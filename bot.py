@@ -46,28 +46,28 @@ async def buttons(update:Update,context:ContextTypes.DEFAULT_TYPE):
     elif q.data=="balance":
         u=db.get_user(uid)
         await q.edit_message_text(f"💰 رصيدك الحالي: {u['balance_3m']:.0f} 3M\\n\\nرمز العملة: 3M",reply_markup=keyboard())
-    elif q.data=="referral":
-        u=db.get_user(uid)
-        await q.edit_message_text(f"👥 كود الإحالة الخاص بك:\\n`{u['referral_code']}`\\n\\nرابط الإحالة يُضاف في مرحلة Mini App/الإحالات المتقدمة.",parse_mode="Markdown",reply_markup=keyboard())
+    elif q.data == "referral":
+        u = db.get_user(uid)
+        await q.edit_message_text(f"🎁 رابط الإحالة الخاص بك 🎁\n{u['referral_link']}")
+
+TOKEN = os.getenv("BOT_TOKEN")
 
 def build_application():
-    if not TOKEN: raise RuntimeError("BOT_TOKEN is missing")
-    app=Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start",start))
+    if not TOKEN: 
+        raise RuntimeError("BOT_TOKEN is missing")
+    
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(buttons))
     return app
-
-async def run():
+    app = build_application()
+    async def start_bot():
     app = build_application()
     await app.initialize()
     await app.start()
     await app.updater.start_polling(drop_pending_updates=True)
+    print("Bot is running...")
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(run())
-    print("تم تشغيل البوت بنجاح...")
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(run())
+    asyncio.run(start_bot())
