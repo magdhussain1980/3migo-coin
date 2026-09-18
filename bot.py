@@ -58,13 +58,14 @@ def build_application():
     return app
 
 async def run():
-    # بناء التطبيق وتجهيزه
-app = build_application()
+    app = build_application()
+    await app.initialize()
+    await app.start()
+    await app.updater.start_polling(drop_pending_updates=True)
 
-await app.initialize()
-await app.start()
-await app.updater.start_polling(drop_pending_updates=True)
-    
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(run())
     print("تم تشغيل البوت بنجاح...")
 
 if __name__ == "__main__":
