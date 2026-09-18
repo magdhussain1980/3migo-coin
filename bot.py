@@ -60,14 +60,11 @@ def build_application():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(buttons))
     return app
-    app = build_application()
-    async def start_bot():
+
+async def run():
     app = build_application()
     await app.initialize()
     await app.start()
-    await app.updater.start_polling(drop_pending_updates=True)
-    print("Bot is running...")
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(start_bot())
+    if app.updater:
+        await app.updater.start_polling(drop_pending_updates=True)
+    print("Bot started successfully")
