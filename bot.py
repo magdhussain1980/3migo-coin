@@ -3,7 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 import db
 
-TOKEN=os.getenv("BOT_TOKEN")
+TOKEN = "8272654338:AUEnts2aA6Ki7ueouU_U4E74eICBLh6DoFw"
 
 def keyboard():
     return InlineKeyboardMarkup([
@@ -57,9 +57,16 @@ def build_application():
     app.add_handler(CallbackQueryHandler(buttons))
     return app
 
-def run():
-    db.init_db()
-    build_application().run_polling(drop_pending_updates=True)
+async def run():
+    # بناء التطبيق وتجهيزه
+app = build_application()
 
-if __name__=="__main__":
-    run()
+await app.initialize()
+await app.start()
+await app.updater.start_polling(drop_pending_updates=True)
+    
+    print("تم تشغيل البوت بنجاح...")
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(run())
