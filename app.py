@@ -1,87 +1,91 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from datetime import datetime, date
-from typing import Dict, List
-import os, secrets
+import os
+from fastapi import FastAPI, Header, HTTPException
+from pydantic import BaseModel, Field
+import db
 
-app = FastAPI(title="3Maigo Bot V1.0")
-
-users: Dict[int, dict] = {}
-transactions: List[dict] = []
-tasks: Dict[int, dict] = {
-    1: {"title": "Welcome to 3Maigo", "reward": 100, "active": True},
-}
+app = FastAPI(title="3Migo Coin", version="1.1.0")
 
 class Register(BaseModel):
     telegram_id: int
     username: str = ""
     referral_code: str = ""
 
-def tx(uid, kind, amount, source):
-    item = {
-        "id": len(transactions)+1, "user_id": uid, "type": kind,
-        "amount_3m": amount, "source": source,
-        "created_at": datetime.utcnow().isoformat()
-    }
-    transactions.append(item)
-    users[uid]["balance_3m"] += amount
-    return item
+class RevenueIn(BaseModel):
+    source: str = Field(pattern="^(telegram_ads|direct_ads|affiliate|tasks|partnership)$")
+    campaign_id: str = ""
+    gross_amount: float = Field(gt=0)
+    currency: str = "USD"
+    notes: str = ""
+    status: str = "confirmed"
+
+def require_admin(key):
+    expected=os.getenv("ADMIN_KEY","")
+    if not expected or key != expected:
+        raise HTTPException(status_code=401, detail="invalid_admin_key")
+
+@app.on_event("startup")
+def startup():
+    db.init_db()
 
 @app.get("/")
 def home():
-    return {"project":"3Maigo","version":"V1.0","status":"prototype"}
+    return {"project":"3Migo Coin","version":"1.1.0","status":"prototype","token":"3M","max_supply_draft":3000000000}
+
+@app.get("/health")
+def health():
+    return {"status":"ok"}
 
 @app.post("/register")
-def register(data: Register):
-    if data.telegram_id in users:
-        return users[data.telegram_id]
-    code = secrets.token_urlsafe(6)
-    users[data.telegram_id] = {
-        "telegram_id": data.telegram_id,
-        "username": data.username,
-        "referral_code": code,
-        "referred_by": data.referral_code,
-        "balance_3m": 0,
-        "created_at": datetime.utcnow().isoformat(),
-        "last_daily": None
-    }
-    tx(data.telegram_id, "signup_bonus", 100, "registration")
-    return users[data.telegram_id]
+def register(data:Register):
+    return db.create_user(data.telegram_id,data.username,data.referral_code)[0]
 
 @app.get("/user/{telegram_id}")
-def user(telegram_id: int):
-    return users.get(telegram_id, {"error":"user_not_found"})
+def user(telegram_id:int):
+    u=db.get_user(telegram_id)
+    return u or {"error":"user_not_found"}
 
 @app.post("/user/{telegram_id}/daily")
-def daily(telegram_id: int):
-    if telegram_id not in users:
-        return {"error":"user_not_found"}
-    today = str(date.today())
-    if users[telegram_id]["last_daily"] == today:
-        return {"error":"daily_reward_already_claimed"}
-    users[telegram_id]["last_daily"] = today
-    return tx(telegram_id, "daily_reward", 50, "daily")
+def daily(telegram_id:int):
+    u,status=db.claim_daily(telegram_id)
+    if status=="user_not_found": return {"error":status}
+    if status=="already_claimed": return {"error":status,"user":u}
+    return u
 
 @app.post("/user/{telegram_id}/mine")
-def mine(telegram_id: int):
-    if telegram_id not in users:
-        return {"error":"user_not_found"}
-    return tx(telegram_id, "engagement_reward", 10, "proof_of_engagement")
-
-@app.get("/tasks")
-def get_tasks():
-    return list(tasks.values())
+def mine(telegram_id:int):
+    u=db.get_user(telegram_id)
+    if not u: return {"error":"user_not_found"}
+    return db.credit(telegram_id,10,"engagement_reward","proof_of_engagement")
 
 @app.get("/transactions/{telegram_id}")
-def get_transactions(telegram_id: int):
-    return [t for t in transactions if t["user_id"] == telegram_id]
+def user_transactions(telegram_id:int):
+    return db.transactions(telegram_id)
+
+@app.get("/tasks")
+def tasks():
+    c=db.conn(); rows=c.execute("SELECT id,title,reward_3m,active FROM tasks WHERE active=1").fetchall(); c.close()
+    return [dict(x) for x in rows]
 
 @app.get("/admin/stats")
-def stats():
-    return {
-        "users": len(users),
-        "total_3m_distributed": sum(t["amount_3m"] for t in transactions),
-        "transactions": len(transactions),
-        "revenue_usd": 0,
-        "treasury_usd": 0
-    }
+def admin_stats(x_admin_key:str=Header(default="")):
+    require_admin(x_admin_key)
+    return db.stats()
+
+@app.get("/admin/revenue")
+def admin_revenue(x_admin_key:str=Header(default="")):
+    require_admin(x_admin_key)
+    return db.all_revenue()
+
+@app.post("/admin/revenue")
+def create_revenue(data:RevenueIn,x_admin_key:str=Header(default="")):
+    require_admin(x_admin_key)
+    rid=db.add_revenue(data.source,data.campaign_id,data.gross_amount,data.currency,data.notes,data.status)
+    allocations=db.allocate_revenue(rid,float(os.getenv("REWARD_POOL_SHARE","0.40")))
+    return {"revenue_id":rid,"allocations":allocations}
+
+@app.get("/admin/treasury")
+def treasury(x_admin_key:str=Header(default="")):
+    require_admin(x_admin_key)
+    c=db.conn(); rows=c.execute("""SELECT category, currency, ROUND(SUM(amount),2) amount
+                                  FROM treasury GROUP BY category,currency ORDER BY category""").fetchall(); c.close()
+    return [dict(x) for x in rows]

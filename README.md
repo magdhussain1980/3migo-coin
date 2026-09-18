@@ -1,15 +1,47 @@
-# 3Maigo Bot V1.0
-Prototype of the 3Maigo Telegram economy.
+# 3Migo Coin (3M) — V1.1
 
-Features:
-- User registration
-- Internal 3M balance
+3Migo Coin is a prototype of the 3MIGO SMART digital rewards ecosystem.
+
+## Included
+- Telegram bot with `/start`
+- 3M internal balance
 - Daily reward
-- Engagement mining
-- Referral codes
-- Tasks
-- Transaction ledger
-- Basic admin API
-- Revenue/Treasury placeholders
+- Proof-of-Engagement prototype reward
+- Referral code
+- SQLite persistence
+- Revenue ledger
+- Treasury allocation engine
+- Admin revenue/stats endpoints
+- FastAPI health endpoint
+- Combined Render entry point (`main.py`)
 
-Important: this V1 uses an internal ledger only. It does NOT create or promise a blockchain token.
+## Revenue sources
+- `telegram_ads`
+- `direct_ads`
+- `affiliate`
+- `tasks`
+- `partnership`
+
+Revenue must be recorded only after it is actually confirmed. The prototype does not claim a fixed market value for 3M.
+
+## Security
+Never commit `BOT_TOKEN` or `ADMIN_KEY` to GitHub. Put them in Render Environment Variables.
+
+## Local run
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+## Render
+Build Command:
+`pip install -r requirements.txt`
+
+Start Command:
+`python main.py`
+
+Health URL:
+`/health`
+
+## Status
+Prototype only. No blockchain token exists in V1.1.
