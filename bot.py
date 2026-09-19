@@ -18,8 +18,8 @@ async def ensure_user(update: Update):
     ref = ""
     if update.message and update.message.text:
         parts = update.message.text.split(maxsplit=1)
-        if len(parts) > 1 and parts[1].startswith("ref_"):
-            ref = parts[1]
+        if len(parts) > 1 and parts.startswith("ref_"):
+            ref = parts
     return db.create_user(u.id, u.username or "", ref)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -70,4 +70,4 @@ async def run():
     await app.start()
     if app.updater:
         await app.updater.start_polling(drop_pending_updates=True)
-    print("Bot started successfully")ccessfully")
+    print("Bot started")
