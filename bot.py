@@ -1,73 +1,247 @@
 import os
+import logging
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    CallbackQueryHandler,
+    ContextTypes,
+)
+
 import db
+
+
+# =========================
+# Telegram configuration
+# =========================
 
 TOKEN = os.getenv("BOT_TOKEN")
 
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    level=logging.INFO,
+)
+
+logger = logging.getLogger("3MigoBot")
+
+
+# =========================
+# Telegram connection test
+# =========================
+
+async def telegram_connection_test(application):
+    """
+    Safe Telegram connection diagnostic.
+    Does NOT print the BOT_TOKEN.
+    """
+    try:
+        me = await application.bot.get_me()
+
+        logger.info("========================================")
+        logger.info("3Migo Telegram Diagnostic")
+        logger.info("BOT_TOKEN configured: %s", bool(TOKEN))
+        logger.info("Telegram connection: SUCCESS")
+        logger.info("Bot ID: %s", me.id)
+        logger.info("Bot username: @%s", me.username)
+        logger.info("Bot name: %s", me.first_name)
+        logger.info("========================================")
+
+    except Exception as e:
+        logger.error("========================================")
+        logger.error("3Migo Telegram Diagnostic FAILED")
+        logger.error("BOT_TOKEN configured: %s", bool(TOKEN))
+        logger.error("Telegram connection error: %s", e)
+        logger.error("========================================")
+
+
+# =========================
+# Keyboard
+# =========================
+
 def keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("📱 الحساب", callback_data="account")],
-        [InlineKeyboardButton("💰 المحفظة", callback_data="wallet")],
-        [InlineKeyboardButton("🔥 المهام", callback_data="tasks")],
-        [InlineKeyboardButton("🔗 الإحالة", callback_data="referral")]
-    ])
-
-async def ensure_user(update: Update):
-    u = update.effective_user
-    ref = ""
-    if update.message and update.message.text:
-        parts = update.message.text.split(maxsplit=1)
-        if len(parts) > 1 and parts.startswith("ref_"):
-            ref = parts
-    return db.create_user(u.id, u.username or "", ref)
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await ensure_user(update)
-    
-    welcome_text = (
-        "👋 أهلاً بك في 3Maigo Coin (3M)!\n\n"
-        "📈 هذه نسخة تجريبية. الرصيد داخلي وغير قابل للتداول حالياً.\n"
-        "🤖 يمكنك مراقبة نشاط مؤشر وإيرادات المشروع وأنت هادئ البال."
-    )
-    
-    keyboard_layout = [
         [
-            InlineKeyboardButton("🎁 نظام الإحالة (Referral)", callback_data="referral"),
+            InlineKeyboardButton("⛏️ كسب 3M", callback_data="mine"),
+            InlineKeyboardButton("🎁 اليومية", callback_data="daily")
         ],
         [
-            InlineKeyboardButton("📊 القائمة الرئيسية", callback_data="main_menu"),
-            InlineKeyboardButton("⚙️ الإعدادات", callback_data="settings")
-        ]
-    ]
-    
-    reply_markup = InlineKeyboardMarkup(keyboard_layout)
-    
-    if update.message:
-        await update.message.reply_text(text=welcome_text, reply_markup=reply_markup)
+            InlineKeyboardButton("💰 رصيدي", callback_data="balance"),
+            InlineKeyboardButton("👥 الإحالة", callback_data="referral")
+        ],
+    ])
+
+
+# =========================
+# User registration
+# =========================
+
+async def ensure_user(update):
+    u = update.effective_user
+    ref = ""
+
+    if update.message and update.message.text:
+        parts = update.message.text.split(maxsplit=1)
+
+        if len(parts) > 1 and parts[1].startswith("ref_"):
+            ref = parts[1][4:]
+
+    return db.create_user(
+        u.id,
+        u.username or "",
+        ref
+    )[0]
+
+
+# =========================
+# /start
+# =========================
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    await ensure_user(update)
+
+    await update.message.reply_text(
+        "🪙 أهلاً بك في 3Migo Coin (3M)\n\n"
+        "هذه نسخة تجريبية. الرصيد داخلي وغير قابل للتداول حاليًا.\n"
+        "المكافآت مرتبطة بنشاط مؤهل وإيرادات المشروع، "
+        "وليست وعدًا بسعر ثابت.",
+        reply_markup=keyboard()
+    )
+
+
+# =========================
+# Buttons
+# =========================
 
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     q = update.callback_query
+
     await q.answer()
+
     uid = q.from_user.id
-    
-    if q.data == "referral":
+
+    db.create_user(
+        uid,
+        q.from_user.username or ""
+    )
+
+    if q.data == "mine":
+
+        u = db.credit(
+            uid,
+            10,
+            "engagement_reward",
+            "proof_of_engagement"
+        )
+
+        await q.edit_message_text(
+            f"⛏️ تمت إضافة 10 3M\n\n"
+            f"رصيدك: {u['balance_3m']:.0f} 3M",
+            reply_markup=keyboard()
+        )
+
+    elif q.data == "daily":
+
+        u, status = db.claim_daily(uid)
+
+        if status == "already_claimed":
+
+            await q.edit_message_text(
+                f"🎁 استلمت مكافأة اليوم مسبقًا.\n\n"
+                f"رصيدك: {u['balance_3m']:.0f} 3M",
+                reply_markup=keyboard()
+            )
+
+        else:
+
+            await q.edit_message_text(
+                f"🎁 تمت إضافة 50 3M\n\n"
+                f"رصيدك: {u['balance_3m']:.0f} 3M",
+                reply_markup=keyboard()
+            )
+
+    elif q.data == "balance":
+
         u = db.get_user(uid)
-        await q.edit_message_text(f"🎁 رابط الإحالة الخاص بك 🎁\n{u['referral_link']}")
+
+        await q.edit_message_text(
+            f"💰 رصيدك الحالي: "
+            f"{u['balance_3m']:.0f} 3M\n\n"
+            f"رمز العملة: 3M",
+            reply_markup=keyboard()
+        )
+
+    elif q.data == "referral":
+
+        u = db.get_user(uid)
+
+        await q.edit_message_text(
+            f"👥 كود الإحالة الخاص بك:\n"
+            f"`{u['referral_code']}`\n\n"
+            f"رابط الإحالة يُضاف في مرحلة "
+            f"Mini App/الإحالات المتقدمة.",
+            parse_mode="Markdown",
+            reply_markup=keyboard()
+        )
+
+
+# =========================
+# Build Telegram application
+# =========================
 
 def build_application():
-    if not TOKEN: 
+
+    if not TOKEN:
+        logger.error("BOT_TOKEN is missing from Render Environment")
         raise RuntimeError("BOT_TOKEN is missing")
-    
-    app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(buttons))
+
+    logger.info("BOT_TOKEN detected. Building Telegram application...")
+
+    app = (
+        Application.builder()
+        .token(TOKEN)
+        .post_init(telegram_connection_test)
+        .build()
+    )
+
+    app.add_handler(
+        CommandHandler("start", start)
+    )
+
+    app.add_handler(
+        CallbackQueryHandler(buttons)
+    )
+
     return app
 
-async def run():
-    app = build_application()
-    await app.initialize()
-    await app.start()
-    if app.updater:
-        await app.updater.start_polling(drop_pending_updates=True)
-    print("Bot started")
+
+# =========================
+# Run bot
+# =========================
+
+def run():
+
+    logger.info("========================================")
+    logger.info("Starting 3Migo Telegram Bot...")
+    logger.info("BOT_TOKEN configured: %s", bool(TOKEN))
+    logger.info("========================================")
+
+    db.init_db()
+
+    application = build_application()
+
+    logger.info("Starting Telegram polling...")
+
+    application.run_polling(
+        drop_pending_updates=True
+    )
+
+
+# =========================
+# Direct execution
+# =========================
+
+if __name__ == "__main__":
+    run()
