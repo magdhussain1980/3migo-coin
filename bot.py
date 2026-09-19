@@ -20,7 +20,7 @@ async def ensure_user(update: Update):
         parts = update.message.text.split(maxsplit=1)
         if len(parts) > 1 and parts[1].startswith("ref_"):
             ref = parts[1]
-    return db.create_user(u.id, u.username or "", ref)[0]
+    return db.create_user(u.id, u.username or "", ref)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await ensure_user(update)
@@ -41,7 +41,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ]
     
-   if update.message:
+    reply_markup = InlineKeyboardMarkup(keyboard_layout)
+    
+    if update.message:
         await update.message.reply_text(text=welcome_text, reply_markup=reply_markup)
 
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -68,4 +70,4 @@ async def run():
     await app.start()
     if app.updater:
         await app.updater.start_polling(drop_pending_updates=True)
-    print("Bot started successfully")
+    print("Bot started successfully")ccessfully")
