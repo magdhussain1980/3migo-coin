@@ -1,5 +1,6 @@
 import os
 import logging
+import asyncio
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -303,44 +304,41 @@ def build_application():
 # =========================
 # Run bot
 # =========================
+async def run():
 
-def run():
-
-    logger.info(
-        "========================================"
-    )
-
-    logger.info(
-        "Starting 3Migo Telegram Bot..."
-    )
-
+    logger.info("========================================")
+    logger.info("Starting 3Migo Telegram Bot...")
     logger.info(
         "BOT_TOKEN configured: %s",
         bool(TOKEN)
     )
-
-    logger.info(
-        "========================================"
-    )
-
+    logger.info("========================================")
 
     db.init_db()
 
-
     try:
-
         application = build_application()
+
+        logger.info(
+            "Initializing Telegram application..."
+        )
+
+        await application.initialize()
+
+        logger.info(
+            "Starting Telegram application..."
+        )
+
+        await application.start()
 
         logger.info(
             "Starting Telegram polling..."
         )
 
+        await application.updater.start_polling()
 
-        application.run_polling(
-            drop_pending_updates=True,
-            close_loop=False
-        )
-
+        # Keep the bot running while main.py's event loop is alive.
+        await asyncio.Event().wait()
 
     except Exception:
 
@@ -349,12 +347,3 @@ def run():
         )
 
         raise
-
-
-# =========================
-# Direct execution
-# =========================
-
-if __name__ == "__main__":
-
-    run()
