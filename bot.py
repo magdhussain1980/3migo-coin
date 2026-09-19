@@ -230,18 +230,27 @@ def run():
 
     db.init_db()
 
-    application = build_application()
+    import asyncio
 
-    logger.info("Starting Telegram polling...")
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-    application.run_polling(
-        drop_pending_updates=True
-    )
+    try:
+        application = build_application()
 
+        logger.info("Starting Telegram polling...")
 
-# =========================
-# Direct execution
-# =========================
+        application.run_polling(
+            drop_pending_updates=True,
+            close_loop=False
+        )
 
-if __name__ == "__main__":
-    run()
+    except Exception:
+        logger.exception("3Migo Telegram Bot crashed")
+        raise
+
+    finally:
+        try:
+            loop.close()
+        except Exception:
+            logger.exception("Could not close Telegram event loop")
