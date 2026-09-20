@@ -1,0 +1,971 @@
+/* =========================================================
+   3MIGO COIN — STYLE SYSTEM
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body {
+    background: #031024;
+    color: #eef6ff;
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Tahoma,
+        Arial,
+        sans-serif;
+
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   MAIN APPLICATION
+   ========================================================= */
+
+.app {
+    width: 100%;
+    max-width: 520px;
+    min-height: 100vh;
+
+    margin: 0 auto;
+
+    padding-bottom: 95px;
+
+    background:
+        radial-gradient(
+            circle at 50% 5%,
+            #0d3d6b 0%,
+            #071e3a 30%,
+            #031024 72%
+        );
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.topbar {
+
+    height: 70px;
+
+    padding: 12px 17px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: rgba(3, 18, 38, 0.94);
+
+    border-bottom: 1px solid #16466e;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 20;
+
+    backdrop-filter: blur(14px);
+}
+
+
+.brand-name strong {
+
+    display: block;
+
+    font-size: 18px;
+
+    font-weight: 850;
+
+    letter-spacing: -0.3px;
+}
+
+
+.brand-name small {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #7fa5ca;
+
+    font-size: 10px;
+}
+
+
+.verified {
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 18px;
+    height: 18px;
+
+    margin-right: 3px;
+
+    border-radius: 50%;
+
+    background: #18a7ff;
+
+    color: white;
+
+    font-size: 11px;
+}
+
+
+.beta {
+
+    padding: 6px 11px;
+
+    border: 1px solid #c89a27;
+
+    border-radius: 20px;
+
+    color: #ffd45b;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    background: rgba(255, 203, 67, 0.05);
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand-section {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 21px 18px 15px;
+}
+
+
+.coin-logo {
+
+    width: 72px;
+    height: 72px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #17191b;
+
+    font-size: 25px;
+
+    font-weight: 950;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fff1a5 0%,
+            #f5b82e 50%,
+            #9b620b 100%
+        );
+
+    border: 6px solid #6b450f;
+
+    box-shadow:
+        0 0 25px rgba(245, 184, 46, 0.35),
+        inset 0 0 0 3px #ffd96a;
+}
+
+
+.brand-text h1 {
+
+    margin: 0;
+
+    font-size: 30px;
+
+    font-weight: 900;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffd64e,
+            #ffffff,
+            #6dd5ff
+        );
+
+    color: transparent;
+
+    background-clip: text;
+
+    -webkit-background-clip: text;
+}
+
+
+.brand-text p {
+
+    margin: 4px 0 0;
+
+    color: #9bc3e8;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   BALANCE CARD
+   ========================================================= */
+
+.balance-card {
+
+    margin: 0 14px;
+
+    padding: 19px;
+
+    border: 1px solid #1163a4;
+
+    border-radius: 25px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #062d58,
+            #03152e 75%
+        );
+
+    box-shadow:
+        0 20px 45px rgba(0, 0, 0, 0.45);
+}
+
+
+.balance-title {
+
+    color: #a9c9e7;
+
+    font-size: 13px;
+}
+
+
+.balance {
+
+    margin: 4px 0;
+
+    font-size: 40px;
+
+    line-height: 1.1;
+
+    font-weight: 950;
+
+    letter-spacing: -1px;
+}
+
+
+.balance span {
+
+    color: #ffd34d;
+
+    font-size: 25px;
+}
+
+
+.balance-note {
+
+    margin-bottom: 15px;
+
+    color: #7097bb;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   MINING BUTTON
+   ========================================================= */
+
+.mine-button {
+
+    width: 100%;
+
+    min-height: 70px;
+
+    padding: 13px 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    border: 1px solid #19a9ff;
+
+    border-radius: 21px;
+
+    color: white;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            #0b65a8,
+            #062b54 68%,
+            #041b36
+        );
+
+    box-shadow:
+        0 0 28px rgba(24, 167, 255, 0.16);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.mine-button:active {
+
+    transform: scale(0.97);
+
+    box-shadow:
+        0 0 35px rgba(24, 167, 255, 0.30);
+}
+
+
+.mine-icon {
+
+    font-size: 28px;
+}
+
+
+.mine-content {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+}
+
+
+.mine-content strong {
+
+    font-size: 18px;
+}
+
+
+.mine-content small {
+
+    margin-top: 2px;
+
+    color: #9bdcff;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   MINING STATUS
+   ========================================================= */
+
+.mining-status {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 9px;
+
+    margin-top: 11px;
+}
+
+
+.mining-status > div {
+
+    padding: 10px;
+
+    text-align: center;
+
+    border: 1px solid #124875;
+
+    border-radius: 14px;
+
+    background: #041a33;
+}
+
+
+.mining-status strong {
+
+    display: block;
+
+    color: #f6c94a;
+
+    font-size: 14px;
+}
+
+
+.mining-status small {
+
+    display: block;
+
+    margin-top: 2px;
+
+    color: #7ea5c9;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   FEATURE CARDS
+   ========================================================= */
+
+.features {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    padding: 14px;
+}
+
+
+.feature-card {
+
+    min-height: 112px;
+
+    padding: 13px;
+
+    text-align: right;
+
+    color: white;
+
+    border-radius: 19px;
+
+    background: #061b34;
+
+    border: 1px solid #16456f;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.feature-card:active {
+
+    transform: scale(0.97);
+}
+
+
+.feature-icon {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 28px;
+}
+
+
+.feature-card strong {
+
+    display: block;
+
+    font-size: 14px;
+}
+
+
+.feature-card small {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #7fa8ca;
+
+    font-size: 10px;
+}
+
+
+.feature-card.daily {
+
+    border-color: #67521b;
+}
+
+
+.feature-card.tasks {
+
+    border-color: #1a6864;
+}
+
+
+.feature-card.referral {
+
+    border-color: #744e18;
+}
+
+
+.feature-card.wallet {
+
+    border-color: #185a88;
+}
+
+
+/* =========================================================
+   STATISTICS
+   ========================================================= */
+
+.statistics {
+
+    margin: 0 14px 14px;
+
+    padding: 15px;
+
+    border: 1px solid #123d64;
+
+    border-radius: 20px;
+
+    background: #04172e;
+}
+
+
+.section-title {
+
+    font-size: 14px;
+
+    font-weight: 850;
+
+    margin-bottom: 12px;
+}
+
+
+.statistics-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+}
+
+
+.stat-box {
+
+    padding: 10px;
+
+    text-align: center;
+
+    border-radius: 13px;
+
+    background: #061e39;
+}
+
+
+.stat-box small {
+
+    display: block;
+
+    color: #7198bb;
+
+    font-size: 9px;
+}
+
+
+.stat-box strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #f5cd55;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   PROMOTION
+   ========================================================= */
+
+.promotion {
+
+    margin: 0 14px 14px;
+
+    padding: 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border: 1px solid #1268a5;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            120deg,
+            #082d53,
+            #073d70
+        );
+}
+
+
+.promotion-text small {
+
+    color: #9bc1df;
+
+    font-size: 10px;
+}
+
+
+.promotion-text h2 {
+
+    margin: 3px 0;
+
+    color: #ffd452;
+
+    font-size: 24px;
+}
+
+
+.promotion-text p {
+
+    max-width: 255px;
+
+    margin: 0;
+
+    color: #9bc1df;
+
+    font-size: 10px;
+
+    line-height: 1.6;
+}
+
+
+.promotion-coin {
+
+    width: 59px;
+    height: 59px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #17191b;
+
+    font-size: 18px;
+
+    font-weight: 950;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fff1a5,
+            #f5b82e 50%,
+            #9b620b
+        );
+
+    border: 5px solid #6b450f;
+
+    box-shadow:
+        0 0 20px rgba(245, 184, 46, 0.28),
+        inset 0 0 0 2px #ffd96a;
+}
+
+
+/* =========================================================
+   ROADMAP
+   ========================================================= */
+
+.roadmap {
+
+    margin: 0 14px 18px;
+
+    padding: 15px;
+
+    border: 1px solid #123d64;
+
+    border-radius: 20px;
+
+    background: #04172e;
+}
+
+
+.roadmap-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 11px 0;
+
+    border-bottom: 1px solid rgba(33, 83, 119, 0.35);
+}
+
+
+.roadmap-item:last-child {
+
+    border-bottom: none;
+}
+
+
+.roadmap-item > span {
+
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #6ed5ff;
+
+    background: #082c4c;
+
+    border: 1px solid #17628d;
+}
+
+
+.roadmap-item div {
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.roadmap-item strong {
+
+    font-size: 12px;
+}
+
+
+.roadmap-item small {
+
+    margin-top: 3px;
+
+    color: #7599ba;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   BOTTOM NAVIGATION
+   ========================================================= */
+
+.bottom-nav {
+
+    position: fixed;
+
+    left: 50%;
+
+    bottom: 0;
+
+    transform: translateX(-50%);
+
+    width: min(520px, 100%);
+
+    height: 78px;
+
+    padding:
+        7px 4px
+        calc(7px + env(safe-area-inset-bottom));
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
+    background: rgba(4, 19, 41, 0.96);
+
+    border-top: 1px solid #17466e;
+
+    z-index: 30;
+
+    backdrop-filter: blur(16px);
+}
+
+
+.bottom-nav button {
+
+    border: 0;
+
+    background: transparent;
+
+    color: #7195b9;
+
+    cursor: pointer;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 3px;
+}
+
+
+.bottom-nav button span {
+
+    font-size: 21px;
+}
+
+
+.bottom-nav button small {
+
+    font-size: 9px;
+}
+
+
+.bottom-nav button.active {
+
+    color: #22b7ff;
+}
+
+
+/* =========================================================
+   TOAST MESSAGE
+   ========================================================= */
+
+.toast {
+
+    position: fixed;
+
+    left: 50%;
+
+    bottom: 92px;
+
+    transform:
+        translate(-50%, 20px);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    z-index: 100;
+
+    max-width: 90%;
+
+    padding: 11px 17px;
+
+    border: 1px solid #1a77ad;
+
+    border-radius: 14px;
+
+    color: white;
+
+    background: #0b2947;
+
+    font-size: 12px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.35);
+
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+}
+
+
+.toast.show {
+
+    opacity: 1;
+
+    transform:
+        translate(-50%, 0);
+}
+
+
+/* =========================================================
+   MOBILE OPTIMIZATION
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+    .brand-text h1 {
+        font-size: 25px;
+    }
+
+    .coin-logo {
+        width: 64px;
+        height: 64px;
+    }
+
+    .balance {
+        font-size: 34px;
+    }
+
+    .feature-card {
+        min-height: 105px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL ANIMATION
+   ========================================================= */
+
+@keyframes glow {
+
+    0% {
+        box-shadow:
+            0 0 15px rgba(24, 167, 255, 0.10);
+    }
+
+    50% {
+        box-shadow:
+            0 0 30px rgba(24, 167, 255, 0.28);
+    }
+
+    100% {
+        box-shadow:
+            0 0 15px rgba(24, 167, 255, 0.10);
+    }
+}
+
+
+.mine-button {
+
+    animation:
+        glow 3s infinite ease-in-out;
+}
