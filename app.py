@@ -8,7 +8,29 @@ from pydantic import BaseModel, Field
 import db
 
 app = FastAPI(title="3Migo Coin", version="1.1.0")
+# =========================
+# 3Migo Mini App
+# =========================
 
+WEBAPP_DIR = os.path.join(
+    os.path.dirname(__file__),
+    "webapp"
+)
+
+app.mount(
+    "/webapp",
+    StaticFiles(directory=WEBAPP_DIR),
+    name="webapp"
+)
+
+@app.get("/miniapp")
+def miniapp():
+    return FileResponse(
+        os.path.join(
+            WEBAPP_DIR,
+            "index.html"
+        )
+    )
 class Register(BaseModel):
     telegram_id: int
     username: str = ""
