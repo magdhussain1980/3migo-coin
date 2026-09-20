@@ -1,14 +1,4 @@
-/* =========================================================
-   3MIGO COIN — MINI APP
-   Application Logic
-   ========================================================= */
-
 const tg = window.Telegram?.WebApp;
-
-
-/* =========================================================
-   TELEGRAM INITIALIZATION
-   ========================================================= */
 
 if (tg) {
     tg.ready();
@@ -22,89 +12,51 @@ if (tg) {
     }
 }
 
+/*
+    3Migo Mini App
+    Backend:
+    /user/{telegram_id}
+/user/{telegram_id}/mine
+    /user/{telegram_id}/daily
+*/
 
-/* =========================================================
-   LOCAL DEMO STATE
-   ========================================================= */
+let telegramUser = null;
 
 let state = {
-
     balance: 0,
-
     total: 0,
-
     today: 0,
-
     sessions: 0,
-
     mining: false
-
 };
 
 
-/* =========================================================
-   DOM HELPERS
-   ========================================================= */
+/* =========================
+   TELEGRAM USER
+========================= */
+
+function getTelegramUser() {
+
+    if (
+        tg &&
+        tg.initDataUnsafe &&
+        tg.initDataUnsafe.user
+    ) {
+        return tg.initDataUnsafe.user;
+    }
+
+    return null;
+}
+
+
+/* =========================
+   HELPERS
+========================= */
 
 function $(id) {
-
     return document.getElementById(id);
-
 }
 
-
-/* =========================================================
-   RENDER BALANCE
-   ========================================================= */
-
-function render() {
-
-    if ($("balance")) {
-
-        $("balance").innerHTML =
-            `${Math.floor(state.balance).toLocaleString()}
-             <span>3M</span>`;
-
-    }
-
-
-    if ($("total")) {
-
-        $("total").textContent =
-            `${Math.floor(state.total).toLocaleString()} 3M`;
-
-    }
-
-
-    if ($("today")) {
-
-        $("today").textContent =
-            `${Math.floor(state.today).toLocaleString()} 3M`;
-
-    }
-
-
-    if ($("sessions")) {
-
-        $("sessions").textContent =
-            state.sessions;
-
-    }
-
-
-    if ($("miningState")) {
-
-        $("miningState").textContent =
-            state.mining ? "يعمل" : "جاهز";
-
-    }
-
-}
-
-
-/* =========================================================
-   TOAST MESSAGE
-   ========================================================= */
 
 function showToast(message) {
 
@@ -117,17 +69,10 @@ function showToast(message) {
     toast.classList.add("show");
 
     setTimeout(() => {
-
         toast.classList.remove("show");
-
     }, 2200);
-
 }
 
-
-/* =========================================================
-   TELEGRAM HAPTIC FEEDBACK
-   ========================================================= */
 
 function haptic() {
 
@@ -144,17 +89,263 @@ function haptic() {
         }
 
     } catch (error) {
-
         console.log("Haptic unavailable");
-
     }
-
 }
 
 
-/* =========================================================
+/* =========================
+   RENDER
+========================= */
+
+function render() {
+
+    if ($("balance")) {
+
+        $("balance").innerHTML =
+            `${Math.floor(state.balance).toLocaleString()}
+             <span>3M</span>`;
+
+    }
+
+    if ($("total")) {
+
+        $("total").textContent =
+            `${Math.floor(state.total).toLocaleString()} 3M`;
+
+    }
+
+    if ($("today")) {
+
+        $("today").textContent =
+            `${Math.floor(state.today).toLocaleString()} 3M`;
+
+    }
+
+    if ($("sessions")) {
+
+        $("sessions").textContent =
+            state.sessions;
+
+    }
+
+    if ($("miningState")) {
+
+        $("miningState").textContent =
+            state.mining
+                ? "يعمل"
+                : "جاهز";
+
+    }
+}
+
+
+/* =========================
+   LOAD USER
+========================= */
+
+async function loadUser() {
+
+    telegramUser = getTelegramUser();
+
+    /*
+       خارج Telegram:
+       نستخدم مستخدم تجريبي للتأكد
+       من عمل الواجهة.
+    */
+
+    const telegramId =
+        telegramUser?.id || 1;
+
+    try {
+
+        const response =
+            await fetch(
+                `/user/${telegramId}`
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                "تعذر تحميل المستخدم"
+            );
+        }
+
+        const user =
+            await response.json();
+
+        if (user.error) {
+
+            /*
+                إذا لم يكن المستخدم موجوداً
+                نسجله تلقائياً.
+            */
+
+            await registerUser(
+                telegramId
+            );
+
+            return loadUser();
+        }
+
+        state.balance =
+            Number(user.balance_3m || 0);
+
+        render();
+
+        /*
+            نحمّل سجل العمليات لحساب
+            الإحصائيات.
+        */
+
+        await loadTransactions(
+            telegramId
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
+    }
+}
+
+
+/* =========================
+   REGISTER
+========================= */
+
+async function registerUser(
+    telegramId
+) {
+
+    try {
+
+        const username =
+            telegramUser?.username || "";
+
+        const response =
+            await fetch(
+                "/register",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        telegram_id:
+                            telegramId,
+
+                        username:
+                            username,
+
+                        referral_code:
+                            ""
+
+                    })
+                }
+            );
+
+        return await response.json();
+
+    } catch (error) {
+
+        console.error(error);
+
+        return null;
+    }
+}
+
+
+/* =========================
+   TRANSACTIONS
+========================= */
+
+async function loadTransactions(
+    telegramId
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                `/transactions/${telegramId}`
+            );
+
+        if (!response.ok) return;
+
+        const transactions =
+            await response.json();
+
+        if (!Array.isArray(transactions))
+            return;
+
+        let total = 0;
+        let today = 0;
+        let sessions = 0;
+
+        const currentDate =
+            new Date()
+                .toISOString()
+                .slice(0, 10);
+
+        transactions.forEach(
+            transaction => {
+
+                const amount =
+                    Number(
+                        transaction.amount || 0
+                    );
+
+                total += amount;
+
+                if (
+                    transaction.created_at &&
+                    transaction.created_at
+                        .startsWith(currentDate)
+                ) {
+
+                    today += amount;
+
+                }
+
+                if (
+                    transaction.transaction_type ===
+                    "engagement_reward"
+                ) {
+
+                    sessions++;
+
+                }
+
+            }
+        );
+
+        state.total = total;
+        state.today = today;
+        state.sessions = sessions;
+
+        render();
+
+    } catch (error) {
+
+        console.error(
+            "Transactions error:",
+            error
+        );
+
+    }
+}
+
+
+/* =========================
    MINING
-   ========================================================= */
+========================= */
 
 async function startMining() {
 
@@ -165,138 +356,187 @@ async function startMining() {
         );
 
         return;
-
     }
 
-
-    const button = $("mineBtn");
+    const button =
+        $("mineBtn");
 
     state.mining = true;
 
     if (button) {
 
         button.disabled = true;
-
         button.style.opacity = "0.75";
 
     }
 
-
-    if ($("miningState")) {
-
-        $("miningState").textContent =
-            "يعمل";
-
-    }
-
+    render();
 
     haptic();
-
 
     showToast(
         "⛏️ جاري تشغيل التعدين..."
     );
 
+    const telegramId =
+        telegramUser?.id || 1;
 
-    /*
-       ----------------------------------------------------
-       DEMO MODE
+    try {
 
-       سيتم استبدال هذا الجزء لاحقاً
-       بطلب API حقيقي إلى Render:
+        const response =
+            await fetch(
+                `/user/${telegramId}/mine`,
+                {
+                    method: "POST"
+                }
+            );
 
-       POST /api/mine
+        if (!response.ok) {
 
-       ----------------------------------------------------
-    */
+            throw new Error(
+                "Mining request failed"
+            );
 
+        }
 
-    await new Promise(
-        resolve =>
-            setTimeout(resolve, 1200)
-    );
+        const user =
+            await response.json();
 
+        if (user.error) {
 
-    const reward = 10;
+            showToast(
+                "⚠️ تعذر تنفيذ العملية"
+            );
 
+            return;
+        }
 
-    state.balance += reward;
+        state.balance =
+            Number(
+                user.balance_3m || 0
+            );
 
-    state.total += reward;
+        await loadTransactions(
+            telegramId
+        );
 
-    state.today += reward;
+        render();
 
-    state.sessions += 1;
+        showToast(
+            "⛏️ تمت إضافة 10 3M"
+        );
 
+    } catch (error) {
 
-    render();
+        console.error(error);
 
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
 
-    showToast(
-        `⛏️ تمت إضافة ${reward} 3M`
-    );
+    } finally {
 
+        state.mining = false;
 
-    state.mining = false;
+        if (button) {
 
+            button.disabled = false;
+            button.style.opacity = "1";
 
-    if (button) {
+        }
 
-        button.disabled = false;
-
-        button.style.opacity = "1";
-
+        render();
     }
-
-
-    if ($("miningState")) {
-
-        $("miningState").textContent =
-            "جاهز";
-
-    }
-
 }
 
 
-/* =========================================================
-   DAILY REWARD
-   ========================================================= */
+/* =========================
+   DAILY
+========================= */
 
 async function dailyReward() {
 
     haptic();
 
+    const telegramId =
+        telegramUser?.id || 1;
 
     showToast(
-        "🎁 جاري التحقق من المكافأة..."
+        "🎁 جاري التحقق..."
     );
 
+    try {
 
-    /*
-       سيتم ربط هذه الوظيفة لاحقاً
-       بـ:
+        const response =
+            await fetch(
+                `/user/${telegramId}/daily`,
+                {
+                    method: "POST"
+                }
+            );
 
-       POST /api/daily
-    */
+        const data =
+            await response.json();
 
+        if (
+            data.error ===
+            "already_claimed"
+        ) {
 
-    await new Promise(
-        resolve =>
-            setTimeout(resolve, 700)
-    );
+            state.balance =
+                Number(
+                    data.user?.balance_3m ||
+                    state.balance
+                );
 
+            render();
 
-    showToast(
-        "🎁 نظام المكافأة اليومية سيتم ربطه بالقاعدة"
-    );
+            showToast(
+                "🎁 استلمت المكافأة اليومية مسبقاً"
+            );
 
+            return;
+        }
+
+        if (data.error) {
+
+            showToast(
+                "⚠️ تعذر الحصول على المكافأة"
+            );
+
+            return;
+        }
+
+        state.balance =
+            Number(
+                data.balance_3m ||
+                state.balance
+            );
+
+        await loadTransactions(
+            telegramId
+        );
+
+        render();
+
+        showToast(
+            "🎁 تمت إضافة 50 3M"
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
+    }
 }
 
 
-/* =========================================================
-   TASKS
-   ========================================================= */
+/* =========================
+   FEATURES
+========================= */
 
 function openTasks() {
 
@@ -305,13 +545,8 @@ function openTasks() {
     showToast(
         "☑️ نظام المهام قيد التطوير"
     );
-
 }
 
-
-/* =========================================================
-   REFERRALS
-   ========================================================= */
 
 function openReferral() {
 
@@ -320,13 +555,8 @@ function openReferral() {
     showToast(
         "👥 نظام الإحالات قيد التطوير"
     );
-
 }
 
-
-/* =========================================================
-   WALLET
-   ========================================================= */
 
 function openWallet() {
 
@@ -335,13 +565,8 @@ function openWallet() {
     showToast(
         "💼 المحفظة قيد التطوير"
     );
-
 }
 
-
-/* =========================================================
-   PROFILE
-   ========================================================= */
 
 function openProfile() {
 
@@ -350,76 +575,53 @@ function openProfile() {
     showToast(
         "👤 الحساب قيد التطوير"
     );
-
 }
 
 
-/* =========================================================
-   BUTTON ROUTER
-   ========================================================= */
+/* =========================
+   ACTION HANDLER
+========================= */
 
 function handleAction(action) {
 
     switch (action) {
 
-
         case "mine":
-
             startMining();
-
             break;
-
 
         case "daily":
-
             dailyReward();
-
             break;
-
 
         case "tasks":
-
             openTasks();
-
             break;
-
 
         case "referral":
-
             openReferral();
-
             break;
-
 
         case "wallet":
-
             openWallet();
-
             break;
-
 
         case "profile":
-
             openProfile();
-
             break;
 
-
         default:
-
             console.log(
                 "Unknown action:",
                 action
             );
-
     }
-
 }
 
 
-/* =========================================================
-   CONNECT FEATURE BUTTONS
-   ========================================================= */
+/* =========================
+   BUTTON EVENTS
+========================= */
 
 document
     .querySelectorAll("[data-action]")
@@ -442,13 +644,8 @@ document
     });
 
 
-/* =========================================================
-   MAIN MINING BUTTON
-   ========================================================= */
-
 const miningButton =
     $("mineBtn");
-
 
 if (miningButton) {
 
@@ -460,37 +657,14 @@ if (miningButton) {
 }
 
 
-/* =========================================================
-   INITIAL DISPLAY
-   ========================================================= */
+/* =========================
+   START APP
+========================= */
 
 render();
 
+loadUser();
 
-/* =========================================================
-   USER INFORMATION FROM TELEGRAM
-   ========================================================= */
-
-if (
-    tg &&
-    tg.initDataUnsafe &&
-    tg.initDataUnsafe.user
-) {
-
-    const user =
-        tg.initDataUnsafe.user;
-
-    console.log(
-        "3Migo Telegram User:",
-        user.id
-    );
-
-}
-
-
-/* =========================================================
-   DEVELOPMENT MESSAGE
-   ========================================================= */
 
 console.log(
     "================================="
@@ -501,7 +675,7 @@ console.log(
 );
 
 console.log(
-    "Version: 1.0 Prototype"
+    "Version: 1.1 Backend Connected"
 );
 
 console.log(
