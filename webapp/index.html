@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0,
+                   maximum-scale=1.0,
+                   user-scalable=no">
+
+    <meta name="theme-color" content="#031024">
+
+    <title>3Migo Coin</title>
+
+    <!-- Telegram Mini App -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- 3Migo Design -->
+    <link rel="stylesheet" href="/webapp/style.css">
+
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="topbar">
+
+        <div class="brand-name">
+
+            <strong>
+                3Migo Coin
+                <span class="verified">✓</span>
+            </strong>
+
+            <small>
+                Telegram Mini App
+            </small>
+
+        </div>
+
+        <div class="beta">
+            BETA
+        </div>
+
+    </header>
+
+
+    <!-- ================= BRAND ================= -->
+
+    <section class="brand-section">
+
+        <div class="coin-logo">
+            3M
+        </div>
+
+        <div class="brand-text">
+
+            <h1>
+                3Migo
+            </h1>
+
+            <p>
+                شارك • اكسب • ابنِ القيمة
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= BALANCE ================= -->
+
+    <section class="balance-card">
+
+        <div class="balance-title">
+            رصيدك من 3M
+        </div>
+
+        <div id="balance" class="balance">
+            0
+            <span>3M</span>
+        </div>
+
+        <div class="balance-note">
+            نسخة تجريبية — الرصيد داخلي حالياً
+        </div>
+
+
+        <!-- MINING BUTTON -->
+
+        <button id="mineBtn"
+                class="mine-button">
+
+            <span class="mine-icon">
+                ⛏️
+            </span>
+
+            <span class="mine-content">
+
+                <strong>
+                    ابدأ التعدين
+                </strong>
+
+                <small>
+                    اضغط للبدء
+                </small>
+
+            </span>
+
+        </button>
+
+
+        <!-- MINING STATUS -->
+
+        <div class="mining-status">
+
+            <div>
+
+                <strong id="rate">
+                    +10
+                </strong>
+
+                <small>
+                    3M / جلسة
+                </small>
+
+            </div>
+
+
+            <div>
+
+                <strong id="miningState">
+                    جاهز
+                </strong>
+
+                <small>
+                    حالة التعدين
+                </small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= FEATURES ================= -->
+
+    <section class="features">
+
+
+        <!-- DAILY -->
+
+        <button class="feature-card daily"
+                data-action="daily">
+
+            <span class="feature-icon">
+                🎁
+            </span>
+
+            <strong>
+                المكافأة اليومية
+            </strong>
+
+            <small>
+                احصل على 50 3M
+            </small>
+
+        </button>
+
+
+        <!-- TASKS -->
+
+        <button class="feature-card tasks"
+                data-action="tasks">
+
+            <span class="feature-icon">
+                ☑️
+            </span>
+
+            <strong>
+                المهام
+            </strong>
+
+            <small>
+                مهام ومكافآت
+            </small>
+
+        </button>
+
+
+        <!-- REFERRAL -->
+
+        <button class="feature-card referral"
+                data-action="referral">
+
+            <span class="feature-icon">
+                👥
+            </span>
+
+            <strong>
+                الإحالات
+            </strong>
+
+            <small>
+                شارك واربح
+            </small>
+
+        </button>
+
+
+        <!-- WALLET -->
+
+        <button class="feature-card wallet"
+                data-action="wallet">
+
+            <span class="feature-icon">
+                💼
+            </span>
+
+            <strong>
+                المحفظة
+            </strong>
+
+            <small>
+                الرصيد والعمليات
+            </small>
+
+        </button>
+
+    </section>
+
+
+    <!-- ================= STATISTICS ================= -->
+
+    <section class="statistics">
+
+        <div class="section-title">
+
+            📊
+            إحصائيات التعدين
+
+        </div>
+
+
+        <div class="statistics-grid">
+
+
+            <div class="stat-box">
+
+                <small>
+                    إجمالي المكافآت
+                </small>
+
+                <strong id="total">
+                    0 3M
+                </strong>
+
+            </div>
+
+
+            <div class="stat-box">
+
+                <small>
+                    اليوم
+                </small>
+
+                <strong id="today">
+                    0 3M
+                </strong>
+
+            </div>
+
+
+            <div class="stat-box">
+
+                <small>
+                    جلسات التعدين
+                </small>
+
+                <strong id="sessions">
+                    0
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= PROMOTION ================= -->
+
+    <section class="promotion">
+
+        <div class="promotion-text">
+
+            <small>
+                مرحباً بك في عالم
+            </small>
+
+            <h2>
+                3Migo
+            </h2>
+
+            <p>
+                ابنِ رصيدك من خلال النشاط
+                والمهام المؤهلة.
+            </p>
+
+        </div>
+
+
+        <div class="promotion-coin">
+            3M
+        </div>
+
+    </section>
+
+
+    <!-- ================= ROADMAP ================= -->
+
+    <section class="roadmap">
+
+        <div class="section-title">
+
+            🚀
+            مستقبل 3Migo
+
+        </div>
+
+
+        <div class="roadmap-item">
+
+            <span>
+                ✓
+            </span>
+
+            <div>
+
+                <strong>
+                    المرحلة الأولى
+                </strong>
+
+                <small>
+                    إطلاق النظام التجريبي
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="roadmap-item">
+
+            <span>
+                ◉
+            </span>
+
+            <div>
+
+                <strong>
+                    المرحلة الثانية
+                </strong>
+
+                <small>
+                    Mini App والمحفظة
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="roadmap-item">
+
+            <span>
+                ○
+            </span>
+
+            <div>
+
+                <strong>
+                    المرحلة الثالثة
+                </strong>
+
+                <small>
+                    Tokenomics والبنية المتقدمة
+                </small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+<!-- ================= BOTTOM NAVIGATION ================= -->
+
+<nav class="bottom-nav">
+
+
+    <button class="active">
+
+        <span>
+            ⌂
+        </span>
+
+        <small>
+            الرئيسية
+        </small>
+
+    </button>
+
+
+    <button data-action="mine">
+
+        <span>
+            ⛏️
+        </span>
+
+        <small>
+            التعدين
+        </small>
+
+    </button>
+
+
+    <button data-action="tasks">
+
+        <span>
+            ☑️
+        </span>
+
+        <small>
+            المهام
+        </small>
+
+    </button>
+
+
+    <button data-action="wallet">
+
+        <span>
+            💼
+        </span>
+
+        <small>
+            المحفظة
+        </small>
+
+    </button>
+
+
+    <button data-action="profile">
+
+        <span>
+            👤
+        </span>
+
+        <small>
+            الحساب
+        </small>
+
+    </button>
+
+
+</nav>
+
+
+<!-- ================= MESSAGE ================= -->
+
+<div id="toast"
+     class="toast">
+</div>
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script src="/webapp/app.js"></script>
+
+</body>
+
+</html>
