@@ -115,3 +115,65 @@ def treasury(x_admin_key:str=Header(default="")):
     c=db.conn(); rows=c.execute("""SELECT category, currency, ROUND(SUM(amount),2) amount
                                   FROM treasury GROUP BY category,currency ORDER BY category""").fetchall(); c.close()
     return [dict(x) for x in rows]
+
+@app.get("/referral/{telegram_id}")
+def referral_info(telegram_id: int):
+    user = db.get_user(telegram_id)
+
+    if not user:
+        return {"error": "user_not_found"}
+
+    conn = db.get_conn()
+
+    try:
+        # عدد الأشخاص الذين سجلوا باستخدام كود الإحالة
+        row = conn.execute("""
+            SELECT COUNT(*) AS count
+            FROM users
+            WHERE referred_by=?
+        """, (user["referral_code"],)).fetchone()
+
+        referral_count = row["count"] if row else 0
+
+        # إجمالي مكافآت الإحالة
+        row = conn.execute("""
+            SELECT COALESCE(SUM(amount), 0) AS total
+            FROM transactions
+            WHERE telegram_id=?
+              AND transaction_type='referral_reward'
+        """, (telegram_id,)).fetchone()
+
+        referral_rewards = row["total"] if row else 0
+
+        return {
+            "telegram_id": telegram_id,
+            "referral_code": user["referral_code"],
+            "referral_count": referral_count,
+            "referral_rewards": referral_rewards
+        }
+
+    finally:
+        conn.close()
+
+
+@app.post("/referral/{telegram_id}")
+def apply_referral_api(
+    telegram_id: int,
+    referral_code: str
+):
+    result, status = db.apply_referral(
+        telegram_id,
+        referral_code
+    )
+
+    if status != "referral_applied":
+        return {
+            "status": status,
+            "user": dict(result) if result else None
+        }
+
+    return {
+        "status": status,
+        "user": dict(result),
+        "reward": 25
+    }
