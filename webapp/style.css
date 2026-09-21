@@ -1,498 +1,971 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+/* =========================================================
+   3MIGO COIN — STYLE SYSTEM
+   ========================================================= */
 
-<head>
-    <meta charset="UTF-8">
+* {
+    box-sizing: border-box;
+}
 
-    <meta name="viewport"
-          content="width=device-width,
-                   initial-scale=1.0,
-                   maximum-scale=1.0,
-                   user-scalable=no">
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
 
-    <meta name="theme-color" content="#031024">
+body {
+    background: #031024;
+    color: #eef6ff;
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Tahoma,
+        Arial,
+        sans-serif;
 
-    <title>3Migo Coin</title>
+    overflow-x: hidden;
+}
 
-    <!-- Telegram Mini App -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- 3Migo Design -->
-    <link rel="stylesheet" href="/webapp/style.css">
-</head>
+/* =========================================================
+   MAIN APPLICATION
+   ========================================================= */
 
-<body>
+.app {
+    width: 100%;
+    max-width: 520px;
+    min-height: 100vh;
 
-<div class="app">
+    margin: 0 auto;
 
-    <!-- ================= HEADER ================= -->
+    padding-bottom: 95px;
 
-    <header class="topbar">
+    background:
+        radial-gradient(
+            circle at 50% 5%,
+            #0d3d6b 0%,
+            #071e3a 30%,
+            #031024 72%
+        );
+}
 
-        <div class="brand-name">
 
-            <strong>
-                3Migo Coin
-                <span class="verified">✓</span>
-            </strong>
+/* =========================================================
+   HEADER
+   ========================================================= */
 
-            <small>
-                Telegram Mini App
-            </small>
+.topbar {
 
-        </div>
+    height: 70px;
 
-        <div class="beta">
-            BETA
-        </div>
+    padding: 12px 17px;
 
-    </header>
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
+    background: rgba(3, 18, 38, 0.94);
 
-    <!-- ================= BRAND ================= -->
+    border-bottom: 1px solid #16466e;
 
-    <section class="brand-section">
+    position: sticky;
+    top: 0;
 
-        <div class="coin-logo">
-            3M
-        </div>
+    z-index: 20;
 
-        <div class="brand-text">
+    backdrop-filter: blur(14px);
+}
 
-            <h1>
-                3Migo
-            </h1>
 
-            <p>
-                شارك • اكسب • ابنِ القيمة
-            </p>
+.brand-name strong {
 
-        </div>
+    display: block;
 
-    </section>
+    font-size: 18px;
 
+    font-weight: 850;
 
-    <!-- ================= BALANCE ================= -->
+    letter-spacing: -0.3px;
+}
 
-    <section class="balance-card">
 
-        <div class="balance-title">
-            رصيدك من 3M
-        </div>
+.brand-name small {
 
-        <div id="balance"
-             class="balance">
+    display: block;
 
-            0
-            <span>3M</span>
+    margin-top: 3px;
 
-        </div>
+    color: #7fa5ca;
 
-        <div class="balance-note">
+    font-size: 10px;
+}
 
-            نسخة تجريبية — الرصيد داخلي حالياً
 
-        </div>
+.verified {
 
+    display: inline-flex;
 
-        <!-- MINING BUTTON -->
+    align-items: center;
+    justify-content: center;
 
-        <button id="mineBtn"
-                class="mine-button">
+    width: 18px;
+    height: 18px;
 
-            <span class="mine-icon">
-                ⛏️
-            </span>
+    margin-right: 3px;
 
-            <span class="mine-content">
+    border-radius: 50%;
 
-                <strong>
-                    ابدأ التعدين
-                </strong>
+    background: #18a7ff;
 
-                <small>
-                    اضغط للبدء
-                </small>
+    color: white;
 
-            </span>
+    font-size: 11px;
+}
 
-        </button>
 
+.beta {
 
-        <!-- MINING STATUS -->
+    padding: 6px 11px;
 
-        <div class="mining-status">
+    border: 1px solid #c89a27;
 
-            <div>
+    border-radius: 20px;
 
-                <strong id="rate">
-                    +10
-                </strong>
+    color: #ffd45b;
 
-                <small>
-                    3M / جلسة
-                </small>
+    font-size: 10px;
 
-            </div>
+    font-weight: 800;
 
+    background: rgba(255, 203, 67, 0.05);
+}
 
-            <div>
 
-                <strong id="miningState">
-                    جاهز
-                </strong>
+/* =========================================================
+   BRAND
+   ========================================================= */
 
-                <small>
-                    حالة التعدين
-                </small>
+.brand-section {
 
-            </div>
+    display: flex;
 
-        </div>
+    align-items: center;
 
-    </section>
+    gap: 15px;
 
+    padding: 21px 18px 15px;
+}
 
-    <!-- ================= FEATURES ================= -->
 
-    <section class="features">
+.coin-logo {
 
+    width: 72px;
+    height: 72px;
 
-        <!-- DAILY -->
+    flex-shrink: 0;
 
-        <button class="feature-card daily"
-                data-action="daily">
+    display: flex;
 
-            <span class="feature-icon">
-                🎁
-            </span>
+    align-items: center;
+    justify-content: center;
 
-            <strong>
-                المكافأة اليومية
-            </strong>
+    border-radius: 50%;
 
-            <small>
-                احصل على 50 3M
-            </small>
+    color: #17191b;
 
-        </button>
+    font-size: 25px;
 
+    font-weight: 950;
 
-        <!-- TASKS -->
+    background:
+        linear-gradient(
+            145deg,
+            #fff1a5 0%,
+            #f5b82e 50%,
+            #9b620b 100%
+        );
 
-        <button class="feature-card tasks"
-                data-action="tasks">
+    border: 6px solid #6b450f;
 
-            <span class="feature-icon">
-                ☑️
-            </span>
+    box-shadow:
+        0 0 25px rgba(245, 184, 46, 0.35),
+        inset 0 0 0 3px #ffd96a;
+}
 
-            <strong>
-                المهام
-            </strong>
 
-            <small>
-                مهام ومكافآت
-            </small>
+.brand-text h1 {
 
-        </button>
+    margin: 0;
 
+    font-size: 30px;
 
-        <!-- REFERRAL -->
+    font-weight: 900;
 
-        <button class="feature-card referral"
-                data-action="referral">
+    background:
+        linear-gradient(
+            90deg,
+            #ffd64e,
+            #ffffff,
+            #6dd5ff
+        );
 
-            <span class="feature-icon">
-                👥
-            </span>
+    color: transparent;
 
-            <strong>
-                الإحالات
-            </strong>
+    background-clip: text;
 
-            <small>
-                شارك واربح
-            </small>
+    -webkit-background-clip: text;
+}
 
-        </button>
 
+.brand-text p {
 
-        <!-- WALLET -->
+    margin: 4px 0 0;
 
-        <button class="feature-card wallet"
-                data-action="wallet">
+    color: #9bc3e8;
 
-            <span class="feature-icon">
-                💼
-            </span>
+    font-size: 13px;
+}
 
-            <strong>
-                المحفظة
-            </strong>
 
-            <small>
-                الرصيد والعمليات
-            </small>
+/* =========================================================
+   BALANCE CARD
+   ========================================================= */
 
-        </button>
+.balance-card {
 
-    </section>
+    margin: 0 14px;
 
+    padding: 19px;
 
-    <!-- ================= STATISTICS ================= -->
+    border: 1px solid #1163a4;
 
-    <section class="statistics">
+    border-radius: 25px;
 
-        <div class="section-title">
+    background:
+        linear-gradient(
+            145deg,
+            #062d58,
+            #03152e 75%
+        );
 
-            📊
-            إحصائيات التعدين
+    box-shadow:
+        0 20px 45px rgba(0, 0, 0, 0.45);
+}
 
-        </div>
 
+.balance-title {
 
-        <div class="statistics-grid">
+    color: #a9c9e7;
 
+    font-size: 13px;
+}
 
-            <div class="stat-box">
 
-                <small>
-                    إجمالي المكافآت
-                </small>
+.balance {
 
-                <strong id="total">
-                    0 3M
-                </strong>
+    margin: 4px 0;
 
-            </div>
+    font-size: 40px;
 
+    line-height: 1.1;
 
-            <div class="stat-box">
+    font-weight: 950;
 
-                <small>
-                    اليوم
-                </small>
+    letter-spacing: -1px;
+}
 
-                <strong id="today">
-                    0 3M
-                </strong>
 
-            </div>
+.balance span {
 
+    color: #ffd34d;
 
-            <div class="stat-box">
+    font-size: 25px;
+}
 
-                <small>
-                    جلسات التعدين
-                </small>
 
-                <strong id="sessions">
-                    0
-                </strong>
+.balance-note {
 
-            </div>
+    margin-bottom: 15px;
 
+    color: #7097bb;
 
-        </div>
+    font-size: 10px;
+}
 
-    </section>
 
+/* =========================================================
+   MINING BUTTON
+   ========================================================= */
 
-    <!-- ================= PROMOTION ================= -->
+.mine-button {
 
-    <section class="promotion">
+    width: 100%;
 
-        <div class="promotion-text">
+    min-height: 70px;
 
-            <small>
-                مرحباً بك في عالم
-            </small>
+    padding: 13px 16px;
 
-            <h2>
-                3Migo
-            </h2>
+    display: flex;
 
-            <p>
-                ابنِ رصيدك من خلال النشاط
-                والمهام المؤهلة.
-            </p>
+    align-items: center;
 
-        </div>
+    justify-content: center;
 
+    gap: 10px;
 
-        <div class="promotion-coin">
-            3M
-        </div>
+    border: 1px solid #19a9ff;
 
-    </section>
+    border-radius: 21px;
 
+    color: white;
 
-    <!-- ================= ROADMAP PREVIEW ================= -->
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            #0b65a8,
+            #062b54 68%,
+            #041b36
+        );
 
-    <section class="roadmap">
+    box-shadow:
+        0 0 28px rgba(24, 167, 255, 0.16);
 
-        <div class="section-title">
+    cursor: pointer;
 
-            🚀
-            مستقبل 3Migo
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+}
 
-        </div>
 
+.mine-button:active {
 
-        <div class="roadmap-item">
+    transform: scale(0.97);
 
-            <span>
-                ✓
-            </span>
+    box-shadow:
+        0 0 35px rgba(24, 167, 255, 0.30);
+}
 
-            <div>
 
-                <strong>
-                    المرحلة الأولى
-                </strong>
+.mine-icon {
 
-                <small>
-                    إطلاق النظام التجريبي
-                </small>
+    font-size: 28px;
+}
 
-            </div>
 
-        </div>
+.mine-content {
 
+    display: flex;
 
-        <div class="roadmap-item">
+    flex-direction: column;
 
-            <span>
-                ◉
-            </span>
+    align-items: flex-start;
+}
 
-            <div>
 
-                <strong>
-                    المرحلة الثانية
-                </strong>
+.mine-content strong {
 
-                <small>
-                    Mini App والمحفظة
-                </small>
+    font-size: 18px;
+}
 
-            </div>
 
-        </div>
+.mine-content small {
 
+    margin-top: 2px;
 
-        <div class="roadmap-item">
+    color: #9bdcff;
 
-            <span>
-                ○
-            </span>
+    font-size: 10px;
+}
 
-            <div>
 
-                <strong>
-                    المرحلة الثالثة
-                </strong>
+/* =========================================================
+   MINING STATUS
+   ========================================================= */
 
-                <small>
-                    Tokenomics والبنية المتقدمة
-                </small>
+.mining-status {
 
-            </div>
+    display: grid;
 
-        </div>
+    grid-template-columns: 1fr 1fr;
 
-    </section>
+    gap: 9px;
 
+    margin-top: 11px;
+}
 
-</div>
 
+.mining-status > div {
 
-<!-- ================= BOTTOM NAVIGATION ================= -->
+    padding: 10px;
 
-<nav class="bottom-nav">
+    text-align: center;
 
+    border: 1px solid #124875;
 
-    <button class="active">
+    border-radius: 14px;
 
-        <span>
-            ⌂
-        </span>
+    background: #041a33;
+}
 
-        <small>
-            الرئيسية
-        </small>
 
-    </button>
+.mining-status strong {
 
+    display: block;
 
-    <button data-action="mine">
+    color: #f6c94a;
 
-        <span>
-            ⛏️
-        </span>
+    font-size: 14px;
+}
 
-        <small>
-            التعدين
-        </small>
 
-    </button>
+.mining-status small {
 
+    display: block;
 
-    <button data-action="tasks">
+    margin-top: 2px;
 
-        <span>
-            ☑️
-        </span>
+    color: #7ea5c9;
 
-        <small>
-            المهام
-        </small>
+    font-size: 9px;
+}
 
-    </button>
 
+/* =========================================================
+   FEATURE CARDS
+   ========================================================= */
 
-    <button data-action="wallet">
+.features {
 
-        <span>
-            💼
-        </span>
+    display: grid;
 
-        <small>
-            المحفظة
-        </small>
+    grid-template-columns: 1fr 1fr;
 
-    </button>
+    gap: 10px;
 
+    padding: 14px;
+}
 
-    <button data-action="profile">
 
-        <span>
-            👤
-        </span>
+.feature-card {
 
-        <small>
-            الحساب
-        </small>
+    min-height: 112px;
 
-    </button>
+    padding: 13px;
 
+    text-align: right;
 
-</nav>
+    color: white;
 
+    border-radius: 19px;
 
-<!-- ================= MESSAGE ================= -->
+    background: #061b34;
 
-<div id="toast"
-     class="toast">
+    border: 1px solid #16456f;
 
-</div>
+    cursor: pointer;
 
+    transition:
+        transform 0.15s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
 
-<!-- ================= JAVASCRIPT ================= -->
 
-<script src="/webapp/app.js"></script>
+.feature-card:active {
 
-</body>
+    transform: scale(0.97);
+}
 
-</html>
+
+.feature-icon {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 28px;
+}
+
+
+.feature-card strong {
+
+    display: block;
+
+    font-size: 14px;
+}
+
+
+.feature-card small {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #7fa8ca;
+
+    font-size: 10px;
+}
+
+
+.feature-card.daily {
+
+    border-color: #67521b;
+}
+
+
+.feature-card.tasks {
+
+    border-color: #1a6864;
+}
+
+
+.feature-card.referral {
+
+    border-color: #744e18;
+}
+
+
+.feature-card.wallet {
+
+    border-color: #185a88;
+}
+
+
+/* =========================================================
+   STATISTICS
+   ========================================================= */
+
+.statistics {
+
+    margin: 0 14px 14px;
+
+    padding: 15px;
+
+    border: 1px solid #123d64;
+
+    border-radius: 20px;
+
+    background: #04172e;
+}
+
+
+.section-title {
+
+    font-size: 14px;
+
+    font-weight: 850;
+
+    margin-bottom: 12px;
+}
+
+
+.statistics-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+}
+
+
+.stat-box {
+
+    padding: 10px;
+
+    text-align: center;
+
+    border-radius: 13px;
+
+    background: #061e39;
+}
+
+
+.stat-box small {
+
+    display: block;
+
+    color: #7198bb;
+
+    font-size: 9px;
+}
+
+
+.stat-box strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #f5cd55;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   PROMOTION
+   ========================================================= */
+
+.promotion {
+
+    margin: 0 14px 14px;
+
+    padding: 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border: 1px solid #1268a5;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            120deg,
+            #082d53,
+            #073d70
+        );
+}
+
+
+.promotion-text small {
+
+    color: #9bc1df;
+
+    font-size: 10px;
+}
+
+
+.promotion-text h2 {
+
+    margin: 3px 0;
+
+    color: #ffd452;
+
+    font-size: 24px;
+}
+
+
+.promotion-text p {
+
+    max-width: 255px;
+
+    margin: 0;
+
+    color: #9bc1df;
+
+    font-size: 10px;
+
+    line-height: 1.6;
+}
+
+
+.promotion-coin {
+
+    width: 59px;
+    height: 59px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #17191b;
+
+    font-size: 18px;
+
+    font-weight: 950;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fff1a5,
+            #f5b82e 50%,
+            #9b620b
+        );
+
+    border: 5px solid #6b450f;
+
+    box-shadow:
+        0 0 20px rgba(245, 184, 46, 0.28),
+        inset 0 0 0 2px #ffd96a;
+}
+
+
+/* =========================================================
+   ROADMAP
+   ========================================================= */
+
+.roadmap {
+
+    margin: 0 14px 18px;
+
+    padding: 15px;
+
+    border: 1px solid #123d64;
+
+    border-radius: 20px;
+
+    background: #04172e;
+}
+
+
+.roadmap-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 11px 0;
+
+    border-bottom: 1px solid rgba(33, 83, 119, 0.35);
+}
+
+
+.roadmap-item:last-child {
+
+    border-bottom: none;
+}
+
+
+.roadmap-item > span {
+
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #6ed5ff;
+
+    background: #082c4c;
+
+    border: 1px solid #17628d;
+}
+
+
+.roadmap-item div {
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.roadmap-item strong {
+
+    font-size: 12px;
+}
+
+
+.roadmap-item small {
+
+    margin-top: 3px;
+
+    color: #7599ba;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   BOTTOM NAVIGATION
+   ========================================================= */
+
+.bottom-nav {
+
+    position: fixed;
+
+    left: 50%;
+
+    bottom: 0;
+
+    transform: translateX(-50%);
+
+    width: min(520px, 100%);
+
+    height: 78px;
+
+    padding:
+        7px 4px
+        calc(7px + env(safe-area-inset-bottom));
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
+    background: rgba(4, 19, 41, 0.96);
+
+    border-top: 1px solid #17466e;
+
+    z-index: 30;
+
+    backdrop-filter: blur(16px);
+}
+
+
+.bottom-nav button {
+
+    border: 0;
+
+    background: transparent;
+
+    color: #7195b9;
+
+    cursor: pointer;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 3px;
+}
+
+
+.bottom-nav button span {
+
+    font-size: 21px;
+}
+
+
+.bottom-nav button small {
+
+    font-size: 9px;
+}
+
+
+.bottom-nav button.active {
+
+    color: #22b7ff;
+}
+
+
+/* =========================================================
+   TOAST MESSAGE
+   ========================================================= */
+
+.toast {
+
+    position: fixed;
+
+    left: 50%;
+
+    bottom: 92px;
+
+    transform:
+        translate(-50%, 20px);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    z-index: 100;
+
+    max-width: 90%;
+
+    padding: 11px 17px;
+
+    border: 1px solid #1a77ad;
+
+    border-radius: 14px;
+
+    color: white;
+
+    background: #0b2947;
+
+    font-size: 12px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.35);
+
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+}
+
+
+.toast.show {
+
+    opacity: 1;
+
+    transform:
+        translate(-50%, 0);
+}
+
+
+/* =========================================================
+   MOBILE OPTIMIZATION
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+    .brand-text h1 {
+        font-size: 25px;
+    }
+
+    .coin-logo {
+        width: 64px;
+        height: 64px;
+    }
+
+    .balance {
+        font-size: 34px;
+    }
+
+    .feature-card {
+        min-height: 105px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL ANIMATION
+   ========================================================= */
+
+@keyframes glow {
+
+    0% {
+        box-shadow:
+            0 0 15px rgba(24, 167, 255, 0.10);
+    }
+
+    50% {
+        box-shadow:
+            0 0 30px rgba(24, 167, 255, 0.28);
+    }
+
+    100% {
+        box-shadow:
+            0 0 15px rgba(24, 167, 255, 0.10);
+    }
+}
+
+
+.mine-button {
+
+    animation:
+        glow 3s infinite ease-in-out;
+}
