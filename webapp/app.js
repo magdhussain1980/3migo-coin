@@ -1,0 +1,687 @@
+const tg = window.Telegram?.WebApp;
+
+if (tg) {
+    tg.ready();
+    tg.expand();
+
+    try {
+        tg.setHeaderColor("#04142a");
+        tg.setBackgroundColor("#031024");
+    } catch (error) {
+        console.log("Telegram UI settings unavailable");
+    }
+}
+
+/*
+    3Migo Mini App
+    Backend:
+    /user/{telegram_id}
+/user/{telegram_id}/mine
+    /user/{telegram_id}/daily
+*/
+
+let telegramUser = null;
+
+let state = {
+    balance: 0,
+    total: 0,
+    today: 0,
+    sessions: 0,
+    mining: false
+};
+
+
+/* =========================
+   TELEGRAM USER
+========================= */
+
+function getTelegramUser() {
+
+    if (
+        tg &&
+        tg.initDataUnsafe &&
+        tg.initDataUnsafe.user
+    ) {
+        return tg.initDataUnsafe.user;
+    }
+
+    return null;
+}
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+
+function showToast(message) {
+
+    const toast = $("toast");
+
+    if (!toast) return;
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2200);
+}
+
+
+function haptic() {
+
+    try {
+
+        if (
+            tg &&
+            tg.HapticFeedback
+        ) {
+
+            tg.HapticFeedback
+                .impactOccurred("medium");
+
+        }
+
+    } catch (error) {
+        console.log("Haptic unavailable");
+    }
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function render() {
+
+    if ($("balance")) {
+
+        $("balance").innerHTML =
+            `${Math.floor(state.balance).toLocaleString()}
+             <span>3M</span>`;
+
+    }
+
+    if ($("total")) {
+
+        $("total").textContent =
+            `${Math.floor(state.total).toLocaleString()} 3M`;
+
+    }
+
+    if ($("today")) {
+
+        $("today").textContent =
+            `${Math.floor(state.today).toLocaleString()} 3M`;
+
+    }
+
+    if ($("sessions")) {
+
+        $("sessions").textContent =
+            state.sessions;
+
+    }
+
+    if ($("miningState")) {
+
+        $("miningState").textContent =
+            state.mining
+                ? "يعمل"
+                : "جاهز";
+
+    }
+}
+
+
+/* =========================
+   LOAD USER
+========================= */
+
+async function loadUser() {
+
+    telegramUser = getTelegramUser();
+
+    /*
+       خارج Telegram:
+       نستخدم مستخدم تجريبي للتأكد
+       من عمل الواجهة.
+    */
+
+    const telegramId =
+        telegramUser?.id || 1;
+
+    try {
+
+        const response =
+            await fetch(
+                `/user/${telegramId}`
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                "تعذر تحميل المستخدم"
+            );
+        }
+
+        const user =
+            await response.json();
+
+        if (user.error) {
+
+            /*
+                إذا لم يكن المستخدم موجوداً
+                نسجله تلقائياً.
+            */
+
+            await registerUser(
+                telegramId
+            );
+
+            return loadUser();
+        }
+
+        state.balance =
+            Number(user.balance_3m || 0);
+
+        render();
+
+        /*
+            نحمّل سجل العمليات لحساب
+            الإحصائيات.
+        */
+
+        await loadTransactions(
+            telegramId
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
+    }
+}
+
+
+/* =========================
+   REGISTER
+========================= */
+
+async function registerUser(
+    telegramId
+) {
+
+    try {
+
+        const username =
+            telegramUser?.username || "";
+
+        const response =
+            await fetch(
+                "/register",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        telegram_id:
+                            telegramId,
+
+                        username:
+                            username,
+
+                        referral_code:
+                            ""
+
+                    })
+                }
+            );
+
+        return await response.json();
+
+    } catch (error) {
+
+        console.error(error);
+
+        return null;
+    }
+}
+
+
+/* =========================
+   TRANSACTIONS
+========================= */
+
+async function loadTransactions(
+    telegramId
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                `/transactions/${telegramId}`
+            );
+
+        if (!response.ok) return;
+
+        const transactions =
+            await response.json();
+
+        if (!Array.isArray(transactions))
+            return;
+
+        let total = 0;
+        let today = 0;
+        let sessions = 0;
+
+        const currentDate =
+            new Date()
+                .toISOString()
+                .slice(0, 10);
+
+        transactions.forEach(
+            transaction => {
+
+                const amount =
+                    Number(
+                        transaction.amount || 0
+                    );
+
+                total += amount;
+
+                if (
+                    transaction.created_at &&
+                    transaction.created_at
+                        .startsWith(currentDate)
+                ) {
+
+                    today += amount;
+
+                }
+
+                if (
+                    transaction.transaction_type ===
+                    "engagement_reward"
+                ) {
+
+                    sessions++;
+
+                }
+
+            }
+        );
+
+        state.total = total;
+        state.today = today;
+        state.sessions = sessions;
+
+        render();
+
+    } catch (error) {
+
+        console.error(
+            "Transactions error:",
+            error
+        );
+
+    }
+}
+
+
+/* =========================
+   MINING
+========================= */
+
+async function startMining() {
+
+    if (state.mining) {
+
+        showToast(
+            "⛏️ التعدين يعمل حالياً"
+        );
+
+        return;
+    }
+
+    const button =
+        $("mineBtn");
+
+    state.mining = true;
+
+    if (button) {
+
+        button.disabled = true;
+        button.style.opacity = "0.75";
+
+    }
+
+    render();
+
+    haptic();
+
+    showToast(
+        "⛏️ جاري تشغيل التعدين..."
+    );
+
+    const telegramId =
+        telegramUser?.id || 1;
+
+    try {
+
+        const response =
+            await fetch(
+                `/user/${telegramId}/mine`,
+                {
+                    method: "POST"
+                }
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Mining request failed"
+            );
+
+        }
+
+        const user =
+            await response.json();
+
+        if (user.error) {
+
+            showToast(
+                "⚠️ تعذر تنفيذ العملية"
+            );
+
+            return;
+        }
+
+        state.balance =
+            Number(
+                user.balance_3m || 0
+            );
+
+        await loadTransactions(
+            telegramId
+        );
+
+        render();
+
+        showToast(
+            "⛏️ تمت إضافة 10 3M"
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
+
+    } finally {
+
+        state.mining = false;
+
+        if (button) {
+
+            button.disabled = false;
+            button.style.opacity = "1";
+
+        }
+
+        render();
+    }
+}
+
+
+/* =========================
+   DAILY
+========================= */
+
+async function dailyReward() {
+
+    haptic();
+
+    const telegramId =
+        telegramUser?.id || 1;
+
+    showToast(
+        "🎁 جاري التحقق..."
+    );
+
+    try {
+
+        const response =
+            await fetch(
+                `/user/${telegramId}/daily`,
+                {
+                    method: "POST"
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            data.error ===
+            "already_claimed"
+        ) {
+
+            state.balance =
+                Number(
+                    data.user?.balance_3m ||
+                    state.balance
+                );
+
+            render();
+
+            showToast(
+                "🎁 استلمت المكافأة اليومية مسبقاً"
+            );
+
+            return;
+        }
+
+        if (data.error) {
+
+            showToast(
+                "⚠️ تعذر الحصول على المكافأة"
+            );
+
+            return;
+        }
+
+        state.balance =
+            Number(
+                data.balance_3m ||
+                state.balance
+            );
+
+        await loadTransactions(
+            telegramId
+        );
+
+        render();
+
+        showToast(
+            "🎁 تمت إضافة 50 3M"
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
+    }
+}
+
+
+/* =========================
+   FEATURES
+========================= */
+
+function openTasks() {
+
+    haptic();
+
+    showToast(
+        "☑️ نظام المهام قيد التطوير"
+    );
+}
+
+
+function openReferral() {
+
+    haptic();
+
+    showToast(
+        "👥 نظام الإحالات قيد التطوير"
+    );
+}
+
+
+function openWallet() {
+
+    haptic();
+
+    showToast(
+        "💼 المحفظة قيد التطوير"
+    );
+}
+
+
+function openProfile() {
+
+    haptic();
+
+    showToast(
+        "👤 الحساب قيد التطوير"
+    );
+}
+
+
+/* =========================
+   ACTION HANDLER
+========================= */
+
+function handleAction(action) {
+
+    switch (action) {
+
+        case "mine":
+            startMining();
+            break;
+
+        case "daily":
+            dailyReward();
+            break;
+
+        case "tasks":
+            openTasks();
+            break;
+
+        case "referral":
+            openReferral();
+            break;
+
+        case "wallet":
+            openWallet();
+            break;
+
+        case "profile":
+            openProfile();
+            break;
+
+        default:
+            console.log(
+                "Unknown action:",
+                action
+            );
+    }
+}
+
+
+/* =========================
+   BUTTON EVENTS
+========================= */
+
+document
+    .querySelectorAll("[data-action]")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const action =
+                    button.getAttribute(
+                        "data-action"
+                    );
+
+                handleAction(action);
+
+            }
+        );
+
+    });
+
+
+const miningButton =
+    $("mineBtn");
+
+if (miningButton) {
+
+    miningButton.addEventListener(
+        "click",
+        startMining
+    );
+
+}
+
+
+/* =========================
+   START APP
+========================= */
+
+render();
+
+loadUser();
+
+
+console.log(
+    "================================="
+);
+
+console.log(
+    "3Migo Coin Mini App"
+);
+
+console.log(
+    "Version: 1.1 Backend Connected"
+);
+
+console.log(
+    "Token: 3M"
+);
+
+console.log(
+    "================================="
+);
