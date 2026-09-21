@@ -548,13 +548,48 @@ function openTasks() {
 }
 
 
-function openReferral() {
-
+async function openReferral() {
     haptic();
 
-    showToast(
-        "👥 نظام الإحالات قيد التطوير"
-    );
+    const telegramId = telegramUser?.id || 1;
+
+    try {
+        showToast("👥 جاري تحميل بيانات الإحالة...");
+
+        const response = await fetch(
+            `/referral/${telegramId}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Referral request failed");
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            showToast("⚠️ تعذر تحميل بيانات الإحالة");
+            return;
+        }
+
+        const referralCode = data.referral_code || "";
+        const referralCount = Number(data.referral_count || 0);
+        const referralRewards = Number(data.referral_rewards || 0);
+
+        const referralLink =
+            `https://t.me/threemigosmart_bot?start=ref_${referralCode}`;
+
+        alert(
+            `👥 نظام الإحالات\n\n` +
+            `🔑 كود الإحالة:\n${referralCode}\n\n` +
+            `🔗 رابط الدعوة:\n${referralLink}\n\n` +
+            `👤 عدد الإحالات: ${referralCount}\n` +
+            `🎁 مكافآت الإحالة: ${referralRewards} 3M`
+        );
+
+    } catch (error) {
+        console.error(error);
+        showToast("⚠️ تعذر الاتصال بالخادم");
+    }
 }
 
 
