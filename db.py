@@ -264,3 +264,93 @@ def claim_daily(telegram_id):
 
         finally:
             conn.close()
+def apply_referral(new_user_id, referral_code):
+    """
+    تسجيل إحالة مستخدم جديد ومنح مكافأة للمُحيل.
+    تعمل مرة واحدة فقط للمستخدم الجديد.
+    """
+
+    if not referral_code:
+        return None, "no_referral"
+
+    with _db_lock:
+        conn = get_conn()
+
+        try:
+            # البحث عن المستخدم الجديد
+            cur = conn.execute(
+                "SELECT * FROM users WHERE telegram_id=?",
+                (new_user_id,)
+            )
+            new_user = cur.fetchone()
+
+            if new_user is None:
+                return None, "new_user_not_found"
+
+            # منع تغيير المُحيل بعد تسجيله
+            if new_user["referred_by"]:
+                return new_user, "already_referred"
+
+            # البحث عن صاحب كود الإحالة
+            cur = conn.execute(
+                "SELECT * FROM users WHERE referral_code=?",
+                (referral_code,)
+            )
+            referrer = cur.fetchone()
+
+            if referrer is None:
+                return new_user, "invalid_referral"
+
+            # منع إحالة الشخص لنفسه
+            if referrer["telegram_id"] == new_user_id:
+                return new_user, "self_referral"
+
+            # تسجيل المُحيل
+            conn.execute("""
+                UPDATE users
+                SET referred_by=?
+                WHERE telegram_id=?
+            """, (
+                referral_code,
+                new_user_id
+            ))
+
+            conn.commit()
+
+            # مكافأة المُحيل: 25 3M
+            cur = conn.execute("""
+                UPDATE users
+                SET balance_3m = balance_3m + 25
+                WHERE telegram_id=?
+            """, (
+                referrer["telegram_id"],
+            ))
+
+            if cur.rowcount == 0:
+                conn.rollback()
+                return new_user, "reward_error"
+
+            # تسجيل عملية المكافأة
+            conn.execute("""
+                INSERT INTO transactions
+                (telegram_id, amount, transaction_type, reference, created_at)
+                VALUES (?, 25, 'referral_reward', ?, ?)
+            """, (
+                referrer["telegram_id"],
+                f"referral:{new_user_id}",
+                datetime.utcnow().isoformat()
+            ))
+
+            conn.commit()
+
+            # إرجاع بيانات المُحيل بعد المكافأة
+            cur = conn.execute(
+                "SELECT * FROM users WHERE telegram_id=?",
+                (referrer["telegram_id"],)
+            )
+            updated_referrer = cur.fetchone()
+
+            return updated_referrer, "referral_applied"
+
+        finally:
+            conn.close()
