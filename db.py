@@ -264,6 +264,7 @@ def claim_daily(telegram_id):
 
         finally:
             conn.close()
+
 def apply_referral(new_user_id, referral_code):
     """
     تسجيل إحالة مستخدم جديد ومنح مكافأة للمُحيل.
