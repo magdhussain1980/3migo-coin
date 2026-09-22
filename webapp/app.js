@@ -1,24 +1,38 @@
-const tg = window.Telegram?.WebApp;
+/* =========================================================
+   3Migo Coin - Telegram Mini App
+   Version: 1.2
+   Backend Connected
+========================================================= */
+
+const tg = window.Telegram?.WebApp || null;
+
+
+/* =========================================================
+   TELEGRAM INITIALIZATION
+========================================================= */
 
 if (tg) {
-    tg.ready();
-    tg.expand();
 
     try {
-        tg.setHeaderColor("#04142a");
-        tg.setBackgroundColor("#031024");
+        tg.ready();
+        tg.expand();
+
+        try {
+            tg.setHeaderColor("#04142a");
+            tg.setBackgroundColor("#031024");
+        } catch (error) {
+            console.log("Telegram UI settings unavailable");
+        }
+
     } catch (error) {
-        console.log("Telegram UI settings unavailable");
+        console.error("Telegram initialization error:", error);
     }
 }
 
-/*
-    3Migo Mini App
-    Backend:
-    /user/{telegram_id}
-/user/{telegram_id}/mine
-    /user/{telegram_id}/daily
-*/
+
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
 
 let telegramUser = null;
 
@@ -27,31 +41,64 @@ let state = {
     total: 0,
     today: 0,
     sessions: 0,
-    mining: false
+    mining: false,
+    loadingUser: false
 };
 
 
-/* =========================
+/* =========================================================
    TELEGRAM USER
-========================= */
+========================================================= */
 
 function getTelegramUser() {
 
-    if (
-        tg &&
-        tg.initDataUnsafe &&
-        tg.initDataUnsafe.user
-    ) {
-        return tg.initDataUnsafe.user;
+    try {
+
+        if (
+            tg &&
+            tg.initDataUnsafe &&
+            tg.initDataUnsafe.user
+        ) {
+            return tg.initDataUnsafe.user;
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Telegram user error:",
+            error
+        );
+
     }
 
     return null;
 }
 
 
-/* =========================
+/* =========================================================
+   TELEGRAM ID
+========================================================= */
+
+function getTelegramId() {
+
+    const user = getTelegramUser();
+
+    if (user && user.id) {
+        return Number(user.id);
+    }
+
+    /*
+        المستخدم التجريبي يستخدم فقط عند فتح
+        التطبيق خارج Telegram أثناء الاختبار.
+    */
+
+    return 1;
+}
+
+
+/* =========================================================
    HELPERS
-========================= */
+========================================================= */
 
 function $(id) {
     return document.getElementById(id);
@@ -62,14 +109,23 @@ function showToast(message) {
 
     const toast = $("toast");
 
-    if (!toast) return;
+    if (!toast) {
+        console.log(message);
+        return;
+    }
 
     toast.textContent = message;
 
     toast.classList.add("show");
 
-    setTimeout(() => {
+    clearTimeout(
+        window.__toastTimer
+    );
+
+    window.__toastTimer = setTimeout(() => {
+
         toast.classList.remove("show");
+
     }, 2200);
 }
 
@@ -89,45 +145,78 @@ function haptic() {
         }
 
     } catch (error) {
-        console.log("Haptic unavailable");
+
+        console.log(
+            "Haptic unavailable"
+        );
+
     }
 }
 
 
-/* =========================
+/*
+    حماية النصوص القادمة من Backend
+*/
+
+function escapeHTML(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* =========================================================
    RENDER
-========================= */
+========================================================= */
 
 function render() {
 
     if ($("balance")) {
 
         $("balance").innerHTML =
-            `${Math.floor(state.balance).toLocaleString()}
-             <span>3M</span>`;
+            `${Math.floor(
+                Number(state.balance || 0)
+            ).toLocaleString()}
+            <span>3M</span>`;
 
     }
+
 
     if ($("total")) {
 
         $("total").textContent =
-            `${Math.floor(state.total).toLocaleString()} 3M`;
+            `${Math.floor(
+                Number(state.total || 0)
+            ).toLocaleString()} 3M`;
 
     }
+
 
     if ($("today")) {
 
         $("today").textContent =
-            `${Math.floor(state.today).toLocaleString()} 3M`;
+            `${Math.floor(
+                Number(state.today || 0)
+            ).toLocaleString()} 3M`;
 
     }
+
 
     if ($("sessions")) {
 
         $("sessions").textContent =
-            state.sessions;
+            Number(state.sessions || 0);
 
     }
+
 
     if ($("miningState")) {
 
@@ -140,22 +229,31 @@ function render() {
 }
 
 
-/* =========================
+/* =========================================================
    LOAD USER
-========================= */
+========================================================= */
 
 async function loadUser() {
 
+    if (state.loadingUser) {
+        return;
+    }
+
+    state.loadingUser = true;
+
     telegramUser = getTelegramUser();
 
-    /*
-       خارج Telegram:
-       نستخدم مستخدم تجريبي للتأكد
-       من عمل الواجهة.
-    */
+    const telegramId = getTelegramId();
 
-    const telegramId =
-        telegramUser?.id || 1;
+    console.log(
+        "Telegram User:",
+        telegramUser
+    );
+
+    console.log(
+        "Telegram ID:",
+        telegramId
+    );
 
     try {
 
@@ -164,57 +262,122 @@ async function loadUser() {
                 `/user/${telegramId}`
             );
 
+        /*
+            المستخدم غير موجود
+        */
+
+        if (
+            response.status === 404
+        ) {
+
+            const registered =
+                await registerUser(
+                    telegramId
+                );
+
+            if (registered) {
+
+                state.loadingUser = false;
+
+                return loadUser();
+
+            }
+
+            throw new Error(
+                "تعذر تسجيل المستخدم"
+            );
+        }
+
+
         if (!response.ok) {
+
             throw new Error(
                 "تعذر تحميل المستخدم"
             );
+
         }
+
 
         const user =
             await response.json();
 
+
         if (user.error) {
 
             /*
-                إذا لم يكن المستخدم موجوداً
-                نسجله تلقائياً.
+                محاولة تسجيل المستخدم
+                إذا كان Backend يعيد error
+                بدلاً من 404.
             */
 
-            await registerUser(
-                telegramId
-            );
+            const registered =
+                await registerUser(
+                    telegramId
+                );
 
-            return loadUser();
+            if (registered) {
+
+                state.loadingUser = false;
+
+                return loadUser();
+
+            }
+
+            throw new Error(
+                user.error
+            );
         }
 
+
         state.balance =
-            Number(user.balance_3m || 0);
+            Number(
+                user.balance_3m || 0
+            );
+
 
         render();
 
+
         /*
-            نحمّل سجل العمليات لحساب
-            الإحصائيات.
+            تحميل سجل العمليات
         */
 
         await loadTransactions(
             telegramId
         );
 
+
+        /*
+            تحديث اسم المستخدم إن وجد
+        */
+
+        updateTelegramUserDisplay();
+
+
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Load user error:",
+            error
+        );
 
         showToast(
             "⚠️ تعذر الاتصال بالخادم"
         );
+
+    } finally {
+
+        state.loadingUser = false;
+
+        render();
+
     }
 }
 
 
-/* =========================
-   REGISTER
-========================= */
+/* =========================================================
+   REGISTER USER
+========================================================= */
 
 async function registerUser(
     telegramId
@@ -224,6 +387,13 @@ async function registerUser(
 
         const username =
             telegramUser?.username || "";
+
+        const firstName =
+            telegramUser?.first_name || "";
+
+        const lastName =
+            telegramUser?.last_name || "";
+
 
         const response =
             await fetch(
@@ -244,6 +414,12 @@ async function registerUser(
                         username:
                             username,
 
+                        first_name:
+                            firstName,
+
+                        last_name:
+                            lastName,
+
                         referral_code:
                             ""
 
@@ -251,20 +427,91 @@ async function registerUser(
                 }
             );
 
-        return await response.json();
+
+        if (!response.ok) {
+
+            console.error(
+                "Register failed:",
+                response.status
+            );
+
+            return false;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            data &&
+            data.error
+        ) {
+
+            console.error(
+                "Register error:",
+                data.error
+            );
+
+            return false;
+        }
+
+
+        return true;
+
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Register error:",
+            error
+        );
 
-        return null;
+        return false;
     }
 }
 
 
-/* =========================
+/* =========================================================
+   USER DISPLAY
+========================================================= */
+
+function updateTelegramUserDisplay() {
+
+    if (!telegramUser) {
+        return;
+    }
+
+    const possibleNames = [
+        "username",
+        "userName",
+        "profileName"
+    ];
+
+    const displayName =
+        telegramUser.username ||
+        telegramUser.first_name ||
+        "3Migo User";
+
+
+    possibleNames.forEach(id => {
+
+        const element = $(id);
+
+        if (element) {
+
+            element.textContent =
+                displayName;
+
+        }
+
+    });
+}
+
+
+/* =========================================================
    TRANSACTIONS
-========================= */
+========================================================= */
 
 async function loadTransactions(
     telegramId
@@ -277,22 +524,31 @@ async function loadTransactions(
                 `/transactions/${telegramId}`
             );
 
-        if (!response.ok) return;
+
+        if (!response.ok) {
+            return;
+        }
+
 
         const transactions =
             await response.json();
 
-        if (!Array.isArray(transactions))
+
+        if (!Array.isArray(transactions)) {
             return;
+        }
+
 
         let total = 0;
         let today = 0;
         let sessions = 0;
 
+
         const currentDate =
             new Date()
                 .toISOString()
                 .slice(0, 10);
+
 
         transactions.forEach(
             transaction => {
@@ -302,17 +558,21 @@ async function loadTransactions(
                         transaction.amount || 0
                     );
 
+
                 total += amount;
+
 
                 if (
                     transaction.created_at &&
-                    transaction.created_at
-                        .startsWith(currentDate)
+                    String(
+                        transaction.created_at
+                    ).startsWith(currentDate)
                 ) {
 
                     today += amount;
 
                 }
+
 
                 if (
                     transaction.transaction_type ===
@@ -326,11 +586,19 @@ async function loadTransactions(
             }
         );
 
-        state.total = total;
-        state.today = today;
-        state.sessions = sessions;
+
+        state.total =
+            total;
+
+        state.today =
+            today;
+
+        state.sessions =
+            sessions;
+
 
         render();
+
 
     } catch (error) {
 
@@ -343,9 +611,9 @@ async function loadTransactions(
 }
 
 
-/* =========================
+/* =========================================================
    MINING
-========================= */
+========================================================= */
 
 async function startMining() {
 
@@ -358,28 +626,39 @@ async function startMining() {
         return;
     }
 
+
     const button =
         $("mineBtn");
 
-    state.mining = true;
+
+    state.mining =
+        true;
+
 
     if (button) {
 
-        button.disabled = true;
-        button.style.opacity = "0.75";
+        button.disabled =
+            true;
+
+        button.style.opacity =
+            "0.75";
 
     }
+
 
     render();
 
     haptic();
 
+
     showToast(
         "⛏️ جاري تشغيل التعدين..."
     );
 
+
     const telegramId =
-        telegramUser?.id || 1;
+        getTelegramId();
+
 
     try {
 
@@ -391,18 +670,23 @@ async function startMining() {
                 }
             );
 
+
+        const data =
+            await response.json()
+                .catch(() => ({}));
+
+
         if (!response.ok) {
 
             throw new Error(
+                data.error ||
                 "Mining request failed"
             );
 
         }
 
-        const user =
-            await response.json();
 
-        if (user.error) {
+        if (data.error) {
 
             showToast(
                 "⚠️ تعذر تنفيذ العملية"
@@ -411,59 +695,97 @@ async function startMining() {
             return;
         }
 
-        state.balance =
-            Number(
-                user.balance_3m || 0
-            );
+
+        /*
+            Backend قد يعيد user
+            أو يعيد balance مباشرة.
+        */
+
+        if (data.user) {
+
+            state.balance =
+                Number(
+                    data.user.balance_3m ||
+                    state.balance
+                );
+
+        } else {
+
+            state.balance =
+                Number(
+                    data.balance_3m ||
+                    data.balance ||
+                    state.balance
+                );
+
+        }
+
 
         await loadTransactions(
             telegramId
         );
 
+
         render();
 
+
         showToast(
-            "⛏️ تمت إضافة 10 3M"
+            "⛏️ تمت إضافة مكافأة التعدين"
         );
+
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Mining error:",
+            error
+        );
 
         showToast(
             "⚠️ تعذر الاتصال بالخادم"
         );
 
+
     } finally {
 
-        state.mining = false;
+        state.mining =
+            false;
+
 
         if (button) {
 
-            button.disabled = false;
-            button.style.opacity = "1";
+            button.disabled =
+                false;
+
+            button.style.opacity =
+                "1";
 
         }
 
+
         render();
+
     }
 }
 
 
-/* =========================
-   DAILY
-========================= */
+/* =========================================================
+   DAILY REWARD
+========================================================= */
 
 async function dailyReward() {
 
     haptic();
 
+
     const telegramId =
-        telegramUser?.id || 1;
+        getTelegramId();
+
 
     showToast(
         "🎁 جاري التحقق..."
     );
+
 
     try {
 
@@ -475,8 +797,11 @@ async function dailyReward() {
                 }
             );
 
+
         const data =
-            await response.json();
+            await response.json()
+                .catch(() => ({}));
+
 
         if (
             data.error ===
@@ -486,10 +811,13 @@ async function dailyReward() {
             state.balance =
                 Number(
                     data.user?.balance_3m ||
+                    data.balance_3m ||
                     state.balance
                 );
 
+
             render();
+
 
             showToast(
                 "🎁 استلمت المكافأة اليومية مسبقاً"
@@ -497,6 +825,17 @@ async function dailyReward() {
 
             return;
         }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Daily request failed"
+            );
+
+        }
+
 
         if (data.error) {
 
@@ -507,25 +846,35 @@ async function dailyReward() {
             return;
         }
 
+
         state.balance =
             Number(
+                data.user?.balance_3m ||
                 data.balance_3m ||
+                data.balance ||
                 state.balance
             );
+
 
         await loadTransactions(
             telegramId
         );
 
+
         render();
 
+
         showToast(
-            "🎁 تمت إضافة 50 3M"
+            "🎁 تمت إضافة المكافأة اليومية"
         );
+
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Daily error:",
+            error
+        );
 
         showToast(
             "⚠️ تعذر الاتصال بالخادم"
@@ -534,38 +883,61 @@ async function dailyReward() {
 }
 
 
-/* =========================
-   FEATURES
-========================= */
+/* =========================================================
+   TASKS
+========================================================= */
 
 async function openTasks() {
+
     haptic();
 
-    const telegramId = telegramUser?.id || 1;
+
+    const telegramId =
+        getTelegramId();
+
 
     try {
-        showToast("☑️ جاري تحميل المهام...");
 
-        const response = await fetch(
-            `/tasks/${telegramId}`
+        showToast(
+            "☑️ جاري تحميل المهام..."
         );
 
+
+        const response =
+            await fetch(
+                `/tasks/${telegramId}`
+            );
+
+
         if (!response.ok) {
-            throw new Error("Tasks request failed");
+
+            throw new Error(
+                "Tasks request failed"
+            );
+
         }
 
-        const tasks = await response.json();
+
+        const tasks =
+            await response.json();
+
 
         const oldTasks =
-            document.getElementById("tasksModal");
+            $("tasksModal");
+
 
         if (oldTasks) {
             oldTasks.remove();
         }
 
+
         let tasksHTML = "";
 
-        if (!Array.isArray(tasks) || tasks.length === 0) {
+
+        if (
+            !Array.isArray(tasks) ||
+            tasks.length === 0
+        ) {
 
             tasksHTML = `
                 <div class="tasks-empty">
@@ -575,53 +947,91 @@ async function openTasks() {
 
         } else {
 
-            tasks.forEach(task => {
+            tasks.forEach(
+                task => {
 
-                const completed =
-                    Number(task.completed) === 1;
+                    const taskId =
+                        Number(task.id);
 
-                tasksHTML += `
-                    <div class="task-card">
 
-                        <div class="task-info">
+                    const completed =
+                        Number(task.completed) === 1 ||
+                        task.completed === true;
 
-                            <div class="task-title">
-                                ${task.title}
+
+                    const title =
+                        escapeHTML(
+                            task.title ||
+                            "مهمة"
+                        );
+
+
+                    const description =
+                        escapeHTML(
+                            task.description ||
+                            ""
+                        );
+
+
+                    const reward =
+                        Number(
+                            task.reward_3m || 0
+                        );
+
+
+                    tasksHTML += `
+                        <div class="task-card">
+
+                            <div class="task-info">
+
+                                <div class="task-title">
+                                    ${title}
+                                </div>
+
+                                <div class="task-description">
+                                    ${description}
+                                </div>
+
+                                <div class="task-reward">
+                                    🎁 +${reward.toLocaleString()} 3M
+                                </div>
+
                             </div>
 
-                            <div class="task-description">
-                                ${task.description || ""}
-                            </div>
-
-                            <div class="task-reward">
-                                🎁 +${Number(
-                                    task.reward_3m || 0
-                                ).toLocaleString()} 3M
-                            </div>
+                            <button
+                                class="task-button ${
+                                    completed
+                                        ? "completed"
+                                        : ""
+                                }"
+                                ${
+                                    completed
+                                        ? "disabled"
+                                        : ""
+                                }
+                                onclick="completeTask(${taskId})"
+                            >
+                                ${
+                                    completed
+                                        ? "✓ مكتملة"
+                                        : "احصل على المكافأة"
+                                }
+                            </button>
 
                         </div>
-
-                        <button
-                            class="task-button ${completed ? "completed" : ""}"
-                            ${completed ? "disabled" : ""}
-                            onclick="completeTask(${task.id})"
-                        >
-                            ${
-                                completed
-                                ? "✓ مكتملة"
-                                : "احصل على المكافأة"
-                            }
-                        </button>
-
-                    </div>
-                `;
-            });
+                    `;
+                }
+            );
         }
+
 
         const modal =
             document.createElement("div");
 
-        modal.id = "tasksModal";
+
+        modal.id =
+            "tasksModal";
+
 
         modal.innerHTML = `
             <div class="tasks-overlay">
@@ -630,22 +1040,29 @@ async function openTasks() {
 
                     <button
                         class="tasks-close"
-                        onclick="document.getElementById('tasksModal').remove()"
+                        id="tasksClose"
                     >
                         ×
                     </button>
 
                     <div class="tasks-header">
+
                         <div class="tasks-icon">
                             ☑️
                         </div>
 
                         <div>
-                            <h2>مهام 3Migo</h2>
+
+                            <h2>
+                                مهام 3Migo
+                            </h2>
+
                             <small>
                                 أكمل المهام واحصل على 3M
                             </small>
+
                         </div>
+
                     </div>
 
                     <div class="tasks-list">
@@ -661,7 +1078,54 @@ async function openTasks() {
             </div>
         `;
 
-        document.body.appendChild(modal);
+
+        document.body.appendChild(
+            modal
+        );
+
+
+        const closeButton =
+            $("tasksClose");
+
+
+        if (closeButton) {
+
+            closeButton.addEventListener(
+                "click",
+                () => {
+                    modal.remove();
+                }
+            );
+
+        }
+
+
+        const overlay =
+            modal.querySelector(
+                ".tasks-overlay"
+            );
+
+
+        if (overlay) {
+
+            overlay.addEventListener(
+                "click",
+                event => {
+
+                    if (
+                        event.target ===
+                        overlay
+                    ) {
+
+                        modal.remove();
+
+                    }
+
+                }
+            );
+
+        }
+
 
     } catch (error) {
 
@@ -670,6 +1134,7 @@ async function openTasks() {
             error
         );
 
+
         showToast(
             "⚠️ تعذر الاتصال بالخادم"
         );
@@ -677,160 +1142,506 @@ async function openTasks() {
 }
 
 
-async function openReferral() {
+/* =========================================================
+   COMPLETE TASK
+========================================================= */
+
+async function completeTask(
+    taskId
+) {
+
     haptic();
 
-    const telegramId = telegramUser?.id || 1;
 
-    try {
-        showToast("👥 جاري تحميل بيانات الإحالة...");
+    const telegramId =
+        getTelegramId();
 
-        const response = await fetch(
-            `/referral/${telegramId}`
+
+    if (!taskId) {
+
+        showToast(
+            "⚠️ مهمة غير صالحة"
         );
 
+        return;
+    }
+
+
+    try {
+
+        showToast(
+            "⏳ جاري تنفيذ المهمة..."
+        );
+
+
+        /*
+            Endpoint الخاص بإكمال المهمة.
+        */
+
+        const response =
+            await fetch(
+                `/tasks/${telegramId}/${taskId}/complete`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json()
+                .catch(() => ({}));
+
+
         if (!response.ok) {
-            throw new Error("Referral request failed");
+
+            throw new Error(
+                data.error ||
+                "Task completion failed"
+            );
+
         }
 
-        const data = await response.json();
 
         if (data.error) {
-            showToast("⚠️ تعذر تحميل بيانات الإحالة");
+
+            if (
+                data.error ===
+                "already_completed"
+            ) {
+
+                showToast(
+                    "✓ هذه المهمة مكتملة مسبقاً"
+                );
+
+            } else {
+
+                showToast(
+                    "⚠️ تعذر إكمال المهمة"
+                );
+
+            }
+
             return;
         }
 
-        const referralCode = data.referral_code || "";
-        const referralCount = Number(data.referral_count || 0);
-        const referralRewards = Number(data.referral_rewards || 0);
 
-        const referralLink =
-            `https://t.me/threemigosmart_bot?start=ref_${referralCode}`;
+        /*
+            تحديث الرصيد
+        */
 
-        alert(
-            `👥 نظام الإحالات\n\n` +
-            `🔑 كود الإحالة:\n${referralCode}\n\n` +
-            `🔗 رابط الدعوة:\n${referralLink}\n\n` +
-            `👤 عدد الإحالات: ${referralCount}\n` +
-            `🎁 مكافآت الإحالة: ${referralRewards} 3M`
+        if (data.user) {
+
+            state.balance =
+                Number(
+                    data.user.balance_3m ||
+                    state.balance
+                );
+
+        } else {
+
+            state.balance =
+                Number(
+                    data.balance_3m ||
+                    data.balance ||
+                    state.balance
+                );
+
+        }
+
+
+        await loadTransactions(
+            telegramId
         );
 
+
+        render();
+
+
+        showToast(
+            "🎉 تمت المهمة وإضافة المكافأة"
+        );
+
+
+        /*
+            إعادة تحميل قائمة المهام
+            لإظهار المهمة كمكتملة.
+        */
+
+        setTimeout(
+            () => {
+                openTasks();
+            },
+            500
+        );
+
+
     } catch (error) {
-        console.error(error);
-        showToast("⚠️ تعذر الاتصال بالخادم");
+
+        console.error(
+            "Complete task error:",
+            error
+        );
+
+
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
+
     }
 }
 
 
-async function openWallet() {
+/* =========================================================
+   REFERRAL
+========================================================= */
+
+async function openReferral() {
+
     haptic();
 
-    const telegramId = telegramUser?.id || 1;
+
+    const telegramId =
+        getTelegramId();
+
 
     try {
-        showToast("💼 جاري تحميل المحفظة...");
 
-        const userResponse = await fetch(
-            `/user/${telegramId}`
+        showToast(
+            "👥 جاري تحميل بيانات الإحالة..."
         );
 
-        if (!userResponse.ok) {
-            throw new Error("User request failed");
+
+        const response =
+            await fetch(
+                `/referral/${telegramId}`
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Referral request failed"
+            );
+
         }
 
-        const user = await userResponse.json();
 
-        if (user.error) {
-            showToast("⚠️ تعذر تحميل بيانات المحفظة");
+        const data =
+            await response.json();
+
+
+        if (data.error) {
+
+            showToast(
+                "⚠️ تعذر تحميل بيانات الإحالة"
+            );
+
             return;
         }
 
-        const transactionsResponse = await fetch(
-            `/transactions/${telegramId}`
+
+        const referralCode =
+            data.referral_code || "";
+
+
+        const referralCount =
+            Number(
+                data.referral_count || 0
+            );
+
+
+        const referralRewards =
+            Number(
+                data.referral_rewards || 0
+            );
+
+
+        const referralLink =
+            `https://t.me/threemigosmart_bot?start=ref_${encodeURIComponent(
+                referralCode
+            )}`;
+
+
+        if (
+            tg &&
+            tg.showPopup
+        ) {
+
+            tg.showPopup(
+                {
+                    title:
+                        "👥 نظام الإحالات",
+
+                    message:
+                        `🔑 كود الإحالة:\n${referralCode}\n\n` +
+                        `🔗 رابط الدعوة:\n${referralLink}\n\n` +
+                        `👤 عدد الإحالات: ${referralCount}\n` +
+                        `🎁 مكافآت الإحالة: ${referralRewards} 3M`,
+
+                    buttons: [
+                        {
+                            id: "ok",
+                            type: "ok",
+                            text: "حسناً"
+                        }
+                    ]
+                }
+            );
+
+        } else {
+
+            alert(
+                `👥 نظام الإحالات\n\n` +
+                `🔑 كود الإحالة:\n${referralCode}\n\n` +
+                `🔗 رابط الدعوة:\n${referralLink}\n\n` +
+                `👤 عدد الإحالات: ${referralCount}\n` +
+                `🎁 مكافآت الإحالة: ${referralRewards} 3M`
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Referral error:",
+            error
         );
+
+
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
+
+    }
+}
+
+
+/* =========================================================
+   WALLET
+========================================================= */
+
+async function openWallet() {
+
+    haptic();
+
+
+    const telegramId =
+        getTelegramId();
+
+
+    try {
+
+        showToast(
+            "💼 جاري تحميل المحفظة..."
+        );
+
+
+        const userResponse =
+            await fetch(
+                `/user/${telegramId}`
+            );
+
+
+        if (!userResponse.ok) {
+
+            throw new Error(
+                "User request failed"
+            );
+
+        }
+
+
+        const user =
+            await userResponse.json();
+
+
+        if (user.error) {
+
+            showToast(
+                "⚠️ تعذر تحميل بيانات المحفظة"
+            );
+
+            return;
+        }
+
+
+        const transactionsResponse =
+            await fetch(
+                `/transactions/${telegramId}`
+            );
+
 
         let transactions = [];
 
-        if (transactionsResponse.ok) {
-            transactions = await transactionsResponse.json();
 
-            if (!Array.isArray(transactions)) {
+        if (transactionsResponse.ok) {
+
+            transactions =
+                await transactionsResponse.json();
+
+
+            if (
+                !Array.isArray(
+                    transactions
+                )
+            ) {
+
                 transactions = [];
+
             }
+
         }
 
-        const balance = Number(user.balance_3m || 0);
+
+        const balance =
+            Number(
+                user.balance_3m || 0
+            );
+
 
         let totalRewards = 0;
 
-        transactions.forEach(transaction => {
-            const amount = Number(transaction.amount || 0);
 
-            if (amount > 0) {
-                totalRewards += amount;
+        transactions.forEach(
+            transaction => {
+
+                const amount =
+                    Number(
+                        transaction.amount || 0
+                    );
+
+
+                if (amount > 0) {
+
+                    totalRewards += amount;
+
+                }
+
             }
-        });
+        );
+
 
         const transactionNames = {
-            engagement_reward: "⛏️ مكافأة التعدين",
-            daily_reward: "🎁 المكافأة اليومية",
-            referral_reward: "👥 مكافأة إحالة"
+
+            engagement_reward:
+                "⛏️ مكافأة التعدين",
+
+            daily_reward:
+                "🎁 المكافأة اليومية",
+
+            referral_reward:
+                "👥 مكافأة إحالة",
+
+            task_reward:
+                "☑️ مكافأة مهمة"
+
         };
 
-        let transactionHTML = "";
+
+        let transactionHTML =
+            "";
+
 
         const recentTransactions =
-            transactions.slice(-8).reverse();
+            transactions
+                .slice(-8)
+                .reverse();
 
-        if (recentTransactions.length === 0) {
+
+        if (
+            recentTransactions.length === 0
+        ) {
+
             transactionHTML = `
                 <div class="wallet-empty">
                     لا توجد معاملات حتى الآن
                 </div>
             `;
+
         } else {
-            recentTransactions.forEach(transaction => {
 
-                const amount =
-                    Number(transaction.amount || 0);
+            recentTransactions.forEach(
+                transaction => {
 
-                const type =
-                    transactionNames[
-                        transaction.transaction_type
-                    ] || "💰 مكافأة 3M";
+                    const amount =
+                        Number(
+                            transaction.amount || 0
+                        );
 
-                let transactionDate = "";
 
-                if (transaction.created_at) {
-                    transactionDate =
-                        new Date(
-                            transaction.created_at
-                        ).toLocaleDateString("ar");
-                }
+                    const type =
+                        transactionNames[
+                            transaction.transaction_type
+                        ] ||
+                        "💰 مكافأة 3M";
 
-                transactionHTML += `
-                    <div class="wallet-transaction">
-                        <div>
-                            <strong>${type}</strong>
-                            <small>${transactionDate}</small>
+
+                    let transactionDate =
+                        "";
+
+
+                    if (
+                        transaction.created_at
+                    ) {
+
+                        transactionDate =
+                            new Date(
+                                transaction.created_at
+                            ).toLocaleDateString(
+                                "ar"
+                            );
+
+                    }
+
+
+                    transactionHTML += `
+                        <div class="wallet-transaction">
+
+                            <div>
+
+                                <strong>
+                                    ${escapeHTML(type)}
+                                </strong>
+
+                                <small>
+                                    ${escapeHTML(transactionDate)}
+                                </small>
+
+                            </div>
+
+                            <b>
+                                +${amount.toLocaleString()} 3M
+                            </b>
+
                         </div>
-                        <b>+${amount.toLocaleString()} 3M</b>
-                    </div>
-                `;
-            });
+                    `;
+                }
+            );
         }
 
+
         const oldWallet =
-            document.getElementById("walletModal");
+            $("walletModal");
+
 
         if (oldWallet) {
             oldWallet.remove();
         }
 
+
         const modal =
             document.createElement("div");
 
-        modal.id = "walletModal";
+
+        modal.id =
+            "walletModal";
+
 
         modal.innerHTML = `
             <div class="wallet-overlay">
@@ -840,18 +1651,35 @@ async function openWallet() {
                     <button
                         class="wallet-close"
                         id="walletClose"
-                    >×</button>
+                    >
+                        ×
+                    </button>
 
                     <div class="wallet-header">
-                        <div class="wallet-icon">💼</div>
-                        <div>
-                            <h2>محفظة 3M</h2>
-                            <small>3Migo Coin</small>
+
+                        <div class="wallet-icon">
+                            💼
                         </div>
+
+                        <div>
+
+                            <h2>
+                                محفظة 3M
+                            </h2>
+
+                            <small>
+                                3Migo Coin
+                            </small>
+
+                        </div>
+
                     </div>
 
                     <div class="wallet-balance">
-                        <small>الرصيد الحالي</small>
+
+                        <small>
+                            الرصيد الحالي
+                        </small>
 
                         <strong>
                             ${balance.toLocaleString()}
@@ -861,22 +1689,33 @@ async function openWallet() {
                         <p>
                             رصيد تجريبي داخلي
                         </p>
+
                     </div>
 
                     <div class="wallet-stats">
 
                         <div>
-                            <small>إجمالي المكافآت</small>
+
+                            <small>
+                                إجمالي المكافآت
+                            </small>
+
                             <strong>
                                 ${totalRewards.toLocaleString()} 3M
                             </strong>
+
                         </div>
 
                         <div>
-                            <small>المعاملات</small>
+
+                            <small>
+                                المعاملات
+                            </small>
+
                             <strong>
                                 ${transactions.length}
                             </strong>
+
                         </div>
 
                     </div>
@@ -899,25 +1738,54 @@ async function openWallet() {
             </div>
         `;
 
-        document.body.appendChild(modal);
 
-        document
-            .getElementById("walletClose")
-            .addEventListener("click", () => {
-                modal.remove();
-            });
+        document.body.appendChild(
+            modal
+        );
 
-        modal
-            .querySelector(".wallet-overlay")
-            .addEventListener("click", (event) => {
-                if (
-                    event.target.classList.contains(
-                        "wallet-overlay"
-                    )
-                ) {
+
+        const closeButton =
+            $("walletClose");
+
+
+        if (closeButton) {
+
+            closeButton.addEventListener(
+                "click",
+                () => {
                     modal.remove();
                 }
-            });
+            );
+
+        }
+
+
+        const overlay =
+            modal.querySelector(
+                ".wallet-overlay"
+            );
+
+
+        if (overlay) {
+
+            overlay.addEventListener(
+                "click",
+                event => {
+
+                    if (
+                        event.target ===
+                        overlay
+                    ) {
+
+                        modal.remove();
+
+                    }
+
+                }
+            );
+
+        }
+
 
     } catch (error) {
 
@@ -926,6 +1794,7 @@ async function openWallet() {
             error
         );
 
+
         showToast(
             "⚠️ تعذر الاتصال بالخادم"
         );
@@ -933,9 +1802,64 @@ async function openWallet() {
 }
 
 
+/* =========================================================
+   PROFILE
+========================================================= */
+
 function openProfile() {
 
     haptic();
+
+
+    const user =
+        getTelegramUser();
+
+
+    if (
+        user &&
+        tg &&
+        tg.showPopup
+    ) {
+
+        const name =
+            [
+                user.first_name,
+                user.last_name
+            ]
+            .filter(Boolean)
+            .join(" ") ||
+            "مستخدم 3Migo";
+
+
+        const username =
+            user.username
+                ? `@${user.username}`
+                : "بدون Username";
+
+
+        tg.showPopup({
+
+            title:
+                "👤 حساب 3Migo",
+
+            message:
+                `الاسم: ${name}\n` +
+                `المعرف: ${username}\n` +
+                `Telegram ID: ${user.id}`,
+
+            buttons: [
+                {
+                    id: "ok",
+                    type: "ok",
+                    text: "حسناً"
+                }
+            ]
+
+        });
+
+        return;
+    }
+
 
     showToast(
         "👤 الحساب قيد التطوير"
@@ -943,9 +1867,9 @@ function openProfile() {
 }
 
 
-/* =========================
+/* =========================================================
    ACTION HANDLER
-========================= */
+========================================================= */
 
 function handleAction(action) {
 
@@ -976,17 +1900,19 @@ function handleAction(action) {
             break;
 
         default:
+
             console.log(
                 "Unknown action:",
                 action
             );
+
     }
 }
 
 
-/* =========================
+/* =========================================================
    BUTTON EVENTS
-========================= */
+========================================================= */
 
 document
     .querySelectorAll("[data-action]")
@@ -1001,7 +1927,9 @@ document
                         "data-action"
                     );
 
-                handleAction(action);
+                handleAction(
+                    action
+                );
 
             }
         );
@@ -1009,27 +1937,61 @@ document
     });
 
 
-const miningButton =
-    $("mineBtn");
-
-if (miningButton) {
-
-    miningButton.addEventListener(
-        "click",
-        startMining
-    );
-
-}
+/*
+    مهم:
+    لا نضيف listener آخر لـ mineBtn هنا،
+    لأن data-action="mine" يعالج الزر بالفعل.
+    هذا يمنع تنفيذ التعدين مرتين.
+*/
 
 
-/* =========================
+/* =========================================================
+   GLOBAL FUNCTIONS
+========================================================= */
+
+/*
+    نضع الدوال على window لأن أزرار المهام
+    تستخدم onclick="completeTask(...)"
+*/
+
+window.startMining =
+    startMining;
+
+window.dailyReward =
+    dailyReward;
+
+window.openTasks =
+    openTasks;
+
+window.completeTask =
+    completeTask;
+
+window.openReferral =
+    openReferral;
+
+window.openWallet =
+    openWallet;
+
+window.openProfile =
+    openProfile;
+
+window.handleAction =
+    handleAction;
+
+
+/* =========================================================
    START APP
-========================= */
+========================================================= */
 
 render();
 
+
 loadUser();
 
+
+/* =========================================================
+   DEBUG
+========================================================= */
 
 console.log(
     "================================="
@@ -1040,11 +2002,26 @@ console.log(
 );
 
 console.log(
-    "Version: 1.1 Backend Connected"
+    "Version: 1.2 Backend Connected"
 );
 
 console.log(
     "Token: 3M"
+);
+
+console.log(
+    "Telegram:",
+    Boolean(tg)
+);
+
+console.log(
+    "Telegram User:",
+    getTelegramUser()
+);
+
+console.log(
+    "Telegram ID:",
+    getTelegramId()
 );
 
 console.log(
