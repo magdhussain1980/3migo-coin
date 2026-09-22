@@ -593,13 +593,214 @@ async function openReferral() {
 }
 
 
-function openWallet() {
-
+async function openWallet() {
     haptic();
 
-    showToast(
-        "💼 المحفظة قيد التطوير"
-    );
+    const telegramId = telegramUser?.id || 1;
+
+    try {
+        showToast("💼 جاري تحميل المحفظة...");
+
+        const userResponse = await fetch(
+            `/user/${telegramId}`
+        );
+
+        if (!userResponse.ok) {
+            throw new Error("User request failed");
+        }
+
+        const user = await userResponse.json();
+
+        if (user.error) {
+            showToast("⚠️ تعذر تحميل بيانات المحفظة");
+            return;
+        }
+
+        const transactionsResponse = await fetch(
+            `/transactions/${telegramId}`
+        );
+
+        let transactions = [];
+
+        if (transactionsResponse.ok) {
+            transactions = await transactionsResponse.json();
+
+            if (!Array.isArray(transactions)) {
+                transactions = [];
+            }
+        }
+
+        const balance = Number(user.balance_3m || 0);
+
+        let totalRewards = 0;
+
+        transactions.forEach(transaction => {
+            const amount = Number(transaction.amount || 0);
+
+            if (amount > 0) {
+                totalRewards += amount;
+            }
+        });
+
+        const transactionNames = {
+            engagement_reward: "⛏️ مكافأة التعدين",
+            daily_reward: "🎁 المكافأة اليومية",
+            referral_reward: "👥 مكافأة إحالة"
+        };
+
+        let transactionHTML = "";
+
+        const recentTransactions =
+            transactions.slice(-8).reverse();
+
+        if (recentTransactions.length === 0) {
+            transactionHTML = `
+                <div class="wallet-empty">
+                    لا توجد معاملات حتى الآن
+                </div>
+            `;
+        } else {
+            recentTransactions.forEach(transaction => {
+
+                const amount =
+                    Number(transaction.amount || 0);
+
+                const type =
+                    transactionNames[
+                        transaction.transaction_type
+                    ] || "💰 مكافأة 3M";
+
+                let transactionDate = "";
+
+                if (transaction.created_at) {
+                    transactionDate =
+                        new Date(
+                            transaction.created_at
+                        ).toLocaleDateString("ar");
+                }
+
+                transactionHTML += `
+                    <div class="wallet-transaction">
+                        <div>
+                            <strong>${type}</strong>
+                            <small>${transactionDate}</small>
+                        </div>
+                        <b>+${amount.toLocaleString()} 3M</b>
+                    </div>
+                `;
+            });
+        }
+
+        const oldWallet =
+            document.getElementById("walletModal");
+
+        if (oldWallet) {
+            oldWallet.remove();
+        }
+
+        const modal =
+            document.createElement("div");
+
+        modal.id = "walletModal";
+
+        modal.innerHTML = `
+            <div class="wallet-overlay">
+
+                <div class="wallet-modal">
+
+                    <button
+                        class="wallet-close"
+                        id="walletClose"
+                    >×</button>
+
+                    <div class="wallet-header">
+                        <div class="wallet-icon">💼</div>
+                        <div>
+                            <h2>محفظة 3M</h2>
+                            <small>3Migo Coin</small>
+                        </div>
+                    </div>
+
+                    <div class="wallet-balance">
+                        <small>الرصيد الحالي</small>
+
+                        <strong>
+                            ${balance.toLocaleString()}
+                            <span>3M</span>
+                        </strong>
+
+                        <p>
+                            رصيد تجريبي داخلي
+                        </p>
+                    </div>
+
+                    <div class="wallet-stats">
+
+                        <div>
+                            <small>إجمالي المكافآت</small>
+                            <strong>
+                                ${totalRewards.toLocaleString()} 3M
+                            </strong>
+                        </div>
+
+                        <div>
+                            <small>المعاملات</small>
+                            <strong>
+                                ${transactions.length}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <div class="wallet-section-title">
+                        📜 آخر العمليات
+                    </div>
+
+                    <div class="wallet-transactions">
+                        ${transactionHTML}
+                    </div>
+
+                    <div class="wallet-note">
+                        ⚠️ 3M حاليًا عملة تجريبية داخل النظام
+                        وغير قابلة للتداول.
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document
+            .getElementById("walletClose")
+            .addEventListener("click", () => {
+                modal.remove();
+            });
+
+        modal
+            .querySelector(".wallet-overlay")
+            .addEventListener("click", (event) => {
+                if (
+                    event.target.classList.contains(
+                        "wallet-overlay"
+                    )
+                ) {
+                    modal.remove();
+                }
+            });
+
+    } catch (error) {
+
+        console.error(
+            "Wallet error:",
+            error
+        );
+
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
+    }
 }
 
 
