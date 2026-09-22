@@ -52,6 +52,7 @@ def require_admin(key):
 @app.on_event("startup")
 def startup():
     db.init_db()
+    db.init_tasks()
 
 @app.get("/")
 def home():
