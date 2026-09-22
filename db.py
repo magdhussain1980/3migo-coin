@@ -1231,17 +1231,38 @@ def stats():
 
 
 # =========================================================
-# REVENUE SYSTEM
+# 3MIGO REVENUE ENGINE V3
 # =========================================================
 
-def add_revenue(
-    source,
-    campaign_id,
-    gross_amount,
-    currency,
-    notes,
-    status
-):
+# Default revenue allocation
+# These percentages are planning parameters and can be
+# changed later from the administration system.
+
+REWARD_POOL_SHARE = float(
+    os.getenv("REWARD_POOL_SHARE", "40")
+)
+
+TREASURY_SHARE = float(
+    os.getenv("TREASURY_SHARE", "30")
+)
+
+OPERATIONS_SHARE = float(
+    os.getenv("OPERATIONS_SHARE", "20")
+)
+
+MARKETING_SHARE = float(
+    os.getenv("MARKETING_SHARE", "10")
+)
+
+
+def init_revenue():
+    """
+    Initialize the revenue engine database.
+
+    Revenue represents real advertising or commercial
+    income received by the 3Migo platform.
+    """
+
     with _db_lock:
         connection = get_conn()
 
@@ -1249,37 +1270,195 @@ def add_revenue(
             connection.execute("""
                 CREATE TABLE IF NOT EXISTS revenue (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+
                     source TEXT NOT NULL,
+
                     campaign_id TEXT DEFAULT '',
-                    gross_amount REAL NOT NULL,
+
+                    ad_type TEXT DEFAULT 'general',
+
+                    gross_amount REAL NOT NULL DEFAULT 0,
+
                     currency TEXT DEFAULT 'USD',
+
                     notes TEXT DEFAULT '',
-                    status TEXT DEFAULT 'confirmed',
-                    created_at TEXT NOT NULL
+
+                    status TEXT NOT NULL DEFAULT 'pending',
+
+                    reward_pool_amount REAL DEFAULT 0,
+
+                    treasury_amount REAL DEFAULT 0,
+
+                    operations_amount REAL DEFAULT 0,
+
+                    marketing_amount REAL DEFAULT 0,
+
+                    created_at TEXT NOT NULL,
+
+                    confirmed_at TEXT DEFAULT ''
                 )
             """)
+
+            connection.execute("""
+                CREATE INDEX IF NOT EXISTS
+                idx_revenue_status
+                ON revenue(status)
+            """)
+
+            connection.execute("""
+                CREATE INDEX IF NOT EXISTS
+                idx_revenue_created
+                ON revenue(created_at)
+            """)
+
+            connection.commit()
+
+        finally:
+            connection.close()
+
+
+def calculate_revenue_allocation(
+    gross_amount
+):
+    """
+    Calculate how a confirmed revenue amount
+    will be allocated inside the 3Migo economy.
+    """
+
+    amount = float(gross_amount or 0)
+
+    reward_pool = (
+        amount * REWARD_POOL_SHARE / 100
+    )
+
+    treasury = (
+        amount * TREASURY_SHARE / 100
+    )
+
+    operations = (
+        amount * OPERATIONS_SHARE / 100
+    )
+
+    marketing = (
+        amount * MARKETING_SHARE / 100
+    )
+
+    return {
+        "gross_amount": round(amount, 8),
+
+        "reward_pool_amount":
+            round(reward_pool, 8),
+
+        "treasury_amount":
+            round(treasury, 8),
+
+        "operations_amount":
+            round(operations, 8),
+
+        "marketing_amount":
+            round(marketing, 8)
+    }
+
+
+def add_revenue(
+    source,
+    campaign_id="",
+    ad_type="general",
+    gross_amount=0,
+    currency="USD",
+    notes="",
+    status="pending"
+):
+    """
+    Register a new advertising/commercial revenue record.
+
+    Example:
+
+        add_revenue(
+            source="ad_network",
+            campaign_id="CAMPAIGN001",
+            ad_type="video",
+            gross_amount=10,
+            currency="USD",
+            status="confirmed"
+        )
+    """
+
+    init_revenue()
+
+    valid_statuses = {
+        "pending",
+        "confirmed",
+        "cancelled"
+    }
+
+    if status not in valid_statuses:
+        status = "pending"
+
+    allocation = calculate_revenue_allocation(
+        gross_amount
+    )
+
+    with _db_lock:
+        connection = get_conn()
+
+        try:
+
+            confirmed_at = ""
+
+            if status == "confirmed":
+                confirmed_at = utc_now_iso()
 
             cursor = connection.execute(
                 """
                 INSERT INTO revenue (
                     source,
                     campaign_id,
+                    ad_type,
                     gross_amount,
                     currency,
                     notes,
                     status,
-                    created_at
+                    reward_pool_amount,
+                    treasury_amount,
+                    operations_amount,
+                    marketing_amount,
+                    created_at,
+                    confirmed_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (
+                    ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?
+                )
                 """,
                 (
-                    source,
-                    campaign_id,
-                    gross_amount,
-                    currency,
-                    notes,
+                    source or "unknown",
+                    campaign_id or "",
+                    ad_type or "general",
+                    allocation["gross_amount"],
+                    currency or "USD",
+                    notes or "",
                     status,
-                    utc_now_iso()
+
+                    allocation[
+                        "reward_pool_amount"
+                    ],
+
+                    allocation[
+                        "treasury_amount"
+                    ],
+
+                    allocation[
+                        "operations_amount"
+                    ],
+
+                    allocation[
+                        "marketing_amount"
+                    ],
+
+                    utc_now_iso(),
+
+                    confirmed_at
                 )
             )
 
@@ -1291,22 +1470,137 @@ def add_revenue(
             connection.close()
 
 
-def all_revenue():
+def confirm_revenue(
+    revenue_id
+):
+    """
+    Confirm a pending revenue record.
+
+    Allocation amounts are already calculated
+    when the record is created.
+    """
+
+    init_revenue()
+
     with _db_lock:
         connection = get_conn()
 
         try:
-            table = connection.execute(
+
+            revenue = connection.execute(
                 """
-                SELECT name
-                FROM sqlite_master
-                WHERE type='table'
-                AND name='revenue'
-                """
+                SELECT *
+                FROM revenue
+                WHERE id=?
+                """,
+                (revenue_id,)
             ).fetchone()
 
-            if not table:
-                return []
+            if revenue is None:
+                return None, "not_found"
+
+            if revenue["status"] == "confirmed":
+                return dict(revenue), "already_confirmed"
+
+            if revenue["status"] == "cancelled":
+                return dict(revenue), "cancelled"
+
+            connection.execute(
+                """
+                UPDATE revenue
+                SET status='confirmed',
+                    confirmed_at=?
+                WHERE id=?
+                """,
+                (
+                    utc_now_iso(),
+                    revenue_id
+                )
+            )
+
+            connection.commit()
+
+            updated = connection.execute(
+                """
+                SELECT *
+                FROM revenue
+                WHERE id=?
+                """,
+                (revenue_id,)
+            ).fetchone()
+
+            return dict(updated), "confirmed"
+
+        finally:
+            connection.close()
+
+
+def cancel_revenue(
+    revenue_id
+):
+    """
+    Cancel a revenue record.
+    """
+
+    init_revenue()
+
+    with _db_lock:
+        connection = get_conn()
+
+        try:
+
+            revenue = connection.execute(
+                """
+                SELECT *
+                FROM revenue
+                WHERE id=?
+                """,
+                (revenue_id,)
+            ).fetchone()
+
+            if revenue is None:
+                return None, "not_found"
+
+            if revenue["status"] == "confirmed":
+                return dict(revenue), "already_confirmed"
+
+            connection.execute(
+                """
+                UPDATE revenue
+                SET status='cancelled'
+                WHERE id=?
+                """,
+                (revenue_id,)
+            )
+
+            connection.commit()
+
+            updated = connection.execute(
+                """
+                SELECT *
+                FROM revenue
+                WHERE id=?
+                """,
+                (revenue_id,)
+            ).fetchone()
+
+            return dict(updated), "cancelled"
+
+        finally:
+            connection.close()
+
+
+def all_revenue():
+    """
+    Return all revenue records.
+    """
+
+    init_revenue()
+
+    with _db_lock:
+        connection = get_conn()
+
+        try:
 
             rows = connection.execute(
                 """
@@ -1325,17 +1619,280 @@ def all_revenue():
             connection.close()
 
 
-def allocate_revenue(
-    revenue_id,
-    reward_pool_share
-):
+def revenue_summary():
     """
-    Placeholder for the future revenue
-    allocation engine.
+    Return the complete financial summary
+    of the 3Migo revenue engine.
     """
 
-    return {
-        "revenue_id": revenue_id,
-        "reward_pool_share":
-            reward_pool_share
-    }
+    init_revenue()
+
+    with _db_lock:
+        connection = get_conn()
+
+        try:
+
+            total = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(gross_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                """
+            ).fetchone()["total"]
+
+            confirmed = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(gross_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                WHERE status='confirmed'
+                """
+            ).fetchone()["total"]
+
+            pending = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(gross_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                WHERE status='pending'
+                """
+            ).fetchone()["total"]
+
+            cancelled = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(gross_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                WHERE status='cancelled'
+                """
+            ).fetchone()["total"]
+
+            reward_pool = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(reward_pool_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                WHERE status='confirmed'
+                """
+            ).fetchone()["total"]
+
+            treasury = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(treasury_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                WHERE status='confirmed'
+                """
+            ).fetchone()["total"]
+
+            operations = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(operations_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                WHERE status='confirmed'
+                """
+            ).fetchone()["total"]
+
+            marketing = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(marketing_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                WHERE status='confirmed'
+                """
+            ).fetchone()["total"]
+
+            return {
+                "total_revenue_usd":
+                    round(float(total or 0), 8),
+
+                "confirmed_revenue_usd":
+                    round(float(confirmed or 0), 8),
+
+                "pending_revenue_usd":
+                    round(float(pending or 0), 8),
+
+                "cancelled_revenue_usd":
+                    round(float(cancelled or 0), 8),
+
+                "reward_pool_usd":
+                    round(float(reward_pool or 0), 8),
+
+                "treasury_usd":
+                    round(float(treasury or 0), 8),
+
+                "operations_usd":
+                    round(float(operations or 0), 8),
+
+                "marketing_usd":
+                    round(float(marketing or 0), 8),
+
+                "allocation": {
+                    "reward_pool_percent":
+                        REWARD_POOL_SHARE,
+
+                    "treasury_percent":
+                        TREASURY_SHARE,
+
+                    "operations_percent":
+                        OPERATIONS_SHARE,
+
+                    "marketing_percent":
+                        MARKETING_SHARE
+                }
+            }
+
+        finally:
+            connection.close()
+
+
+def revenue_today():
+    """
+    Confirmed revenue generated today.
+    """
+
+    init_revenue()
+
+    today = date.today().isoformat()
+
+    with _db_lock:
+        connection = get_conn()
+
+        try:
+
+            row = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(gross_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                WHERE status='confirmed'
+                AND DATE(created_at)=?
+                """,
+                (today,)
+            ).fetchone()
+
+            return round(
+                float(row["total"] or 0),
+                8
+            )
+
+        finally:
+            connection.close()
+
+
+def revenue_month():
+    """
+    Confirmed revenue generated during
+    the current month.
+    """
+
+    init_revenue()
+
+    month_prefix = (
+        date.today().strftime("%Y-%m")
+    )
+
+    with _db_lock:
+        connection = get_conn()
+
+        try:
+
+            row = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(gross_amount),
+                        0
+                    ) AS total
+                FROM revenue
+                WHERE status='confirmed'
+                AND created_at LIKE ?
+                """,
+                (
+                    month_prefix + "%",
+                )
+            ).fetchone()
+
+            return round(
+                float(row["total"] or 0),
+                8
+            )
+
+        finally:
+            connection.close()
+
+
+def allocate_revenue(
+    revenue_id,
+    reward_pool_share=None
+):
+    """
+    Return allocation information for a revenue record.
+
+    This function does NOT distribute 3M yet.
+
+    The actual reward distribution engine will be
+    implemented in the next phase after the revenue
+    accounting layer is verified.
+    """
+
+    init_revenue()
+
+    with _db_lock:
+        connection = get_conn()
+
+        try:
+
+            revenue = connection.execute(
+                """
+                SELECT *
+                FROM revenue
+                WHERE id=?
+                """,
+                (revenue_id,)
+            ).fetchone()
+
+            if revenue is None:
+                return {
+                    "status": "not_found"
+                }
+
+            result = dict(revenue)
+
+            if reward_pool_share is not None:
+                result[
+                    "requested_reward_pool_share"
+                ] = float(reward_pool_share)
+
+            return result
+
+        finally:
+            connection.close()
