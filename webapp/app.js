@@ -1180,7 +1180,7 @@ async function completeTask(
 
         const response =
             await fetch(
-                `/tasks/${telegramId}/${taskId}/complete`,
+                `/tasks/${telegramId}/complete/${taskId}
                 {
                     method: "POST",
 
