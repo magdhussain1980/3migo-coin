@@ -355,3 +355,235 @@ def apply_referral(new_user_id, referral_code):
 
         finally:
             conn.close()
+# =========================================================
+# 3MIGO COIN — TASK REWARD SYSTEM
+# =========================================================
+
+def init_tasks():
+    """
+    إنشاء جدول المهام وإضافة المهام الأساسية.
+    """
+
+    with _db_lock:
+        conn = get_conn()
+
+        try:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS tasks (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT NOT NULL,
+                    description TEXT DEFAULT '',
+                    reward_3m REAL NOT NULL DEFAULT 0,
+                    task_type TEXT DEFAULT 'general',
+                    task_url TEXT DEFAULT '',
+                    active INTEGER DEFAULT 1,
+                    created_at TEXT NOT NULL
+                )
+            """)
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS user_tasks (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    telegram_id INTEGER NOT NULL,
+                    task_id INTEGER NOT NULL,
+                    completed_at TEXT NOT NULL,
+                    UNIQUE(telegram_id, task_id)
+                )
+            """)
+
+            # إضافة المهام الأساسية إذا لم تكن موجودة
+            existing = conn.execute(
+                "SELECT COUNT(*) AS count FROM tasks"
+            ).fetchone()["count"]
+
+            if existing == 0:
+
+                tasks = [
+                    (
+                        "📱 استخدام تطبيق 3Migo",
+                        "افتح تطبيق 3Migo واستخدم الواجهة",
+                        10,
+                        "visit",
+                        "/"
+                    ),
+                    (
+                        "📢 متابعة أخبار 3Migo",
+                        "تابع قناة 3Migo الرسمية",
+                        25,
+                        "channel",
+                        ""
+                    ),
+                    (
+                        "👥 دعوة مستخدم جديد",
+                        "ادعُ مستخدمًا جديدًا إلى 3Migo",
+                        25,
+                        "referral",
+                        ""
+                    )
+                ]
+
+                for task in tasks:
+                    conn.execute("""
+                        INSERT INTO tasks
+                        (
+                            title,
+                            description,
+                            reward_3m,
+                            task_type,
+                            task_url,
+                            active,
+                            created_at
+                        )
+                        VALUES (?, ?, ?, ?, ?, 1, ?)
+                    """, (
+                        task[0],
+                        task[1],
+                        task[2],
+                        task[3],
+                        task[4],
+                        datetime.utcnow().isoformat()
+                    ))
+
+            conn.commit()
+
+        finally:
+            conn.close()
+
+
+def get_tasks(telegram_id):
+    """
+    إرجاع المهام النشطة مع حالة إنجاز المستخدم.
+    """
+
+    with _db_lock:
+        conn = get_conn()
+
+        try:
+            rows = conn.execute("""
+                SELECT
+                    t.id,
+                    t.title,
+                    t.description,
+                    t.reward_3m,
+                    t.task_type,
+                    t.task_url,
+                    CASE
+                        WHEN ut.id IS NULL THEN 0
+                        ELSE 1
+                    END AS completed
+                FROM tasks t
+                LEFT JOIN user_tasks ut
+                    ON ut.task_id = t.id
+                    AND ut.telegram_id = ?
+                WHERE t.active = 1
+                ORDER BY t.id ASC
+            """, (
+                telegram_id,
+            )).fetchall()
+
+            return [dict(row) for row in rows]
+
+        finally:
+            conn.close()
+
+
+def complete_task(telegram_id, task_id):
+    """
+    إكمال مهمة ومنح المكافأة مرة واحدة فقط.
+    """
+
+    with _db_lock:
+        conn = get_conn()
+
+        try:
+
+            # التأكد من وجود المستخدم
+            user = conn.execute(
+                "SELECT * FROM users WHERE telegram_id=?",
+                (telegram_id,)
+            ).fetchone()
+
+            if user is None:
+                return None, "user_not_found"
+
+            # البحث عن المهمة
+            task = conn.execute("""
+                SELECT *
+                FROM tasks
+                WHERE id=? AND active=1
+            """, (
+                task_id,
+            )).fetchone()
+
+            if task is None:
+                return None, "task_not_found"
+
+            # منع الحصول على المكافأة مرتين
+            completed = conn.execute("""
+                SELECT id
+                FROM user_tasks
+                WHERE telegram_id=? AND task_id=?
+            """, (
+                telegram_id,
+                task_id
+            )).fetchone()
+
+            if completed:
+                return user, "already_completed"
+
+            reward = float(task["reward_3m"])
+
+            # تسجيل المهمة
+            conn.execute("""
+                INSERT INTO user_tasks
+                (
+                    telegram_id,
+                    task_id,
+                    completed_at
+                )
+                VALUES (?, ?, ?)
+            """, (
+                telegram_id,
+                task_id,
+                datetime.utcnow().isoformat()
+            ))
+
+            # إضافة المكافأة
+            conn.execute("""
+                UPDATE users
+                SET balance_3m = balance_3m + ?
+                WHERE telegram_id=?
+            """, (
+                reward,
+                telegram_id
+            ))
+
+            # تسجيل المعاملة
+            conn.execute("""
+                INSERT INTO transactions
+                (
+                    telegram_id,
+                    amount,
+                    transaction_type,
+                    reference,
+                    created_at
+                )
+                VALUES (?, ?, 'task_reward', ?, ?)
+            """, (
+                telegram_id,
+                reward,
+                f"task:{task_id}",
+                datetime.utcnow().isoformat()
+            ))
+
+            conn.commit()
+
+            updated_user = conn.execute(
+                "SELECT * FROM users WHERE telegram_id=?",
+                (telegram_id,)
+            ).fetchone()
+
+            return updated_user, "completed"
+
+        finally:
+            conn.close()
