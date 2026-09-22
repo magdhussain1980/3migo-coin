@@ -177,3 +177,51 @@ def apply_referral_api(
         "user": dict(result),
         "reward": 25
     }
+# =========================================================
+# 3MIGO COIN — TASK API
+# =========================================================
+
+@app.get("/tasks/{telegram_id}")
+def tasks_for_user(telegram_id: int):
+    """
+    إرجاع المهام النشطة وحالة إنجاز المستخدم.
+    """
+
+    # التأكد من وجود المستخدم
+    db.get_user(telegram_id)
+
+    return db.get_tasks(telegram_id)
+
+
+@app.post("/tasks/{telegram_id}/complete/{task_id}")
+def complete_user_task(
+    telegram_id: int,
+    task_id: int
+):
+    """
+    إكمال مهمة ومنح المكافأة.
+    """
+
+    user, status = db.complete_task(
+        telegram_id,
+        task_id
+    )
+
+    if status == "completed":
+        return {
+            "status": "completed",
+            "reward": 0,
+            "user": dict(user)
+        }
+
+    if status == "already_completed":
+        return {
+            "status": "already_completed",
+            "reward": 0,
+            "user": dict(user)
+        }
+
+    return {
+        "status": status,
+        "user": dict(user) if user else None
+    }
