@@ -95,7 +95,8 @@
         <!-- MINING BUTTON -->
 
         <button id="mineBtn"
-                class="mine-button">
+                class="mine-button"
+                type="button">
 
             <span class="mine-icon">
                 ⛏️
@@ -158,7 +159,8 @@
         <!-- DAILY -->
 
         <button class="feature-card daily"
-                data-action="daily">
+                data-action="daily"
+                type="button">
 
             <span class="feature-icon">
                 🎁
@@ -178,7 +180,8 @@
         <!-- TASKS -->
 
         <button class="feature-card tasks"
-                data-action="tasks">
+                data-action="tasks"
+                type="button">
 
             <span class="feature-icon">
                 ☑️
@@ -198,7 +201,8 @@
         <!-- REFERRAL -->
 
         <button class="feature-card referral"
-                data-action="referral">
+                data-action="referral"
+                type="button">
 
             <span class="feature-icon">
                 👥
@@ -218,7 +222,8 @@
         <!-- WALLET -->
 
         <button class="feature-card wallet"
-                data-action="wallet">
+                data-action="wallet"
+                type="button">
 
             <span class="feature-icon">
                 💼
@@ -290,6 +295,81 @@
 
             </div>
 
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- ================= TASKS SECTION ================== -->
+    <!-- ================================================= -->
+
+    <section id="tasksSection"
+             class="tasks-section">
+
+        <div class="section-title tasks-section-title">
+
+            <span>
+                ☑️
+            </span>
+
+            <span>
+                المهام والمكافآت
+            </span>
+
+        </div>
+
+
+        <div class="tasks-header">
+
+            <div>
+
+                <strong>
+                    اكسب المزيد من 3M
+                </strong>
+
+                <small>
+                    أكمل المهام المؤهلة واحصل على مكافآتك
+                </small>
+
+            </div>
+
+            <div class="tasks-total-badge">
+                3M
+            </div>
+
+        </div>
+
+
+        <!--
+            app.js سيقوم بتحميل المهام من API
+            ووضع البطاقات هنا
+        -->
+
+        <div id="tasksContainer"
+             class="tasks-container">
+
+            <div class="task-loading">
+
+                <span>
+                    ⏳
+                </span>
+
+                <span>
+                    جاري تحميل المهام...
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="tasks-footer">
+
+            <small>
+                يتم تحديث حالة المهام تلقائياً
+            </small>
 
         </div>
 
@@ -402,6 +482,20 @@
     </section>
 
 
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="app-footer">
+
+        <strong>
+            3Migo Coin
+        </strong>
+
+        <small>
+            شارك • اكسب • ابنِ القيمة
+        </small>
+
+    </footer>
+
 </div>
 
 
@@ -410,7 +504,8 @@
 <nav class="bottom-nav">
 
 
-    <button class="active">
+    <button class="active"
+            type="button">
 
         <span>
             ⌂
@@ -423,7 +518,8 @@
     </button>
 
 
-    <button data-action="mine">
+    <button data-action="mine"
+            type="button">
 
         <span>
             ⛏️
@@ -436,7 +532,8 @@
     </button>
 
 
-    <button data-action="tasks">
+    <button data-action="tasks"
+            type="button">
 
         <span>
             ☑️
@@ -449,7 +546,8 @@
     </button>
 
 
-    <button data-action="wallet">
+    <button data-action="wallet"
+            type="button">
 
         <span>
             💼
@@ -462,7 +560,8 @@
     </button>
 
 
-    <button data-action="profile">
+    <button data-action="profile"
+            type="button">
 
         <span>
             👤
