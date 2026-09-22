@@ -1,1217 +1,682 @@
-/* =========================================================
-   3MIGO COIN — STYLE SYSTEM
-   ========================================================= */
-
 * {
     box-sizing: border-box;
-}
-
-html,
-body {
     margin: 0;
     padding: 0;
-    min-height: 100%;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 body {
+    font-family: Arial, Tahoma, sans-serif;
     background: #031024;
-    color: #eef6ff;
-    font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Tahoma,
-        Arial,
-        sans-serif;
-
-    overflow-x: hidden;
+    color: #ffffff;
+    min-height: 100vh;
+    padding-bottom: 90px;
 }
 
-
-/* =========================================================
-   MAIN APPLICATION
-   ========================================================= */
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+}
 
 .app {
     width: 100%;
     max-width: 520px;
-    min-height: 100vh;
-
     margin: 0 auto;
-
-    padding-bottom: 95px;
-
-    background:
-        radial-gradient(
-            circle at 50% 5%,
-            #0d3d6b 0%,
-            #071e3a 30%,
-            #031024 72%
-        );
-}
-
-
-/* =========================================================
-   HEADER
-   ========================================================= */
-
-.topbar {
-
-    height: 70px;
-
-    padding: 12px 17px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    background: rgba(3, 18, 38, 0.94);
-
-    border-bottom: 1px solid #16466e;
-
-    position: sticky;
-    top: 0;
-
-    z-index: 20;
-
-    backdrop-filter: blur(14px);
-}
-
-
-.brand-name strong {
-
-    display: block;
-
-    font-size: 18px;
-
-    font-weight: 850;
-
-    letter-spacing: -0.3px;
-}
-
-
-.brand-name small {
-
-    display: block;
-
-    margin-top: 3px;
-
-    color: #7fa5ca;
-
-    font-size: 10px;
-}
-
-
-.verified {
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    width: 18px;
-    height: 18px;
-
-    margin-right: 3px;
-
-    border-radius: 50%;
-
-    background: #18a7ff;
-
-    color: white;
-
-    font-size: 11px;
-}
-
-
-.beta {
-
-    padding: 6px 11px;
-
-    border: 1px solid #c89a27;
-
-    border-radius: 20px;
-
-    color: #ffd45b;
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    background: rgba(255, 203, 67, 0.05);
-}
-
-
-/* =========================================================
-   BRAND
-   ========================================================= */
-
-.brand-section {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 15px;
-
-    padding: 21px 18px 15px;
-}
-
-
-.coin-logo {
-
-    width: 72px;
-    height: 72px;
-
-    flex-shrink: 0;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    color: #17191b;
-
-    font-size: 25px;
-
-    font-weight: 950;
-
-    background:
-        linear-gradient(
-            145deg,
-            #fff1a5 0%,
-            #f5b82e 50%,
-            #9b620b 100%
-        );
-
-    border: 6px solid #6b450f;
-
-    box-shadow:
-        0 0 25px rgba(245, 184, 46, 0.35),
-        inset 0 0 0 3px #ffd96a;
-}
-
-
-.brand-text h1 {
-
-    margin: 0;
-
-    font-size: 30px;
-
-    font-weight: 900;
-
-    background:
-        linear-gradient(
-            90deg,
-            #ffd64e,
-            #ffffff,
-            #6dd5ff
-        );
-
-    color: transparent;
-
-    background-clip: text;
-
-    -webkit-background-clip: text;
-}
-
-
-.brand-text p {
-
-    margin: 4px 0 0;
-
-    color: #9bc3e8;
-
-    font-size: 13px;
-}
-
-
-/* =========================================================
-   BALANCE CARD
-   ========================================================= */
-
-.balance-card {
-
-    margin: 0 14px;
-
-    padding: 19px;
-
-    border: 1px solid #1163a4;
-
-    border-radius: 25px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #062d58,
-            #03152e 75%
-        );
-
-    box-shadow:
-        0 20px 45px rgba(0, 0, 0, 0.45);
-}
-
-
-.balance-title {
-
-    color: #a9c9e7;
-
-    font-size: 13px;
-}
-
-
-.balance {
-
-    margin: 4px 0;
-
-    font-size: 40px;
-
-    line-height: 1.1;
-
-    font-weight: 950;
-
-    letter-spacing: -1px;
-}
-
-
-.balance span {
-
-    color: #ffd34d;
-
-    font-size: 25px;
-}
-
-
-.balance-note {
-
-    margin-bottom: 15px;
-
-    color: #7097bb;
-
-    font-size: 10px;
-}
-
-
-/* =========================================================
-   MINING BUTTON
-   ========================================================= */
-
-.mine-button {
-
-    width: 100%;
-
-    min-height: 70px;
-
-    padding: 13px 16px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 10px;
-
-    border: 1px solid #19a9ff;
-
-    border-radius: 21px;
-
-    color: white;
-
-    background:
-        radial-gradient(
-            circle at 50% 35%,
-            #0b65a8,
-            #062b54 68%,
-            #041b36
-        );
-
-    box-shadow:
-        0 0 28px rgba(24, 167, 255, 0.16);
-
-    cursor: pointer;
-
-    transition:
-        transform 0.15s ease,
-        box-shadow 0.2s ease;
-}
-
-
-.mine-button:active {
-
-    transform: scale(0.97);
-
-    box-shadow:
-        0 0 35px rgba(24, 167, 255, 0.30);
-}
-
-
-.mine-icon {
-
-    font-size: 28px;
-}
-
-
-.mine-content {
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: flex-start;
-}
-
-
-.mine-content strong {
-
-    font-size: 18px;
-}
-
-
-.mine-content small {
-
-    margin-top: 2px;
-
-    color: #9bdcff;
-
-    font-size: 10px;
-}
-
-
-/* =========================================================
-   MINING STATUS
-   ========================================================= */
-
-.mining-status {
-
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 9px;
-
-    margin-top: 11px;
-}
-
-
-.mining-status > div {
-
-    padding: 10px;
-
-    text-align: center;
-
-    border: 1px solid #124875;
-
-    border-radius: 14px;
-
-    background: #041a33;
-}
-
-
-.mining-status strong {
-
-    display: block;
-
-    color: #f6c94a;
-
-    font-size: 14px;
-}
-
-
-.mining-status small {
-
-    display: block;
-
-    margin-top: 2px;
-
-    color: #7ea5c9;
-
-    font-size: 9px;
-}
-
-
-/* =========================================================
-   FEATURE CARDS
-   ========================================================= */
-
-.features {
-
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 10px;
-
     padding: 14px;
 }
 
 
-.feature-card {
+/* ================= HEADER ================= */
 
-    min-height: 112px;
-
-    padding: 13px;
-
-    text-align: right;
-
-    color: white;
-
-    border-radius: 19px;
-
-    background: #061b34;
-
-    border: 1px solid #16456f;
-
-    cursor: pointer;
-
-    transition:
-        transform 0.15s ease,
-        border-color 0.2s ease,
-        background 0.2s ease;
-}
-
-
-.feature-card:active {
-
-    transform: scale(0.97);
-}
-
-
-.feature-icon {
-
-    display: block;
-
-    margin-bottom: 8px;
-
-    font-size: 28px;
-}
-
-
-.feature-card strong {
-
-    display: block;
-
-    font-size: 14px;
-}
-
-
-.feature-card small {
-
-    display: block;
-
-    margin-top: 4px;
-
-    color: #7fa8ca;
-
-    font-size: 10px;
-}
-
-
-.feature-card.daily {
-
-    border-color: #67521b;
-}
-
-
-.feature-card.tasks {
-
-    border-color: #1a6864;
-}
-
-
-.feature-card.referral {
-
-    border-color: #744e18;
-}
-
-
-.feature-card.wallet {
-
-    border-color: #185a88;
-}
-
-
-/* =========================================================
-   STATISTICS
-   ========================================================= */
-
-.statistics {
-
-    margin: 0 14px 14px;
-
-    padding: 15px;
-
-    border: 1px solid #123d64;
-
-    border-radius: 20px;
-
-    background: #04172e;
-}
-
-
-.section-title {
-
-    font-size: 14px;
-
-    font-weight: 850;
-
-    margin-bottom: 12px;
-}
-
-
-.statistics-grid {
-
-    display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
-    gap: 8px;
-}
-
-
-.stat-box {
-
-    padding: 10px;
-
-    text-align: center;
-
-    border-radius: 13px;
-
-    background: #061e39;
-}
-
-
-.stat-box small {
-
-    display: block;
-
-    color: #7198bb;
-
-    font-size: 9px;
-}
-
-
-.stat-box strong {
-
-    display: block;
-
-    margin-top: 4px;
-
-    color: #f5cd55;
-
-    font-size: 12px;
-}
-
-
-/* =========================================================
-   PROMOTION
-   ========================================================= */
-
-.promotion {
-
-    margin: 0 14px 14px;
-
-    padding: 16px;
-
+.topbar {
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
-    border: 1px solid #1268a5;
-
-    border-radius: 20px;
-
-    background:
-        linear-gradient(
-            120deg,
-            #082d53,
-            #073d70
-        );
+    padding: 8px 4px 18px;
 }
 
-
-.promotion-text small {
-
-    color: #9bc1df;
-
-    font-size: 10px;
-}
-
-
-.promotion-text h2 {
-
-    margin: 3px 0;
-
-    color: #ffd452;
-
-    font-size: 24px;
-}
-
-
-.promotion-text p {
-
-    max-width: 255px;
-
-    margin: 0;
-
-    color: #9bc1df;
-
-    font-size: 10px;
-
-    line-height: 1.6;
-}
-
-
-.promotion-coin {
-
-    width: 59px;
-    height: 59px;
-
-    flex-shrink: 0;
-
+.brand-name {
     display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    color: #17191b;
-
+.brand-name strong {
     font-size: 18px;
-
-    font-weight: 950;
-
-    background:
-        linear-gradient(
-            145deg,
-            #fff1a5,
-            #f5b82e 50%,
-            #9b620b
-        );
-
-    border: 5px solid #6b450f;
-
-    box-shadow:
-        0 0 20px rgba(245, 184, 46, 0.28),
-        inset 0 0 0 2px #ffd96a;
 }
 
+.brand-name small {
+    color: #91a4bd;
+    font-size: 11px;
+}
 
-/* =========================================================
-   ROADMAP
-   ========================================================= */
+.verified {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #168cff;
+    color: #fff;
+    font-size: 11px;
+}
 
-.roadmap {
-
-    margin: 0 14px 18px;
-
-    padding: 15px;
-
-    border: 1px solid #123d64;
-
+.beta {
+    background: rgba(22, 140, 255, 0.15);
+    border: 1px solid rgba(22, 140, 255, 0.35);
+    color: #55aaff;
     border-radius: 20px;
-
-    background: #04172e;
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: bold;
 }
 
 
-.roadmap-item {
+/* ================= BRAND ================= */
 
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    padding: 11px 0;
-
-    border-bottom: 1px solid rgba(33, 83, 119, 0.35);
-}
-
-
-.roadmap-item:last-child {
-
-    border-bottom: none;
-}
-
-
-.roadmap-item > span {
-
-    width: 30px;
-    height: 30px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    color: #6ed5ff;
-
-    background: #082c4c;
-
-    border: 1px solid #17628d;
-}
-
-
-.roadmap-item div {
-
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-.roadmap-item strong {
-
-    font-size: 12px;
-}
-
-
-.roadmap-item small {
-
-    margin-top: 3px;
-
-    color: #7599ba;
-
-    font-size: 9px;
-}
-
-
-/* =========================================================
-   BOTTOM NAVIGATION
-   ========================================================= */
-
-.bottom-nav {
-
-    position: fixed;
-
-    left: 50%;
-
-    bottom: 0;
-
-    transform: translateX(-50%);
-
-    width: min(520px, 100%);
-
-    height: 78px;
-
-    padding:
-        7px 4px
-        calc(7px + env(safe-area-inset-bottom));
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(5, 1fr);
-
-    background: rgba(4, 19, 41, 0.96);
-
-    border-top: 1px solid #17466e;
-
-    z-index: 30;
-
-    backdrop-filter: blur(16px);
-}
-
-
-.bottom-nav button {
-
-    border: 0;
-
-    background: transparent;
-
-    color: #7195b9;
-
-    cursor: pointer;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 3px;
-}
-
-
-.bottom-nav button span {
-
-    font-size: 21px;
-}
-
-
-.bottom-nav button small {
-
-    font-size: 9px;
-}
-
-
-.bottom-nav button.active {
-
-    color: #22b7ff;
-}
-
-
-/* =========================================================
-   TOAST MESSAGE
-   ========================================================= */
-
-.toast {
-
-    position: fixed;
-
-    left: 50%;
-
-    bottom: 92px;
-
-    transform:
-        translate(-50%, 20px);
-
-    opacity: 0;
-
-    pointer-events: none;
-
-    z-index: 100;
-
-    max-width: 90%;
-
-    padding: 11px 17px;
-
-    border: 1px solid #1a77ad;
-
-    border-radius: 14px;
-
-    color: white;
-
-    background: #0b2947;
-
-    font-size: 12px;
-
-    box-shadow:
-        0 8px 25px rgba(0,0,0,0.35);
-
-    transition:
-        opacity 0.25s ease,
-        transform 0.25s ease;
-}
-
-
-.toast.show {
-
-    opacity: 1;
-
-    transform:
-        translate(-50%, 0);
-}
-
-
-/* =========================================================
-   MOBILE OPTIMIZATION
-   ========================================================= */
-
-@media (max-width: 360px) {
-
-    .brand-text h1 {
-        font-size: 25px;
-    }
-
-    .coin-logo {
-        width: 64px;
-        height: 64px;
-    }
-
-    .balance {
-        font-size: 34px;
-    }
-
-    .feature-card {
-        min-height: 105px;
-    }
-
-}
-
-
-/* =========================================================
-   SMALL ANIMATION
-   ========================================================= */
-
-@keyframes glow {
-
-    0% {
-        box-shadow:
-            0 0 15px rgba(24, 167, 255, 0.10);
-    }
-
-    50% {
-        box-shadow:
-            0 0 30px rgba(24, 167, 255, 0.28);
-    }
-
-    100% {
-        box-shadow:
-            0 0 15px rgba(24, 167, 255, 0.10);
-    }
-}
-
-
-.mine-button {
-
-    animation:
-        glow 3s infinite ease-in-out;
-}
-/* =========================================================
-   3MIGO COIN — WALLET UI
-   ========================================================= */
-
-.wallet-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    background: rgba(0, 8, 20, 0.82);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-.wallet-modal {
-    position: relative;
-    width: 100%;
-    max-width: 430px;
-    max-height: 88vh;
-    overflow-y: auto;
-    padding: 24px;
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    border-radius: 28px;
-    background:
-        radial-gradient(
-            circle at top right,
-            rgba(0, 183, 255, 0.18),
-            transparent 38%
-        ),
-        linear-gradient(
-            145deg,
-            #071a35,
-            #031024 70%
-        );
-    box-shadow:
-        0 25px 80px rgba(0, 0, 0, 0.55),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    color: #eef6ff;
-    animation: walletOpen 0.25s ease-out;
-}
-
-@keyframes walletOpen {
-    from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.96);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.wallet-close {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    width: 38px;
-    height: 38px;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-    font-size: 27px;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.wallet-close:active {
-    transform: scale(0.92);
-}
-
-.wallet-header {
+.brand-section {
     display: flex;
     align-items: center;
     gap: 14px;
-    margin-bottom: 22px;
+    margin-bottom: 16px;
 }
 
-.wallet-icon {
+.coin-logo {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 58px;
-    height: 58px;
-    border-radius: 18px;
-    background: linear-gradient(
-        135deg,
-        #19a7ff,
-        #6c4cff
-    );
-    font-size: 30px;
-    box-shadow:
-        0 8px 25px rgba(25, 167, 255, 0.3);
-}
-
-.wallet-header h2 {
-    margin: 0;
-    font-size: 23px;
-    font-weight: 800;
-}
-
-.wallet-header small {
-    display: block;
-    margin-top: 4px;
-    color: #8ca8c5;
-}
-
-.wallet-balance {
-    padding: 24px 18px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 22px;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.045);
-}
-
-.wallet-balance small {
-    color: #8ca8c5;
-}
-
-.wallet-balance strong {
-    display: block;
-    margin-top: 8px;
-    font-size: 38px;
+    background: linear-gradient(145deg, #168cff, #063b82);
+    box-shadow: 0 8px 25px rgba(22, 140, 255, 0.25);
     font-weight: 900;
-    letter-spacing: -1px;
+    font-size: 18px;
 }
 
-.wallet-balance strong span {
-    font-size: 19px;
-    color: #38bdf8;
+.brand-text h1 {
+    font-size: 26px;
 }
 
-.wallet-balance p {
-    margin: 10px 0 0;
-    color: #718ba7;
+.brand-text p {
+    margin-top: 4px;
+    color: #91a4bd;
     font-size: 12px;
 }
 
-.wallet-stats {
+
+/* ================= BALANCE ================= */
+
+.balance-card {
+    background: linear-gradient(
+        145deg,
+        #0b2344,
+        #06172f
+    );
+
+    border: 1px solid rgba(74, 142, 218, 0.25);
+    border-radius: 22px;
+    padding: 20px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.22);
+}
+
+.balance-title {
+    color: #91a4bd;
+    font-size: 13px;
+}
+
+.balance {
+    margin-top: 7px;
+    font-size: 38px;
+    font-weight: 900;
+}
+
+.balance span {
+    font-size: 15px;
+    color: #55aaff;
+    margin-right: 5px;
+}
+
+.balance-note {
+    margin-top: 7px;
+    color: #7086a1;
+    font-size: 10px;
+}
+
+
+/* ================= MINING ================= */
+
+.mine-button {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 16px;
+    background: linear-gradient(
+        135deg,
+        #168cff,
+        #0754a5
+    );
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    text-align: right;
+    box-shadow: 0 8px 25px rgba(22, 140, 255, 0.2);
+    transition: 0.2s;
+}
+
+.mine-button:active {
+    transform: scale(0.98);
+}
+
+.mine-icon {
+    font-size: 27px;
+}
+
+.mine-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mine-content strong {
+    font-size: 15px;
+}
+
+.mine-content small {
+    opacity: 0.75;
+    font-size: 11px;
+}
+
+.mining-status {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.mining-status > div {
+    background: rgba(255,255,255,0.04);
+    border-radius: 13px;
+    padding: 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mining-status strong {
+    font-size: 15px;
+}
+
+.mining-status small {
+    color: #778da8;
+    font-size: 10px;
+}
+
+
+/* ================= FEATURES ================= */
+
+.features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     margin-top: 14px;
 }
 
-.wallet-stats > div {
-    padding: 16px;
+.feature-card {
+    min-height: 105px;
+    padding: 15px;
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.045);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: #071a34;
+    border: 1px solid rgba(91, 140, 190, 0.18);
+    color: #fff;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.2s;
 }
 
-.wallet-stats small {
-    display: block;
-    color: #819ab5;
-    font-size: 12px;
+.feature-card:active {
+    transform: scale(0.97);
 }
 
-.wallet-stats strong {
-    display: block;
-    margin-top: 7px;
-    font-size: 16px;
+.feature-icon {
+    font-size: 24px;
 }
 
-.wallet-section-title {
-    margin: 22px 2px 12px;
-    font-size: 16px;
+.feature-card strong {
+    font-size: 14px;
+}
+
+.feature-card small {
+    color: #7e94ae;
+    font-size: 10px;
+}
+
+
+/* ================= STATISTICS ================= */
+
+.statistics {
+    margin-top: 16px;
+    background: #06172e;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid rgba(91, 140, 190, 0.15);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 13px;
 }
 
-.wallet-transactions {
+.statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.stat-box {
+    background: rgba(255,255,255,0.035);
+    border-radius: 13px;
+    padding: 12px 7px;
+    text-align: center;
+}
+
+.stat-box small {
+    display: block;
+    color: #7187a2;
+    font-size: 9px;
+    margin-bottom: 7px;
+}
+
+.stat-box strong {
+    font-size: 13px;
+}
+
+
+/* ================================================= */
+/* ================= TASKS SECTION ================== */
+/* ================================================= */
+
+.tasks-section {
+    margin-top: 16px;
+    padding: 17px;
+    background: linear-gradient(
+        145deg,
+        #081d38,
+        #05142a
+    );
+    border: 1px solid rgba(52, 145, 238, 0.22);
+    border-radius: 21px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.tasks-section-title {
+    margin-bottom: 15px;
+}
+
+.tasks-section-title span:first-child {
+    font-size: 20px;
+}
+
+.tasks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.tasks-header > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tasks-header strong {
+    font-size: 14px;
+}
+
+.tasks-header small {
+    color: #7389a4;
+    font-size: 10px;
+}
+
+.tasks-total-badge {
+    min-width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(22, 140, 255, 0.14);
+    border: 1px solid rgba(22, 140, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #55aaff;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.tasks-container {
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
     gap: 9px;
 }
 
-.wallet-transaction {
+.task-loading {
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #8195ad;
+    font-size: 11px;
+}
+
+
+/* Task card generated by app.js */
+
+.task-card {
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(111, 153, 194, 0.15);
+    border-radius: 15px;
+    padding: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.task-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-card-title {
+    font-weight: 800;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.task-card-description {
+    margin-top: 3px;
+    color: #7187a2;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.task-card-reward {
+    margin-top: 5px;
+    color: #55aaff;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.task-button {
+    min-width: 75px;
+    padding: 9px 8px;
+    border-radius: 10px;
+    background: #168cff;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.task-button:active {
+    transform: scale(0.96);
+}
+
+.task-button.completed {
+    background: rgba(46, 190, 120, 0.15);
+    color: #54d89b;
+    border: 1px solid rgba(46, 190, 120, 0.25);
+}
+
+.task-error {
+    padding: 15px;
+    text-align: center;
+    color: #ff8b8b;
+    font-size: 11px;
+    background: rgba(255, 80, 80, 0.06);
+    border-radius: 12px;
+}
+
+.tasks-footer {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+}
+
+.tasks-footer small {
+    color: #61758d;
+    font-size: 9px;
+}
+
+
+/* ================= PROMOTION ================= */
+
+.promotion {
+    margin-top: 16px;
+    padding: 20px;
+    border-radius: 21px;
+    background: linear-gradient(
+        135deg,
+        #0b2a50,
+        #071a34
+    );
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 13px 14px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(74, 142, 218, 0.18);
 }
 
-.wallet-transaction strong {
-    display: block;
-    font-size: 13px;
+.promotion-text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
-.wallet-transaction small {
-    display: block;
-    margin-top: 4px;
-    color: #718ba7;
+.promotion-text small {
+    color: #7790ab;
     font-size: 10px;
 }
 
-.wallet-transaction b {
-    white-space: nowrap;
-    color: #38bdf8;
-    font-size: 13px;
+.promotion-text h2 {
+    font-size: 23px;
 }
 
-.wallet-empty {
-    padding: 22px;
-    border-radius: 16px;
+.promotion-text p {
+    color: #8094ac;
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+.promotion-coin {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #168cff;
+    font-weight: 900;
+    box-shadow: 0 8px 25px rgba(22, 140, 255, 0.25);
+}
+
+
+/* ================= ROADMAP ================= */
+
+.roadmap {
+    margin-top: 16px;
+    padding: 17px;
+    background: #06172e;
+    border-radius: 20px;
+    border: 1px solid rgba(91, 140, 190, 0.15);
+}
+
+.roadmap-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.roadmap-item:last-child {
+    border-bottom: none;
+}
+
+.roadmap-item > span {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(22,140,255,0.12);
+    color: #55aaff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.roadmap-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.roadmap-item strong {
+    font-size: 12px;
+}
+
+.roadmap-item small {
+    color: #7288a2;
+    font-size: 9px;
+}
+
+
+/* ================= FOOTER ================= */
+
+.app-footer {
     text-align: center;
-    color: #819ab5;
-    background: rgba(255, 255, 255, 0.04);
+    padding: 25px 10px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
-.wallet-note {
-    margin-top: 18px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: rgba(255, 193, 7, 0.07);
-    border: 1px solid rgba(255, 193, 7, 0.16);
-    color: #b9a96e;
+.app-footer strong {
+    font-size: 12px;
+}
+
+.app-footer small {
+    color: #566b84;
+    font-size: 9px;
+}
+
+
+/* ================= BOTTOM NAV ================= */
+
+.bottom-nav {
+    position: fixed;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    width: calc(100% - 20px);
+    max-width: 500px;
+    height: 68px;
+    background: rgba(4, 18, 37, 0.96);
+    border: 1px solid rgba(91, 140, 190, 0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+.bottom-nav button {
+    background: transparent;
+    color: #647a94;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.bottom-nav button span {
+    font-size: 19px;
+}
+
+.bottom-nav button small {
+    font-size: 9px;
+}
+
+.bottom-nav button.active {
+    color: #55aaff;
+}
+
+
+/* ================= TOAST ================= */
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%) translateY(20px);
+    background: #102a49;
+    color: #fff;
+    padding: 11px 16px;
+    border-radius: 12px;
     font-size: 11px;
-    line-height: 1.7;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.25s;
+    z-index: 2000;
+    max-width: calc(100% - 40px);
     text-align: center;
 }
 
-@media (max-width: 380px) {
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
 
-    .wallet-modal {
-        padding: 19px;
-        border-radius: 24px;
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 360px) {
+
+    .app {
+        padding: 10px;
     }
 
-    .wallet-balance strong {
+    .balance {
         font-size: 32px;
     }
 
-    .wallet-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 25px;
+    .task-card {
+        align-items: flex-start;
+    }
+
+    .task-button {
+        min-width: 68px;
+    }
+
+    .bottom-nav {
+        width: calc(100% - 14px);
     }
 }
