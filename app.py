@@ -225,3 +225,19 @@ def complete_user_task(
         "status": status,
         "user": dict(user) if user else None
     }
+# =========================================================
+# 3MIGO COIN — TASK LIST API
+# =========================================================
+
+@app.get("/tasks/{telegram_id}")
+def tasks_for_user(telegram_id: int):
+    """
+    إرجاع قائمة المهام للمستخدم.
+    """
+
+    # التأكد من وجود المستخدم
+    db.get_user(telegram_id)
+
+    tasks = db.get_tasks(telegram_id)
+
+    return tasks
