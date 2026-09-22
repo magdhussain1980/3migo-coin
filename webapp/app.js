@@ -538,13 +538,142 @@ async function dailyReward() {
    FEATURES
 ========================= */
 
-function openTasks() {
-
+async function openTasks() {
     haptic();
 
-    showToast(
-        "☑️ نظام المهام قيد التطوير"
-    );
+    const telegramId = telegramUser?.id || 1;
+
+    try {
+        showToast("☑️ جاري تحميل المهام...");
+
+        const response = await fetch(
+            `/tasks/${telegramId}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Tasks request failed");
+        }
+
+        const tasks = await response.json();
+
+        const oldTasks =
+            document.getElementById("tasksModal");
+
+        if (oldTasks) {
+            oldTasks.remove();
+        }
+
+        let tasksHTML = "";
+
+        if (!Array.isArray(tasks) || tasks.length === 0) {
+
+            tasksHTML = `
+                <div class="tasks-empty">
+                    لا توجد مهام متاحة حاليًا
+                </div>
+            `;
+
+        } else {
+
+            tasks.forEach(task => {
+
+                const completed =
+                    Number(task.completed) === 1;
+
+                tasksHTML += `
+                    <div class="task-card">
+
+                        <div class="task-info">
+
+                            <div class="task-title">
+                                ${task.title}
+                            </div>
+
+                            <div class="task-description">
+                                ${task.description || ""}
+                            </div>
+
+                            <div class="task-reward">
+                                🎁 +${Number(
+                                    task.reward_3m || 0
+                                ).toLocaleString()} 3M
+                            </div>
+
+                        </div>
+
+                        <button
+                            class="task-button ${completed ? "completed" : ""}"
+                            ${completed ? "disabled" : ""}
+                            onclick="completeTask(${task.id})"
+                        >
+                            ${
+                                completed
+                                ? "✓ مكتملة"
+                                : "احصل على المكافأة"
+                            }
+                        </button>
+
+                    </div>
+                `;
+            });
+        }
+
+        const modal =
+            document.createElement("div");
+
+        modal.id = "tasksModal";
+
+        modal.innerHTML = `
+            <div class="tasks-overlay">
+
+                <div class="tasks-modal">
+
+                    <button
+                        class="tasks-close"
+                        onclick="document.getElementById('tasksModal').remove()"
+                    >
+                        ×
+                    </button>
+
+                    <div class="tasks-header">
+                        <div class="tasks-icon">
+                            ☑️
+                        </div>
+
+                        <div>
+                            <h2>مهام 3Migo</h2>
+                            <small>
+                                أكمل المهام واحصل على 3M
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="tasks-list">
+                        ${tasksHTML}
+                    </div>
+
+                    <div class="tasks-note">
+                        🎯 أكمل المهام للحصول على مكافآت 3M
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+    } catch (error) {
+
+        console.error(
+            "Tasks error:",
+            error
+        );
+
+        showToast(
+            "⚠️ تعذر الاتصال بالخادم"
+        );
+    }
 }
 
 
