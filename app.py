@@ -191,10 +191,71 @@ def economic_summary():
 
 
 # =========================================================
-# TELEGRAM MINI APP
+# ECONOMIC USER PROFILE
 # =========================================================
-# Telegram/Open App should open the actual Mini App UI,
-# not the API JSON response.
+
+@app.get("/economic/user/{telegram_id}")
+def economic_user_profile(
+    telegram_id: int
+):
+
+    try:
+
+        return economic_engine.user_economic_profile(
+            telegram_id
+        )
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(error)
+        )
+
+
+# =========================================================
+# ECONOMIC MINING TEST
+# =========================================================
+# This endpoint records a mining reward inside the
+# Economic Engine as LOCKED 3M.
+#
+# It does NOT modify the existing db.py balance.
+#
+# This is intentionally a test/integration endpoint.
+# =========================================================
+
+@app.post("/economic/mining/{telegram_id}")
+def economic_mining_test(
+    telegram_id: int
+):
+
+    user_data = db.get_user(
+        telegram_id
+    )
+
+    if not user_data:
+
+        return {
+            "error": "user_not_found"
+        }
+
+    result = economic_engine.register_mining_reward(
+        telegram_id=telegram_id,
+        amount_3m=MINING_REWARD,
+        reference="api_test_mining"
+    )
+
+    return {
+        "status": "success",
+        "economic_layer": "locked",
+        "telegram_id": telegram_id,
+        "reward_3m": MINING_REWARD,
+        "result": result
+    }
+
+
+# =========================================================
+# TELEGRAM MINI APP
 # =========================================================
 
 @app.get("/miniapp")
