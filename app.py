@@ -2,7 +2,7 @@ import os
 from typing import Optional
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -10,12 +10,13 @@ import db
 
 
 # =========================================================
-# 3MIGO COIN API — VERSION 3.1
+# 3MIGO COIN API — VERSION 3.1.1
 # Admin Dashboard Foundation
 # Revenue Engine + Mining + Tasks + Referral
+# Telegram Mini App Redirect Fix
 # =========================================================
 
-APP_VERSION = "3.1.0"
+APP_VERSION = "3.1.1"
 
 app = FastAPI(
     title="3Migo Coin",
@@ -94,18 +95,21 @@ class RevenueIn(BaseModel):
 # =========================================================
 
 def require_admin(key: str):
+
     expected = os.getenv(
         "ADMIN_KEY",
         ""
     )
 
     if not expected:
+
         raise HTTPException(
             status_code=503,
             detail="admin_key_not_configured"
         )
 
     if key != expected:
+
         raise HTTPException(
             status_code=401,
             detail="invalid_admin_key"
@@ -162,14 +166,20 @@ def health():
     }
 
 
+# =========================================================
+# TELEGRAM MINI APP
+# =========================================================
+# Telegram/Open App should open the actual Mini App UI,
+# not the API JSON response.
+# =========================================================
+
 @app.get("/miniapp")
 def miniapp():
 
-    return {
-        "project": "3Migo Coin",
-        "webapp": "/webapp/index.html",
-        "version": APP_VERSION
-    }
+    return RedirectResponse(
+        url="/webapp/index.html",
+        status_code=307
+    )
 
 
 # =========================================================
@@ -271,7 +281,7 @@ def admin_home():
             </p>
 
             <div class="version">
-                Admin Dashboard v3.1.0
+                Admin Dashboard v3.1.1
             </div>
 
         </div>
@@ -932,10 +942,13 @@ def admin_dashboard(
 
     # Revenue summary
     try:
+
         result["revenue_engine"] = (
             db.revenue_summary()
         )
+
     except Exception:
+
         result["revenue_engine"] = {
             "status": "unavailable"
         }
@@ -990,8 +1003,11 @@ def admin_dashboard(
 
     # General statistics
     try:
+
         result["stats"] = db.stats()
+
     except Exception:
+
         result["stats"] = {
             "status": "unavailable"
         }
