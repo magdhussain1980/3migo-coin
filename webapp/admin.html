@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>3Migo Smart — لوحة الإدارة</title>
+
+    <meta name="theme-color" content="#071426">
+    <meta name="description" content="3Migo Smart Admin Dashboard">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Tahoma, sans-serif;
+            background: #071426;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        .app {
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           HEADER
+        ========================== */
+
+        .header {
+            background: #0b1b31;
+            border-bottom: 1px solid #1d3555;
+            padding: 18px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ffd21f, #ff9f00);
+            color: #071426;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .brand h1 {
+            font-size: 21px;
+            margin-bottom: 4px;
+        }
+
+        .brand p {
+            color: #91a6c1;
+            font-size: 12px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: #103b2c;
+            color: #55e6a4;
+            border: 1px solid #176343;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #43e39a;
+        }
+
+        /* =========================
+           MAIN
+        ========================== */
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 25px 18px 50px;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            font-size: 25px;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #91a6c1;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* =========================
+           LOGIN
+        ========================== */
+
+        .login-box {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #0b1b31;
+            border: 1px solid #203b5c;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 45px rgba(0,0,0,.25);
+        }
+
+        .login-box h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .login-box p {
+            color: #91a6c1;
+            font-size: 13px;
+            line-height: 1.7;
+            margin-bottom: 18px;
+        }
+
+        .input {
+            width: 100%;
+            padding: 13px 14px;
+            background: #071426;
+            color: white;
+            border: 1px solid #294665;
+            border-radius: 10px;
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        .input:focus {
+            border-color: #ffd21f;
+        }
+
+        .primary-btn {
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            padding: 13px;
+            background: linear-gradient(135deg, #ffd21f, #ff9f00);
+            color: #071426;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .primary-btn:active {
+            transform: scale(.99);
+        }
+
+        /* =========================
+           DASHBOARD
+        ========================== */
+
+        .dashboard {
+            display: none;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #0b1b31;
+            border: 1px solid #1d3555;
+            border-radius: 16px;
+            padding: 18px;
+            min-height: 125px;
+        }
+
+        .card-label {
+            color: #91a6c1;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-value {
+            font-size: 24px;
+            font-weight: 800;
+            word-break: break-word;
+        }
+
+        .card-sub {
+            color: #7087a4;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .gold {
+            color: #ffd21f;
+        }
+
+        .green {
+            color: #55e6a4;
+        }
+
+        .blue {
+            color: #66b5ff;
+        }
+
+        .orange {
+            color: #ffb454;
+        }
+
+        /* =========================
+           SECTIONS
+        ========================== */
+
+        .section {
+            background: #0b1b31;
+            border: 1px solid #1d3555;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .section-description {
+            color: #8197b3;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .refresh-btn {
+            background: #132b48;
+            border: 1px solid #294665;
+            color: #d9e6f5;
+            border-radius: 9px;
+            padding: 9px 13px;
+            cursor: pointer;
+        }
+
+        .refresh-btn:hover {
+            background: #183653;
+        }
+
+        .grid-two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid #172d48;
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #91a6c1;
+        }
+
+        .info-value {
+            font-weight: 700;
+            text-align: left;
+        }
+
+        /* =========================
+           ERROR / MESSAGE
+        ========================== */
+
+        .message {
+            display: none;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .error {
+            background: #431b25;
+            border: 1px solid #71313f;
+            color: #ff9eae;
+        }
+
+        .success {
+            background: #103b2c;
+            border: 1px solid #176343;
+            color: #55e6a4;
+        }
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        .footer {
+            text-align: center;
+            color: #617995;
+            font-size: 11px;
+            padding: 25px 0 10px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 900px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 14px;
+            }
+
+            .header-inner {
+                align-items: flex-start;
+            }
+
+            .brand h1 {
+                font-size: 17px;
+            }
+
+            .brand p {
+                font-size: 10px;
+            }
+
+            .logo {
+                width: 42px;
+                height: 42px;
+            }
+
+            .status {
+                font-size: 10px;
+                padding: 7px 9px;
+            }
+
+            .container {
+                padding: 20px 12px 40px;
+            }
+
+            .welcome h2 {
+                font-size: 21px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .card {
+                padding: 14px;
+                min-height: 110px;
+            }
+
+            .card-value {
+                font-size: 19px;
+            }
+
+            .grid-two {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-inner">
+
+            <div class="brand">
+                <div class="logo">3M</div>
+
+                <div>
+                    <h1>3Migo Smart</h1>
+                    <p>Revenue & Administration System</p>
+                </div>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                <span>API متصل</span>
+            </div>
+
+        </div>
+    </header>
+
+
+    <!-- MAIN -->
+    <main class="container">
+
+        <div class="welcome">
+            <h2>لوحة الإدارة</h2>
+            <p>
+                مركز التحكم في منظومة 3Migo Coin ومحرك الإيرادات
+                والخزينة والمكافآت.
+            </p>
+        </div>
+
+
+        <!-- LOGIN -->
+        <section id="loginBox" class="login-box">
+
+            <h3>دخول الإدارة</h3>
+
+            <p>
+                أدخل مفتاح الإدارة الموجود في إعدادات Render.
+                لا تشارك هذا المفتاح مع أي شخص.
+            </p>
+
+            <input
+                id="adminKey"
+                class="input"
+                type="password"
+                placeholder="ADMIN KEY"
+                autocomplete="off"
+            >
+
+            <button
+                id="loginBtn"
+                class="primary-btn"
+                type="button"
+            >
+                دخول لوحة الإدارة
+            </button>
+
+            <div id="loginError" class="message error"></div>
+
+        </section>
+
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="dashboard">
+
+            <!-- KPI CARDS -->
+            <div class="cards">
+
+                <div class="card">
+                    <div class="card-label">إجمالي الإيرادات</div>
+                    <div id="totalRevenue" class="card-value gold">—</div>
+                    <div id="revenueCurrency" class="card-sub">
+                        Revenue
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-label">Reward Pool</div>
+                    <div id="rewardPool" class="card-value green">—</div>
+                    <div class="card-sub">مخصص للمكافآت</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-label">Treasury</div>
+                    <div id="treasury" class="card-value blue">—</div>
+                    <div class="card-sub">خزينة المشروع</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-label">Operations</div>
+                    <div id="operations" class="card-value orange">—</div>
+                    <div class="card-sub">التشغيل</div>
+                </div>
+
+            </div>
+
+
+            <!-- SYSTEM -->
+            <section class="section">
+
+                <div class="section-header">
+
+                    <div>
+                        <div class="section-title">
+                            حالة النظام
+                        </div>
+
+                        <div class="section-description">
+                            بيانات الاتصال وإعدادات المنظومة
+                        </div>
+                    </div>
+
+                    <button
+                        id="refreshBtn"
+                        class="refresh-btn"
+                        type="button"
+                    >
+                        تحديث
+                    </button>
+
+                </div>
+
+                <div class="grid-two">
+
+                    <div>
+                        <div class="info-row">
+                            <span class="info-label">المشروع</span>
+                            <span id="projectName" class="info-value">—</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">الإصدار</span>
+                            <span id="version" class="info-value">—</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">الحالة</span>
+                            <span id="systemStatus" class="info-value green">—</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="info-row">
+                            <span class="info-label">Mining Cycle</span>
+                            <span id="miningCycle" class="info-value">—</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Mining Reward</span>
+                            <span id="miningReward" class="info-value">—</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Token</span>
+                            <span class="info-value gold">3M</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- REVENUE -->
+            <section class="section">
+
+                <div class="section-header">
+
+                    <div>
+                        <div class="section-title">
+                            محرك الإيرادات
+                        </div>
+
+                        <div class="section-description">
+                            توزيع الإيرادات بين المكافآت والخزينة والتشغيل والتسويق.
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="grid-two">
+
+                    <div>
+
+                        <div class="info-row">
+                            <span class="info-label">
+                                Reward Pool
+                            </span>
+
+                            <span id="revenueRewardPool" class="info-value green">
+                                —
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">
+                                Treasury
+                            </span>
+
+                            <span id="revenueTreasury" class="info-value blue">
+                                —
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div>
+
+                        <div class="info-row">
+                            <span class="info-label">
+                                Operations
+                            </span>
+
+                            <span id="revenueOperations" class="info-value orange">
+                                —
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">
+                                Marketing
+                            </span>
+
+                            <span id="revenueMarketing" class="info-value">
+                                —
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- NEXT MODULES -->
+            <section class="section">
+
+                <div class="section-header">
+
+                    <div>
+                        <div class="section-title">
+                            وحدات الإدارة
+                        </div>
+
+                        <div class="section-description">
+                            سيتم تفعيل هذه الوحدات تباعًا وربطها بالـ API.
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="grid-two">
+
+                    <div class="info-row">
+                        <span class="info-label">المستخدمون</span>
+                        <span class="info-value">قريبًا</span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">المهام والمكافآت</span>
+                        <span class="info-value">قريبًا</span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">الحملات الإعلانية</span>
+                        <span class="info-value">قريبًا</span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">الخزينة</span>
+                        <span class="info-value">قريبًا</span>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <div id="dashboardMessage" class="message"></div>
+
+            <div class="footer">
+                3Migo Smart · Admin Dashboard · API 3.1.0
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    /*
+     * 3Migo Smart Admin
+     * API Base
+     */
+
+    const API_BASE = window.location.origin;
+
+    let ADMIN_KEY = sessionStorage.getItem("3migo_admin_key") || "";
+
+
+    /*
+     * عناصر الصفحة
+     */
+
+    const loginBox = document.getElementById("loginBox");
+    const dashboard = document.getElementById("dashboard");
+
+    const adminKeyInput = document.getElementById("adminKey");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginError = document.getElementById("loginError");
+
+    const refreshBtn = document.getElementById("refreshBtn");
+
+
+    /*
+     * رسائل
+     */
+
+    function showMessage(element, message, type = "error") {
+
+        element.textContent = message;
+        element.className = "message " + type;
+        element.style.display = "block";
+
+    }
+
+
+    function hideMessage(element) {
+
+        element.style.display = "none";
+
+    }
+
+
+    /*
+     * تنسيق الأرقام
+     */
+
+    function formatNumber(value) {
+
+        if (value === null || value === undefined) {
+            return "0";
+        }
+
+        const number = Number(value);
+
+        if (Number.isNaN(number)) {
+            return String(value);
+        }
+
+        return number.toLocaleString("en-US", {
+            maximumFractionDigits: 4
+        });
+
+    }
+
+
+    /*
+     * قراءة قيمة محتملة من أكثر من شكل
+     */
+
+    function readValue(object, keys, fallback = 0) {
+
+        if (!object) {
+            return fallback;
+        }
+
+        for (const key of keys) {
+
+            if (
+                object[key] !== undefined &&
+                object[key] !== null
+            ) {
+                return object[key];
+            }
+
+        }
+
+        return fallback;
+
+    }
+
+
+    /*
+     * الاتصال بالـ Dashboard API
+     */
+
+    async function loadDashboard() {
+
+        hideMessage(document.getElementById("dashboardMessage"));
+
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = "جاري التحديث...";
+
+        try {
+
+            const response = await fetch(
+                API_BASE + "/admin/dashboard",
+                {
+                    method: "GET",
+                    headers: {
+                        "X-Admin-Key": ADMIN_KEY
+                    },
+                    cache: "no-store"
+                }
+            );
+
+
+            if (response.status === 401) {
+
+                sessionStorage.removeItem("3migo_admin_key");
+                ADMIN_KEY = "";
+
+                dashboard.style.display = "none";
+                loginBox.style.display = "block";
+
+                showMessage(
+                    loginError,
+                    "مفتاح الإدارة غير صحيح."
+                );
+
+                return;
+            }
+
+
+            if (response.status === 503) {
+
+                throw new Error(
+                    "ADMIN_KEY غير مهيأ في الخادم."
+                );
+
+            }
+
+
+            if (!response.ok) {
+
+                const text = await response.text();
+
+                throw new Error(
+                    "HTTP " +
+                    response.status +
+                    ": " +
+                    text
+                );
+
+            }
+
+
+            const data = await response.json();
+
+            updateDashboard(data);
+
+            loginBox.style.display = "none";
+            dashboard.style.display = "block";
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "3Migo Admin Error:",
+                error
+            );
+
+            showMessage(
+                document.getElementById("dashboardMessage"),
+                "تعذر تحميل بيانات لوحة الإدارة: " +
+                error.message,
+                "error"
+            );
+
+        }
+
+        finally {
+
+            refreshBtn.disabled = false;
+            refreshBtn.textContent = "تحديث";
+
+        }
+
+    }
+
+
+    /*
+     * تحديث واجهة البيانات
+     */
+
+    function updateDashboard(data) {
+
+        /*
+         * System
+         */
+
+        document.getElementById("projectName").textContent =
+            readValue(
+                data,
+                ["project"],
+                "3Migo Coin"
+            );
+
+        document.getElementById("version").textContent =
+            readValue(
+                data,
+                ["version"],
+                "—"
+            );
+
+        document.getElementById("systemStatus").textContent =
+            readValue(
+                data,
+                ["status"],
+                "online"
+            );
+
+
+        /*
+         * Mining
+         */
+
+        const mining = data.mining || {};
+
+        document.getElementById("miningCycle").textContent =
+            formatNumber(
+                readValue(
+                    mining,
+                    ["cycle_hours", "mining_cycle_hours"],
+                    12
+                )
+            ) + " ساعة";
+
+        document.getElementById("miningReward").textContent =
+            formatNumber(
+                readValue(
+                    mining,
+                    ["reward", "mining_reward"],
+                    10
+                )
+            ) + " 3M";
+
+
+        /*
+         * Revenue
+         */
+
+        const revenue = data.revenue || {};
+
+        const gross =
+            readValue(
+                revenue,
+                [
+                    "gross_amount",
+                    "total_revenue",
+                    "gross",
+                    "total"
+                ],
+                0
+            );
+
+        const rewardPool =
+            readValue(
+                revenue,
+                [
+                    "reward_pool",
+                    "reward_pool_amount"
+                ],
+                0
+            );
+
+        const treasury =
+            readValue(
+                revenue,
+                [
+                    "treasury",
+                    "treasury_amount"
+                ],
+                0
+            );
+
+        const operations =
+            readValue(
+                revenue,
+                [
+                    "operations",
+                    "operations_amount"
+                ],
+                0
+            );
+
+        const marketing =
+            readValue(
+                revenue,
+                [
+                    "marketing",
+                    "marketing_amount"
+                ],
+                0
+            );
+
+
+        document.getElementById("totalRevenue").textContent =
+            formatNumber(gross);
+
+        document.getElementById("rewardPool").textContent =
+            formatNumber(rewardPool);
+
+        document.getElementById("treasury").textContent =
+            formatNumber(treasury);
+
+        document.getElementById("operations").textContent =
+            formatNumber(operations);
+
+
+        document.getElementById("revenueRewardPool").textContent =
+            formatNumber(rewardPool);
+
+        document.getElementById("revenueTreasury").textContent =
+            formatNumber(treasury);
+
+        document.getElementById("revenueOperations").textContent =
+            formatNumber(operations);
+
+        document.getElementById("revenueMarketing").textContent =
+            formatNumber(marketing);
+
+
+        /*
+         * Currency
+         */
+
+        document.getElementById("revenueCurrency").textContent =
+            readValue(
+                revenue,
+                ["currency"],
+                "Revenue"
+            );
+
+    }
+
+
+    /*
+     * تسجيل الدخول
+     */
+
+    loginBtn.addEventListener(
+        "click",
+        async function () {
+
+            hideMessage(loginError);
+
+            const key =
+                adminKeyInput.value.trim();
+
+            if (!key) {
+
+                showMessage(
+                    loginError,
+                    "يرجى إدخال مفتاح الإدارة."
+                );
+
+                return;
+            }
+
+
+            ADMIN_KEY = key;
+
+            sessionStorage.setItem(
+                "3migo_admin_key",
+                ADMIN_KEY
+            );
+
+
+            await loadDashboard();
+
+        }
+    );
+
+
+    /*
+     * زر التحديث
+     */
+
+    refreshBtn.addEventListener(
+        "click",
+        loadDashboard
+    );
+
+
+    /*
+     * Enter في حقل المفتاح
+     */
+
+    adminKeyInput.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (event.key === "Enter") {
+                loginBtn.click();
+            }
+
+        }
+    );
+
+
+    /*
+     * محاولة تلقائية إذا كان المفتاح محفوظًا
+     */
+
+    if (ADMIN_KEY) {
+        loadDashboard();
+    }
+
+</script>
+
+</body>
+</html>
