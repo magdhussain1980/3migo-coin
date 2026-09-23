@@ -2,6 +2,7 @@ import os
 from typing import Optional
 
 from fastapi import FastAPI, Header, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -9,15 +10,17 @@ import db
 
 
 # =========================================================
-# 3MIGO COIN API — VERSION 3.0
+# 3MIGO COIN API — VERSION 3.1
+# Admin Dashboard Foundation
 # Revenue Engine + Mining + Tasks + Referral
 # =========================================================
 
-APP_VERSION = "3.0.0"
+APP_VERSION = "3.1.0"
 
 app = FastAPI(
     title="3Migo Coin",
-    version=APP_VERSION
+    version=APP_VERSION,
+    description="3Migo Smart Revenue & Rewards API"
 )
 
 
@@ -28,7 +31,10 @@ app = FastAPI(
 try:
     app.mount(
         "/webapp",
-        StaticFiles(directory="webapp", html=True),
+        StaticFiles(
+            directory="webapp",
+            html=True
+        ),
         name="webapp"
     )
 except Exception:
@@ -88,7 +94,10 @@ class RevenueIn(BaseModel):
 # =========================================================
 
 def require_admin(key: str):
-    expected = os.getenv("ADMIN_KEY", "")
+    expected = os.getenv(
+        "ADMIN_KEY",
+        ""
+    )
 
     if not expected:
         raise HTTPException(
@@ -138,7 +147,8 @@ def home():
         "max_supply_draft": 3000000000,
         "mining_cycle_hours": MINING_CYCLE_HOURS,
         "mining_reward": MINING_REWARD,
-        "revenue_engine": "3.0"
+        "revenue_engine": "3.0",
+        "admin_dashboard": "3.1"
     }
 
 
@@ -163,6 +173,115 @@ def miniapp():
 
 
 # =========================================================
+# ADMIN DASHBOARD ENTRY
+# =========================================================
+
+@app.get(
+    "/admin",
+    response_class=HTMLResponse
+)
+def admin_home():
+
+    return """
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+
+        <title>3Migo Smart Admin</title>
+
+        <style>
+            body {
+                margin: 0;
+                background: #07111f;
+                color: #ffffff;
+                font-family: Arial, sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                text-align: center;
+            }
+
+            .box {
+                width: 90%;
+                max-width: 520px;
+                background: #0d1b2e;
+                border: 1px solid #1f3b5d;
+                border-radius: 20px;
+                padding: 30px;
+                box-sizing: border-box;
+            }
+
+            .logo {
+                font-size: 32px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+
+            .logo span {
+                color: #f5c542;
+            }
+
+            h1 {
+                margin: 10px 0;
+            }
+
+            p {
+                color: #aebed0;
+                line-height: 1.7;
+            }
+
+            .status {
+                display: inline-block;
+                padding: 8px 16px;
+                border-radius: 20px;
+                background: #123c2c;
+                color: #58d68d;
+                margin: 15px 0;
+            }
+
+            .version {
+                color: #7f9bb8;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="box">
+
+            <div class="logo">
+                3<span>Migo</span> Smart
+            </div>
+
+            <h1>لوحة الإدارة</h1>
+
+            <div class="status">
+                ● النظام متصل
+            </div>
+
+            <p>
+                تم تشغيل أساس لوحة الإدارة بنجاح.
+                سيتم ربط لوحة المؤشرات والإيرادات
+                والخزانة والمستخدمين في المرحلة التالية.
+            </p>
+
+            <div class="version">
+                Admin Dashboard v3.1.0
+            </div>
+
+        </div>
+
+    </body>
+    </html>
+    """
+
+
+# =========================================================
 # USERS
 # =========================================================
 
@@ -181,7 +300,9 @@ def register(data: Register):
 @app.get("/user/{telegram_id}")
 def user(telegram_id: int):
 
-    u = db.get_user(telegram_id)
+    u = db.get_user(
+        telegram_id
+    )
 
     return u or {
         "error": "user_not_found"
@@ -215,11 +336,12 @@ def daily(telegram_id: int):
     return u
 
 
-# Legacy-compatible route
 @app.post("/user/{telegram_id}/daily")
 def daily_legacy(telegram_id: int):
 
-    return daily(telegram_id)
+    return daily(
+        telegram_id
+    )
 
 
 # =========================================================
@@ -257,11 +379,9 @@ def start_mining(telegram_id: int):
             "error": "user_not_found"
         }
 
-    result = db.start_mining(
+    return db.start_mining(
         telegram_id
     )
-
-    return result
 
 
 @app.post("/mining/{telegram_id}/claim")
@@ -282,7 +402,6 @@ def claim_mining(telegram_id: int):
     )
 
 
-# Legacy mining endpoint
 @app.post("/user/{telegram_id}/mine")
 def mine_legacy(telegram_id: int):
 
@@ -558,7 +677,9 @@ def create_revenue(
     )
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     allowed_statuses = {
         "pending",
@@ -601,7 +722,9 @@ def admin_revenue(
     )
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return db.all_revenue()
 
@@ -613,7 +736,9 @@ def admin_revenue_summary(
     )
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return db.revenue_summary()
 
@@ -625,7 +750,9 @@ def admin_revenue_today(
     )
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return {
         "revenue_today_usd":
@@ -640,7 +767,9 @@ def admin_revenue_month(
     )
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return {
         "revenue_month_usd":
@@ -648,7 +777,9 @@ def admin_revenue_month(
     }
 
 
-@app.post("/admin/revenue/{revenue_id}/confirm")
+@app.post(
+    "/admin/revenue/{revenue_id}/confirm"
+)
 def confirm_admin_revenue(
     revenue_id: int,
     x_admin_key: str = Header(
@@ -656,7 +787,9 @@ def confirm_admin_revenue(
     )
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     revenue, status = db.confirm_revenue(
         revenue_id
@@ -668,7 +801,9 @@ def confirm_admin_revenue(
     }
 
 
-@app.post("/admin/revenue/{revenue_id}/cancel")
+@app.post(
+    "/admin/revenue/{revenue_id}/cancel"
+)
 def cancel_admin_revenue(
     revenue_id: int,
     x_admin_key: str = Header(
@@ -676,7 +811,9 @@ def cancel_admin_revenue(
     )
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     revenue, status = db.cancel_revenue(
         revenue_id
@@ -699,7 +836,9 @@ def admin_stats(
     )
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return db.stats()
 
@@ -715,7 +854,9 @@ def treasury(
     )
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     connection = db.get_conn()
 
@@ -759,3 +900,126 @@ def treasury(
     finally:
 
         connection.close()
+
+
+# =========================================================
+# ADMIN DASHBOARD DATA
+# =========================================================
+
+@app.get("/admin/dashboard")
+def admin_dashboard(
+    x_admin_key: str = Header(
+        default=""
+    )
+):
+
+    require_admin(
+        x_admin_key
+    )
+
+    result = {
+        "project": "3Migo Coin",
+        "version": APP_VERSION,
+        "status": "online",
+        "mining": {
+            "cycle_hours": MINING_CYCLE_HOURS,
+            "reward": MINING_REWARD
+        },
+        "revenue_engine": {},
+        "treasury": [],
+        "stats": {}
+    }
+
+    # Revenue summary
+    try:
+        result["revenue_engine"] = (
+            db.revenue_summary()
+        )
+    except Exception:
+        result["revenue_engine"] = {
+            "status": "unavailable"
+        }
+
+    # Treasury
+    try:
+
+        connection = db.get_conn()
+
+        try:
+
+            table_exists = connection.execute(
+                """
+                SELECT name
+                FROM sqlite_master
+                WHERE type='table'
+                AND name='treasury'
+                """
+            ).fetchone()
+
+            if table_exists:
+
+                rows = connection.execute(
+                    """
+                    SELECT
+                        category,
+                        currency,
+                        ROUND(
+                            SUM(amount),
+                            8
+                        ) AS amount
+                    FROM treasury
+                    GROUP BY
+                        category,
+                        currency
+                    ORDER BY category
+                    """
+                ).fetchall()
+
+                result["treasury"] = [
+                    dict(row)
+                    for row in rows
+                ]
+
+        finally:
+
+            connection.close()
+
+    except Exception:
+
+        result["treasury"] = []
+
+    # General statistics
+    try:
+        result["stats"] = db.stats()
+    except Exception:
+        result["stats"] = {
+            "status": "unavailable"
+        }
+
+    return result
+
+
+# =========================================================
+# ADMIN SYSTEM STATUS
+# =========================================================
+
+@app.get("/admin/status")
+def admin_status(
+    x_admin_key: str = Header(
+        default=""
+    )
+):
+
+    require_admin(
+        x_admin_key
+    )
+
+    return {
+        "status": "online",
+        "project": "3Migo Coin",
+        "api_version": APP_VERSION,
+        "revenue_engine": "3.0",
+        "admin_dashboard": "3.1",
+        "mining_cycle_hours": MINING_CYCLE_HOURS,
+        "mining_reward": MINING_REWARD
+    }
