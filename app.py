@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 import db
+import economic_engine
 
 
 # =========================================================
@@ -14,6 +15,7 @@ import db
 # Admin Dashboard Foundation
 # Revenue Engine + Mining + Tasks + Referral
 # Telegram Mini App Redirect Fix
+# Economic Engine Integration
 # =========================================================
 
 APP_VERSION = "3.1.1"
@@ -135,6 +137,11 @@ def startup():
     except Exception:
         pass
 
+    try:
+        economic_engine.init_economic_engine()
+    except Exception:
+        pass
+
 
 # =========================================================
 # BASIC
@@ -152,6 +159,7 @@ def home():
         "mining_cycle_hours": MINING_CYCLE_HOURS,
         "mining_reward": MINING_REWARD,
         "revenue_engine": "3.0",
+        "economic_engine": "1.0",
         "admin_dashboard": "3.1"
     }
 
@@ -164,6 +172,22 @@ def health():
         "service": "3Migo Coin API",
         "version": APP_VERSION
     }
+
+
+# =========================================================
+# ECONOMIC ENGINE
+# =========================================================
+
+@app.get("/economic/health")
+def economic_health():
+
+    return economic_engine.health()
+
+
+@app.get("/economic/summary")
+def economic_summary():
+
+    return economic_engine.economic_summary()
 
 
 # =========================================================
@@ -1035,6 +1059,7 @@ def admin_status(
         "project": "3Migo Coin",
         "api_version": APP_VERSION,
         "revenue_engine": "3.0",
+        "economic_engine": "1.0",
         "admin_dashboard": "3.1",
         "mining_cycle_hours": MINING_CYCLE_HOURS,
         "mining_reward": MINING_REWARD
