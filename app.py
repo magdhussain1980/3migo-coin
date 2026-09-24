@@ -83,6 +83,41 @@ class RevenueIn(BaseModel):
 
 
 # =========================================================
+# ECONOMIC API MODELS
+# =========================================================
+
+class ContributionIn(BaseModel):
+    score: float = Field(gt=0)
+    source: str = Field(
+        default="activity",
+        min_length=1,
+        max_length=100,
+    )
+    reference: str | None = None
+
+
+class TrustIn(BaseModel):
+    trust_score: float = Field(
+        ge=0,
+        le=100,
+    )
+
+
+class UnlockIn(BaseModel):
+    amount_3m: float = Field(gt=0)
+    reference: str | None = None
+
+
+class SpendIn(BaseModel):
+    service: str = Field(
+        min_length=1,
+        max_length=200,
+    )
+    amount_3m: float = Field(gt=0)
+    reference: str | None = None
+
+
+# =========================================================
 # ADMIN SECURITY
 # =========================================================
 
@@ -170,6 +205,246 @@ def economic_summary():
 
 
 # =========================================================
+# ECONOMIC USER PROFILE
+# =========================================================
+
+@app.get("/economic/user/{telegram_id}")
+def economic_user_profile(
+    telegram_id: int,
+):
+    try:
+        return economic_engine.user_economic_profile(
+            telegram_id
+        )
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=str(error),
+        )
+
+
+# =========================================================
+# ECONOMIC CONTRIBUTION
+# =========================================================
+
+@app.post("/economic/contribution/{telegram_id}")
+def economic_contribution(
+    telegram_id: int,
+    data: ContributionIn,
+):
+    try:
+        result = economic_engine.add_contribution(
+            telegram_id=telegram_id,
+            score=data.score,
+            source=data.source,
+            reference=data.reference,
+        )
+
+        return {
+            "status": "success",
+            "economic_layer": "contribution",
+            "telegram_id": telegram_id,
+            "score_added": data.score,
+            "source": data.source,
+            "result": result,
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        )
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=str(error),
+        )
+
+
+# =========================================================
+# ECONOMIC TRUST SCORE
+# =========================================================
+
+@app.post("/economic/trust/{telegram_id}")
+def economic_trust(
+    telegram_id: int,
+    data: TrustIn,
+    x_admin_key: str = Header(default=""),
+):
+    require_admin(x_admin_key)
+
+    try:
+        result = economic_engine.set_trust_score(
+            telegram_id=telegram_id,
+            trust_score=data.trust_score,
+        )
+
+        return {
+            "status": "success",
+            "economic_layer": "trust",
+            "telegram_id": telegram_id,
+            "trust_score": data.trust_score,
+            "result": result,
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        )
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=str(error),
+        )
+
+
+# =========================================================
+# ECONOMIC UNLOCK
+# =========================================================
+
+@app.post("/economic/unlock/{telegram_id}")
+def economic_unlock(
+    telegram_id: int,
+    data: UnlockIn,
+    x_admin_key: str = Header(default=""),
+):
+    require_admin(x_admin_key)
+
+    try:
+        result = economic_engine.unlock_3m(
+            telegram_id=telegram_id,
+            amount_3m=data.amount_3m,
+            reference=data.reference,
+        )
+
+        return {
+            "status": "success",
+            "economic_layer": "unlock",
+            "telegram_id": telegram_id,
+            "amount_3m": data.amount_3m,
+            "result": result,
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        )
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=str(error),
+        )
+
+
+# =========================================================
+# ECONOMIC AIRDROP PREVIEW
+# =========================================================
+
+@app.get("/economic/airdrop/{telegram_id}")
+def economic_airdrop_preview(
+    telegram_id: int,
+):
+    try:
+        result = economic_engine.calculate_airdrop_preview(
+            telegram_id=telegram_id,
+        )
+
+        return {
+            "status": "success",
+            "economic_layer": "airdrop_preview",
+            "telegram_id": telegram_id,
+            "result": result,
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        )
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=str(error),
+        )
+
+
+# =========================================================
+# ECONOMIC SPEND
+# =========================================================
+
+@app.post("/economic/spend/{telegram_id}")
+def economic_spend(
+    telegram_id: int,
+    data: SpendIn,
+):
+    try:
+        result = economic_engine.spend_3m(
+            telegram_id=telegram_id,
+            service=data.service,
+            amount_3m=data.amount_3m,
+            reference=data.reference,
+        )
+
+        return {
+            "status": "success",
+            "economic_layer": "utility",
+            "telegram_id": telegram_id,
+            "service": data.service,
+            "amount_3m": data.amount_3m,
+            "result": result,
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        )
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=str(error),
+        )
+
+
+# =========================================================
+# ECONOMIC MINING TEST
+# =========================================================
+
+@app.post("/economic/mining/{telegram_id}")
+def economic_mining_test(
+    telegram_id: int,
+):
+    user_data = db.get_user(telegram_id)
+
+    if not user_data:
+        return {
+            "error": "user_not_found",
+        }
+
+    result = economic_engine.register_mining_reward(
+        telegram_id=telegram_id,
+        amount_3m=MINING_REWARD,
+        reference="api_test_mining",
+    )
+
+    return {
+        "status": "success",
+        "economic_layer": "locked",
+        "telegram_id": telegram_id,
+        "reward_3m": MINING_REWARD,
+        "result": result,
+    }
+
+
+# =========================================================
 # AUTOMATED ECONOMIC ENGINE TEST
 # =========================================================
 
@@ -217,56 +492,6 @@ def run_economic_tests(
             status_code=500,
             detail=f"economic_tests_error: {error}",
         )
-
-
-# =========================================================
-# ECONOMIC USER PROFILE
-# =========================================================
-
-@app.get("/economic/user/{telegram_id}")
-def economic_user_profile(
-    telegram_id: int,
-):
-    try:
-        return economic_engine.user_economic_profile(
-            telegram_id
-        )
-
-    except Exception as error:
-        raise HTTPException(
-            status_code=500,
-            detail=str(error),
-        )
-
-
-# =========================================================
-# ECONOMIC MINING TEST
-# =========================================================
-
-@app.post("/economic/mining/{telegram_id}")
-def economic_mining_test(
-    telegram_id: int,
-):
-    user_data = db.get_user(telegram_id)
-
-    if not user_data:
-        return {
-            "error": "user_not_found",
-        }
-
-    result = economic_engine.register_mining_reward(
-        telegram_id=telegram_id,
-        amount_3m=MINING_REWARD,
-        reference="api_test_mining",
-    )
-
-    return {
-        "status": "success",
-        "economic_layer": "locked",
-        "telegram_id": telegram_id,
-        "reward_3m": MINING_REWARD,
-        "result": result,
-    }
 
 
 # =========================================================
