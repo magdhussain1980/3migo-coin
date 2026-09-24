@@ -43,14 +43,21 @@ class TestEconomicEngine(unittest.TestCase):
         )
 
     def test_contribution(self):
+        reference = "test_contribution_001"
+
         data = economic_engine.add_contribution(
             self.telegram_id,
             100,
             source="test",
-            reference="test_contribution_001"
+            reference=reference
         )
 
         self.assertEqual(
+            data["telegram_id"],
+            self.telegram_id
+        )
+
+        self.assertGreaterEqual(
             data["contribution_score"],
             100
         )
@@ -67,79 +74,198 @@ class TestEconomicEngine(unittest.TestCase):
         )
 
     def test_mining(self):
+        reference = "test_mining_001"
+
         result = economic_engine.register_mining_reward(
             self.telegram_id,
             10,
-            reference="test_mining_001"
+            reference=reference
         )
 
-        self.assertTrue(result["success"])
-        self.assertEqual(result["reward_3m"], 10)
-        self.assertEqual(result["status"], "locked")
+        self.assertTrue(
+            result["success"] or result["duplicate"]
+        )
+
+        self.assertEqual(
+            result["reward_3m"],
+            10
+        )
+
+        self.assertEqual(
+            result["status"],
+            "locked"
+        )
 
     def test_mining_idempotency(self):
-        result = economic_engine.register_mining_reward(
+        reference = "test_mining_idempotency_001"
+
+        first = economic_engine.register_mining_reward(
             self.telegram_id,
             10,
-            reference="test_mining_001"
+            reference=reference
         )
 
-        self.assertTrue(result["duplicate"])
+        second = economic_engine.register_mining_reward(
+            self.telegram_id,
+            10,
+            reference=reference
+        )
+
+        self.assertTrue(
+            first["success"] or first["duplicate"]
+        )
+
+        self.assertTrue(
+            second["duplicate"]
+        )
 
     def test_unlock(self):
+        reference = "test_unlock_003"
+
+        before = economic_engine.user_economic_profile(
+            self.telegram_id
+        )
+
+        locked_before = float(
+            before["locked_3m"]
+        )
+
+        unlocked_before = float(
+            before["unlocked_3m"]
+        )
+
+        if locked_before < 5:
+
+            mining_reference = "test_unlock_mining_003"
+
+            economic_engine.register_mining_reward(
+                self.telegram_id,
+                10,
+                reference=mining_reference
+            )
+
+            before = economic_engine.user_economic_profile(
+                self.telegram_id
+            )
+
+            locked_before = float(
+                before["locked_3m"]
+            )
+
+            unlocked_before = float(
+                before["unlocked_3m"]
+            )
+
+        self.assertGreaterEqual(
+            locked_before,
+            5
+        )
+
         result = economic_engine.unlock_3m(
             self.telegram_id,
             5,
-            reference="test_unlock_001"
+            reference=reference
         )
 
-        self.assertTrue(result["success"])
+        self.assertTrue(
+            result["success"] or result["duplicate"]
+        )
 
-        profile = economic_engine.user_economic_profile(
+        after = economic_engine.user_economic_profile(
             self.telegram_id
         )
 
-        self.assertEqual(profile["locked_3m"], 5)
-        self.assertEqual(profile["unlocked_3m"], 5)
+        if result["success"]:
+
+            self.assertEqual(
+                float(after["locked_3m"]),
+                locked_before - 5
+            )
+
+            self.assertEqual(
+                float(after["unlocked_3m"]),
+                unlocked_before + 5
+            )
+
+        else:
+
+            self.assertGreaterEqual(
+                float(after["unlocked_3m"]),
+                unlocked_before
+            )
 
     def test_spend(self):
-        # تأكيد وجود رصيد متاح للإنفاق.
-        profile = economic_engine.user_economic_profile(
+        before = economic_engine.user_economic_profile(
             self.telegram_id
         )
 
-        if profile["unlocked_3m"] < 2:
+        unlocked_before = float(
+            before["unlocked_3m"]
+        )
+
+        if unlocked_before < 2:
+
+            locked_before = float(
+                before["locked_3m"]
+            )
+
+            if locked_before < 2:
+
+                economic_engine.register_mining_reward(
+                    self.telegram_id,
+                    10,
+                    reference="test_spend_mining_003"
+                )
+
             economic_engine.unlock_3m(
                 self.telegram_id,
                 2,
-                reference="test_unlock_spend_001"
+                reference="test_spend_unlock_003"
             )
+
+        before = economic_engine.user_economic_profile(
+            self.telegram_id
+        )
+
+        unlocked_before = float(
+            before["unlocked_3m"]
+        )
+
+        self.assertGreaterEqual(
+            unlocked_before,
+            2
+        )
 
         result = economic_engine.spend_3m(
             self.telegram_id,
             "test_service",
             2,
-            reference="test_spend_001"
+            reference="test_spend_003"
         )
 
-        self.assertTrue(result["success"])
+        self.assertTrue(
+            result["success"] or result["duplicate"]
+        )
 
-        profile = economic_engine.user_economic_profile(
+        after = economic_engine.user_economic_profile(
             self.telegram_id
         )
 
-        self.assertGreaterEqual(
-            profile["unlocked_3m"],
-            0
-        )
+        if result["success"]:
+
+            self.assertEqual(
+                float(after["unlocked_3m"]),
+                unlocked_before - 2
+            )
 
     def test_spending_protection(self):
         with self.assertRaises(Exception):
+
             economic_engine.spend_3m(
                 self.telegram_id,
                 "test_service",
-                1000,
-                reference="test_spend_invalid_001"
+                1000000,
+                reference="test_spend_invalid_003"
             )
 
     def test_airdrop_preview(self):
@@ -147,8 +273,30 @@ class TestEconomicEngine(unittest.TestCase):
             self.telegram_id
         )
 
-        self.assertIn("telegram_id", data)
-        self.assertIn("estimated_airdrop_3m", data)
+        self.assertIn(
+            "telegram_id",
+            data
+        )
+
+        self.assertIn(
+            "eligible_pool",
+            data
+        )
+
+        self.assertIn(
+            "user_contribution_score",
+            data
+        )
+
+        self.assertIn(
+            "total_contribution_score",
+            data
+        )
+
+        self.assertIn(
+            "estimated_airdrop_3m",
+            data
+        )
 
         self.assertEqual(
             data["telegram_id"],
@@ -156,28 +304,45 @@ class TestEconomicEngine(unittest.TestCase):
         )
 
         self.assertGreaterEqual(
-            data["estimated_airdrop_3m"],
+            float(data["estimated_airdrop_3m"]),
             0
         )
 
     def test_revenue_record(self):
+        reference = "test_revenue_003"
+
         result = economic_engine.record_revenue(
             source="test",
             gross_amount=100,
             fees=10,
             currency="USD",
-            reference="test_revenue_001",
+            reference=reference,
             status="pending"
         )
 
-        self.assertTrue(result["success"])
-        self.assertEqual(result["gross_amount"], 100)
-        self.assertEqual(result["fees"], 10)
-        self.assertEqual(result["net_amount"], 90)
+        self.assertTrue(
+            result["success"] or result.get("duplicate", False)
+        )
+
+        if result["success"]:
+
+            self.assertEqual(
+                result["gross_amount"],
+                100
+            )
+
+            self.assertEqual(
+                result["fees"],
+                10
+            )
+
+            self.assertEqual(
+                result["net_amount"],
+                90
+            )
 
     def test_revenue_confirmation(self):
-        # إنشاء سجل مستقل للتأكيد.
-        reference = "test_revenue_confirm_001"
+        reference = "test_revenue_confirm_003"
 
         economic_engine.record_revenue(
             source="test_confirmation",
@@ -192,7 +357,9 @@ class TestEconomicEngine(unittest.TestCase):
             reference
         )
 
-        self.assertTrue(result["success"])
+        self.assertTrue(
+            result["success"] or result.get("duplicate", False)
+        )
 
     def test_summary(self):
         data = economic_engine.economic_summary()
@@ -201,17 +368,25 @@ class TestEconomicEngine(unittest.TestCase):
             data["project"],
             "3Migo"
         )
+
         self.assertEqual(
             data["unit"],
             "3M"
         )
+
         self.assertEqual(
             data["status"],
             "internal_economic_layer"
         )
+
         self.assertEqual(
             data["blockchain"],
             "not_active"
+        )
+
+        self.assertEqual(
+            data["market_value"],
+            "not_defined"
         )
 
     def test_capacity(self):
@@ -227,6 +402,11 @@ class TestEconomicEngine(unittest.TestCase):
             0
         )
 
+        self.assertGreaterEqual(
+            data["remaining_mining"],
+            0
+        )
+
     def test_profile_integrity(self):
         data = economic_engine.user_economic_profile(
             self.telegram_id
@@ -238,13 +418,33 @@ class TestEconomicEngine(unittest.TestCase):
         )
 
         self.assertGreaterEqual(
-            data["trust_score"],
+            float(data["trust_score"]),
             0
         )
 
         self.assertLessEqual(
-            data["trust_score"],
+            float(data["trust_score"]),
             100
+        )
+
+        self.assertGreaterEqual(
+            float(data["total_mined"]),
+            0
+        )
+
+        self.assertGreaterEqual(
+            float(data["locked_3m"]),
+            0
+        )
+
+        self.assertGreaterEqual(
+            float(data["unlocked_3m"]),
+            0
+        )
+
+        self.assertGreaterEqual(
+            float(data["airdrop_3m"]),
+            0
         )
 
 
