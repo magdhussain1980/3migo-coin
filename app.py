@@ -12,10 +12,10 @@ import economic_engine
 
 
 # =========================================================
-# 3MIGO COIN API — VERSION 3.2.0
+# 3MIGO COIN API — VERSION 3.2.1
 # =========================================================
 
-APP_VERSION = "3.2.0"
+APP_VERSION = "3.2.1"
 
 
 app = FastAPI(
@@ -143,6 +143,7 @@ def require_admin(key: str):
 
 @app.on_event("startup")
 def startup():
+
     db.init_db()
 
     try:
@@ -167,6 +168,7 @@ def startup():
 
 @app.get("/")
 def home():
+
     return {
         "project": "3Migo Coin",
         "version": APP_VERSION,
@@ -183,6 +185,7 @@ def home():
 
 @app.get("/health")
 def health():
+
     return {
         "status": "ok",
         "service": "3Migo Coin API",
@@ -196,11 +199,13 @@ def health():
 
 @app.get("/economic/health")
 def economic_health():
+
     return economic_engine.health()
 
 
 @app.get("/economic/summary")
 def economic_summary():
+
     return economic_engine.economic_summary()
 
 
@@ -212,12 +217,15 @@ def economic_summary():
 def economic_user_profile(
     telegram_id: int,
 ):
+
     try:
+
         return economic_engine.user_economic_profile(
             telegram_id
         )
 
     except Exception as error:
+
         raise HTTPException(
             status_code=500,
             detail=str(error),
@@ -233,7 +241,9 @@ def economic_contribution(
     telegram_id: int,
     data: ContributionIn,
 ):
+
     try:
+
         result = economic_engine.add_contribution(
             telegram_id=telegram_id,
             score=data.score,
@@ -251,12 +261,14 @@ def economic_contribution(
         }
 
     except ValueError as error:
+
         raise HTTPException(
             status_code=400,
             detail=str(error),
         )
 
     except Exception as error:
+
         raise HTTPException(
             status_code=500,
             detail=str(error),
@@ -273,9 +285,11 @@ def economic_trust(
     data: TrustIn,
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     try:
+
         result = economic_engine.set_trust_score(
             telegram_id=telegram_id,
             trust_score=data.trust_score,
@@ -290,12 +304,14 @@ def economic_trust(
         }
 
     except ValueError as error:
+
         raise HTTPException(
             status_code=400,
             detail=str(error),
         )
 
     except Exception as error:
+
         raise HTTPException(
             status_code=500,
             detail=str(error),
@@ -312,9 +328,11 @@ def economic_unlock(
     data: UnlockIn,
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     try:
+
         result = economic_engine.unlock_3m(
             telegram_id=telegram_id,
             amount_3m=data.amount_3m,
@@ -330,12 +348,14 @@ def economic_unlock(
         }
 
     except ValueError as error:
+
         raise HTTPException(
             status_code=400,
             detail=str(error),
         )
 
     except Exception as error:
+
         raise HTTPException(
             status_code=500,
             detail=str(error),
@@ -350,7 +370,9 @@ def economic_unlock(
 def economic_airdrop_preview(
     telegram_id: int,
 ):
+
     try:
+
         result = economic_engine.calculate_airdrop_preview(
             telegram_id=telegram_id,
         )
@@ -363,12 +385,14 @@ def economic_airdrop_preview(
         }
 
     except ValueError as error:
+
         raise HTTPException(
             status_code=400,
             detail=str(error),
         )
 
     except Exception as error:
+
         raise HTTPException(
             status_code=500,
             detail=str(error),
@@ -384,7 +408,9 @@ def economic_spend(
     telegram_id: int,
     data: SpendIn,
 ):
+
     try:
+
         result = economic_engine.spend_3m(
             telegram_id=telegram_id,
             service=data.service,
@@ -402,12 +428,14 @@ def economic_spend(
         }
 
     except ValueError as error:
+
         raise HTTPException(
             status_code=400,
             detail=str(error),
         )
 
     except Exception as error:
+
         raise HTTPException(
             status_code=500,
             detail=str(error),
@@ -422,9 +450,11 @@ def economic_spend(
 def economic_mining_test(
     telegram_id: int,
 ):
+
     user_data = db.get_user(telegram_id)
 
     if not user_data:
+
         return {
             "error": "user_not_found",
         }
@@ -452,9 +482,11 @@ def economic_mining_test(
 def run_economic_tests(
     x_admin_key: str = Header(default="")
 ):
+
     require_admin(x_admin_key)
 
     try:
+
         process = subprocess.run(
             [
                 sys.executable,
@@ -482,12 +514,14 @@ def run_economic_tests(
         }
 
     except subprocess.TimeoutExpired:
+
         raise HTTPException(
             status_code=504,
             detail="economic_tests_timeout",
         )
 
     except Exception as error:
+
         raise HTTPException(
             status_code=500,
             detail=f"economic_tests_error: {error}",
@@ -500,6 +534,7 @@ def run_economic_tests(
 
 @app.get("/miniapp")
 def miniapp():
+
     return RedirectResponse(
         url="/webapp/index.html",
         status_code=307,
@@ -515,72 +550,110 @@ def miniapp():
     response_class=HTMLResponse,
 )
 def admin_home():
+
     return """
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
     <title>3Migo Smart Admin</title>
 
     <style>
+
         body {
+
             margin: 0;
+
             background: #07111f;
+
             color: #ffffff;
+
             font-family: Arial, sans-serif;
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             min-height: 100vh;
+
             text-align: center;
         }
 
         .box {
+
             width: 90%;
+
             max-width: 520px;
+
             background: #0d1b2e;
+
             border: 1px solid #1f3b5d;
+
             border-radius: 20px;
+
             padding: 30px;
+
             box-sizing: border-box;
         }
 
         .logo {
+
             font-size: 32px;
+
             font-weight: bold;
+
             margin-bottom: 10px;
         }
 
         .logo span {
+
             color: #f5c542;
         }
 
         h1 {
+
             margin: 10px 0;
         }
 
         p {
+
             color: #aebed0;
+
             line-height: 1.7;
         }
 
         .status {
+
             display: inline-block;
+
             padding: 8px 16px;
+
             border-radius: 20px;
+
             background: #123c2c;
+
             color: #58d68d;
+
             margin: 15px 0;
         }
 
         .version {
+
             color: #7f9bb8;
+
             font-size: 13px;
         }
+
     </style>
+
 </head>
 
 <body>
@@ -591,7 +664,9 @@ def admin_home():
             3<span>Migo</span> Smart
         </div>
 
-        <h1>لوحة الإدارة</h1>
+        <h1>
+            لوحة الإدارة
+        </h1>
 
         <div class="status">
             ● النظام متصل
@@ -604,12 +679,13 @@ def admin_home():
         </p>
 
         <div class="version">
-            Admin Dashboard v3.2.0
+            Admin Dashboard v3.2.1
         </div>
 
     </div>
 
 </body>
+
 </html>
 """
 
@@ -620,6 +696,7 @@ def admin_home():
 
 @app.post("/register")
 def register(data: Register):
+
     result = db.create_user(
         data.telegram_id,
         data.username,
@@ -631,6 +708,7 @@ def register(data: Register):
 
 @app.get("/user/{telegram_id}")
 def user(telegram_id: int):
+
     u = db.get_user(telegram_id)
 
     return u or {
@@ -644,14 +722,17 @@ def user(telegram_id: int):
 
 @app.post("/daily/{telegram_id}")
 def daily(telegram_id: int):
+
     u, status = db.claim_daily(telegram_id)
 
     if status == "user_not_found":
+
         return {
             "error": status,
         }
 
     if status == "already_claimed":
+
         return {
             "error": status,
             "user": u,
@@ -662,6 +743,7 @@ def daily(telegram_id: int):
 
 @app.post("/user/{telegram_id}/daily")
 def daily_legacy(telegram_id: int):
+
     return daily(telegram_id)
 
 
@@ -671,9 +753,11 @@ def daily_legacy(telegram_id: int):
 
 @app.get("/mining/{telegram_id}/status")
 def mining_status(telegram_id: int):
+
     user_data = db.get_user(telegram_id)
 
     if not user_data:
+
         return {
             "error": "user_not_found",
         }
@@ -683,9 +767,11 @@ def mining_status(telegram_id: int):
 
 @app.post("/mining/{telegram_id}/start")
 def start_mining(telegram_id: int):
+
     user_data = db.get_user(telegram_id)
 
     if not user_data:
+
         return {
             "error": "user_not_found",
         }
@@ -695,9 +781,11 @@ def start_mining(telegram_id: int):
 
 @app.post("/mining/{telegram_id}/claim")
 def claim_mining(telegram_id: int):
+
     user_data = db.get_user(telegram_id)
 
     if not user_data:
+
         return {
             "error": "user_not_found",
         }
@@ -707,9 +795,11 @@ def claim_mining(telegram_id: int):
 
 @app.post("/user/{telegram_id}/mine")
 def mine_legacy(telegram_id: int):
+
     user_data = db.get_user(telegram_id)
 
     if not user_data:
+
         return {
             "error": "user_not_found",
         }
@@ -723,6 +813,7 @@ def mine_legacy(telegram_id: int):
 
 @app.get("/transactions/{telegram_id}")
 def user_transactions(telegram_id: int):
+
     return db.transactions(telegram_id)
 
 
@@ -732,7 +823,9 @@ def user_transactions(telegram_id: int):
 
 @app.get("/tasks")
 def tasks():
+
     try:
+
         rows = db.get_tasks()
 
         return [
@@ -741,9 +834,11 @@ def tasks():
         ]
 
     except Exception:
+
         connection = db.get_conn()
 
         try:
+
             rows = connection.execute(
                 """
                 SELECT
@@ -765,18 +860,23 @@ def tasks():
             ]
 
         finally:
+
             connection.close()
 
 
 @app.get("/tasks/{telegram_id}")
 def user_tasks(telegram_id: int):
+
     try:
+
         return db.user_tasks(telegram_id)
 
     except Exception:
+
         connection = db.get_conn()
 
         try:
+
             rows = connection.execute(
                 """
                 SELECT
@@ -807,6 +907,7 @@ def user_tasks(telegram_id: int):
             ]
 
         finally:
+
             connection.close()
 
 
@@ -817,9 +918,11 @@ def complete_task(
     telegram_id: int,
     task_id: int,
 ):
+
     user_data = db.get_user(telegram_id)
 
     if not user_data:
+
         return {
             "error": "user_not_found",
         }
@@ -827,6 +930,7 @@ def complete_task(
     connection = db.get_conn()
 
     try:
+
         task = connection.execute(
             """
             SELECT *
@@ -838,9 +942,11 @@ def complete_task(
         ).fetchone()
 
     finally:
+
         connection.close()
 
     if not task:
+
         return {
             "error": "task_not_found",
         }
@@ -851,9 +957,11 @@ def complete_task(
     )
 
     updated_user = result[0]
+
     status = result[1]
 
     if status != "completed":
+
         return {
             "status": status,
             "user": updated_user,
@@ -875,28 +983,118 @@ def complete_task(
 
 @app.get("/referral/{telegram_id}")
 def referral(telegram_id: int):
-    try:
-        return db.referral_stats(telegram_id)
 
-    except Exception:
+    try:
+
         user_data = db.get_user(telegram_id)
 
         if not user_data:
+
             return {
+                "status": "error",
                 "error": "user_not_found",
+                "telegram_id": telegram_id,
             }
 
+        # Safely convert SQLite Row to dictionary
+        try:
+
+            user_dict = dict(user_data)
+
+        except Exception:
+
+            user_dict = {}
+
+        # -------------------------------------------------
+        # Try the existing database referral statistics
+        # -------------------------------------------------
+
+        try:
+
+            stats = db.referral_stats(telegram_id)
+
+            if stats:
+
+                try:
+
+                    stats_dict = dict(stats)
+
+                except Exception:
+
+                    stats_dict = {}
+
+                if isinstance(stats_dict, dict):
+
+                    referral_code = (
+                        stats_dict.get("referral_code")
+                        or user_dict.get("referral_code")
+                        or f"3M{telegram_id}"
+                    )
+
+                    referral_count = (
+                        stats_dict.get("referral_count", 0)
+                        or 0
+                    )
+
+                    referral_rewards = (
+                        stats_dict.get(
+                            "referral_rewards",
+                            0,
+                        )
+                        or 0
+                    )
+
+                    return {
+                        "status": "success",
+                        "telegram_id": telegram_id,
+                        "referral_code": referral_code,
+                        "referral_link": (
+                            "https://t.me/"
+                            "threemigosmart_bot"
+                            "?start=ref_"
+                            + str(referral_code)
+                        ),
+                        "referral_count": int(
+                            referral_count
+                        ),
+                        "referral_rewards": float(
+                            referral_rewards
+                        ),
+                    }
+
+        except Exception:
+
+            pass
+
+        # -------------------------------------------------
+        # Safe fallback
+        # -------------------------------------------------
+
         referral_code = (
-            user_data.get("referral_code")
+            user_dict.get("referral_code")
             or f"3M{telegram_id}"
         )
 
         return {
+            "status": "success",
             "telegram_id": telegram_id,
             "referral_code": referral_code,
+            "referral_link": (
+                "https://t.me/"
+                "threemigosmart_bot"
+                "?start=ref_"
+                + str(referral_code)
+            ),
             "referral_count": 0,
             "referral_rewards": 0.0,
         }
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"referral_error: {error}",
+        )
 
 
 @app.post("/referral/{telegram_id}")
@@ -904,21 +1102,57 @@ def referral_register(
     telegram_id: int,
     data: ReferralIn,
 ):
+
     if not data.referral_code:
+
         return {
+            "status": "error",
             "error": "referral_code_required",
         }
 
     try:
-        return db.process_referral(
+
+        user_data = db.get_user(telegram_id)
+
+        if not user_data:
+
+            return {
+                "status": "error",
+                "error": "user_not_found",
+            }
+
+        result = db.process_referral(
             telegram_id,
             data.referral_code,
         )
 
-    except Exception:
+        try:
+
+            if isinstance(result, tuple):
+
+                result = result[0]
+
+            if result is not None:
+
+                result = dict(result)
+
+        except Exception:
+
+            pass
+
         return {
-            "error": "referral_processing_unavailable",
+            "status": "success",
+            "telegram_id": telegram_id,
+            "referral_code": data.referral_code,
+            "result": result,
         }
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"referral_processing_error: {error}",
+        )
 
 
 # =========================================================
@@ -930,6 +1164,7 @@ def create_revenue(
     data: RevenueIn,
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     allowed_statuses = {
@@ -939,6 +1174,7 @@ def create_revenue(
     }
 
     if data.status not in allowed_statuses:
+
         raise HTTPException(
             status_code=400,
             detail="invalid_revenue_status",
@@ -967,7 +1203,9 @@ def create_revenue(
 def admin_revenue(
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
+
     return db.all_revenue()
 
 
@@ -975,7 +1213,9 @@ def admin_revenue(
 def admin_revenue_summary(
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
+
     return db.revenue_summary()
 
 
@@ -983,6 +1223,7 @@ def admin_revenue_summary(
 def admin_revenue_today(
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     return {
@@ -994,6 +1235,7 @@ def admin_revenue_today(
 def admin_revenue_month(
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     return {
@@ -1008,6 +1250,7 @@ def confirm_admin_revenue(
     revenue_id: int,
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     revenue, status = db.confirm_revenue(
@@ -1027,6 +1270,7 @@ def cancel_admin_revenue(
     revenue_id: int,
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     revenue, status = db.cancel_revenue(
@@ -1047,7 +1291,9 @@ def cancel_admin_revenue(
 def admin_stats(
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
+
     return db.stats()
 
 
@@ -1059,11 +1305,13 @@ def admin_stats(
 def treasury(
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     connection = db.get_conn()
 
     try:
+
         table_exists = connection.execute(
             """
             SELECT name
@@ -1074,6 +1322,7 @@ def treasury(
         ).fetchone()
 
         if not table_exists:
+
             return []
 
         rows = connection.execute(
@@ -1099,6 +1348,7 @@ def treasury(
         ]
 
     finally:
+
         connection.close()
 
 
@@ -1110,44 +1360,61 @@ def treasury(
 def admin_dashboard(
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     result = {
+
         "project": "3Migo Coin",
+
         "version": APP_VERSION,
+
         "status": "online",
+
         "mining": {
             "cycle_hours": MINING_CYCLE_HOURS,
             "reward": MINING_REWARD,
         },
+
         "revenue_engine": {},
+
         "treasury": [],
+
         "economic_engine": {},
+
         "stats": {},
     }
 
     try:
+
         result["revenue_engine"] = (
             db.revenue_summary()
         )
+
     except Exception:
+
         result["revenue_engine"] = {
             "status": "unavailable"
         }
 
     try:
+
         result["economic_engine"] = (
             economic_engine.economic_summary()
         )
+
     except Exception:
+
         result["economic_engine"] = {
             "status": "unavailable"
         }
 
     try:
+
         connection = db.get_conn()
 
         try:
+
             table_exists = connection.execute(
                 """
                 SELECT name
@@ -1158,6 +1425,7 @@ def admin_dashboard(
             ).fetchone()
 
             if table_exists:
+
                 rows = connection.execute(
                     """
                     SELECT
@@ -1181,15 +1449,19 @@ def admin_dashboard(
                 ]
 
         finally:
+
             connection.close()
 
     except Exception:
+
         result["treasury"] = []
 
     try:
+
         result["stats"] = db.stats()
 
     except Exception:
+
         result["stats"] = {
             "status": "unavailable"
         }
@@ -1205,17 +1477,28 @@ def admin_dashboard(
 def admin_status(
     x_admin_key: str = Header(default=""),
 ):
+
     require_admin(x_admin_key)
 
     return {
+
         "status": "online",
+
         "project": "3Migo Coin",
+
         "api_version": APP_VERSION,
+
         "revenue_engine": "3.0",
+
         "economic_engine": "2.0",
+
         "admin_dashboard": "3.2",
+
         "max_supply": 30000000000,
+
         "mining_allocation": 12000000000,
+
         "mining_cycle_hours": MINING_CYCLE_HOURS,
+
         "mining_reward": MINING_REWARD,
     }
