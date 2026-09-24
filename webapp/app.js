@@ -1,7 +1,7 @@
 /* =========================================================
    3Migo Coin - Telegram Mini App
    Frontend Controller
-   Version 4.0.0
+   Version 4.0.1
    Economy Experience Layer
 
    IMPORTANT:
@@ -11,6 +11,12 @@
    - No fake market value.
    - No changes to economic_engine.py.
    - No changes to database.
+
+   V4.0.1 FIXES:
+   - Wallet Available now uses main backend balance.
+   - Economic Available is displayed separately.
+   - Main balance is re-synced after reward operations.
+   - Existing API contracts preserved.
    ========================================================= */
 
 "use strict";
@@ -69,7 +75,7 @@ const state = {
     username: "",
 
     /* =====================================================
-       LEGACY WALLET
+       MAIN / LEGACY WALLET
        ===================================================== */
 
     balance: 0,
@@ -464,7 +470,7 @@ async function ensureUserRegistered() {
 
 
 /* =========================================================
-   LEGACY BALANCE UI
+   LEGACY / MAIN BALANCE UI
    ========================================================= */
 
 function updateBalanceUI() {
@@ -541,6 +547,13 @@ async function loadUser() {
             return null;
         }
 
+
+        /*
+         * MAIN AUTHORITATIVE BALANCE
+         *
+         * This is the balance shown as:
+         * Wallet -> Available
+         */
 
         state.balance =
             safeNumber(
@@ -974,6 +987,9 @@ function analyzeAdGalaxy() {
     state.adGalaxy.connected =
         adTasks.length > 0;
 
+    /*
+     * No real provider is claimed to be connected.
+     */
     state.adGalaxy.providerConnected =
         false;
 
@@ -1647,7 +1663,7 @@ function showEconomicDashboard() {
                 )}
 
                 ${economicCard(
-                    "متاح",
+                    "متاح اقتصادي",
                     "economicUnlocked",
                     e.unlocked3m,
                     "3M"
@@ -2209,7 +2225,18 @@ async function executeSpend(modal) {
         }
 
 
-        await loadEconomicProfile();
+        /*
+         * Re-sync both wallet layers
+         * after economic spend.
+         */
+
+        await Promise.allSettled([
+
+            loadUser(),
+
+            loadEconomicProfile()
+
+        ]);
 
 
         modal?.remove();
@@ -2571,18 +2598,24 @@ async function claimMining() {
         state.miningRemaining = 0;
 
 
-        state.balance += reward;
-
-        state.total += reward;
-
-        state.today += reward;
-
-        state.sessions += 1;
-
-
-        updateBalanceUI();
-
         updateMiningUI();
+
+
+        /*
+         * Backend is authoritative.
+         * Do not rely only on local balance increment.
+         */
+
+        await Promise.allSettled([
+
+            loadUser(),
+
+            loadEconomicProfile(),
+
+            loadMiningStatus()
+
+        ]);
+
 
         updateExperienceLevel();
 
@@ -2590,9 +2623,6 @@ async function claimMining() {
         showToast(
             `تم استلام ${formatNumber(reward)} 3M بنجاح 🎉`
         );
-
-
-        await loadEconomicProfile();
 
 
     } catch (error) {
@@ -2924,21 +2954,23 @@ async function completeTask(taskId) {
         task.completed = 1;
 
 
-        state.balance += reward;
+        /*
+         * Backend remains authoritative.
+         * Re-load wallet after completion.
+         */
 
-        state.total += reward;
+        await Promise.allSettled([
 
-        state.today += reward;
+            loadUser(),
 
+            loadEconomicProfile(),
 
-        updateBalanceUI();
+            loadTasks()
 
-        renderTasks();
+        ]);
+
 
         updateExperienceLevel();
-
-
-        await loadEconomicProfile();
 
 
         showToast(
@@ -3049,16 +3081,17 @@ async function dailyReward() {
             );
 
 
-        state.balance += reward;
+        /*
+         * Re-sync from backend.
+         */
 
-        state.total += reward;
+        await Promise.allSettled([
 
-        state.today += reward;
+            loadUser(),
 
+            loadEconomicProfile()
 
-        updateBalanceUI();
-
-        await loadEconomicProfile();
+        ]);
 
 
         showToast(
@@ -3430,7 +3463,7 @@ async function showReferral() {
 
 
 /* =========================================================
-   WALLET V4
+   WALLET V4 — FIXED
    ========================================================= */
 
 async function showWallet() {
@@ -3443,6 +3476,11 @@ async function showWallet() {
         old.remove();
     }
 
+
+    /*
+     * IMPORTANT:
+     * Load BOTH layers before rendering wallet.
+     */
 
     await Promise.allSettled([
 
@@ -3500,7 +3538,22 @@ async function showWallet() {
     `;
 
 
+    /*
+     * =====================================================
+     * IMPORTANT WALLET SEPARATION
+     *
+     * Available = MAIN USER BALANCE
+     * Economic Available = ECONOMIC ENGINE BALANCE
+     * =====================================================
+     */
+
     const available =
+        safeNumber(
+            state.balance
+        );
+
+
+    const economicAvailable =
         safeNumber(
             state.economic.unlocked3m
         );
@@ -3604,7 +3657,9 @@ async function showWallet() {
             </div>
 
 
-            <!-- AVAILABLE -->
+            <!-- =================================================
+                 MAIN AVAILABLE BALANCE
+                 ================================================= -->
 
             <div style="
                 margin:18px;
@@ -3643,10 +3698,20 @@ async function showWallet() {
                     3M
                 </div>
 
+                <div style="
+                    margin-top:8px;
+                    color:#7892ad;
+                    font-size:10px;
+                ">
+                    الرصيد الرئيسي الفعلي من User API
+                </div>
+
             </div>
 
 
-            <!-- CORE BALANCES -->
+            <!-- =================================================
+                 CORE BALANCES
+                 ================================================= -->
 
             <div style="
                 padding:0 18px;
@@ -3654,6 +3719,12 @@ async function showWallet() {
                 grid-template-columns:1fr 1fr;
                 gap:10px;
             ">
+
+                ${walletMetric(
+                    "💎 Economic Available",
+                    economicAvailable,
+                    "3M"
+                )}
 
                 ${walletMetric(
                     "🔒 Locked",
@@ -3694,28 +3765,48 @@ async function showWallet() {
             </div>
 
 
-            <!-- MAIN BALANCE NOTE -->
+            <!-- =================================================
+                 BALANCE EXPLANATION
+                 ================================================= -->
 
             <div style="
                 margin:14px 18px 0;
-                padding:13px;
+                padding:14px;
                 border-radius:15px;
                 background:#0a2340;
                 color:#8ea4bd;
                 font-size:11px;
-                line-height:1.7;
+                line-height:1.8;
             ">
-                الرصيد الرئيسي:
-                <strong style="color:#dce8f4;">
+
+                <div>
+                    💎 <strong style="color:#dce8f4;">
+                    الرصيد الرئيسي:
+                    </strong>
                     ${formatNumber(state.balance)} 3M
-                </strong>
-                <br>
-                يتم عرض الرصيد الرئيسي منفصلاً عن الرصيد الاقتصادي
-                حتى لا تختلط طبقات النظام.
+                </div>
+
+                <div style="margin-top:5px;">
+                    🌐 <strong style="color:#dce8f4;">
+                    المتاح الاقتصادي:
+                    </strong>
+                    ${formatNumber(economicAvailable)} 3M
+                </div>
+
+                <div style="
+                    margin-top:7px;
+                    color:#687f99;
+                ">
+                    يتم عرض طبقة الرصيد الرئيسي وطبقة الاقتصاد
+                    بشكل منفصل حتى لا تختلط البيانات.
+                </div>
+
             </div>
 
 
-            <!-- ACTIONS -->
+            <!-- =================================================
+                 ACTIONS
+                 ================================================= -->
 
             <div style="
                 padding:0 18px;
@@ -3759,7 +3850,9 @@ async function showWallet() {
             </div>
 
 
-            <!-- TRANSACTIONS -->
+            <!-- =================================================
+                 TRANSACTIONS
+                 ================================================= -->
 
             <div style="
                 margin:18px;
@@ -4373,8 +4466,8 @@ function findAIAnswer(question) {
     ) {
 
         return `
-            افتح Wallet لمشاهدة Available وLocked
-            وTotal Mined وAirdrop وContribution وTrust
+            افتح Wallet لمشاهدة Available وEconomic Available
+            وLocked وTotal Mined وAirdrop وContribution وTrust
             وآخر العمليات.
         `;
     }
@@ -5125,7 +5218,7 @@ function setupV4Actions() {
 async function initializeApp() {
 
     console.log(
-        "3Migo Coin Mini App v4.0.0 starting..."
+        "3Migo Coin Mini App v4.0.1 starting..."
     );
 
 
@@ -5209,7 +5302,7 @@ async function initializeApp() {
 
 
         console.log(
-            "3Migo Coin Mini App v4.0.0 ready.",
+            "3Migo Coin Mini App v4.0.1 ready.",
             {
 
                 telegramId:
