@@ -1872,7 +1872,7 @@ function updateMiningUI() {
         rateEl.textContent =
             `${formatNumber(
                 state.miningReward
-            )} 3M / ${MINING_CYCLE_HOURS}h`;
+            )} 3M لكل جلسة (${MINING_CYCLE_HOURS} ساعة)`;
     }
 
 
@@ -1895,7 +1895,7 @@ function updateMiningUI() {
         if (strong) {
 
             strong.textContent =
-                "⛏️ Mining Active";
+                "⛏️ التعدين نشط";
         }
 
 
@@ -1914,8 +1914,8 @@ function updateMiningUI() {
 
         button.textContent =
             state.miningRemaining > 0
-                ? "⛏️ Mining..."
-                : "🎁 Claim 3M";
+                ? "⛏️ جارٍ التعدين..."
+                : "🎁 استلم 3M";
 
 
         button.classList.add(
@@ -1928,23 +1928,23 @@ function updateMiningUI() {
         if (strong) {
 
             strong.textContent =
-                "⚡ Ready to Mine";
+                "⚡ جاهز للتعدين";
         }
 
 
         if (small) {
 
             small.textContent =
-                `${formatNumber(
+                `مكافأة ${formatNumber(
                     state.miningReward
-                )} 3M reward`;
+                )} 3M`;
         }
 
 
         button.disabled = false;
 
         button.textContent =
-            "⛏️ Start Mining";
+            "⛏️ ابدأ التعدين";
 
 
         button.classList.remove(
@@ -2113,7 +2113,7 @@ async function startMining() {
 
         button.disabled = true;
         button.textContent =
-            "⏳ Starting...";
+            "⏳ جارٍ البدء...";
     }
 
 
