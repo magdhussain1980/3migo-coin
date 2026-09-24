@@ -2,7 +2,6 @@
 <html lang="ar" dir="rtl">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta name="viewport"
@@ -11,19 +10,17 @@
                    maximum-scale=1.0,
                    user-scalable=no">
 
-    <meta name="theme-color"
-          content="#031024">
+    <meta name="theme-color" content="#03070d">
 
-    <meta name="mobile-web-app-capable"
-          content="yes">
-
-    <meta name="apple-mobile-web-app-capable"
-          content="yes">
-
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style"
           content="black-translucent">
 
-    <title>3Migo Coin</title>
+    <meta name="description"
+          content="3Migo Coin — Telegram Mini App">
+
+    <title>3Migo Coin — 3M</title>
 
     <!-- =====================================================
          TELEGRAM MINI APP
@@ -31,14 +28,12 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-
     <!-- =====================================================
-         3MIGO MASTER DESIGN
+         3MIGO MASTER DESIGN V5.2
          ===================================================== -->
 
     <link rel="stylesheet"
           href="/webapp/style.css">
-
 </head>
 
 
@@ -55,13 +50,17 @@
 
         <div class="brand-name">
 
-            <strong>
-                3Migo Coin
+            <div class="brand-title-row">
+
+                <strong>
+                    3Migo Coin
+                </strong>
 
                 <span class="verified">
                     ✓
                 </span>
-            </strong>
+
+            </div>
 
             <small>
                 Telegram Mini App
@@ -70,8 +69,14 @@
         </div>
 
 
-        <div class="beta">
-            BETA
+        <div class="header-status">
+
+            <span class="status-dot"></span>
+
+            <span class="beta">
+                BETA
+            </span>
+
         </div>
 
     </header>
@@ -79,17 +84,33 @@
 
 
     <!-- =====================================================
-         MASTER BRAND HERO
+         COIN HERO
          ===================================================== -->
 
     <section class="brand-section">
 
-        <div class="coin-logo">
-            3M
+        <div class="coin-stage">
+
+            <div class="coin-glow"></div>
+
+            <div class="coin-logo">
+
+                <span>
+                    3M
+                </span>
+
+            </div>
+
+            <div class="coin-ring"></div>
+
         </div>
 
 
         <div class="brand-text">
+
+            <div class="brand-kicker">
+                DIGITAL REWARD SYSTEM
+            </div>
 
             <h1>
                 3Migo
@@ -98,6 +119,22 @@
             <p>
                 شارك • اكسب • ابنِ القيمة
             </p>
+
+            <div class="brand-badges">
+
+                <span>
+                    3M
+                </span>
+
+                <span>
+                    V5.2
+                </span>
+
+                <span>
+                    DEMO
+                </span>
+
+            </div>
 
         </div>
 
@@ -111,9 +148,25 @@
 
     <section class="balance-card">
 
+        <div class="balance-card-top">
 
-        <div class="balance-title">
-            رصيدك من 3M
+            <div>
+
+                <div class="balance-title">
+                    رصيدك من 3M
+                </div>
+
+                <small class="balance-subtitle">
+                    Main Available Balance
+                </small>
+
+            </div>
+
+
+            <div class="balance-mini-coin">
+                3M
+            </div>
+
         </div>
 
 
@@ -130,7 +183,11 @@
 
 
         <div class="balance-note">
+
+            <span class="info-dot">i</span>
+
             نسخة تجريبية — الرصيد داخلي حالياً
+
         </div>
 
 
@@ -147,7 +204,6 @@
                 ⛏️
             </span>
 
-
             <span class="mine-content">
 
                 <strong>
@@ -155,9 +211,13 @@
                 </strong>
 
                 <small>
-                    اضغط للبدء
+                    جلسة التعدين — 12 ساعة
                 </small>
 
+            </span>
+
+            <span class="mine-arrow">
+                ←
             </span>
 
         </button>
@@ -169,7 +229,6 @@
              ================================================= -->
 
         <div class="mining-status">
-
 
             <div>
 
@@ -184,6 +243,9 @@
             </div>
 
 
+            <div class="mining-divider"></div>
+
+
             <div>
 
                 <strong id="miningState">
@@ -196,7 +258,6 @@
 
             </div>
 
-
         </div>
 
     </section>
@@ -208,9 +269,6 @@
          ===================================================== -->
 
     <section class="features">
-
-
-        <!-- DAILY -->
 
         <button class="feature-card daily"
                 data-action="daily"
@@ -228,11 +286,12 @@
                 احصل على 50 3M
             </small>
 
+            <span class="feature-arrow">
+                ←
+            </span>
+
         </button>
 
-
-
-        <!-- TASKS -->
 
         <button class="feature-card tasks"
                 data-action="tasks"
@@ -250,11 +309,12 @@
                 مهام ومكافآت
             </small>
 
+            <span class="feature-arrow">
+                ←
+            </span>
+
         </button>
 
-
-
-        <!-- REFERRAL -->
 
         <button class="feature-card referral"
                 data-action="referral"
@@ -272,11 +332,12 @@
                 شارك واربح
             </small>
 
+            <span class="feature-arrow">
+                ←
+            </span>
+
         </button>
 
-
-
-        <!-- WALLET -->
 
         <button class="feature-card wallet"
                 data-action="wallet"
@@ -294,6 +355,10 @@
                 الرصيد والعمليات
             </small>
 
+            <span class="feature-arrow">
+                ←
+            </span>
+
         </button>
 
     </section>
@@ -301,15 +366,20 @@
 
 
     <!-- =====================================================
-         EXPERIENCE PREVIEW
+         EXPERIENCE
          ===================================================== -->
 
     <section class="experience-preview">
 
         <div class="section-title">
 
-            ⚡
-            مستوى تجربة 3Migo
+            <span class="section-title-icon">
+                ⚡
+            </span>
+
+            <span>
+                مستوى تجربة 3Migo
+            </span>
 
         </div>
 
@@ -331,7 +401,7 @@
                 </div>
 
 
-                <div>
+                <div class="experience-score">
 
                     <small>
                         نقاط التجربة
@@ -373,7 +443,7 @@
 
 
     <!-- =====================================================
-         REFERRAL SECTION
+         REFERRAL
          ===================================================== -->
 
     <section id="referralSection"
@@ -382,14 +452,18 @@
 
         <div class="section-title">
 
-            👥
-            برنامج الإحالة
+            <span class="section-title-icon">
+                👥
+            </span>
+
+            <span>
+                برنامج الإحالة
+            </span>
 
         </div>
 
 
         <div class="referral-card">
-
 
             <div class="referral-header">
 
@@ -413,15 +487,11 @@
             </div>
 
 
-
-            <!-- REFERRAL LINK -->
-
             <div class="referral-link-box">
 
                 <small>
                     رابط الإحالة الخاص بك
                 </small>
-
 
                 <div class="referral-link-row">
 
@@ -429,7 +499,6 @@
                            type="text"
                            readonly
                            value="جاري إنشاء الرابط...">
-
 
                     <button id="copyReferralBtn"
                             type="button">
@@ -443,9 +512,6 @@
             </div>
 
 
-
-            <!-- REFERRAL CODE -->
-
             <div class="referral-code-box">
 
                 <small>
@@ -458,9 +524,6 @@
 
             </div>
 
-
-
-            <!-- REFERRAL STATS -->
 
             <div class="referral-stats">
 
@@ -492,9 +555,6 @@
             </div>
 
 
-
-            <!-- SHARE -->
-
             <button id="shareReferralBtn"
                     class="referral-share-button"
                     type="button">
@@ -504,9 +564,6 @@
             </button>
 
 
-
-            <!-- GIFTS -->
-
             <div class="referral-gifts">
 
                 <div class="gift-title">
@@ -515,7 +572,6 @@
 
 
                 <div class="gift-grid">
-
 
                     <div class="gift-box">
 
@@ -567,11 +623,9 @@
 
                     </div>
 
-
                 </div>
 
             </div>
-
 
 
             <div class="referral-note">
@@ -595,14 +649,18 @@
 
         <div class="section-title">
 
-            📊
-            إحصائيات التعدين
+            <span class="section-title-icon">
+                📊
+            </span>
+
+            <span>
+                إحصائيات التعدين
+            </span>
 
         </div>
 
 
         <div class="statistics-grid">
-
 
             <div class="stat-box">
 
@@ -642,7 +700,6 @@
 
             </div>
 
-
         </div>
 
     </section>
@@ -657,14 +714,18 @@
 
         <div class="section-title">
 
-            💠
-            اقتصاد 3Migo
+            <span class="section-title-icon">
+                💠
+            </span>
+
+            <span>
+                اقتصاد 3Migo
+            </span>
 
         </div>
 
 
         <div class="economy-preview-card">
-
 
             <div class="economy-preview-header">
 
@@ -681,7 +742,7 @@
                 </div>
 
 
-                <span>
+                <span class="economy-symbol">
                     3M
                 </span>
 
@@ -689,7 +750,6 @@
 
 
             <div class="economy-preview-grid">
-
 
                 <div class="economy-preview-item">
 
@@ -763,6 +823,7 @@
                     type="button">
 
                 فتح مركز الاقتصاد
+                <span>←</span>
 
             </button>
 
@@ -779,10 +840,9 @@
     <section id="tasksSection"
              class="tasks-section">
 
-
         <div class="section-title tasks-section-title">
 
-            <span>
+            <span class="section-title-icon">
                 ☑️
             </span>
 
@@ -818,7 +878,6 @@
         <div id="tasksContainer"
              class="tasks-container">
 
-
             <div class="task-loading">
 
                 <span>
@@ -830,7 +889,6 @@
                 </span>
 
             </div>
-
 
         </div>
 
@@ -855,16 +913,18 @@
 
         <div class="section-title">
 
-            🚀
-            أدوات 3Migo
+            <span class="section-title-icon">
+                🚀
+            </span>
+
+            <span>
+                أدوات 3Migo
+            </span>
 
         </div>
 
 
         <div class="master-services-grid">
-
-
-            <!-- AD GALAXY -->
 
             <button class="master-service-card ad-galaxy-service"
                     data-action="ad-galaxy"
@@ -889,9 +949,6 @@
             </button>
 
 
-
-            <!-- AI -->
-
             <button class="master-service-card ai-service"
                     data-action="ai"
                     type="button">
@@ -914,7 +971,6 @@
 
             </button>
 
-
         </div>
 
     </section>
@@ -927,18 +983,15 @@
 
     <section class="promotion">
 
-
         <div class="promotion-text">
 
             <small>
                 مرحباً بك في عالم
             </small>
 
-
             <h2>
                 3Migo
             </h2>
-
 
             <p>
                 ابنِ رصيدك من خلال النشاط
@@ -949,7 +1002,11 @@
 
 
         <div class="promotion-coin">
-            3M
+
+            <span>
+                3M
+            </span>
+
         </div>
 
     </section>
@@ -962,11 +1019,15 @@
 
     <section class="roadmap">
 
-
         <div class="section-title">
 
-            🚀
-            مستقبل 3Migo
+            <span class="section-title-icon">
+                🚀
+            </span>
+
+            <span>
+                مستقبل 3Migo
+            </span>
 
         </div>
 
@@ -976,7 +1037,6 @@
             <span>
                 ✓
             </span>
-
 
             <div>
 
@@ -999,7 +1059,6 @@
                 ◉
             </span>
 
-
             <div>
 
                 <strong>
@@ -1021,7 +1080,6 @@
                 ○
             </span>
 
-
             <div>
 
                 <strong>
@@ -1035,7 +1093,6 @@
             </div>
 
         </div>
-
 
     </section>
 
@@ -1057,7 +1114,6 @@
 
     </footer>
 
-
 </div>
 
 
@@ -1067,7 +1123,6 @@
      ========================================================= -->
 
 <nav class="bottom-nav">
-
 
     <button class="active"
             type="button">
@@ -1138,7 +1193,6 @@
 
     </button>
 
-
 </nav>
 
 
@@ -1158,7 +1212,6 @@
      ========================================================= -->
 
 <script src="/webapp/app.js"></script>
-
 
 </body>
 
