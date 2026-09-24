@@ -1,7 +1,6 @@
 /* =========================================================
    3Migo Coin — Telegram Mini App
-   STYLE SHEET
-   Version 5.2
+   STYLE SHEET Version 5.3
    3MIGO SMART — Premium Economy Experience
 
    IMPORTANT:
@@ -11,2564 +10,1402 @@
    - Existing data-action contracts preserved.
    - Compatible with app.js V5.0.
    - No API / database / economic engine changes.
-========================================================= */
 
+   V5.3 CHANGE LOG (UI feedback pass):
+   - .beta-badge: new class so the BETA tag sits fully inside
+     the topbar instead of being clipped at the screen edge.
+     Add class="beta-badge" to that element in the HTML.
+   - Coin hero (.coin-stage/.coin-glow/.coin-ring/.coin-logo):
+     reduced ~15% so the balance card and mine button are
+     visible with less scrolling.
+   - #miningState: restyled to read as two clear lines
+     (rate line + status line) instead of one cramped line.
+     Wrap the two pieces of text in separate <span>/<div> or
+     use a <br> between them in the HTML.
+   - .bottom-nav: stronger contrast between the active and
+     inactive tabs.
+   - .trial-badge: new class for the "نسخة تجريبية" disclosure
+     text so it reads clearly instead of blending into the
+     background. Add class="trial-badge" to that element.
+========================================================= */
 
 /* =========================================================
    01. RESET & ROOT
 ========================================================= */
-
 :root {
-    --bg: #03070d;
-    --bg-soft: #071019;
-    --bg-deep: #02050a;
+  --bg: #03070d;
+  --bg-soft: #071019;
+  --bg-deep: #02050a;
+  --bg-card: rgba(10, 17, 27, 0.88);
+  --bg-card-2: rgba(16, 24, 35, 0.94);
 
-    --bg-card: rgba(10, 17, 27, 0.88);
-    --bg-card-2: rgba(16, 24, 35, 0.94);
+  --gold: #f7931a;
+  --gold-light: #ffb84d;
+  --gold-soft: #ffcc70;
+  --gold-pale: #ffe0a3;
+  --orange: #ff8a00;
+  --orange-dark: #c96500;
 
-    --gold: #f7931a;
-    --gold-light: #ffb84d;
-    --gold-soft: #ffcc70;
-    --gold-pale: #ffe0a3;
+  --cyan: #5bdcff;
+  --cyan-soft: #8be8ff;
+  --blue: #1769ff;
+  --blue-light: #4da3ff;
 
-    --orange: #ff8a00;
-    --orange-dark: #c96500;
+  --green: #25d366;
+  --green-soft: #6fffa0;
+  --red: #ff5c5c;
+  --yellow: #ffd54a;
 
-    --cyan: #5bdcff;
-    --cyan-soft: #8be8ff;
+  --white: #ffffff;
+  --text: #f6f8fb;
+  --text-soft: #dce4ed;
+  --muted: #8e9bab;
 
-    --blue: #1769ff;
-    --blue-light: #4da3ff;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-gold: rgba(247, 147, 26, 0.30);
+  --border-cyan: rgba(91, 220, 255, 0.25);
 
-    --green: #25d366;
-    --green-soft: #6fffa0;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  --shadow-gold: 0 0 20px rgba(247, 147, 26, 0.18), 0 0 55px rgba(247, 147, 26, 0.08);
+  --shadow-blue: 0 0 24px rgba(23, 105, 255, 0.16);
 
-    --red: #ff5c5c;
-    --yellow: #ffd54a;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+  --radius-pill: 999px;
 
-    --white: #ffffff;
-    --text: #f6f8fb;
-    --text-soft: #dce4ed;
-    --muted: #8e9bab;
-
-    --border: rgba(255, 255, 255, 0.09);
-    --border-gold: rgba(247, 147, 26, 0.30);
-    --border-cyan: rgba(91, 220, 255, 0.25);
-
-    --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
-    --shadow-gold:
-        0 0 20px rgba(247, 147, 26, 0.18),
-        0 0 55px rgba(247, 147, 26, 0.08);
-
-    --shadow-blue:
-        0 0 24px rgba(23, 105, 255, 0.16);
-
-    --radius-sm: 10px;
-    --radius-md: 16px;
-    --radius-lg: 22px;
-    --radius-xl: 30px;
-    --radius-pill: 999px;
-
-    --transition: 180ms ease;
+  --transition: 180ms ease;
 }
 
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 body {
-    font-family:
-        Arial,
-        Tahoma,
-        sans-serif;
-
-    background:
-        radial-gradient(
-            circle at 50% -10%,
-            rgba(247, 147, 26, 0.08),
-            transparent 32%
-        ),
-        radial-gradient(
-            circle at 0% 35%,
-            rgba(23, 105, 255, 0.06),
-            transparent 28%
-        ),
-        var(--bg);
-
-    color: var(--white);
-    min-height: 100vh;
-    padding-bottom: 96px;
-
-    overflow-x: hidden;
-
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+  font-family: Arial, Tahoma, sans-serif;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(247, 147, 26, 0.08), transparent 32%),
+    radial-gradient(circle at 0% 35%, rgba(23, 105, 255, 0.06), transparent 28%),
+    var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  padding-bottom: 96px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-button,
-input,
-textarea,
-select {
-    font-family: inherit;
+button, input, textarea, select {
+  font-family: inherit;
 }
 
 button {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 button:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 img {
-    max-width: 100%;
-    display: block;
+  max-width: 100%;
+  display: block;
 }
 
 a {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
-
 
 /* =========================================================
    02. GLOBAL SCROLLBAR
 ========================================================= */
-
-::-webkit-scrollbar {
-    width: 5px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-deep);
-}
-
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
 ::-webkit-scrollbar-thumb {
-    background: rgba(247, 147, 26, 0.45);
-    border-radius: var(--radius-pill);
+  background: rgba(247, 147, 26, 0.45);
+  border-radius: var(--radius-pill);
 }
-
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(247, 147, 26, 0.75);
+  background: rgba(247, 147, 26, 0.75);
 }
-
 
 /* =========================================================
    03. APP CONTAINER
 ========================================================= */
-
 .app {
-    width: 100%;
-    max-width: 720px;
-    margin: 0 auto;
-    position: relative;
-    padding: 0 14px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  position: relative;
+  padding: 0 14px;
 }
 
-main {
-    width: 100%;
-}
-
+main { width: 100%; }
 
 /* =========================================================
    04. TOP BAR
 ========================================================= */
-
 .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    min-height: 58px;
-    padding: 10px 4px;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(3, 7, 13, 0.96),
-            rgba(3, 7, 13, 0.78)
-        );
-
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 58px;
+  padding: 10px 4px;
+  background: linear-gradient(180deg, rgba(3, 7, 13, 0.96), rgba(3, 7, 13, 0.78));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: visible;
 }
 
 .topbar-title {
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: 0.3px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+/* BETA tag — kept fully inside the bar, never clipped at the edge */
+.beta-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  color: var(--bg);
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(247, 147, 26, 0.25);
+  white-space: nowrap;
 }
 
 .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .verified {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 19px;
-    height: 19px;
-
-    border-radius: 50%;
-
-    color: #061018;
-    background: linear-gradient(
-        135deg,
-        var(--cyan),
-        var(--cyan-soft)
-    );
-
-    font-size: 11px;
-    font-weight: 900;
-
-    box-shadow:
-        0 0 10px rgba(91, 220, 255, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  color: #061018;
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-soft));
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: 0 0 10px rgba(91, 220, 255, 0.35);
 }
 
 .status-dot {
-    width: 8px;
-    height: 8px;
-
-    border-radius: 50%;
-    background: var(--green);
-
-    box-shadow:
-        0 0 0 4px rgba(37, 211, 102, 0.08),
-        0 0 14px rgba(37, 211, 102, 0.6);
-
-    animation: statusPulse 2s infinite ease-in-out;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(37, 211, 102, 0.08), 0 0 14px rgba(37, 211, 102, 0.6);
+  animation: statusPulse 2s infinite ease-in-out;
 }
 
 @keyframes statusPulse {
-    0%,
-    100% {
-        opacity: 0.65;
-        transform: scale(0.9);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
+  0%, 100% { opacity: 0.65; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.05); }
 }
-
 
 /* =========================================================
    05. HERO
 ========================================================= */
-
 .hero {
-    position: relative;
-    text-align: center;
-
-    padding: 18px 0 12px;
-
-    overflow: hidden;
+  position: relative;
+  text-align: center;
+  padding: 18px 0 12px;
+  overflow: hidden;
 }
 
 .hero::before {
-    content: "";
-    position: absolute;
-
-    left: 50%;
-    top: 25px;
-
-    width: 300px;
-    height: 180px;
-
-    transform: translateX(-50%);
-
-    background:
-        radial-gradient(
-            ellipse,
-            rgba(247, 147, 26, 0.13),
-            transparent 68%
-        );
-
-    pointer-events: none;
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 25px;
+  width: 300px;
+  height: 180px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(247, 147, 26, 0.13), transparent 68%);
+  pointer-events: none;
 }
 
 .coin-stage {
-    position: relative;
-
-    width: 190px;
-    height: 190px;
-
-    margin: 0 auto 15px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: relative;
+  width: 162px;
+  height: 162px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .coin-glow {
-    position: absolute;
-
-    width: 145px;
-    height: 145px;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(247, 147, 26, 0.35),
-            rgba(247, 147, 26, 0.06) 50%,
-            transparent 72%
-        );
-
-    filter: blur(8px);
-
-    animation: coinGlow 3.5s ease-in-out infinite;
+  position: absolute;
+  width: 124px;
+  height: 124px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(247, 147, 26, 0.35), rgba(247, 147, 26, 0.06) 50%, transparent 72%);
+  filter: blur(8px);
+  animation: coinGlow 3.5s ease-in-out infinite;
 }
 
 .coin-ring {
-    position: absolute;
-
-    width: 174px;
-    height: 174px;
-
-    border-radius: 50%;
-
-    border: 1px solid rgba(247, 147, 26, 0.26);
-
-    box-shadow:
-        0 0 18px rgba(247, 147, 26, 0.10),
-        inset 0 0 18px rgba(247, 147, 26, 0.06);
-
-    animation: ringRotate 16s linear infinite;
+  position: absolute;
+  width: 148px;
+  height: 148px;
+  border-radius: 50%;
+  border: 1px solid rgba(247, 147, 26, 0.26);
+  box-shadow: 0 0 18px rgba(247, 147, 26, 0.10), inset 0 0 18px rgba(247, 147, 26, 0.06);
+  animation: ringRotate 16s linear infinite;
 }
 
 @keyframes ringRotate {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes coinGlow {
-    0%,
-    100% {
-        opacity: 0.65;
-        transform: scale(0.94);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.06);
-    }
+  0%, 100% { opacity: 0.65; transform: scale(0.94); }
+  50% { opacity: 1; transform: scale(1.06); }
 }
 
-.coin-logo,
-.hero-logo {
-    position: relative;
-    z-index: 3;
-
-    width: 104px;
-    height: 104px;
-
-    object-fit: cover;
-
-    border-radius: 50%;
-
-    border: 5px solid #f6ad3c;
-
-    background:
-        radial-gradient(
-            circle at 30% 25%,
-            #fff4d5,
-            #f7931a 34%,
-            #c86600 74%,
-            #713500
-        );
-
-    box-shadow:
-        0 0 0 4px rgba(255, 207, 125, 0.14),
-        0 0 0 9px rgba(247, 147, 26, 0.08),
-        inset 5px 5px 12px rgba(255, 255, 255, 0.45),
-        inset -7px -8px 15px rgba(78, 35, 0, 0.48),
-        0 12px 35px rgba(0, 0, 0, 0.55),
-        0 0 32px rgba(247, 147, 26, 0.23);
-
-    animation: coinFloat 4s ease-in-out infinite;
+.coin-logo, .hero-logo {
+  position: relative;
+  z-index: 3;
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #f6ad3c;
+  background: radial-gradient(circle at 30% 25%, #fff4d5, #f7931a 34%, #c86600 74%, #713500);
+  box-shadow:
+    0 0 0 4px rgba(255, 207, 125, 0.14),
+    0 0 0 9px rgba(247, 147, 26, 0.08),
+    inset 5px 5px 12px rgba(255, 255, 255, 0.45),
+    inset -7px -8px 15px rgba(78, 35, 0, 0.48),
+    0 12px 35px rgba(0, 0, 0, 0.55),
+    0 0 32px rgba(247, 147, 26, 0.23);
+  animation: coinFloat 4s ease-in-out infinite;
 }
 
-.coin-logo::before,
-.hero-logo::before {
-    content: "";
-
-    position: absolute;
-    inset: 7px;
-
-    border-radius: 50%;
-
-    border: 1px solid rgba(255, 240, 194, 0.65);
-
-    box-shadow:
-        inset 0 0 0 2px rgba(113, 53, 0, 0.25),
-        inset 0 0 10px rgba(255, 255, 255, 0.2);
-
-    pointer-events: none;
+.coin-logo::before, .hero-logo::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 240, 194, 0.65);
+  box-shadow: inset 0 0 0 2px rgba(113, 53, 0, 0.25), inset 0 0 10px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
 }
 
-.coin-logo::after,
-.hero-logo::after {
-    content: "3M • 3MIGO • 3M • 3MIGO";
-
-    position: absolute;
-    left: 50%;
-    bottom: 7px;
-
-    transform: translateX(-50%);
-
-    width: 82%;
-
-    color: rgba(255, 236, 181, 0.72);
-
-    font-size: 4px;
-    font-weight: 900;
-
-    letter-spacing: 1px;
-
-    white-space: nowrap;
-
-    text-shadow:
-        0 1px 1px rgba(0, 0, 0, 0.65);
-
-    pointer-events: none;
+.coin-logo::after, .hero-logo::after {
+  content: "3M • 3MIGO • 3M • 3MIGO";
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%);
+  width: 82%;
+  color: rgba(255, 236, 181, 0.72);
+  font-size: 4px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.65);
+  pointer-events: none;
 }
 
 @keyframes coinFloat {
-    0%,
-    100% {
-        transform: translateY(0) rotate(-1deg);
-    }
-
-    50% {
-        transform: translateY(-5px) rotate(1deg);
-    }
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
 }
-
 
 /* =========================================================
    06. BRAND TITLE
 ========================================================= */
-
 .brand-title {
-    position: relative;
-    z-index: 2;
-
-    margin-top: 2px;
-
-    font-size: 27px;
-    line-height: 1.05;
-
-    font-weight: 900;
-    letter-spacing: 0.4px;
-
-    text-shadow:
-        0 3px 18px rgba(0, 0, 0, 0.55);
+  position: relative;
+  z-index: 2;
+  margin-top: 2px;
+  font-size: 27px;
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.55);
 }
 
 .brand-title .coin-symbol {
-    display: inline-block;
-
-    margin-right: 4px;
-
-    color: var(--gold);
-
-    font-size: 28px;
-
-    text-shadow:
-        0 0 14px rgba(247, 147, 26, 0.45);
+  display: inline-block;
+  margin-right: 4px;
+  color: var(--gold);
+  font-size: 28px;
+  text-shadow: 0 0 14px rgba(247, 147, 26, 0.45);
 }
 
 .brand-subtitle {
-    margin-top: 7px;
-
-    color: var(--muted);
-
-    font-size: 11px;
-    font-weight: 700;
-
-    letter-spacing: 2px;
-    text-transform: uppercase;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .hero-badges {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-
-    gap: 7px;
-
-    margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
 }
 
 .badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    min-height: 26px;
-
-    padding: 4px 10px;
-
-    border-radius: var(--radius-pill);
-
-    color: var(--text-soft);
-
-    background:
-        rgba(255, 255, 255, 0.045);
-
-    border: 1px solid var(--border);
-
-    font-size: 10px;
-    font-weight: 800;
-
-    letter-spacing: 0.7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
 }
 
 .badge.gold {
-    color: var(--gold-light);
-    border-color: var(--border-gold);
-
-    background:
-        rgba(247, 147, 26, 0.08);
+  color: var(--gold-light);
+  border-color: var(--border-gold);
+  background: rgba(247, 147, 26, 0.08);
 }
 
 .badge.cyan {
-    color: var(--cyan);
-    border-color: var(--border-cyan);
-
-    background:
-        rgba(91, 220, 255, 0.06);
+  color: var(--cyan);
+  border-color: var(--border-cyan);
+  background: rgba(91, 220, 255, 0.06);
 }
-
 
 /* =========================================================
    07. SECTION SYSTEM
 ========================================================= */
-
 section {
-    width: 100%;
-    margin-top: 16px;
+  width: 100%;
+  margin-top: 16px;
 }
 
 .section-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 10px;
-
-    font-size: 14px;
-    font-weight: 900;
-
-    color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--text);
 }
 
 .section-title span {
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 600;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
 }
-
 
 /* =========================================================
    08. GENERIC CARD
 ========================================================= */
-
 .card {
-    position: relative;
-
-    padding: 16px;
-
-    border-radius: var(--radius-lg);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(19, 29, 41, 0.94),
-            rgba(7, 13, 21, 0.94)
-        );
-
-    border: 1px solid var(--border);
-
-    box-shadow: var(--shadow);
-
-    overflow: hidden;
+  position: relative;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, rgba(19, 29, 41, 0.94), rgba(7, 13, 21, 0.94));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .card::before {
-    content: "";
-
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    width: 100%;
-    height: 1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.16),
-            transparent
-        );
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
 }
-
 
 /* =========================================================
    09. BALANCE CARD
 ========================================================= */
-
 .balance-card {
-    position: relative;
-
-    padding: 20px;
-
-    border-radius: var(--radius-xl);
-
-    background:
-        radial-gradient(
-            circle at 85% 15%,
-            rgba(247, 147, 26, 0.16),
-            transparent 35%
-        ),
-        linear-gradient(
-            145deg,
-            rgba(24, 31, 42, 0.97),
-            rgba(7, 12, 20, 0.97)
-        );
-
-    border: 1px solid rgba(247, 147, 26, 0.18);
-
-    box-shadow:
-        var(--shadow),
-        var(--shadow-gold);
-
-    overflow: hidden;
+  position: relative;
+  padding: 20px;
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at 85% 15%, rgba(247, 147, 26, 0.16), transparent 35%),
+    linear-gradient(145deg, rgba(24, 31, 42, 0.97), rgba(7, 12, 20, 0.97));
+  border: 1px solid rgba(247, 147, 26, 0.18);
+  box-shadow: var(--shadow), var(--shadow-gold);
+  overflow: hidden;
 }
 
 .balance-card::after {
-    content: "";
-
-    position: absolute;
-    right: -60px;
-    bottom: -70px;
-
-    width: 160px;
-    height: 160px;
-
-    border-radius: 50%;
-
-    border: 1px solid rgba(247, 147, 26, 0.10);
-    box-shadow:
-        0 0 0 15px rgba(247, 147, 26, 0.025),
-        0 0 0 30px rgba(247, 147, 26, 0.018);
-
-    pointer-events: none;
+  content: "";
+  position: absolute;
+  right: -60px;
+  bottom: -70px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 1px solid rgba(247, 147, 26, 0.10);
+  box-shadow: 0 0 0 15px rgba(247, 147, 26, 0.025), 0 0 0 30px rgba(247, 147, 26, 0.018);
+  pointer-events: none;
 }
 
 .balance-label {
-    color: var(--muted);
-
-    font-size: 11px;
-    font-weight: 700;
-
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
 }
 
 .balance-value {
-    margin-top: 5px;
-
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
-
-    font-size: 38px;
-    line-height: 1;
-
-    font-weight: 900;
-
-    color: var(--white);
-
-    text-shadow:
-        0 3px 20px rgba(0, 0, 0, 0.5);
+  margin-top: 5px;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 900;
+  color: var(--white);
+  text-shadow: 0 3px 20px rgba(0, 0, 0, 0.5);
 }
 
 .balance-value .unit {
-    color: var(--gold-light);
-
-    font-size: 15px;
-    font-weight: 900;
-
-    letter-spacing: 0.8px;
+  color: var(--gold-light);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
 }
 
 .balance-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-top: 14px;
-
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  gap: 10px;
 }
 
 .rate {
-    color: var(--muted);
-    font-size: 11px;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .rate strong {
-    color: var(--gold-light);
+  color: var(--gold-light);
 }
 
 #mineBtn {
-    position: relative;
-
-    width: 100%;
-
-    margin-top: 16px;
-    padding: 14px 18px;
-
-    border: 0;
-    border-radius: 16px;
-
-    color: #180c00;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffd36a,
-            #f7931a 48%,
-            #d96b00
-        );
-
-    box-shadow:
-        0 8px 25px rgba(247, 147, 26, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.55);
-
-    font-size: 15px;
-    font-weight: 900;
-
-    transition:
-        transform var(--transition),
-        box-shadow var(--transition),
-        filter var(--transition);
+  position: relative;
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 16px;
+  color: #180c00;
+  background: linear-gradient(135deg, #ffd36a, #f7931a 48%, #d96b00);
+  box-shadow: 0 8px 25px rgba(247, 147, 26, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  font-size: 15px;
+  font-weight: 900;
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
 }
 
 #mineBtn:hover {
-    filter: brightness(1.07);
-    box-shadow:
-        0 10px 30px rgba(247, 147, 26, 0.30),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  filter: brightness(1.07);
+  box-shadow: 0 10px 30px rgba(247, 147, 26, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-#mineBtn:active {
-    transform: scale(0.98);
-}
+#mineBtn:active { transform: scale(0.98); }
 
 #miningState {
-    margin-top: 9px;
-
-    text-align: center;
-
-    color: var(--muted);
-
-    font-size: 10px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.5;
 }
 
+#miningState strong {
+  color: var(--gold-light);
+  font-weight: 900;
+}
+
+/* "نسخة تجريبية" style disclosures — bright enough not to blend into the card */
+.trial-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  color: var(--yellow);
+  background: rgba(255, 213, 74, 0.10);
+  border: 1px solid rgba(255, 213, 74, 0.28);
+  font-size: 11px;
+  font-weight: 800;
+}
 
 /* =========================================================
    10. QUICK ACTIONS
 ========================================================= */
-
 .quick-actions {
-    display: grid;
-
-    grid-template-columns: repeat(4, 1fr);
-
-    gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
-.quick-action,
-.action-card {
-    position: relative;
-
-    min-height: 74px;
-
-    padding: 10px 7px;
-
-    border-radius: 17px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    gap: 6px;
-
-    color: var(--text);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(18, 28, 40, 0.96),
-            rgba(8, 14, 22, 0.96)
-        );
-
-    border: 1px solid var(--border);
-
-    transition:
-        transform var(--transition),
-        border-color var(--transition),
-        background var(--transition);
+.quick-action, .action-card {
+  position: relative;
+  min-height: 74px;
+  padding: 10px 7px;
+  border-radius: 17px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text);
+  background: linear-gradient(145deg, rgba(18, 28, 40, 0.96), rgba(8, 14, 22, 0.96));
+  border: 1px solid var(--border);
+  transition: transform var(--transition), border-color var(--transition), background var(--transition);
 }
 
-.quick-action:hover,
-.action-card:hover {
-    transform: translateY(-2px);
-
-    border-color:
-        rgba(247, 147, 26, 0.30);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(29, 38, 51, 0.98),
-            rgba(10, 17, 26, 0.98)
-        );
+.quick-action:hover, .action-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(247, 147, 26, 0.30);
+  background: linear-gradient(145deg, rgba(29, 38, 51, 0.98), rgba(10, 17, 26, 0.98));
 }
 
-.quick-action .icon,
-.action-card .icon {
-    font-size: 22px;
+.quick-action .icon, .action-card .icon { font-size: 22px; }
+.quick-action span, .action-card span {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-soft);
 }
-
-.quick-action span,
-.action-card span {
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--text-soft);
-}
-
 
 /* =========================================================
    11. EXPERIENCE
 ========================================================= */
-
 .experience-card {
-    padding: 16px;
-
-    border-radius: var(--radius-lg);
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(14, 24, 38, 0.95),
-            rgba(6, 13, 22, 0.95)
-        );
-
-    border: 1px solid rgba(91, 220, 255, 0.12);
-
-    box-shadow:
-        var(--shadow),
-        var(--shadow-blue);
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(14, 24, 38, 0.95), rgba(6, 13, 22, 0.95));
+  border: 1px solid rgba(91, 220, 255, 0.12);
+  box-shadow: var(--shadow), var(--shadow-blue);
 }
 
 .experience-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.experience-level {
-    color: var(--cyan);
-
-    font-size: 18px;
-    font-weight: 900;
-}
-
-.experience-score {
-    color: var(--muted);
-
-    font-size: 11px;
-}
+.experience-level { color: var(--cyan); font-size: 18px; font-weight: 900; }
+.experience-score { color: var(--muted); font-size: 11px; }
 
 .experience-progress {
-    position: relative;
-
-    height: 9px;
-
-    margin-top: 12px;
-
-    border-radius: var(--radius-pill);
-
-    background:
-        rgba(255, 255, 255, 0.06);
-
-    overflow: hidden;
+  position: relative;
+  height: 9px;
+  margin-top: 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
 }
 
 #v4LevelProgress {
-    width: 0;
-    height: 100%;
-
-    border-radius: inherit;
-
-    background:
-        linear-gradient(
-            90deg,
-            #1769ff,
-            #5bdcff
-        );
-
-    box-shadow:
-        0 0 14px rgba(91, 220, 255, 0.28);
-
-    transition: width 0.5s ease;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1769ff, #5bdcff);
+  box-shadow: 0 0 14px rgba(91, 220, 255, 0.28);
+  transition: width 0.5s ease;
 }
-
 
 /* =========================================================
    12. REFERRAL
 ========================================================= */
-
-.referral-card,
-#referralSection {
-    position: relative;
-
-    padding: 16px;
-
-    border-radius: var(--radius-lg);
-
-    background:
-        radial-gradient(
-            circle at 90% 10%,
-            rgba(247, 147, 26, 0.12),
-            transparent 35%
-        ),
-        var(--bg-card);
-
-    border: 1px solid var(--border-gold);
-
-    box-shadow: var(--shadow);
+.referral-card, #referralSection {
+  position: relative;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(247, 147, 26, 0.12), transparent 35%),
+    var(--bg-card);
+  border: 1px solid var(--border-gold);
+  box-shadow: var(--shadow);
 }
 
 .referral-link-box {
-    display: flex;
-    align-items: center;
-
-    gap: 8px;
-
-    margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 #referralLink {
-    flex: 1;
-
-    min-width: 0;
-
-    padding: 11px 12px;
-
-    border-radius: 12px;
-
-    color: var(--text-soft);
-
-    background:
-        rgba(0, 0, 0, 0.22);
-
-    border: 1px solid var(--border);
-
-    font-size: 10px;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  border-radius: 12px;
+  color: var(--text-soft);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-#copyReferralBtn,
-#shareReferralBtn {
-    border: 0;
-
-    padding: 10px 12px;
-
-    border-radius: 11px;
-
-    color: #160c00;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--gold-light),
-            var(--gold)
-        );
-
-    font-size: 11px;
-    font-weight: 900;
+#copyReferralBtn, #shareReferralBtn {
+  border: 0;
+  padding: 10px 12px;
+  border-radius: 11px;
+  color: #160c00;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .referral-stats {
-    display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
-    gap: 8px;
-
-    margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .referral-stat {
-    padding: 11px 7px;
-
-    text-align: center;
-
-    border-radius: 13px;
-
-    background:
-        rgba(255, 255, 255, 0.035);
-
-    border: 1px solid var(--border);
+  padding: 11px 7px;
+  text-align: center;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
 }
 
-.referral-stat strong {
-    display: block;
-
-    color: var(--gold-light);
-
-    font-size: 16px;
-}
-
-.referral-stat span {
-    display: block;
-
-    margin-top: 3px;
-
-    color: var(--muted);
-
-    font-size: 9px;
-}
-
+.referral-stat strong { display: block; color: var(--gold-light); font-size: 16px; }
+.referral-stat span { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
 
 /* =========================================================
    13. STATISTICS
 ========================================================= */
-
 .stats-grid {
-    display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
-    gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
 .stat-card {
-    padding: 14px 9px;
-
-    border-radius: 16px;
-
-    text-align: center;
-
-    background:
-        rgba(255, 255, 255, 0.035);
-
-    border: 1px solid var(--border);
+  padding: 14px 9px;
+  border-radius: 16px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
 }
 
-.stat-card strong {
-    display: block;
-
-    color: var(--white);
-
-    font-size: 18px;
-    font-weight: 900;
-}
-
-.stat-card span {
-    display: block;
-
-    margin-top: 5px;
-
-    color: var(--muted);
-
-    font-size: 9px;
-}
-
+.stat-card strong { display: block; color: var(--white); font-size: 18px; font-weight: 900; }
+.stat-card span { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; }
 
 /* =========================================================
    14. ECONOMIC ENGINE
 ========================================================= */
-
 .economic-card {
-    position: relative;
-
-    padding: 17px;
-
-    border-radius: var(--radius-xl);
-
-    background:
-        radial-gradient(
-            circle at 15% 0%,
-            rgba(91, 220, 255, 0.08),
-            transparent 34%
-        ),
-        radial-gradient(
-            circle at 100% 100%,
-            rgba(247, 147, 26, 0.10),
-            transparent 36%
-        ),
-        linear-gradient(
-            145deg,
-            rgba(15, 24, 35, 0.97),
-            rgba(5, 11, 18, 0.97)
-        );
-
-    border: 1px solid rgba(91, 220, 255, 0.13);
-
-    box-shadow: var(--shadow);
-
-    overflow: hidden;
+  position: relative;
+  padding: 17px;
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(91, 220, 255, 0.08), transparent 34%),
+    radial-gradient(circle at 100% 100%, rgba(247, 147, 26, 0.10), transparent 36%),
+    linear-gradient(145deg, rgba(15, 24, 35, 0.97), rgba(5, 11, 18, 0.97));
+  border: 1px solid rgba(91, 220, 255, 0.13);
+  box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .economic-grid {
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 8px;
-
-    margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .economic-item {
-    padding: 12px;
-
-    border-radius: 14px;
-
-    background:
-        rgba(255, 255, 255, 0.035);
-
-    border: 1px solid var(--border);
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
 }
 
-.economic-item .label {
-    color: var(--muted);
-
-    font-size: 9px;
-}
-
-.economic-item .value {
-    margin-top: 5px;
-
-    color: var(--text);
-
-    font-size: 15px;
-    font-weight: 900;
-}
-
-.economic-item.gold .value {
-    color: var(--gold-light);
-}
-
-.economic-item.cyan .value {
-    color: var(--cyan);
-}
-
-.economic-item.green .value {
-    color: var(--green-soft);
-}
+.economic-item .label { color: var(--muted); font-size: 9px; }
+.economic-item .value { margin-top: 5px; color: var(--text); font-size: 15px; font-weight: 900; }
+.economic-item.gold .value { color: var(--gold-light); }
+.economic-item.cyan .value { color: var(--cyan); }
+.economic-item.green .value { color: var(--green-soft); }
 
 #economicDashboardBtn {
-    width: 100%;
-
-    margin-top: 13px;
-    padding: 12px;
-
-    border-radius: 13px;
-
-    color: var(--cyan);
-
-    background:
-        rgba(91, 220, 255, 0.06);
-
-    border: 1px solid rgba(91, 220, 255, 0.18);
-
-    font-size: 11px;
-    font-weight: 900;
+  width: 100%;
+  margin-top: 13px;
+  padding: 12px;
+  border-radius: 13px;
+  color: var(--cyan);
+  background: rgba(91, 220, 255, 0.06);
+  border: 1px solid rgba(91, 220, 255, 0.18);
+  font-size: 11px;
+  font-weight: 900;
 }
-
 
 /* =========================================================
    15. TASKS
 ========================================================= */
-
-#tasksSection {
-    scroll-margin-top: 70px;
-}
-
-#tasksContainer {
-    display: flex;
-    flex-direction: column;
-
-    gap: 9px;
-}
+#tasksSection { scroll-margin-top: 70px; }
+#tasksContainer { display: flex; flex-direction: column; gap: 9px; }
 
 .task-card {
-    position: relative;
-
-    display: flex;
-    align-items: center;
-
-    gap: 12px;
-
-    padding: 13px;
-
-    border-radius: 16px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(16, 25, 36, 0.94),
-            rgba(7, 13, 21, 0.94)
-        );
-
-    border: 1px solid var(--border);
-
-    transition:
-        transform var(--transition),
-        border-color var(--transition);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(16, 25, 36, 0.94), rgba(7, 13, 21, 0.94));
+  border: 1px solid var(--border);
+  transition: transform var(--transition), border-color var(--transition);
 }
 
-.task-card:hover {
-    transform: translateY(-1px);
-
-    border-color:
-        rgba(247, 147, 26, 0.24);
-}
+.task-card:hover { transform: translateY(-1px); border-color: rgba(247, 147, 26, 0.24); }
 
 .task-icon {
-    width: 40px;
-    height: 40px;
-
-    flex: 0 0 40px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 13px;
-
-    background:
-        rgba(247, 147, 26, 0.09);
-
-    border: 1px solid rgba(247, 147, 26, 0.15);
-
-    font-size: 18px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  background: rgba(247, 147, 26, 0.09);
+  border: 1px solid rgba(247, 147, 26, 0.15);
+  font-size: 18px;
 }
 
-.task-content {
-    flex: 1;
-    min-width: 0;
+.task-content { flex: 1; min-width: 0; }
+.task-title { color: var(--text); font-size: 12px; font-weight: 900; }
+.task-description { margin-top: 3px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+.task-reward { margin-top: 5px; color: var(--gold-light); font-size: 10px; font-weight: 900; }
+
+.task-btn, .complete-task-btn {
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 11px;
+  color: #160c00;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  font-size: 9px;
+  font-weight: 900;
 }
-
-.task-title {
-    color: var(--text);
-
-    font-size: 12px;
-    font-weight: 900;
-}
-
-.task-description {
-    margin-top: 3px;
-
-    color: var(--muted);
-
-    font-size: 9px;
-    line-height: 1.4;
-}
-
-.task-reward {
-    margin-top: 5px;
-
-    color: var(--gold-light);
-
-    font-size: 10px;
-    font-weight: 900;
-}
-
-.task-btn,
-.complete-task-btn {
-    padding: 9px 11px;
-
-    border: 0;
-    border-radius: 11px;
-
-    color: #160c00;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--gold-light),
-            var(--gold)
-        );
-
-    font-size: 9px;
-    font-weight: 900;
-}
-
 
 /* =========================================================
    16. MASTER SERVICES
 ========================================================= */
-
 .master-services {
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 
 .master-service {
-    position: relative;
-
-    min-height: 135px;
-
-    padding: 16px;
-
-    border-radius: 20px;
-
-    overflow: hidden;
-
-    border: 1px solid var(--border);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(18, 29, 43, 0.95),
-            rgba(6, 13, 21, 0.95)
-        );
-
-    transition:
-        transform var(--transition),
-        border-color var(--transition);
+  position: relative;
+  min-height: 135px;
+  padding: 16px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: linear-gradient(145deg, rgba(18, 29, 43, 0.95), rgba(6, 13, 21, 0.95));
+  transition: transform var(--transition), border-color var(--transition);
 }
 
-.master-service:hover {
-    transform: translateY(-2px);
-
-    border-color:
-        rgba(247, 147, 26, 0.28);
-}
+.master-service:hover { transform: translateY(-2px); border-color: rgba(247, 147, 26, 0.28); }
 
 .master-service::after {
-    content: "";
-
-    position: absolute;
-
-    width: 90px;
-    height: 90px;
-
-    right: -25px;
-    bottom: -30px;
-
-    border-radius: 50%;
-
-    background:
-        rgba(247, 147, 26, 0.07);
-
-    filter: blur(3px);
+  content: "";
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  right: -25px;
+  bottom: -30px;
+  border-radius: 50%;
+  background: rgba(247, 147, 26, 0.07);
+  filter: blur(3px);
 }
 
-.master-service .service-icon {
-    font-size: 29px;
-}
-
-.master-service h3 {
-    margin-top: 10px;
-
-    font-size: 14px;
-    font-weight: 900;
-}
-
-.master-service p {
-    margin-top: 5px;
-
-    color: var(--muted);
-
-    font-size: 9px;
-    line-height: 1.45;
-}
-
+.master-service .service-icon { font-size: 29px; }
+.master-service h3 { margin-top: 10px; font-size: 14px; font-weight: 900; }
+.master-service p { margin-top: 5px; color: var(--muted); font-size: 9px; line-height: 1.45; }
 
 /* =========================================================
    17. AD GALAXY
 ========================================================= */
-
 .ad-galaxy {
-    position: relative;
-
-    padding: 18px;
-
-    min-height: 150px;
-
-    border-radius: 22px;
-
-    background:
-        radial-gradient(
-            circle at 20% 25%,
-            rgba(247, 147, 26, 0.18),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 80% 70%,
-            rgba(91, 220, 255, 0.10),
-            transparent 32%
-        ),
-        #07111d;
-
-    border: 1px solid rgba(247, 147, 26, 0.18);
-
-    overflow: hidden;
+  position: relative;
+  padding: 18px;
+  min-height: 150px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(247, 147, 26, 0.18), transparent 30%),
+    radial-gradient(circle at 80% 70%, rgba(91, 220, 255, 0.10), transparent 32%),
+    #07111d;
+  border: 1px solid rgba(247, 147, 26, 0.18);
+  overflow: hidden;
 }
 
-.ad-galaxy::before,
-.ad-galaxy::after {
-    content: "";
-
-    position: absolute;
-
-    border-radius: 50%;
-
-    background: rgba(255, 255, 255, 0.7);
-
-    box-shadow:
-        30px 12px rgba(255, 255, 255, 0.35),
-        70px 45px rgba(255, 255, 255, 0.25),
-        125px 20px rgba(255, 255, 255, 0.45),
-        180px 75px rgba(255, 255, 255, 0.2);
+.ad-galaxy::before, .ad-galaxy::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    30px 12px rgba(255, 255, 255, 0.35),
+    70px 45px rgba(255, 255, 255, 0.25),
+    125px 20px rgba(255, 255, 255, 0.45),
+    180px 75px rgba(255, 255, 255, 0.2);
 }
 
-.ad-galaxy::before {
-    width: 2px;
-    height: 2px;
+.ad-galaxy::before { width: 2px; height: 2px; top: 20px; left: 25px; }
+.ad-galaxy::after { width: 3px; height: 3px; right: 35px; top: 35px; }
 
-    top: 20px;
-    left: 25px;
-}
-
-.ad-galaxy::after {
-    width: 3px;
-    height: 3px;
-
-    right: 35px;
-    top: 35px;
-}
-
-.ad-galaxy h3 {
-    position: relative;
-    z-index: 2;
-
-    font-size: 19px;
-    font-weight: 900;
-
-    color: var(--gold-light);
-}
-
+.ad-galaxy h3 { position: relative; z-index: 2; font-size: 19px; font-weight: 900; color: var(--gold-light); }
 .ad-galaxy p {
-    position: relative;
-    z-index: 2;
-
-    margin-top: 7px;
-
-    max-width: 80%;
-
-    color: var(--text-soft);
-
-    font-size: 10px;
-    line-height: 1.5;
+  position: relative;
+  z-index: 2;
+  margin-top: 7px;
+  max-width: 80%;
+  color: var(--text-soft);
+  font-size: 10px;
+  line-height: 1.5;
 }
-
 
 /* =========================================================
    18. AI SERVICE
 ========================================================= */
-
 .ai-service {
-    position: relative;
-
-    padding: 18px;
-
-    border-radius: 22px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(9, 25, 39, 0.97),
-            rgba(5, 12, 20, 0.97)
-        );
-
-    border: 1px solid rgba(91, 220, 255, 0.16);
-
-    overflow: hidden;
+  position: relative;
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(9, 25, 39, 0.97), rgba(5, 12, 20, 0.97));
+  border: 1px solid rgba(91, 220, 255, 0.16);
+  overflow: hidden;
 }
 
 .ai-service::before {
-    content: "";
-
-    position: absolute;
-
-    width: 160px;
-    height: 160px;
-
-    right: -65px;
-    top: -65px;
-
-    border-radius: 50%;
-
-    border: 1px solid rgba(91, 220, 255, 0.12);
-
-    box-shadow:
-        0 0 0 18px rgba(91, 220, 255, 0.025),
-        0 0 0 38px rgba(91, 220, 255, 0.018);
+  content: "";
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  right: -65px;
+  top: -65px;
+  border-radius: 50%;
+  border: 1px solid rgba(91, 220, 255, 0.12);
+  box-shadow: 0 0 0 18px rgba(91, 220, 255, 0.025), 0 0 0 38px rgba(91, 220, 255, 0.018);
 }
 
-.ai-service h3 {
-    font-size: 18px;
-    font-weight: 900;
-
-    color: var(--cyan);
-}
-
-.ai-service p {
-    margin-top: 7px;
-
-    color: var(--muted);
-
-    font-size: 10px;
-    line-height: 1.5;
-}
-
+.ai-service h3 { font-size: 18px; font-weight: 900; color: var(--cyan); }
+.ai-service p { margin-top: 7px; color: var(--muted); font-size: 10px; line-height: 1.5; }
 
 /* =========================================================
    19. PROMOTION
 ========================================================= */
-
 .promotion {
-    position: relative;
-
-    display: flex;
-    align-items: center;
-
-    gap: 15px;
-
-    padding: 16px;
-
-    border-radius: 21px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(247, 147, 26, 0.12),
-            rgba(9, 18, 29, 0.95)
-        );
-
-    border: 1px solid rgba(247, 147, 26, 0.16);
-
-    overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 16px;
+  border-radius: 21px;
+  background: linear-gradient(135deg, rgba(247, 147, 26, 0.12), rgba(9, 18, 29, 0.95));
+  border: 1px solid rgba(247, 147, 26, 0.16);
+  overflow: hidden;
 }
 
 .promotion-coin {
-    position: relative;
-
-    width: 66px;
-    height: 66px;
-
-    flex: 0 0 66px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    color: #301600;
-
-    background:
-        radial-gradient(
-            circle at 30% 25%,
-            #fff0c9,
-            #ffb52e 34%,
-            #e67a00 70%,
-            #a84900
-        );
-
-    border: 3px solid #ffc95e;
-
-    box-shadow:
-        inset 3px 3px 8px rgba(255, 255, 255, 0.45),
-        inset -4px -5px 9px rgba(75, 29, 0, 0.38),
-        0 7px 18px rgba(0, 0, 0, 0.35),
-        0 0 20px rgba(247, 147, 26, 0.18);
-
-    font-size: 20px;
-    font-weight: 900;
+  position: relative;
+  width: 66px;
+  height: 66px;
+  flex: 0 0 66px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #301600;
+  background: radial-gradient(circle at 30% 25%, #fff0c9, #ffb52e 34%, #e67a00 70%, #a84900);
+  border: 3px solid #ffc95e;
+  box-shadow:
+    inset 3px 3px 8px rgba(255, 255, 255, 0.45),
+    inset -4px -5px 9px rgba(75, 29, 0, 0.38),
+    0 7px 18px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(247, 147, 26, 0.18);
+  font-size: 20px;
+  font-weight: 900;
 }
 
 .promotion-coin::before {
-    content: "";
-
-    position: absolute;
-    inset: 6px;
-
-    border-radius: 50%;
-
-    border: 1px solid rgba(255, 242, 205, 0.58);
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 242, 205, 0.58);
 }
 
-.promotion-content {
-    flex: 1;
-}
-
-.promotion-content h3 {
-    font-size: 15px;
-    font-weight: 900;
-}
-
-.promotion-content p {
-    margin-top: 4px;
-
-    color: var(--muted);
-
-    font-size: 9px;
-    line-height: 1.45;
-}
-
+.promotion-content { flex: 1; }
+.promotion-content h3 { font-size: 15px; font-weight: 900; }
+.promotion-content p { margin-top: 4px; color: var(--muted); font-size: 9px; line-height: 1.45; }
 
 /* =========================================================
    20. ROADMAP
 ========================================================= */
-
-.roadmap {
-    display: flex;
-    flex-direction: column;
-
-    gap: 8px;
-}
+.roadmap { display: flex; flex-direction: column; gap: 8px; }
 
 .roadmap-item {
-    position: relative;
-
-    display: flex;
-    align-items: flex-start;
-
-    gap: 11px;
-
-    padding: 13px;
-
-    border-radius: 15px;
-
-    background:
-        rgba(255, 255, 255, 0.035);
-
-    border: 1px solid var(--border);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
 }
 
 .roadmap-dot {
-    width: 12px;
-    height: 12px;
-
-    flex: 0 0 12px;
-
-    margin-top: 2px;
-
-    border-radius: 50%;
-
-    background:
-        var(--muted);
-
-    box-shadow:
-        0 0 0 4px rgba(255, 255, 255, 0.035);
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--muted);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.035);
 }
 
 .roadmap-item.active .roadmap-dot {
-    background: var(--gold);
-
-    box-shadow:
-        0 0 0 4px rgba(247, 147, 26, 0.09),
-        0 0 14px rgba(247, 147, 26, 0.45);
+  background: var(--gold);
+  box-shadow: 0 0 0 4px rgba(247, 147, 26, 0.09), 0 0 14px rgba(247, 147, 26, 0.45);
 }
 
 .roadmap-item.done .roadmap-dot {
-    background: var(--green);
-
-    box-shadow:
-        0 0 0 4px rgba(37, 211, 102, 0.08),
-        0 0 14px rgba(37, 211, 102, 0.35);
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(37, 211, 102, 0.08), 0 0 14px rgba(37, 211, 102, 0.35);
 }
 
-.roadmap-content {
-    flex: 1;
-}
-
-.roadmap-content h4 {
-    font-size: 12px;
-    font-weight: 900;
-}
-
-.roadmap-content p {
-    margin-top: 4px;
-
-    color: var(--muted);
-
-    font-size: 9px;
-    line-height: 1.4;
-}
-
+.roadmap-content { flex: 1; }
+.roadmap-content h4 { font-size: 12px; font-weight: 900; }
+.roadmap-content p { margin-top: 4px; color: var(--muted); font-size: 9px; line-height: 1.4; }
 
 /* =========================================================
    21. WALLET
 ========================================================= */
-
 .wallet-card {
-    padding: 17px;
-
-    border-radius: var(--radius-xl);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(17, 28, 42, 0.96),
-            rgba(6, 12, 20, 0.96)
-        );
-
-    border: 1px solid var(--border);
-
-    box-shadow: var(--shadow);
+  padding: 17px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(145deg, rgba(17, 28, 42, 0.96), rgba(6, 12, 20, 0.96));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
-.wallet-balance {
-    font-size: 30px;
-    font-weight: 900;
-
-    color: var(--white);
-}
-
-.wallet-unit {
-    color: var(--gold-light);
-
-    font-size: 13px;
-}
+.wallet-balance { font-size: 30px; font-weight: 900; color: var(--white); }
+.wallet-unit { color: var(--gold-light); font-size: 13px; }
 
 .wallet-actions {
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 9px;
-
-    margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+  margin-top: 14px;
 }
 
 .wallet-action {
-    padding: 12px;
-
-    border-radius: 13px;
-
-    color: var(--text);
-
-    background:
-        rgba(255, 255, 255, 0.04);
-
-    border: 1px solid var(--border);
-
-    font-size: 10px;
-    font-weight: 800;
+  padding: 12px;
+  border-radius: 13px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 800;
 }
-
 
 /* =========================================================
    22. TRANSACTIONS
 ========================================================= */
-
-.transactions {
-    display: flex;
-    flex-direction: column;
-
-    gap: 7px;
-}
+.transactions { display: flex; flex-direction: column; gap: 7px; }
 
 .transaction {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 10px;
-
-    padding: 11px 12px;
-
-    border-radius: 13px;
-
-    background:
-        rgba(255, 255, 255, 0.03);
-
-    border: 1px solid rgba(255, 255, 255, 0.055);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.055);
 }
 
-.transaction-info {
-    min-width: 0;
-}
-
-.transaction-title {
-    color: var(--text);
-
-    font-size: 10px;
-    font-weight: 800;
-}
-
-.transaction-date {
-    margin-top: 3px;
-
-    color: var(--muted);
-
-    font-size: 8px;
-}
-
-.transaction-amount {
-    white-space: nowrap;
-
-    color: var(--gold-light);
-
-    font-size: 11px;
-    font-weight: 900;
-}
-
+.transaction-info { min-width: 0; }
+.transaction-title { color: var(--text); font-size: 10px; font-weight: 800; }
+.transaction-date { margin-top: 3px; color: var(--muted); font-size: 8px; }
+.transaction-amount { white-space: nowrap; color: var(--gold-light); font-size: 11px; font-weight: 900; }
 
 /* =========================================================
    23. BUTTON SYSTEM
 ========================================================= */
-
 .primary-btn {
-    border: 0;
-
-    padding: 12px 17px;
-
-    border-radius: 13px;
-
-    color: #160c00;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--gold-light),
-            var(--gold)
-        );
-
-    font-size: 11px;
-    font-weight: 900;
-
-    box-shadow:
-        0 7px 18px rgba(247, 147, 26, 0.17);
+  border: 0;
+  padding: 12px 17px;
+  border-radius: 13px;
+  color: #160c00;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: 0 7px 18px rgba(247, 147, 26, 0.17);
 }
 
 .secondary-btn {
-    padding: 11px 15px;
-
-    border-radius: 13px;
-
-    color: var(--text);
-
-    background:
-        rgba(255, 255, 255, 0.045);
-
-    border: 1px solid var(--border);
-
-    font-size: 10px;
-    font-weight: 800;
+  padding: 11px 15px;
+  border-radius: 13px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 800;
 }
 
 .icon-btn {
-    width: 40px;
-    height: 40px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 13px;
-
-    color: var(--text);
-
-    background:
-        rgba(255, 255, 255, 0.045);
-
-    border: 1px solid var(--border);
-
-    font-size: 17px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--border);
+  font-size: 17px;
 }
-
 
 /* =========================================================
    24. MODALS
 ========================================================= */
-
 .modal {
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 500;
-
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
-
-    padding: 12px;
-
-    background:
-        rgba(0, 0, 0, 0.68);
-
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.modal.active,
-.modal.show {
-    display: flex;
-}
+.modal.active, .modal.show { display: flex; }
 
 .modal-content {
-    width: 100%;
-    max-width: 560px;
-
-    max-height: 88vh;
-
-    overflow-y: auto;
-
-    padding: 19px;
-
-    border-radius: 24px 24px 16px 16px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #101b28,
-            #060c14
-        );
-
-    border: 1px solid var(--border);
-
-    box-shadow:
-        0 -15px 60px rgba(0, 0, 0, 0.45);
-
-    animation: modalUp 220ms ease-out;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 19px;
+  border-radius: 24px 24px 16px 16px;
+  background: linear-gradient(145deg, #101b28, #060c14);
+  border: 1px solid var(--border);
+  box-shadow: 0 -15px 60px rgba(0, 0, 0, 0.45);
+  animation: modalUp 220ms ease-out;
 }
 
 @keyframes modalUp {
-    from {
-        transform: translateY(30px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 10px;
-
-    margin-bottom: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 13px;
 }
 
-.modal-title {
-    font-size: 17px;
-    font-weight: 900;
-}
+.modal-title { font-size: 17px; font-weight: 900; }
 
 .modal-close {
-    width: 34px;
-    height: 34px;
-
-    border-radius: 10px;
-
-    color: var(--text);
-
-    background:
-        rgba(255, 255, 255, 0.05);
-
-    border: 1px solid var(--border);
-
-    font-size: 17px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  font-size: 17px;
 }
-
 
 /* =========================================================
    25. TOAST
 ========================================================= */
-
 #toast {
-    position: fixed;
-
-    left: 50%;
-    bottom: 83px;
-
-    z-index: 1000;
-
-    width: max-content;
-    max-width: calc(100vw - 32px);
-
-    padding: 11px 15px;
-
-    transform:
-        translateX(-50%)
-        translateY(20px);
-
-    opacity: 0;
-    pointer-events: none;
-
-    border-radius: 13px;
-
-    color: var(--white);
-
-    background:
-        rgba(13, 21, 31, 0.96);
-
-    border: 1px solid rgba(247, 147, 26, 0.22);
-
-    box-shadow:
-        0 12px 35px rgba(0, 0, 0, 0.4);
-
-    font-size: 11px;
-    font-weight: 700;
-
-    transition:
-        opacity 180ms ease,
-        transform 180ms ease;
+  position: fixed;
+  left: 50%;
+  bottom: 83px;
+  z-index: 1000;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 11px 15px;
+  transform: translateX(-50%) translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 13px;
+  color: var(--white);
+  background: rgba(13, 21, 31, 0.96);
+  border: 1px solid rgba(247, 147, 26, 0.22);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+  font-size: 11px;
+  font-weight: 700;
+  transition: opacity 180ms ease, transform 180ms ease;
 }
 
-#toast.show {
-    opacity: 1;
-
-    transform:
-        translateX(-50%)
-        translateY(0);
-}
-
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* =========================================================
    26. BOTTOM NAVIGATION
 ========================================================= */
-
 .bottom-nav {
-    position: fixed;
-
-    left: 50%;
-    bottom: 9px;
-
-    z-index: 200;
-
-    width: min(
-        calc(100% - 18px),
-        700px
-    );
-
-    transform: translateX(-50%);
-
-    display: grid;
-
-    grid-template-columns: repeat(5, 1fr);
-
-    padding: 7px;
-
-    border-radius: 21px;
-
-    background:
-        rgba(8, 14, 22, 0.93);
-
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
-    box-shadow:
-        0 14px 45px rgba(0, 0, 0, 0.52);
-
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+  position: fixed;
+  left: 50%;
+  bottom: 9px;
+  z-index: 200;
+  width: min(calc(100% - 18px), 700px);
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 7px;
+  border-radius: 21px;
+  background: rgba(8, 14, 22, 0.93);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 45px rgba(0, 0, 0, 0.52);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-.bottom-nav button,
-.bottom-nav a {
-    min-height: 51px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    gap: 3px;
-
-    border: 0;
-    border-radius: 15px;
-
-    color: var(--muted);
-
-    background: transparent;
-
-    font-size: 9px;
-    font-weight: 800;
-
-    transition:
-        color var(--transition),
-        background var(--transition);
+.bottom-nav button, .bottom-nav a {
+  min-height: 51px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 15px;
+  color: rgba(142, 155, 171, 0.68);
+  background: transparent;
+  font-size: 9px;
+  font-weight: 700;
+  transition: color var(--transition), background var(--transition);
 }
 
-.bottom-nav button .nav-icon,
-.bottom-nav a .nav-icon {
-    font-size: 18px;
-    line-height: 1;
+.bottom-nav button .nav-icon, .bottom-nav a .nav-icon {
+  font-size: 18px;
+  line-height: 1;
+  opacity: 0.75;
 }
 
-.bottom-nav button.active,
-.bottom-nav a.active {
-    color: var(--gold-light);
-
-    background:
-        rgba(247, 147, 26, 0.08);
+.bottom-nav button.active, .bottom-nav a.active {
+  color: var(--gold-light);
+  background: rgba(247, 147, 26, 0.14);
+  font-weight: 900;
 }
 
-.bottom-nav button.active .nav-icon,
-.bottom-nav a.active .nav-icon {
-    filter:
-        drop-shadow(
-            0 0 7px
-            rgba(247, 147, 26, 0.45)
-        );
+.bottom-nav button.active .nav-icon, .bottom-nav a.active .nav-icon {
+  opacity: 1;
 }
 
+.bottom-nav button.active .nav-icon, .bottom-nav a.active .nav-icon {
+  filter: drop-shadow(0 0 7px rgba(247, 147, 26, 0.45));
+}
 
 /* =========================================================
    27. EMPTY / LOADING STATES
 ========================================================= */
-
-.loading {
-    padding: 24px;
-
-    text-align: center;
-
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
-.empty-state {
-    padding: 25px 15px;
-
-    text-align: center;
-
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
+.loading { padding: 24px; text-align: center; color: var(--muted); font-size: 11px; }
+.empty-state { padding: 25px 15px; text-align: center; color: var(--muted); font-size: 11px; }
 .error-state {
-    padding: 15px;
-
-    border-radius: 14px;
-
-    color: #ffb1b1;
-
-    background:
-        rgba(255, 92, 92, 0.07);
-
-    border: 1px solid rgba(255, 92, 92, 0.16);
-
-    font-size: 10px;
+  padding: 15px;
+  border-radius: 14px;
+  color: #ffb1b1;
+  background: rgba(255, 92, 92, 0.07);
+  border: 1px solid rgba(255, 92, 92, 0.16);
+  font-size: 10px;
 }
-
 
 /* =========================================================
    28. UTILITY CLASSES
 ========================================================= */
-
-.hidden {
-    display: none !important;
-}
-
-.text-gold {
-    color: var(--gold-light) !important;
-}
-
-.text-cyan {
-    color: var(--cyan) !important;
-}
-
-.text-green {
-    color: var(--green-soft) !important;
-}
-
-.text-muted {
-    color: var(--muted) !important;
-}
-
-.text-center {
-    text-align: center !important;
-}
-
-.mt-1 {
-    margin-top: 6px;
-}
-
-.mt-2 {
-    margin-top: 10px;
-}
-
-.mt-3 {
-    margin-top: 15px;
-}
-
-.mt-4 {
-    margin-top: 20px;
-}
-
+.hidden { display: none !important; }
+.text-gold { color: var(--gold-light) !important; }
+.text-cyan { color: var(--cyan) !important; }
+.text-green { color: var(--green-soft) !important; }
+.text-muted { color: var(--muted) !important; }
+.text-center { text-align: center !important; }
+.mt-1 { margin-top: 6px; }
+.mt-2 { margin-top: 10px; }
+.mt-3 { margin-top: 15px; }
+.mt-4 { margin-top: 20px; }
 
 /* =========================================================
    29. FOOTER
 ========================================================= */
-
 footer {
-    padding: 28px 8px 18px;
-
-    text-align: center;
-
-    color: var(--muted);
-
-    font-size: 9px;
-    line-height: 1.6;
+  padding: 28px 8px 18px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.6;
 }
 
-footer strong {
-    color: var(--gold-light);
-}
-
+footer strong { color: var(--gold-light); }
 
 /* =========================================================
    30. COIN / 3MIGO SMART IDENTITY
 ========================================================= */
-
-.threemigo-brand {
-    color: var(--white);
-    font-weight: 900;
-}
-
-.threemigo-brand .migo {
-    color: var(--gold-light);
-}
-
-.threemigo-brand .smart {
-    color: var(--cyan);
-}
+.threemigo-brand { color: var(--white); font-weight: 900; }
+.threemigo-brand .migo { color: var(--gold-light); }
+.threemigo-brand .smart { color: var(--cyan); }
 
 .coin-symbol-large {
-    color: var(--gold-light);
-
-    font-size: 32px;
-    font-weight: 900;
-
-    text-shadow:
-        0 0 18px rgba(247, 147, 26, 0.35);
+  color: var(--gold-light);
+  font-size: 32px;
+  font-weight: 900;
+  text-shadow: 0 0 18px rgba(247, 147, 26, 0.35);
 }
-
 
 /* =========================================================
    31. RESPONSIVE — TABLET
 ========================================================= */
-
 @media (min-width: 600px) {
-
-    .app {
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-
-    .coin-stage {
-        width: 210px;
-        height: 210px;
-    }
-
-    .coin-ring {
-        width: 190px;
-        height: 190px;
-    }
-
-    .coin-logo,
-    .hero-logo {
-        width: 116px;
-        height: 116px;
-    }
-
-    .balance-value {
-        font-size: 43px;
-    }
-
-    .quick-actions {
-        gap: 10px;
-    }
-
-    .quick-action {
-        min-height: 82px;
-    }
+  .app { padding-left: 20px; padding-right: 20px; }
+  .coin-stage { width: 182px; height: 182px; }
+  .coin-ring { width: 165px; height: 165px; }
+  .coin-logo, .hero-logo { width: 100px; height: 100px; }
+  .balance-value { font-size: 43px; }
+  .quick-actions { gap: 10px; }
+  .quick-action { min-height: 82px; }
 }
-
 
 /* =========================================================
    32. RESPONSIVE — SMALL PHONES
 ========================================================= */
-
 @media (max-width: 520px) {
-
-    .app {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-
-    .hero {
-        padding-top: 13px;
-    }
-
-    .coin-stage {
-        width: 172px;
-        height: 172px;
-    }
-
-    .coin-ring {
-        width: 158px;
-        height: 158px;
-    }
-
-    .coin-logo,
-    .hero-logo {
-        width: 96px;
-        height: 96px;
-
-        border-width: 4px;
-    }
-
-    .brand-title {
-        font-size: 24px;
-    }
-
-    .brand-title .coin-symbol {
-        font-size: 25px;
-    }
-
-    .balance-value {
-        font-size: 34px;
-    }
-
-    .quick-actions {
-        gap: 6px;
-    }
-
-    .quick-action,
-    .action-card {
-        min-height: 70px;
-    }
-
-    .quick-action .icon,
-    .action-card .icon {
-        font-size: 19px;
-    }
-
-    .master-service {
-        min-height: 125px;
-    }
+  .app { padding-left: 12px; padding-right: 12px; }
+  .hero { padding-top: 13px; }
+  .coin-stage { width: 146px; height: 146px; }
+  .coin-ring { width: 134px; height: 134px; }
+  .coin-logo, .hero-logo { width: 82px; height: 82px; border-width: 4px; }
+  .brand-title { font-size: 24px; }
+  .brand-title .coin-symbol { font-size: 25px; }
+  .balance-value { font-size: 34px; }
+  .quick-actions { gap: 6px; }
+  .quick-action, .action-card { min-height: 70px; }
+  .quick-action .icon, .action-card .icon { font-size: 19px; }
+  .master-service { min-height: 125px; }
 }
-
 
 /* =========================================================
    33. RESPONSIVE — VERY SMALL PHONES
 ========================================================= */
-
 @media (max-width: 380px) {
-
-    body {
-        padding-bottom: 90px;
-    }
-
-    .app {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    .topbar {
-        min-height: 53px;
-    }
-
-    .topbar-title {
-        font-size: 15px;
-    }
-
-    .coin-stage {
-        width: 152px;
-        height: 152px;
-    }
-
-    .coin-ring {
-        width: 140px;
-        height: 140px;
-    }
-
-    .coin-logo,
-    .hero-logo {
-        width: 86px;
-        height: 86px;
-    }
-
-    .brand-title {
-        font-size: 22px;
-    }
-
-    .balance-card {
-        padding: 16px;
-    }
-
-    .balance-value {
-        font-size: 31px;
-    }
-
-    .quick-action span,
-    .action-card span {
-        font-size: 9px;
-    }
-
-    .quick-action {
-        min-height: 66px;
-    }
-
-    .economic-grid {
-        gap: 6px;
-    }
-
-    .bottom-nav {
-        bottom: 6px;
-    }
-
-    .bottom-nav button,
-    .bottom-nav a {
-        min-height: 47px;
-    }
+  body { padding-bottom: 90px; }
+  .app { padding-left: 10px; padding-right: 10px; }
+  .topbar { min-height: 53px; }
+  .topbar-title { font-size: 15px; }
+  .coin-stage { width: 129px; height: 129px; }
+  .coin-ring { width: 119px; height: 119px; }
+  .coin-logo, .hero-logo { width: 73px; height: 73px; }
+  .brand-title { font-size: 22px; }
+  .balance-card { padding: 16px; }
+  .balance-value { font-size: 31px; }
+  .quick-action span, .action-card span { font-size: 9px; }
+  .quick-action { min-height: 66px; }
+  .economic-grid { gap: 6px; }
+  .bottom-nav { bottom: 6px; }
+  .bottom-nav button, .bottom-nav a { min-height: 47px; }
 }
-
 
 /* =========================================================
    34. REDUCED MOTION
 ========================================================= */
-
 @media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
-    }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
-
 
 /* =========================================================
    35. TELEGRAM SAFE AREA
 ========================================================= */
-
 @supports (padding: max(0px)) {
-
-    body {
-        padding-bottom:
-            max(
-                96px,
-                calc(78px + env(safe-area-inset-bottom))
-            );
-    }
-
-    .bottom-nav {
-        bottom:
-            max(
-                8px,
-                env(safe-area-inset-bottom)
-            );
-    }
+  body { padding-bottom: max(96px, calc(78px + env(safe-area-inset-bottom))); }
+  .bottom-nav { bottom: max(8px, env(safe-area-inset-bottom)); }
 }
-
 
 /* =========================================================
    36. FINAL VISUAL POLISH
 ========================================================= */
+::selection { color: #1a0d00; background: var(--gold-light); }
 
-::selection {
-    color: #1a0d00;
-
-    background:
-        var(--gold-light);
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
 }
 
-button:focus-visible,
-a:focus-visible {
-    outline: 2px solid var(--cyan);
-
-    outline-offset: 2px;
+.card, .balance-card, .economic-card, .referral-card, .wallet-card,
+.master-service, .task-card, .promotion, .ad-galaxy, .ai-service {
+  isolation: isolate;
 }
-
-.card,
-.balance-card,
-.economic-card,
-.referral-card,
-.wallet-card,
-.master-service,
-.task-card,
-.promotion,
-.ad-galaxy,
-.ai-service {
-    isolation: isolate;
-}
-
 
 /* =========================================================
    END — 3Migo Coin STYLE V5.2
