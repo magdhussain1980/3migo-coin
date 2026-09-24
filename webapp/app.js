@@ -1,8 +1,9 @@
 /* =========================================================
    3Migo Coin - Telegram Mini App
    Frontend Controller
-   Version 3.0.0
+   Version 3.1.0
    Economic API Integration
+   Wallet UI Restored
    ========================================================= */
 
 "use strict";
@@ -91,10 +92,7 @@ const state = {
 
     loadingUser: false,
 
-    /* =====================================================
-       ECONOMIC LAYER
-       ===================================================== */
-
+    /* Economic Layer */
     economic: {
 
         totalMined: 0,
@@ -131,10 +129,7 @@ function $(id) {
 }
 
 
-function safeNumber(
-    value,
-    fallback = 0
-) {
+function safeNumber(value, fallback = 0) {
 
     const number =
         Number(value);
@@ -153,6 +148,56 @@ function escapeHTML(value) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+
+function format3M(value) {
+
+    return safeNumber(value)
+        .toLocaleString(
+            "en-US",
+            {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }
+        );
+}
+
+
+function formatDate(value) {
+
+    if (!value) {
+        return "";
+    }
+
+    try {
+
+        const date =
+            new Date(value);
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+            return String(value);
+        }
+
+        return date.toLocaleString(
+            "ar",
+            {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    } catch {
+
+        return String(value);
+    }
 }
 
 
@@ -715,6 +760,7 @@ function showEconomicDashboard() {
                     <small style="color:#7f94ad;">
                         إجمالي التعدين
                     </small>
+
                     <strong
                         id="economicTotalMined"
                         style="
@@ -723,8 +769,9 @@ function showEconomicDashboard() {
                             font-size:20px;
                         "
                     >
-                        ${e.totalMined.toLocaleString()}
+                        ${format3M(e.totalMined)}
                     </strong>
+
                     <span style="color:#6e849e;font-size:11px;">
                         3M
                     </span>
@@ -739,6 +786,7 @@ function showEconomicDashboard() {
                     <small style="color:#7f94ad;">
                         Locked
                     </small>
+
                     <strong
                         id="economicLocked"
                         style="
@@ -747,8 +795,9 @@ function showEconomicDashboard() {
                             font-size:20px;
                         "
                     >
-                        ${e.locked3m.toLocaleString()}
+                        ${format3M(e.locked3m)}
                     </strong>
+
                     <span style="color:#6e849e;font-size:11px;">
                         3M
                     </span>
@@ -763,6 +812,7 @@ function showEconomicDashboard() {
                     <small style="color:#7f94ad;">
                         Unlocked
                     </small>
+
                     <strong
                         id="economicUnlocked"
                         style="
@@ -771,8 +821,9 @@ function showEconomicDashboard() {
                             font-size:20px;
                         "
                     >
-                        ${e.unlocked3m.toLocaleString()}
+                        ${format3M(e.unlocked3m)}
                     </strong>
+
                     <span style="color:#6e849e;font-size:11px;">
                         3M
                     </span>
@@ -787,6 +838,7 @@ function showEconomicDashboard() {
                     <small style="color:#7f94ad;">
                         Airdrop
                     </small>
+
                     <strong
                         id="economicAirdrop"
                         style="
@@ -795,8 +847,9 @@ function showEconomicDashboard() {
                             font-size:20px;
                         "
                     >
-                        ${e.airdrop3m.toLocaleString()}
+                        ${format3M(e.airdrop3m)}
                     </strong>
+
                     <span style="color:#6e849e;font-size:11px;">
                         3M
                     </span>
@@ -811,6 +864,7 @@ function showEconomicDashboard() {
                     <small style="color:#7f94ad;">
                         Contribution
                     </small>
+
                     <strong
                         id="economicContribution"
                         style="
@@ -819,7 +873,7 @@ function showEconomicDashboard() {
                             font-size:20px;
                         "
                     >
-                        ${e.contributionScore.toLocaleString()}
+                        ${format3M(e.contributionScore)}
                     </strong>
                 </div>
 
@@ -832,6 +886,7 @@ function showEconomicDashboard() {
                     <small style="color:#7f94ad;">
                         Trust Score
                     </small>
+
                     <strong
                         id="economicTrust"
                         style="
@@ -840,8 +895,9 @@ function showEconomicDashboard() {
                             font-size:20px;
                         "
                     >
-                        ${e.trustScore.toLocaleString()}
+                        ${format3M(e.trustScore)}
                     </strong>
+
                     <span style="color:#6e849e;font-size:11px;">
                         / 100
                     </span>
@@ -1020,12 +1076,6 @@ async function showAirdropPreview() {
             );
 
 
-        const pool =
-            safeNumber(
-                data.eligible_pool
-            );
-
-
         const contribution =
             safeNumber(
                 data.user_contribution_score
@@ -1039,7 +1089,7 @@ async function showAirdropPreview() {
 
 
         showToast(
-            `تقدير Airdrop: ${amount.toLocaleString()} 3M | مساهمتك: ${contribution} من ${totalContribution}`,
+            `تقدير Airdrop: ${format3M(amount)} 3M | مساهمتك: ${contribution} من ${totalContribution}`,
             6000
         );
 
@@ -1151,7 +1201,7 @@ function showSpendDialog() {
             ">
                 الرصيد المتاح:
                 <strong style="color:#fff;">
-                    ${available.toFixed(2)} 3M
+                    ${format3M(available)} 3M
                 </strong>
             </div>
 
@@ -1328,7 +1378,7 @@ async function executeSpend(modal) {
     ) {
 
         showToast(
-            `الرصيد المتاح فقط ${available.toFixed(2)} 3M`
+            `الرصيد المتاح فقط ${format3M(available)} 3M`
         );
 
         return;
@@ -1404,7 +1454,7 @@ async function executeSpend(modal) {
 
 
         showToast(
-            `تم استخدام ${amount} 3M في ${service} بنجاح ✅`,
+            `تم استخدام ${format3M(amount)} 3M في ${service} بنجاح ✅`,
             5000
         );
 
@@ -1906,15 +1956,10 @@ async function claimMining() {
 
 
         showToast(
-            `تم استلام ${reward} 3M بنجاح 🎉`
+            `تم استلام ${format3M(reward)} 3M بنجاح 🎉`
         );
 
 
-        /*
-         * Refresh economic profile.
-         * لا نفترض أن التعدين القديم يساوي
-         * Economic Mining.
-         */
         await loadEconomicProfile();
 
     } catch (error) {
@@ -2081,7 +2126,7 @@ function renderTasks() {
                         </div>
 
                         <div class="task-card-reward">
-                            +${reward} 3M
+                            +${format3M(reward)} 3M
                         </div>
 
                     </div>
@@ -2287,7 +2332,7 @@ async function completeTask(taskId) {
 
 
         showToast(
-            `تم إنجاز المهمة وإضافة ${reward} 3M 🎉`
+            `تم إنجاز المهمة وإضافة ${format3M(reward)} 3M 🎉`
         );
 
     } catch (error) {
@@ -2424,7 +2469,7 @@ async function dailyReward() {
 
 
         showToast(
-            `تم استلام المكافأة اليومية: ${reward} 3M 🎁`
+            `تم استلام المكافأة اليومية: ${format3M(reward)} 3M 🎁`
         );
 
     } catch (error) {
@@ -2491,6 +2536,7 @@ function showReferralModal(data) {
 
 
     const referralLink =
+        data.referral_link ||
         `https://t.me/${BOT_USERNAME}?start=ref_${code}`;
 
 
@@ -2559,6 +2605,7 @@ function showReferralModal(data) {
                         background:transparent;
                         color:#91a4bd;
                         font-size:24px;
+                        border:0;
                     "
                 >
                     ×
@@ -2623,6 +2670,7 @@ function showReferralModal(data) {
                         background:#168cff;
                         color:#fff;
                         font-weight:bold;
+                        border:0;
                     "
                 >
                     📋 نسخ الرابط
@@ -2638,6 +2686,7 @@ function showReferralModal(data) {
                         background:#102c4d;
                         color:#fff;
                         font-weight:bold;
+                        border:0;
                     "
                 >
                     📤 مشاركة
@@ -2693,7 +2742,7 @@ function showReferralModal(data) {
 
 
                     <strong>
-                        ${safeNumber(data.referral_rewards).toFixed(2)}
+                        ${format3M(data.referral_rewards)}
                         3M
                     </strong>
 
@@ -2811,73 +2860,1032 @@ async function showReferral() {
    WALLET
    ========================================================= */
 
-async function showWallet() {
+async function loadWalletTransactions() {
+
+    if (!state.telegramId) {
+        return [];
+    }
+
 
     try {
 
-        await loadEconomicProfile();
-
-
-        const transactions =
+        const data =
             await apiRequest(
                 `/transactions/${state.telegramId}`
             );
 
 
-        const list =
-            Array.isArray(
-                transactions
-            )
-                ? transactions
-                : transactions?.transactions ||
-                  [];
-
-
-        const e =
-            state.economic;
-
-
-        let message =
-            `الرصيد الحالي: ${state.balance.toFixed(2)} 3M`;
-
-
-        message +=
-            `\n\n💎 Economic Balance`;
-
-
-        message +=
-            `\nمتاح: ${e.unlocked3m.toFixed(2)} 3M`;
-
-
-        message +=
-            `\nمقفل: ${e.locked3m.toFixed(2)} 3M`;
-
-
-        message +=
-            `\nContribution: ${e.contributionScore}`;
-
-
-        message +=
-            `\nTrust: ${e.trustScore}/100`;
-
-
-        if (list.length > 0) {
-
-            message +=
-                `\n\nآخر العمليات: ${list.length}`;
+        if (Array.isArray(data)) {
+            return data;
         }
 
 
-        showToast(
-            message,
-            7000
+        if (
+            Array.isArray(
+                data?.transactions
+            )
+        ) {
+
+            return data.transactions;
+        }
+
+
+        if (
+            Array.isArray(
+                data?.items
+            )
+        ) {
+
+            return data.items;
+        }
+
+
+        if (
+            Array.isArray(
+                data?.data
+            )
+        ) {
+
+            return data.data;
+        }
+
+
+        return [];
+
+    } catch (error) {
+
+        console.warn(
+            "Wallet transactions unavailable:",
+            error
+        );
+
+
+        return [];
+    }
+}
+
+
+function getTransactionTitle(transaction) {
+
+    return (
+        transaction?.title ||
+        transaction?.description ||
+        transaction?.type ||
+        transaction?.action ||
+        transaction?.source ||
+        "عملية 3Migo"
+    );
+}
+
+
+function getTransactionAmount(transaction) {
+
+    return safeNumber(
+        transaction?.amount_3m ??
+        transaction?.reward_3m ??
+        transaction?.amount ??
+        transaction?.value ??
+        transaction?.reward
+    );
+}
+
+
+function getTransactionDate(transaction) {
+
+    return (
+        transaction?.created_at ||
+        transaction?.timestamp ||
+        transaction?.date ||
+        transaction?.created ||
+        ""
+    );
+}
+
+
+function getTransactionType(transaction) {
+
+    const raw =
+        String(
+            transaction?.type ||
+            transaction?.action ||
+            transaction?.source ||
+            ""
+        ).toLowerCase();
+
+
+    if (
+        raw.includes("spend") ||
+        raw.includes("spent") ||
+        raw.includes("use")
+    ) {
+
+        return "spend";
+    }
+
+
+    if (
+        raw.includes("mine") ||
+        raw.includes("reward") ||
+        raw.includes("daily") ||
+        raw.includes("task") ||
+        raw.includes("referral")
+    ) {
+
+        return "earn";
+    }
+
+
+    return getTransactionAmount(transaction) < 0
+        ? "spend"
+        : "earn";
+}
+
+
+function renderWalletTransactions(list) {
+
+    if (
+        !Array.isArray(list) ||
+        list.length === 0
+    ) {
+
+        return `
+            <div style="
+                padding:22px 10px;
+                text-align:center;
+                color:#7187a2;
+                font-size:13px;
+            ">
+                لا توجد معاملات مسجلة حتى الآن.
+            </div>
+        `;
+    }
+
+
+    const recent =
+        list.slice(0, 20);
+
+
+    return recent.map(
+        transaction => {
+
+            const amount =
+                getTransactionAmount(
+                    transaction
+                );
+
+
+            const type =
+                getTransactionType(
+                    transaction
+                );
+
+
+            const title =
+                escapeHTML(
+                    getTransactionTitle(
+                        transaction
+                    )
+                );
+
+
+            const date =
+                escapeHTML(
+                    formatDate(
+                        getTransactionDate(
+                            transaction
+                        )
+                    )
+                );
+
+
+            const sign =
+                type === "spend"
+                    ? "-"
+                    : "+";
+
+
+            return `
+
+                <div style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:space-between;
+                    gap:10px;
+                    padding:12px 4px;
+                    border-bottom:1px solid rgba(255,255,255,.06);
+                ">
+
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        gap:10px;
+                        min-width:0;
+                    ">
+
+                        <div style="
+                            width:38px;
+                            height:38px;
+                            border-radius:12px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            background:${
+                                type === "spend"
+                                    ? "rgba(255,90,90,.12)"
+                                    : "rgba(40,210,140,.12)"
+                            };
+                            flex-shrink:0;
+                        ">
+                            ${
+                                type === "spend"
+                                    ? "💳"
+                                    : "💎"
+                            }
+                        </div>
+
+
+                        <div style="
+                            min-width:0;
+                        ">
+
+                            <div style="
+                                color:#fff;
+                                font-size:13px;
+                                font-weight:700;
+                                overflow:hidden;
+                                text-overflow:ellipsis;
+                                white-space:nowrap;
+                            ">
+                                ${title}
+                            </div>
+
+
+                            <div style="
+                                color:#667e99;
+                                font-size:10px;
+                                margin-top:4px;
+                            ">
+                                ${date}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        white-space:nowrap;
+                        font-weight:800;
+                        font-size:13px;
+                        color:${
+                            type === "spend"
+                                ? "#ff8585"
+                                : "#58dfad"
+                        };
+                    ">
+                        ${sign}${format3M(amount)} 3M
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+    ).join("");
+}
+
+
+function buildWalletModal(
+    transactions = []
+) {
+
+    const e =
+        state.economic;
+
+
+    const old =
+        $("walletModal");
+
+
+    if (old) {
+        old.remove();
+    }
+
+
+    const totalAvailable =
+        safeNumber(
+            e.unlocked3m
+        );
+
+
+    const totalLocked =
+        safeNumber(
+            e.locked3m
+        );
+
+
+    const totalMined =
+        safeNumber(
+            e.totalMined
+        );
+
+
+    const airdrop =
+        safeNumber(
+            e.airdrop3m
+        );
+
+
+    const contribution =
+        safeNumber(
+            e.contributionScore
+        );
+
+
+    const trust =
+        safeNumber(
+            e.trustScore,
+            100
+        );
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "walletModal";
+
+
+    modal.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:4500;
+        background:rgba(0,0,0,.80);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:14px;
+        direction:rtl;
+    `;
+
+
+    modal.innerHTML = `
+
+        <div style="
+            width:100%;
+            max-width:470px;
+            max-height:94vh;
+            overflow:auto;
+            background:#06182f;
+            border:1px solid rgba(91,140,190,.30);
+            border-radius:26px;
+            color:#fff;
+            box-shadow:0 25px 80px rgba(0,0,0,.5);
+        ">
+
+            <!-- Header -->
+
+            <div style="
+                padding:20px 18px 15px;
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                border-bottom:1px solid rgba(255,255,255,.06);
+            ">
+
+                <div>
+
+                    <div style="
+                        font-size:21px;
+                        font-weight:900;
+                    ">
+                        👛 محفظة 3Migo
+                    </div>
+
+                    <div style="
+                        color:#7288a3;
+                        font-size:11px;
+                        margin-top:5px;
+                    ">
+                        الرصيد والحركات الاقتصادية
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="closeWallet"
+                    type="button"
+                    style="
+                        width:38px;
+                        height:38px;
+                        border-radius:12px;
+                        border:0;
+                        background:rgba(255,255,255,.05);
+                        color:#9aacc2;
+                        font-size:24px;
+                        cursor:pointer;
+                    "
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- Main Balance -->
+
+            <div style="
+                margin:16px;
+                padding:22px;
+                border-radius:21px;
+                background:linear-gradient(
+                    135deg,
+                    #0b3158,
+                    #092343
+                );
+                border:1px solid rgba(85,170,255,.18);
+                text-align:center;
+            ">
+
+                <div style="
+                    color:#8fa8c2;
+                    font-size:12px;
+                    margin-bottom:8px;
+                ">
+                    الرصيد المتاح
+                </div>
+
+
+                <div style="
+                    font-size:35px;
+                    font-weight:900;
+                    letter-spacing:.3px;
+                ">
+                    ${format3M(totalAvailable)}
+                </div>
+
+
+                <div style="
+                    margin-top:4px;
+                    color:#55aaff;
+                    font-size:14px;
+                    font-weight:800;
+                ">
+                    3M
+                </div>
+
+            </div>
+
+
+            <!-- Balance Cards -->
+
+            <div style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:10px;
+                padding:0 16px;
+            ">
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:16px;
+                    padding:14px;
+                ">
+
+                    <div style="
+                        color:#7188a3;
+                        font-size:11px;
+                    ">
+                        🔒 مقفل
+                    </div>
+
+                    <strong style="
+                        display:block;
+                        font-size:19px;
+                        margin-top:7px;
+                    ">
+                        ${format3M(totalLocked)}
+                    </strong>
+
+                    <span style="
+                        color:#607892;
+                        font-size:10px;
+                    ">
+                        3M
+                    </span>
+
+                </div>
+
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:16px;
+                    padding:14px;
+                ">
+
+                    <div style="
+                        color:#7188a3;
+                        font-size:11px;
+                    ">
+                        ⛏️ إجمالي التعدين
+                    </div>
+
+                    <strong style="
+                        display:block;
+                        font-size:19px;
+                        margin-top:7px;
+                    ">
+                        ${format3M(totalMined)}
+                    </strong>
+
+                    <span style="
+                        color:#607892;
+                        font-size:10px;
+                    ">
+                        3M
+                    </span>
+
+                </div>
+
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:16px;
+                    padding:14px;
+                ">
+
+                    <div style="
+                        color:#7188a3;
+                        font-size:11px;
+                    ">
+                        🎁 Airdrop
+                    </div>
+
+                    <strong style="
+                        display:block;
+                        font-size:19px;
+                        margin-top:7px;
+                    ">
+                        ${format3M(airdrop)}
+                    </strong>
+
+                    <span style="
+                        color:#607892;
+                        font-size:10px;
+                    ">
+                        3M
+                    </span>
+
+                </div>
+
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:16px;
+                    padding:14px;
+                ">
+
+                    <div style="
+                        color:#7188a3;
+                        font-size:11px;
+                    ">
+                        ⭐ المساهمة
+                    </div>
+
+                    <strong style="
+                        display:block;
+                        font-size:19px;
+                        margin-top:7px;
+                    ">
+                        ${format3M(contribution)}
+                    </strong>
+
+                    <span style="
+                        color:#607892;
+                        font-size:10px;
+                    ">
+                        Score
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Trust -->
+
+            <div style="
+                margin:14px 16px 0;
+                padding:14px;
+                background:rgba(255,255,255,.035);
+                border-radius:16px;
+            ">
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:9px;
+                ">
+
+                    <span style="
+                        color:#8298b1;
+                        font-size:12px;
+                    ">
+                        🛡️ درجة الثقة
+                    </span>
+
+                    <strong style="
+                        color:#fff;
+                        font-size:13px;
+                    ">
+                        ${format3M(trust)} / 100
+                    </strong>
+
+                </div>
+
+
+                <div style="
+                    height:7px;
+                    background:rgba(255,255,255,.07);
+                    border-radius:20px;
+                    overflow:hidden;
+                ">
+
+                    <div style="
+                        width:${Math.min(
+                            100,
+                            Math.max(0, trust)
+                        )}%;
+                        height:100%;
+                        background:#168cff;
+                        border-radius:20px;
+                    "></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Buttons -->
+
+            <div style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:9px;
+                padding:14px 16px 0;
+            ">
+
+                <button
+                    id="walletSpendBtn"
+                    type="button"
+                    style="
+                        padding:13px 8px;
+                        border:0;
+                        border-radius:14px;
+                        background:#168cff;
+                        color:#fff;
+                        font-weight:800;
+                        cursor:pointer;
+                    "
+                >
+                    💳 استخدام 3M
+                </button>
+
+
+                <button
+                    id="walletAirdropBtn"
+                    type="button"
+                    style="
+                        padding:13px 8px;
+                        border:0;
+                        border-radius:14px;
+                        background:#102f52;
+                        color:#fff;
+                        font-weight:800;
+                        cursor:pointer;
+                    "
+                >
+                    🎁 Airdrop
+                </button>
+
+            </div>
+
+
+            <!-- Transactions -->
+
+            <div style="
+                margin:16px;
+                padding:15px;
+                border-radius:18px;
+                background:rgba(255,255,255,.035);
+            ">
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:9px;
+                ">
+
+                    <strong style="
+                        font-size:15px;
+                    ">
+                        📜 آخر المعاملات
+                    </strong>
+
+
+                    <button
+                        id="refreshWallet"
+                        type="button"
+                        style="
+                            border:0;
+                            background:transparent;
+                            color:#55aaff;
+                            font-size:12px;
+                            cursor:pointer;
+                        "
+                    >
+                        🔄 تحديث
+                    </button>
+
+                </div>
+
+
+                <div id="walletTransactions">
+                    ${renderWalletTransactions(transactions)}
+                </div>
+
+            </div>
+
+
+            <!-- Footer -->
+
+            <div style="
+                padding:0 16px 18px;
+                color:#637b96;
+                font-size:10px;
+                line-height:1.7;
+                text-align:center;
+            ">
+                الرصيد المتاح يمكن استخدامه في الخدمات المدعومة.
+                الرصيد المقفل غير قابل للاستخدام المباشر.
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    $("closeWallet")
+        ?.addEventListener(
+            "click",
+            () => modal.remove()
+        );
+
+
+    $("walletSpendBtn")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                modal.remove();
+
+                showSpendDialog();
+
+            }
+        );
+
+
+    $("walletAirdropBtn")
+        ?.addEventListener(
+            "click",
+            showAirdropPreview
+        );
+
+
+    $("refreshWallet")
+        ?.addEventListener(
+            "click",
+            async () => {
+
+                const button =
+                    $("refreshWallet");
+
+
+                if (button) {
+
+                    button.disabled =
+                        true;
+
+                    button.textContent =
+                        "⏳ تحديث...";
+                }
+
+
+                try {
+
+                    await loadEconomicProfile();
+
+
+                    const freshTransactions =
+                        await loadWalletTransactions();
+
+
+                    const container =
+                        $("walletTransactions");
+
+
+                    if (container) {
+
+                        container.innerHTML =
+                            renderWalletTransactions(
+                                freshTransactions
+                            );
+                    }
+
+
+                    showToast(
+                        "تم تحديث المحفظة ✅"
+                    );
+
+                } catch (error) {
+
+                    showToast(
+                        `تعذر تحديث المحفظة: ${error.message}`
+                    );
+
+                } finally {
+
+                    if (button) {
+
+                        button.disabled =
+                            false;
+
+                        button.textContent =
+                            "🔄 تحديث";
+                    }
+                }
+            }
+        );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === modal
+            ) {
+
+                modal.remove();
+            }
+        }
+    );
+}
+
+
+/* =========================================================
+   SHOW WALLET
+   ========================================================= */
+
+async function showWallet() {
+
+    /*
+     * فتح واجهة تحميل فورية حتى لا يشعر
+     * المستخدم أن الزر لا يعمل.
+     */
+
+    const old =
+        $("walletModal");
+
+
+    if (old) {
+        old.remove();
+    }
+
+
+    const loadingModal =
+        document.createElement(
+            "div"
+        );
+
+
+    loadingModal.id =
+        "walletLoadingModal";
+
+
+    loadingModal.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:4500;
+        background:rgba(0,0,0,.78);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        direction:rtl;
+    `;
+
+
+    loadingModal.innerHTML = `
+
+        <div style="
+            width:100%;
+            max-width:360px;
+            background:#071a34;
+            border:1px solid rgba(91,140,190,.25);
+            border-radius:22px;
+            padding:28px;
+            color:#fff;
+            text-align:center;
+        ">
+
+            <div style="
+                font-size:34px;
+                margin-bottom:12px;
+            ">
+                👛
+            </div>
+
+            <strong style="
+                font-size:17px;
+            ">
+                جاري تحميل المحفظة...
+            </strong>
+
+            <div style="
+                color:#7187a2;
+                font-size:12px;
+                margin-top:8px;
+            ">
+                جاري جلب الرصيد والمعاملات
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(
+        loadingModal
+    );
+
+
+    try {
+
+        /*
+         * أهم نقطة:
+         * لا نفشل المحفظة إذا تعذر تحميل
+         * سجل المعاملات.
+         */
+
+        await loadEconomicProfile();
+
+
+        const transactions =
+            await loadWalletTransactions();
+
+
+        loadingModal.remove();
+
+
+        buildWalletModal(
+            transactions
         );
 
 
     } catch (error) {
 
+        console.error(
+            "Wallet error:",
+            error
+        );
+
+
+        loadingModal.remove();
+
+
+        /*
+         * حتى في حالة فشل أحد الطلبات،
+         * نعرض المحفظة بالبيانات المتاحة.
+         */
+
+        buildWalletModal(
+            []
+        );
+
+
         showToast(
-            `الرصيد الحالي: ${state.balance.toFixed(2)} 3M`
+            "تم فتح المحفظة، لكن تعذر تحميل بعض البيانات.",
+            5000
         );
     }
 }
@@ -3068,7 +4076,7 @@ function setupEconomicButton() {
 async function initializeApp() {
 
     console.log(
-        "3Migo Coin Mini App v3.0.0 starting..."
+        "3Migo Coin Mini App v3.1.0 starting..."
     );
 
 
@@ -3080,24 +4088,28 @@ async function initializeApp() {
         /*
          * Legacy profile
          */
+
         await loadUser();
 
 
         /*
-         * New Economic Engine profile
+         * Economic Engine profile
          */
+
         await loadEconomicProfile();
 
 
         /*
          * Legacy mining
          */
+
         await loadMiningStatus();
 
 
         /*
          * Tasks
          */
+
         await loadTasks();
 
 
