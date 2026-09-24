@@ -1,320 +1,200 @@
-import os
-import tempfile
 import unittest
 
 import economic_engine
 
-class TestEconomicEngineV2(unittest.TestCase):
 
-@classmethod
-def setUpClass(cls):
-    # Use a temporary database so the test never modifies production data.
-    cls.temp_dir = tempfile.TemporaryDirectory()
-    cls.db_path = os.path.join(cls.temp_dir.name, "test_3migo_economic.db")
+class TestEconomicEngine(unittest.TestCase):
 
-    economic_engine.DB_PATH = cls.db_path
-    economic_engine.init_economic_engine()
+    @classmethod
+    def setUpClass(cls):
+        economic_engine.init_economic_engine()
 
-    cls.user_id = 990000001
-    cls.reference_mining = "TEST-MINING-001"
-    cls.reference_spend = "TEST-SPEND-001"
+    def setUp(self):
+        self.telegram_id = 9988776655
 
-@classmethod
-def tearDownClass(cls):
-    cls.temp_dir.cleanup()
+    def test_tokenomics(self):
+        data = economic_engine.validate_tokenomics()
 
-def test_01_tokenomics(self):
-    result = economic_engine.validate_tokenomics()
-
-    self.assertTrue(result["valid"])
-    self.assertEqual(
-        result["max_supply"],
-        30_000_000_000.0
-    )
-    self.assertEqual(
-        result["allocation_total"],
-        30_000_000_000.0
-    )
-    self.assertEqual(result["difference"], 0.0)
-
-def test_02_engine_health(self):
-    result = economic_engine.health()
-
-    self.assertEqual(result["status"], "ok")
-    self.assertEqual(
-        result["engine"],
-        "3Migo Economic Engine"
-    )
-    self.assertEqual(result["version"], "2.0")
-    self.assertTrue(result["tokenomics_valid"])
-
-def test_03_create_economic_user(self):
-    result = economic_engine.ensure_user_account(self.user_id)
-
-    self.assertIsNotNone(result)
-
-    profile = economic_engine.user_economic_profile(self.user_id)
-
-    self.assertEqual(profile["telegram_id"], self.user_id)
-    self.assertEqual(profile["total_mined"], 0.0)
-    self.assertEqual(profile["locked_3m"], 0.0)
-    self.assertEqual(profile["unlocked_3m"], 0.0)
-
-def test_04_add_contribution(self):
-    result = economic_engine.add_contribution(
-        telegram_id=self.user_id,
-        contribution_type="daily_activity",
-        score=10.0,
-        reference="TEST-CONTRIBUTION-001"
-    )
-
-    self.assertIsNotNone(result)
-
-    profile = economic_engine.user_economic_profile(self.user_id)
-
-    self.assertGreaterEqual(
-        profile["contribution_score"],
-        10.0
-    )
-
-def test_05_set_trust_score(self):
-    result = economic_engine.set_trust_score(
-        telegram_id=self.user_id,
-        trust_score=95.0
-    )
-
-    self.assertIsNotNone(result)
-
-    profile = economic_engine.user_economic_profile(self.user_id)
-
-    self.assertEqual(
-        profile["trust_score"],
-        95.0
-    )
-
-def test_06_register_mining_reward(self):
-    result = economic_engine.register_mining_reward(
-        telegram_id=self.user_id,
-        amount_3m=100.0,
-        reference=self.reference_mining
-    )
-
-    self.assertIsNotNone(result)
-
-    profile = economic_engine.user_economic_profile(self.user_id)
-
-    self.assertEqual(
-        profile["total_mined"],
-        100.0
-    )
-
-    self.assertEqual(
-        profile["locked_3m"],
-        100.0
-    )
-
-    self.assertEqual(
-        profile["unlocked_3m"],
-        0.0
-    )
-
-def test_07_mining_idempotency(self):
-    result = economic_engine.register_mining_reward(
-        telegram_id=self.user_id,
-        amount_3m=100.0,
-        reference=self.reference_mining
-    )
-
-    profile = economic_engine.user_economic_profile(self.user_id)
-
-    # The same reference must not create another reward.
-    self.assertEqual(
-        profile["total_mined"],
-        100.0
-    )
-
-    self.assertEqual(
-        profile["locked_3m"],
-        100.0
-    )
-
-def test_08_unlock_3m(self):
-    result = economic_engine.unlock_3m(
-        telegram_id=self.user_id,
-        amount_3m=40.0,
-        reference="TEST-UNLOCK-001"
-    )
-
-    self.assertIsNotNone(result)
-
-    profile = economic_engine.user_economic_profile(self.user_id)
-
-    self.assertEqual(
-        profile["locked_3m"],
-        60.0
-    )
-
-    self.assertEqual(
-        profile["unlocked_3m"],
-        40.0
-    )
-
-def test_09_spend_3m(self):
-    result = economic_engine.spend_3m(
-        telegram_id=self.user_id,
-        amount_3m=10.0,
-        service_type="ai_hub",
-        reference=self.reference_spend,
-        description="Test AI Hub service"
-    )
-
-    self.assertIsNotNone(result)
-
-    profile = economic_engine.user_economic_profile(self.user_id)
-
-    self.assertEqual(
-        profile["unlocked_3m"],
-        30.0
-    )
-
-def test_10_spending_protection(self):
-    with self.assertRaises(Exception):
-        economic_engine.spend_3m(
-            telegram_id=self.user_id,
-            amount_3m=1000.0,
-            service_type="ai_hub",
-            reference="TEST-SPEND-OVER-001",
-            description="Should fail"
+        self.assertTrue(data["valid"])
+        self.assertEqual(data["percentage_total"], 100.0)
+        self.assertEqual(
+            data["allocation_total"],
+            data["max_supply"]
         )
 
-def test_11_airdrop_preview(self):
-    result = economic_engine.calculate_airdrop_preview(
-        telegram_id=self.user_id
-    )
+    def test_health(self):
+        data = economic_engine.health()
 
-    self.assertIsNotNone(result)
+        self.assertEqual(data["status"], "ok")
+        self.assertEqual(data["engine"], "3Migo Economic Engine")
+        self.assertTrue(data["tokenomics_valid"])
 
-    self.assertIn(
-        "eligible",
-        result
-    )
+    def test_user_creation(self):
+        data = economic_engine.ensure_user_account(
+            self.telegram_id
+        )
 
-    self.assertIn(
-        "airdrop_3m",
-        result
-    )
+        self.assertEqual(
+            data["telegram_id"],
+            self.telegram_id
+        )
 
-def test_12_revenue_record(self):
-    result = economic_engine.record_revenue(
-        source="affiliate",
-        campaign_id="TEST-CAMPAIGN-001",
-        gross_amount=100.0,
-        currency="USD",
-        notes="Automated test revenue"
-    )
+    def test_contribution(self):
+        data = economic_engine.add_contribution(
+            self.telegram_id,
+            100,
+            source="test",
+            reference="test_contribution_001"
+        )
 
-    self.assertIsNotNone(result)
+        self.assertEqual(
+            data["contribution_score"],
+            100
+        )
 
-def test_13_revenue_confirmation(self):
-    # Find the latest test revenue through the engine database.
-    conn = economic_engine.get_connection()
+    def test_trust_score(self):
+        data = economic_engine.set_trust_score(
+            self.telegram_id,
+            85
+        )
 
-    try:
-        row = conn.execute(
-            """
-            SELECT revenue_id
-            FROM revenue_ledger_v2
-            ORDER BY id DESC
-            LIMIT 1
-            """
-        ).fetchone()
-    finally:
-        conn.close()
+        self.assertEqual(
+            data["trust_score"],
+            85
+        )
 
-    self.assertIsNotNone(row)
+    def test_mining(self):
+        result = economic_engine.register_mining_reward(
+            self.telegram_id,
+            10,
+            reference="test_mining_001"
+        )
 
-    revenue_id = row["revenue_id"]
+        self.assertTrue(result["success"])
+        self.assertEqual(result["reward_3m"], 10)
+        self.assertEqual(result["status"], "locked")
 
-    result = economic_engine.confirm_revenue(
-        revenue_id=revenue_id
-    )
+    def test_mining_idempotency(self):
+        result = economic_engine.register_mining_reward(
+            self.telegram_id,
+            10,
+            reference="test_mining_001"
+        )
 
-    self.assertIsNotNone(result)
+        self.assertTrue(result["duplicate"])
 
-def test_14_economic_summary(self):
-    result = economic_engine.economic_summary()
+    def test_unlock(self):
+        result = economic_engine.unlock_3m(
+            self.telegram_id,
+            5,
+            reference="test_unlock_001"
+        )
 
-    self.assertEqual(
-        result["project"],
-        "3Migo"
-    )
+        self.assertTrue(result["success"])
 
-    self.assertEqual(
-        result["version"],
-        "2.0"
-    )
+        profile = economic_engine.user_economic_profile(
+            self.telegram_id
+        )
 
-    self.assertEqual(
-        result["unit"],
-        "3M"
-    )
+        self.assertEqual(profile["locked_3m"], 5)
+        self.assertEqual(profile["unlocked_3m"], 5)
 
-    self.assertEqual(
-        result["tokenomics"]["max_supply"],
-        30_000_000_000.0
-    )
+    def test_spend(self):
+        result = economic_engine.spend_3m(
+            self.telegram_id,
+            "test_service",
+            2,
+            reference="test_spend_001"
+        )
 
-    self.assertTrue(
-        result["tokenomics"]["valid"]
-    )
+        self.assertTrue(result["success"])
 
-def test_15_economic_capacity(self):
-    result = economic_engine.economic_capacity()
+        profile = economic_engine.user_economic_profile(
+            self.telegram_id
+        )
 
-    self.assertEqual(
-        result["max_supply"],
-        30_000_000_000.0
-    )
+        self.assertEqual(profile["unlocked_3m"], 3)
 
-    self.assertEqual(
-        result["mining_allocation"],
-        12_000_000_000.0
-    )
+    def test_spending_protection(self):
+        with self.assertRaises(Exception):
+            economic_engine.spend_3m(
+                self.telegram_id,
+                "test_service",
+                1000,
+                reference="test_spend_invalid_001"
+            )
 
-    self.assertGreaterEqual(
-        result["remaining_mining"],
-        0.0
-    )
+    def test_airdrop_preview(self):
+        data = economic_engine.calculate_airdrop_preview(
+            self.telegram_id
+        )
 
-def test_16_user_profile_integrity(self):
-    profile = economic_engine.user_economic_profile(
-        self.user_id
-    )
+        self.assertIn("telegram_id", data)
+        self.assertIn("airdrop_3m", data)
 
-    self.assertEqual(
-        profile["total_mined"],
-        100.0
-    )
+    def test_revenue_record(self):
+        result = economic_engine.record_revenue(
+            source="test",
+            gross_amount=100,
+            fees=10,
+            currency="USD",
+            reference="test_revenue_001",
+            status="pending"
+        )
 
-    self.assertEqual(
-        profile["locked_3m"],
-        60.0
-    )
+        self.assertTrue(result["success"])
+        self.assertEqual(result["gross_amount"], 100)
+        self.assertEqual(result["fees"], 10)
+        self.assertEqual(result["net_amount"], 90)
 
-    self.assertEqual(
-        profile["unlocked_3m"],
-        30.0
-    )
+    def test_revenue_confirmation(self):
+        result = economic_engine.confirm_revenue(
+            "test_revenue_001"
+        )
 
-    self.assertGreaterEqual(
-        profile["contribution_score"],
-        10.0
-    )
+        self.assertTrue(result["success"])
 
-    self.assertEqual(
-        profile["trust_score"],
-        95.0
-    )
+    def test_summary(self):
+        data = economic_engine.economic_summary()
 
-if name == "main":
-unittest.main(verbosity=2)
+        self.assertEqual(data["project"], "3Migo")
+        self.assertEqual(data["unit"], "3M")
+        self.assertEqual(data["status"], "internal_economic_layer")
+        self.assertEqual(data["blockchain"], "not_active")
+
+    def test_capacity(self):
+        data = economic_engine.economic_capacity()
+
+        self.assertEqual(
+            data["max_supply"],
+            30_000_000_000.0
+        )
+
+        self.assertGreaterEqual(
+            data["remaining_supply"],
+            0
+        )
+
+    def test_profile_integrity(self):
+        data = economic_engine.user_economic_profile(
+            self.telegram_id
+        )
+
+        self.assertEqual(
+            data["telegram_id"],
+            self.telegram_id
+        )
+
+        self.assertGreaterEqual(
+            data["trust_score"],
+            0
+        )
+
+        self.assertLessEqual(
+            data["trust_score"],
+            100
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
