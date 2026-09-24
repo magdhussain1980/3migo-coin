@@ -1,26 +1,18 @@
 /* =========================================================
-   3Migo Coin - Telegram Mini App
-   Frontend Controller
-   Version 4.0.1
-   Economy Experience Layer
-
-   IMPORTANT:
-   - Frontend/UI layer only.
-   - Existing API contracts preserved.
-   - No fake revenue.
-   - No fake market value.
-   - No changes to economic_engine.py.
-   - No changes to database.
-
-   V4.0.1 FIXES:
-   - Wallet Available now uses main backend balance.
-   - Economic Available is displayed separately.
-   - Main balance is re-synced after reward operations.
-   - Existing API contracts preserved.
+   3Migo Coin — Telegram Mini App
+   Frontend Controller V5.0
+   MASTER UI EXPERIENCE LAYER
+   ---------------------------------------------------------
+   Safe frontend upgrade:
+   - Existing API contracts preserved
+   - No database changes
+   - No economic_engine.py changes
+   - No fake revenue
+   - No fake market value
+   - Main balance remains separate from Economic Available
    ========================================================= */
 
 "use strict";
-
 
 /* =========================================================
    TELEGRAM
@@ -33,15 +25,14 @@ if (tg) {
         tg.ready();
         tg.expand();
 
-        if (typeof tg.setHeaderColor === "function") {
-            tg.setHeaderColor("#04142a");
-        }
+        tg.setHeaderColor("#04142a");
+        tg.setBackgroundColor("#031024");
 
-        if (typeof tg.setBackgroundColor === "function") {
-            tg.setBackgroundColor("#031024");
+        if (typeof tg.enableClosingConfirmation === "function") {
+            tg.enableClosingConfirmation();
         }
     } catch (error) {
-        console.warn("Telegram UI unavailable:", error);
+        console.log("Telegram UI settings unavailable:", error);
     }
 }
 
@@ -69,144 +60,88 @@ const MINING_CYCLE_SECONDS =
 const state = {
 
     telegramUser: null,
+    telegramId: FALLBACK_TELEGRAM_ID,
+    username: "demo",
 
-    telegramId: null,
-
-    username: "",
-
-    /* =====================================================
-       MAIN / LEGACY WALLET
-       ===================================================== */
-
+    /* Main / legacy wallet */
     balance: 0,
-
     total: 0,
-
     today: 0,
-
     sessions: 0,
 
-
-    /* =====================================================
-       MINING
-       ===================================================== */
-
+    /* Mining */
     miningActive: false,
-
     miningRemaining: 0,
-
     miningReward: 10,
-
     miningTimer: null,
 
-
-    /* =====================================================
-       TASKS
-       ===================================================== */
-
+    /* Tasks */
     tasks: [],
-
     loadingTasks: false,
 
-
-    /* =====================================================
-       REFERRAL
-       ===================================================== */
-
+    /* Referral */
     referral: null,
 
-
-    /* =====================================================
-       ECONOMIC LAYER
-       ===================================================== */
-
+    /* Economic */
     economic: {
-
         totalMined: 0,
-
         locked3m: 0,
-
         unlocked3m: 0,
-
         airdrop3m: 0,
-
         contributionScore: 0,
-
         trustScore: 100,
-
         loaded: false,
-
         loading: false
-
     },
 
-
-    /* =====================================================
-       V4 EXPERIENCE
-       ===================================================== */
-
+    /* Experience */
     experience: {
-
         level: 1,
-
         levelName: "Explorer",
-
         progress: 0,
-
         score: 0,
-
         nextScore: 100,
-
         source: "Frontend Experience Layer"
-
     },
 
-
-    /* =====================================================
-       AD GALAXY
-       ===================================================== */
-
+    /* Ad Galaxy */
     adGalaxy: {
-
         available: 0,
-
         completed: 0,
-
         verified: 0,
-
         loading: false,
-
         connected: false,
-
         providerConnected: false
-
     },
 
-
-    /* =====================================================
-       AI UI
-       ===================================================== */
-
+    /* AI */
     aiMessages: [],
 
-
+    /* Airdrop */
     airdropPreview: null,
 
     loadingEconomic: false,
-
     loadingUser: false
-
 };
 
 
 /* =========================================================
-   HELPERS
+   DOM HELPERS
    ========================================================= */
 
-function $(id) {
-    return document.getElementById(id);
+function $(selector) {
+    return document.querySelector(selector);
 }
 
+
+function $all(selector) {
+    return Array.from(document.querySelectorAll(selector));
+}
+
+
+/* =========================================================
+   SAFE HELPERS
+   ========================================================= */
 
 function safeNumber(value, fallback = 0) {
 
@@ -215,6 +150,32 @@ function safeNumber(value, fallback = 0) {
     return Number.isFinite(number)
         ? number
         : fallback;
+}
+
+
+function clamp(value, min = 0, max = 100) {
+
+    return Math.min(
+        max,
+        Math.max(
+            min,
+            safeNumber(value, min)
+        )
+    );
+}
+
+
+function formatNumber(value, decimals = 2) {
+
+    const number = safeNumber(value);
+
+    return number.toLocaleString(
+        "en-US",
+        {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        }
+    );
 }
 
 
@@ -229,45 +190,30 @@ function escapeHTML(value) {
 }
 
 
-function formatNumber(value, decimals = 2) {
-
-    return safeNumber(value)
-        .toLocaleString("en-US", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: decimals
-        });
-}
-
-
-function clamp(value, min, max) {
-
-    return Math.min(
-        max,
-        Math.max(min, value)
-    );
-}
-
-
 /* =========================================================
    TOAST
    ========================================================= */
 
 function showToast(message, duration = 3000) {
 
-    const toast = $("toast");
+    let toast = $("#toast");
 
     if (!toast) {
-        console.log(message);
-        return;
+
+        toast = document.createElement("div");
+
+        toast.id = "toast";
+
+        document.body.appendChild(toast);
     }
 
     toast.textContent = message;
 
     toast.classList.add("show");
 
-    clearTimeout(showToast.timer);
+    clearTimeout(toast._timer);
 
-    showToast.timer = setTimeout(() => {
+    toast._timer = setTimeout(() => {
 
         toast.classList.remove("show");
 
@@ -281,60 +227,60 @@ function showToast(message, duration = 3000) {
 
 function getTelegramUser() {
 
-    try {
+    if (
+        tg &&
+        tg.initDataUnsafe &&
+        tg.initDataUnsafe.user
+    ) {
 
-        const user =
-            tg?.initDataUnsafe?.user;
+        const user = tg.initDataUnsafe.user;
 
-        if (user?.id) {
-            return user;
-        }
+        state.telegramUser = user;
 
-    } catch (error) {
+        state.telegramId =
+            user.id || FALLBACK_TELEGRAM_ID;
 
-        console.warn(
-            "Telegram user unavailable:",
-            error
-        );
+        state.username =
+            user.username ||
+            user.first_name ||
+            "user";
+
+        return user;
     }
 
-    return {
+
+    state.telegramUser = {
         id: FALLBACK_TELEGRAM_ID,
-        username: "demo"
+        username: "demo",
+        first_name: "Demo"
     };
+
+    state.telegramId =
+        FALLBACK_TELEGRAM_ID;
+
+    state.username = "demo";
+
+    return state.telegramUser;
 }
 
 
 /* =========================================================
-   API REQUEST
+   API
    ========================================================= */
 
 async function apiRequest(endpoint, options = {}) {
 
-    const url =
-        `${API_BASE}${endpoint}`;
+    const url = `${API_BASE}${endpoint}`;
 
     const config = {
-
-        method:
-            options.method || "GET",
-
+        method: options.method || "GET",
         headers: {
-
-            "Content-Type":
-                "application/json",
-
+            "Content-Type": "application/json",
             ...(options.headers || {})
-
         }
-
     };
 
-
-    if (
-        options.body !== undefined &&
-        options.body !== null
-    ) {
+    if (options.body !== undefined) {
 
         config.body =
             typeof options.body === "string"
@@ -349,13 +295,11 @@ async function apiRequest(endpoint, options = {}) {
 
     let data = null;
 
-
     try {
 
-        data =
-            await response.json();
+        data = await response.json();
 
-    } catch {
+    } catch (error) {
 
         data = null;
     }
@@ -369,18 +313,17 @@ async function apiRequest(endpoint, options = {}) {
             data?.error ||
             `HTTP ${response.status}`;
 
-
         if (Array.isArray(data?.detail)) {
 
             message =
                 data.detail
                     .map(item =>
                         item?.msg ||
+                        item?.message ||
                         JSON.stringify(item)
                     )
                     .join(", ");
         }
-
 
         throw new Error(message);
     }
@@ -391,149 +334,105 @@ async function apiRequest(endpoint, options = {}) {
 
 
 /* =========================================================
-   REGISTER USER
+   USER REGISTRATION
    ========================================================= */
 
 async function ensureUserRegistered() {
 
-    const user =
-        getTelegramUser();
-
-
-    state.telegramUser =
-        user;
-
-
-    state.telegramId =
-        user?.id ||
-        FALLBACK_TELEGRAM_ID;
-
-
-    state.username =
-        user?.username ||
-        "";
-
+    getTelegramUser();
 
     try {
 
-        const existing =
+        await apiRequest(
+            `/user/${state.telegramId}`
+        );
+
+        return true;
+
+    } catch (error) {
+
+        try {
+
             await apiRequest(
-                `/user/${state.telegramId}`
+                "/register",
+                {
+                    method: "POST",
+
+                    body: {
+                        telegram_id:
+                            state.telegramId,
+
+                        username:
+                            state.username,
+
+                        referral_code: ""
+                    }
+                }
             );
 
+            return true;
 
-        if (existing) {
-            return existing;
+        } catch (registerError) {
+
+            console.error(
+                "Registration error:",
+                registerError
+            );
+
+            throw registerError;
         }
-
-    } catch (error) {
-
-        console.log(
-            "User not found. Registering..."
-        );
-    }
-
-
-    try {
-
-        return await apiRequest(
-            "/register",
-            {
-
-                method: "POST",
-
-                body: {
-
-                    telegram_id:
-                        state.telegramId,
-
-                    username:
-                        state.username,
-
-                    referral_code: ""
-
-                }
-
-            }
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "Registration failed:",
-            error
-        );
-
-        return null;
     }
 }
 
 
 /* =========================================================
-   LEGACY / MAIN BALANCE UI
+   MAIN BALANCE UI
    ========================================================= */
 
 function updateBalanceUI() {
 
-    const balance =
-        $("balance");
+    const balanceEl = $("#balance");
+    const totalEl = $("#total");
+    const todayEl = $("#today");
+    const sessionsEl = $("#sessions");
 
 
-    if (balance) {
+    if (balanceEl) {
 
-        balance.innerHTML =
-            `${formatNumber(state.balance)}
-             <span>3M</span>`;
+        balanceEl.textContent =
+            formatNumber(state.balance);
     }
 
 
-    const total =
-        $("total");
+    if (totalEl) {
 
-
-    if (total) {
-
-        total.textContent =
-            `${formatNumber(state.total)} 3M`;
+        totalEl.textContent =
+            formatNumber(state.total);
     }
 
 
-    const today =
-        $("today");
+    if (todayEl) {
 
-
-    if (today) {
-
-        today.textContent =
-            `${formatNumber(state.today)} 3M`;
+        todayEl.textContent =
+            formatNumber(state.today);
     }
 
 
-    const sessions =
-        $("sessions");
+    if (sessionsEl) {
 
-
-    if (sessions) {
-
-        sessions.textContent =
-            String(state.sessions);
+        sessionsEl.textContent =
+            formatNumber(state.sessions, 0);
     }
 }
 
 
 /* =========================================================
-   LOAD USER
+   LOAD MAIN USER
    ========================================================= */
 
 async function loadUser() {
 
-    if (!state.telegramId) {
-        return null;
-    }
-
-
     state.loadingUser = true;
-
 
     try {
 
@@ -543,69 +442,56 @@ async function loadUser() {
             );
 
 
-        if (!user) {
-            return null;
-        }
-
-
         /*
-         * MAIN AUTHORITATIVE BALANCE
-         *
-         * This is the balance shown as:
-         * Wallet -> Available
+         * IMPORTANT:
+         * Main wallet balance is authoritative here.
          */
 
-        state.balance =
-            safeNumber(
-                user.balance_3m ??
-                user.balance ??
-                user.balance3m ??
-                0
-            );
+        state.balance = safeNumber(
+            user.balance_3m ??
+            user.balance ??
+            user.balance3m ??
+            0
+        );
 
 
-        state.total =
-            safeNumber(
-                user.total_earned ??
-                user.total ??
-                user.total_3m ??
-                0
-            );
+        state.total = safeNumber(
+            user.total_earned ??
+            user.total ??
+            user.total_3m ??
+            0
+        );
 
 
-        state.today =
-            safeNumber(
-                user.today_earned ??
-                user.today ??
-                user.today_3m ??
-                0
-            );
+        state.today = safeNumber(
+            user.today_earned ??
+            user.today ??
+            user.today_3m ??
+            0
+        );
 
 
-        state.sessions =
-            safeNumber(
-                user.mining_sessions ??
-                user.sessions ??
-                0
-            );
+        state.sessions = safeNumber(
+            user.mining_sessions ??
+            user.sessions ??
+            0
+        );
 
 
         updateBalanceUI();
 
         updateExperienceLevel();
 
-
         return user;
 
     } catch (error) {
 
-        console.warn(
-            "Unable to load user:",
+        console.error(
+            "loadUser:",
             error
         );
 
-
-        return null;
+        throw error;
 
     } finally {
 
@@ -620,18 +506,8 @@ async function loadUser() {
 
 async function loadEconomicProfile() {
 
-    if (!state.telegramId) {
-        return null;
-    }
-
-
-    if (state.loadingEconomic) {
-        return null;
-    }
-
-
+    state.economic.loading = true;
     state.loadingEconomic = true;
-
 
     try {
 
@@ -639,11 +515,6 @@ async function loadEconomicProfile() {
             await apiRequest(
                 `/economic/user/${state.telegramId}`
             );
-
-
-        if (!data) {
-            return null;
-        }
 
 
         state.economic.totalMined =
@@ -683,8 +554,7 @@ async function loadEconomicProfile() {
             );
 
 
-        state.economic.loaded =
-            true;
+        state.economic.loaded = true;
 
 
         updateEconomicUI();
@@ -696,16 +566,24 @@ async function loadEconomicProfile() {
 
     } catch (error) {
 
-        console.warn(
-            "Economic profile unavailable:",
+        console.error(
+            "loadEconomicProfile:",
             error
         );
 
+        state.economic.loaded = false;
+
+        /*
+         * Do not fabricate economic values.
+         */
+
+        updateEconomicUI();
 
         return null;
 
     } finally {
 
+        state.economic.loading = false;
         state.loadingEconomic = false;
     }
 }
@@ -717,7 +595,7 @@ async function loadEconomicProfile() {
 
 function updateEconomicUI() {
 
-    const map = {
+    const ids = {
 
         economicTotalMined:
             state.economic.totalMined,
@@ -736,48 +614,43 @@ function updateEconomicUI() {
 
         economicTrust:
             state.economic.trustScore
-
     };
 
 
-    Object.entries(map)
-        .forEach(([id, value]) => {
+    Object.entries(ids).forEach(
+        ([id, value]) => {
 
-            const element = $(id);
+            const element =
+                document.getElementById(id);
 
-            if (!element) {
-                return;
-            }
-
+            if (!element) return;
 
             element.textContent =
                 formatNumber(value);
-        });
+        }
+    );
+
+
+    updateExperienceUI();
 }
 
 
 /* =========================================================
-   V4 EXPERIENCE LEVEL
-   =========================================================
-   This is an EXPERIENCE/UI level only.
-   It is NOT an official backend economic level.
+   EXPERIENCE ENGINE
+   FRONTEND EXPERIENCE ONLY
    ========================================================= */
 
 function updateExperienceLevel() {
 
     const activityScore =
         clamp(
-            state.sessions * 5,
-            0,
-            100
+            state.sessions * 5
         );
 
 
     const contributionScore =
         clamp(
-            state.economic.contributionScore,
-            0,
-            100
+            state.economic.contributionScore
         );
 
 
@@ -790,15 +663,18 @@ function updateExperienceLevel() {
 
 
     const score =
-        Math.round(
-            activityScore * 0.30 +
-            contributionScore * 0.40 +
+        (
+            activityScore * 0.30
+        ) +
+        (
+            contributionScore * 0.40
+        ) +
+        (
             trustScore * 0.30
         );
 
 
     let level = 1;
-
     let levelName = "Explorer";
 
     if (score >= 80) {
@@ -815,39 +691,30 @@ function updateExperienceLevel() {
 
         level = 2;
         levelName = "Active";
-
     }
 
 
-    const thresholds = {
-        1: 35,
-        2: 60,
-        3: 80,
-        4: 100
-    };
+    let progress = 0;
 
+    if (level === 1) {
 
-    const previousThreshold =
-        level === 1
-            ? 0
-            : thresholds[level - 1];
+        progress =
+            (score / 35) * 100;
 
+    } else if (level === 2) {
 
-    const nextThreshold =
-        thresholds[level];
+        progress =
+            ((score - 35) / 25) * 100;
 
+    } else if (level === 3) {
 
-    const progress =
-        level >= 4
-            ? 100
-            : clamp(
-                (
-                    (score - previousThreshold) /
-                    (nextThreshold - previousThreshold)
-                ) * 100,
-                0,
-                100
-            );
+        progress =
+            ((score - 60) / 20) * 100;
+
+    } else {
+
+        progress = score;
+    }
 
 
     state.experience = {
@@ -856,16 +723,23 @@ function updateExperienceLevel() {
 
         levelName,
 
-        progress,
+        progress:
+            clamp(progress),
 
-        score,
+        score:
+            clamp(score),
 
         nextScore:
-            nextThreshold,
+            level === 1
+                ? 35
+                : level === 2
+                    ? 60
+                    : level === 3
+                        ? 80
+                        : 100,
 
         source:
             "Frontend Experience Layer"
-
     };
 
 
@@ -873,101 +747,89 @@ function updateExperienceLevel() {
 }
 
 
+/* =========================================================
+   EXPERIENCE UI
+   ========================================================= */
+
 function updateExperienceUI() {
 
-    const level =
-        $("v4Level");
+    const levelEl =
+        $("#v4Level");
+
+    const scoreEl =
+        $("#v4ExperienceScore");
+
+    const progressEl =
+        $("#v4LevelProgress");
 
 
-    if (level) {
+    if (levelEl) {
 
-        level.textContent =
-            `Lv.${state.experience.level} ${state.experience.levelName}`;
+        levelEl.textContent =
+            `LV.${state.experience.level} • ${state.experience.levelName}`;
     }
 
 
-    const score =
-        $("v4ExperienceScore");
+    if (scoreEl) {
 
-
-    if (score) {
-
-        score.textContent =
-            `${state.experience.score}/100`;
+        scoreEl.textContent =
+            `${formatNumber(
+                state.experience.score,
+                0
+            )} XP`;
     }
 
 
-    const progress =
-        $("v4LevelProgress");
+    if (progressEl) {
 
-
-    if (progress) {
-
-        progress.style.width =
+        progressEl.style.width =
             `${state.experience.progress}%`;
     }
 }
 
 
 /* =========================================================
-   AD GALAXY DATA
+   AD GALAXY ANALYSIS
    ========================================================= */
 
 function analyzeAdGalaxy() {
 
-    const tasks =
-        Array.isArray(state.tasks)
-            ? state.tasks
-            : [];
+    const adKeywords = [
+        "ad",
+        "ads",
+        "advert",
+        "advertising",
+        "sponsor",
+        "promo",
+        "إعلان",
+        "اعلان",
+        "إعلانات",
+        "اعلانات",
+        "ترويج"
+    ];
 
 
     const adTasks =
-        tasks.filter(task => {
+        state.tasks.filter(task => {
 
-            const type =
-                String(
-                    task?.task_type ||
-                    task?.type ||
-                    ""
-                ).toLowerCase();
-
-
-            const title =
-                String(
-                    task?.title ||
-                    ""
-                ).toLowerCase();
+            const content = [
+                task?.task_type,
+                task?.type,
+                task?.title,
+                task?.description
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
 
 
-            const description =
-                String(
-                    task?.description ||
-                    ""
-                ).toLowerCase();
-
-
-            return (
-                type.includes("ad") ||
-                type.includes("advert") ||
-                title.includes("إعلان") ||
-                title.includes("اعلان") ||
-                title.includes("ad ") ||
-                description.includes("إعلان") ||
-                description.includes("اعلان") ||
-                description.includes("advert")
+            return adKeywords.some(
+                keyword =>
+                    content.includes(
+                        keyword.toLowerCase()
+                    )
             );
-
         });
-
-
-    const available =
-        adTasks.filter(
-            task =>
-                !(
-                    Number(task.completed) === 1 ||
-                    task.completed === true
-                )
-        ).length;
 
 
     const completed =
@@ -979,17 +841,26 @@ function analyzeAdGalaxy() {
 
 
     state.adGalaxy.available =
-        available;
+        adTasks.length;
+
 
     state.adGalaxy.completed =
         completed;
 
+
+    state.adGalaxy.verified =
+        completed;
+
+
     state.adGalaxy.connected =
         adTasks.length > 0;
 
+
     /*
-     * No real provider is claimed to be connected.
+     * IMPORTANT:
+     * No real ad provider has been connected.
      */
+
     state.adGalaxy.providerConnected =
         false;
 
@@ -999,394 +870,188 @@ function analyzeAdGalaxy() {
 
 
 /* =========================================================
-   AD GALAXY MODAL
+   AD GALAXY
    ========================================================= */
 
 function showAdGalaxy() {
-
-    const old =
-        $("adGalaxyModal");
-
-
-    if (old) {
-        old.remove();
-    }
-
 
     const adTasks =
         analyzeAdGalaxy();
 
 
-    const available =
-        state.adGalaxy.available;
+    const existing =
+        $("#adGalaxyModal");
 
+    if (existing) {
 
-    const completed =
-        state.adGalaxy.completed;
-
-
-    const total =
-        adTasks.length;
-
-
-    const progress =
-        total > 0
-            ? Math.round(
-                (completed / total) * 100
-            )
-            : 0;
+        existing.remove();
+    }
 
 
     const modal =
         document.createElement("div");
 
-
     modal.id =
         "adGalaxyModal";
 
+    modal.className =
+        "modal-overlay";
 
-    modal.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:6000;
-        background:rgba(0,0,0,.82);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:14px;
-        direction:rtl;
-    `;
+
+    const progress =
+        state.adGalaxy.available > 0
+            ? (
+                state.adGalaxy.completed /
+                state.adGalaxy.available
+            ) * 100
+            : 0;
 
 
     modal.innerHTML = `
 
-        <div style="
-            width:100%;
-            max-width:500px;
-            max-height:94vh;
-            overflow:auto;
-            background:
-                radial-gradient(
-                    circle at top right,
-                    rgba(39,132,255,.18),
-                    transparent 35%
-                ),
-                #06162d;
-            border:1px solid rgba(79,157,255,.28);
-            border-radius:28px;
-            color:#fff;
-            box-shadow:0 30px 90px rgba(0,0,0,.6);
-        ">
+        <div class="modal-card ad-galaxy-modal">
 
-            <div style="
-                padding:20px;
-                border-bottom:1px solid rgba(255,255,255,.07);
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-            ">
+            <button
+                class="modal-close"
+                data-close-modal
+            >
+                ×
+            </button>
 
-                <div>
+            <div class="modal-icon">
+                🌌
+            </div>
 
-                    <div style="
-                        font-size:23px;
-                        font-weight:900;
-                    ">
-                        📢 Ad Galaxy
-                    </div>
+            <h2>
+                Ad Galaxy
+            </h2>
 
-                    <div style="
-                        color:#8197b0;
-                        font-size:12px;
-                        margin-top:5px;
-                    ">
-                        مركز الإعلانات والمساهمات
-                    </div>
+            <p class="modal-subtitle">
+                مركز المهام والإعلانات
+            </p>
 
+
+            <div class="ad-galaxy-stats">
+
+                <div class="ad-galaxy-stat">
+                    <strong>
+                        ${formatNumber(
+                            state.adGalaxy.available,
+                            0
+                        )}
+                    </strong>
+
+                    <span>
+                        Available
+                    </span>
                 </div>
 
-                <button
-                    id="closeAdGalaxy"
-                    type="button"
-                    style="
-                        width:40px;
-                        height:40px;
-                        border:0;
-                        border-radius:12px;
-                        background:rgba(255,255,255,.06);
-                        color:#9db0c7;
-                        font-size:25px;
-                    "
-                >
-                    ×
-                </button>
+
+                <div class="ad-galaxy-stat">
+                    <strong>
+                        ${formatNumber(
+                            state.adGalaxy.completed,
+                            0
+                        )}
+                    </strong>
+
+                    <span>
+                        Completed
+                    </span>
+                </div>
+
+
+                <div class="ad-galaxy-stat">
+                    <strong>
+                        ${formatNumber(
+                            state.economic.contributionScore,
+                            0
+                        )}
+                    </strong>
+
+                    <span>
+                        Contribution
+                    </span>
+                </div>
 
             </div>
 
 
-            <div style="padding:18px;">
+            <div class="progress-wrapper">
 
-
-                <!-- STATUS -->
-
-                <div style="
-                    padding:16px;
-                    border-radius:20px;
-                    background:
-                        linear-gradient(
-                            135deg,
-                            #103963,
-                            #09233f
-                        );
-                    border:1px solid rgba(65,158,255,.25);
-                ">
-
-                    <div style="
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                    ">
-
-                        <div>
-
-                            <div style="
-                                color:#90a7c0;
-                                font-size:12px;
-                            ">
-                                الإعلانات المتاحة
-                            </div>
-
-                            <strong style="
-                                display:block;
-                                font-size:30px;
-                                margin-top:5px;
-                            ">
-                                ${
-                                    total > 0
-                                        ? available
-                                        : "—"
-                                }
-                            </strong>
-
-                        </div>
-
-
-                        <div style="
-                            text-align:left;
-                        ">
-
-                            <div style="
-                                color:#90a7c0;
-                                font-size:12px;
-                            ">
-                                مساهمتك
-                            </div>
-
-                            <strong style="
-                                display:block;
-                                margin-top:5px;
-                                font-size:20px;
-                            ">
-                                ${
-                                    formatNumber(
-                                        state.economic
-                                            .contributionScore
-                                    )
-                                }
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div style="
-                        margin-top:15px;
-                        height:8px;
-                        background:rgba(255,255,255,.08);
-                        border-radius:20px;
-                        overflow:hidden;
-                    ">
-
-                        <div style="
-                            width:${progress}%;
-                            height:100%;
-                            background:#319bff;
-                            border-radius:20px;
-                            transition:width .4s ease;
-                        "></div>
-
-                    </div>
-
-
-                    <div style="
-                        margin-top:7px;
-                        color:#7890aa;
-                        font-size:10px;
-                    ">
-                        ${
-                            total > 0
-                                ? `${completed} مكتمل من ${total}`
-                                : "لا توجد بيانات إعلانات موصولة حالياً"
-                        }
-                    </div>
-
+                <div class="progress-label">
+                    Galaxy Progress
+                    <span>
+                        ${formatNumber(progress, 0)}%
+                    </span>
                 </div>
 
-
-                <!-- LEVEL -->
-
-                <div style="
-                    margin-top:12px;
-                    padding:15px;
-                    background:#0a2340;
-                    border-radius:18px;
-                ">
-
-                    <div style="
-                        display:flex;
-                        justify-content:space-between;
-                    ">
-
-                        <div>
-
-                            <small style="
-                                color:#7f95ad;
-                            ">
-                                مستوى التجربة
-                            </small>
-
-                            <strong
-                                id="v4Level"
-                                style="
-                                    display:block;
-                                    margin-top:5px;
-                                    font-size:18px;
-                                "
-                            >
-                                Lv.${state.experience.level}
-                                ${escapeHTML(
-                                    state.experience.levelName
-                                )}
-                            </strong>
-
-                        </div>
-
-
-                        <strong
-                            id="v4ExperienceScore"
-                            style="
-                                color:#52aaff;
-                                font-size:16px;
-                            "
-                        >
-                            ${state.experience.score}/100
-                        </strong>
-
-                    </div>
-
-
-                    <div style="
-                        margin-top:10px;
-                        height:6px;
-                        background:rgba(255,255,255,.08);
-                        border-radius:10px;
-                        overflow:hidden;
-                    ">
-
-                        <div
-                            id="v4LevelProgress"
-                            style="
-                                width:${state.experience.progress}%;
-                                height:100%;
-                                background:#52aaff;
-                            "
-                        ></div>
-
-                    </div>
-
+                <div class="progress-bar">
+                    <div
+                        class="progress-fill"
+                        style="width:${clamp(progress)}%"
+                    ></div>
                 </div>
-
-
-                <!-- AD TASKS -->
-
-                <div style="
-                    margin-top:18px;
-                ">
-
-                    <div style="
-                        font-weight:800;
-                        margin-bottom:9px;
-                    ">
-                        🌌 Galaxy Feed
-                    </div>
-
-
-                    ${
-                        adTasks.length
-                            ? adTasks.map(
-                                renderAdGalaxyItem
-                            ).join("")
-                            : `
-                                <div style="
-                                    padding:18px;
-                                    border-radius:16px;
-                                    background:#0a2340;
-                                    color:#8095ad;
-                                    font-size:12px;
-                                    text-align:center;
-                                    line-height:1.8;
-                                ">
-                                    لا توجد حملات إعلانية فعلية
-                                    موصولة بالمنصة حالياً.
-                                </div>
-                            `
-                    }
-
-                </div>
-
-
-                <!-- IMPORTANT NOTICE -->
-
-                <div style="
-                    margin-top:15px;
-                    padding:15px;
-                    border-radius:17px;
-                    background:rgba(255,181,71,.07);
-                    border:1px solid rgba(255,181,71,.18);
-                    color:#b7a88f;
-                    font-size:11px;
-                    line-height:1.8;
-                ">
-                    ⚠️ <strong style="color:#e4c995;">
-                    تنبيه اقتصادي
-                    </strong><br>
-                    هذه الواجهة لا تعتبر مشاهدة الإعلان إيراداً
-                    بحد ذاتها. الإعلانات الحقيقية تحتاج إلى
-                    مزود إعلانات أو حملات فعلية وربط تحقق موثق.
-                    لن يتم عرض إيراد أو مكافأة اقتصادية حقيقية
-                    قبل وصول البيانات من النظام الخلفي.
-                </div>
-
-
-                <button
-                    id="adGalaxyRefresh"
-                    type="button"
-                    style="
-                        width:100%;
-                        margin-top:12px;
-                        padding:14px;
-                        border:0;
-                        border-radius:15px;
-                        background:#12365d;
-                        color:#fff;
-                        font-weight:800;
-                    "
-                >
-                    🔄 تحديث بيانات الإعلانات
-                </button>
 
             </div>
+
+
+            <div class="ad-provider-status">
+
+                <span class="status-dot ${
+                    state.adGalaxy.providerConnected
+                        ? "online"
+                        : "offline"
+                }"></span>
+
+                ${
+                    state.adGalaxy.providerConnected
+                        ? "Ad Provider Connected"
+                        : "Provider Integration Pending"
+                }
+
+            </div>
+
+
+            <div class="ad-galaxy-list">
+
+                ${
+                    adTasks.length
+                        ? adTasks
+                            .map(renderAdGalaxyItem)
+                            .join("")
+                        : `
+                            <div class="empty-state">
+                                لا توجد مهام إعلانية مكتشفة حالياً.
+                            </div>
+                        `
+                }
+
+            </div>
+
+
+            <div class="economic-warning">
+
+                <strong>
+                    ℹ️ شفافية النظام
+                </strong>
+
+                <p>
+                    مهام Ad Galaxy الحالية تعتمد على
+                    المهام المتاحة في النظام.
+                    لا يتم احتساب أي إيراد إعلاني حقيقي
+                    ما لم يتم ربط مزود إعلانات فعلي.
+                </p>
+
+            </div>
+
+
+            <button
+                class="primary-btn"
+                data-refresh-ad-galaxy
+            >
+                🔄 تحديث Galaxy
+            </button>
 
         </div>
     `;
@@ -1395,67 +1060,96 @@ function showAdGalaxy() {
     document.body.appendChild(modal);
 
 
-    $("closeAdGalaxy")
-        ?.addEventListener(
-            "click",
-            () => modal.remove()
-        );
-
-
-    $("adGalaxyRefresh")
-        ?.addEventListener(
-            "click",
-            async () => {
-
-                await loadTasks();
-
-                updateExperienceLevel();
-
-                modal.remove();
-
-                showAdGalaxy();
-
-            }
-        );
-
-
     modal.addEventListener(
         "click",
         event => {
 
-            if (event.target === modal) {
+            if (
+                event.target === modal ||
+                event.target.closest(
+                    "[data-close-modal]"
+                )
+            ) {
+
                 modal.remove();
+
+                return;
             }
 
+
+            if (
+                event.target.closest(
+                    "[data-refresh-ad-galaxy]"
+                )
+            ) {
+
+                modal.remove();
+
+                loadTasks()
+                    .then(() => showAdGalaxy())
+                    .catch(() =>
+                        showToast(
+                            "تعذر تحديث المهام"
+                        )
+                    );
+            }
         }
     );
+
+
+    const taskButtons =
+        modal.querySelectorAll(
+            "[data-complete-task]"
+        );
+
+
+    taskButtons.forEach(button => {
+
+        button.addEventListener(
+            "click",
+            async event => {
+
+                event.stopPropagation();
+
+                const taskId =
+                    button.dataset.completeTask;
+
+                if (!taskId) return;
+
+                await completeTask(taskId);
+
+                modal.remove();
+
+                showAdGalaxy();
+            }
+        );
+    });
 }
 
 
 function renderAdGalaxyItem(task) {
 
     const id =
-        safeNumber(task.id);
+        task.id ??
+        task.task_id ??
+        "";
 
 
     const title =
-        escapeHTML(
-            task.title ||
-            "حملة إعلانية"
-        );
+        task.title ||
+        "Ad Task";
 
 
     const description =
-        escapeHTML(
-            task.description ||
-            "حملة غير موصوفة"
-        );
+        task.description ||
+        "Complete this activity.";
 
 
     const reward =
         safeNumber(
             task.reward_3m ??
-            task.reward
+            task.reward ??
+            0
         );
 
 
@@ -1466,77 +1160,40 @@ function renderAdGalaxyItem(task) {
 
     return `
 
-        <div style="
-            background:#0a2340;
-            border-radius:17px;
-            padding:14px;
-            margin-bottom:9px;
-            border:1px solid rgba(255,255,255,.04);
-        ">
+        <div class="ad-galaxy-item">
 
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                gap:10px;
-            ">
+            <div class="ad-galaxy-item-icon">
+                📡
+            </div>
 
-                <div style="min-width:0;">
+            <div class="ad-galaxy-item-content">
 
-                    <strong style="
-                        display:block;
-                        font-size:13px;
-                    ">
-                        ${title}
-                    </strong>
+                <strong>
+                    ${escapeHTML(title)}
+                </strong>
 
-                    <div style="
-                        color:#7188a2;
-                        font-size:10px;
-                        margin-top:5px;
-                        line-height:1.6;
-                    ">
-                        ${description}
-                    </div>
+                <p>
+                    ${escapeHTML(description)}
+                </p>
 
-                </div>
-
-
-                <div style="
-                    white-space:nowrap;
-                    color:#52aaff;
-                    font-weight:800;
-                    font-size:12px;
-                ">
+                <span>
                     +${formatNumber(reward)} 3M
-                </div>
+                </span>
 
             </div>
 
-
             <button
-                type="button"
-                class="v4-ad-task-button"
-                data-complete-task="${id}"
-                ${completed ? "disabled" : ""}
-                style="
-                    width:100%;
-                    margin-top:11px;
-                    padding:10px;
-                    border:0;
-                    border-radius:11px;
-                    background:${
-                        completed
-                            ? "#18304a"
-                            : "#168cff"
-                    };
-                    color:#fff;
-                    font-weight:700;
-                "
+                ${
+                    completed
+                        ? "disabled"
+                        : ""
+                }
+                data-complete-task="${escapeHTML(id)}"
             >
                 ${
                     completed
-                        ? "✓ مكتملة"
-                        : "فتح / إنجاز"
+                        ? "✓"
+                        : "Open"
                 }
             </button>
 
@@ -1549,218 +1206,201 @@ function renderAdGalaxyItem(task) {
    ECONOMIC DASHBOARD
    ========================================================= */
 
+function economicCard(
+    icon,
+    title,
+    value,
+    subtitle = ""
+) {
+
+    return `
+
+        <div class="economic-card">
+
+            <div class="economic-card-icon">
+                ${icon}
+            </div>
+
+            <div class="economic-card-content">
+
+                <span>
+                    ${escapeHTML(title)}
+                </span>
+
+                <strong>
+                    ${escapeHTML(value)}
+                </strong>
+
+                ${
+                    subtitle
+                        ? `
+                            <small>
+                                ${escapeHTML(subtitle)}
+                            </small>
+                        `
+                        : ""
+                }
+
+            </div>
+
+        </div>
+    `;
+}
+
+
 function showEconomicDashboard() {
 
-    const old =
-        $("economicModal");
+    const existing =
+        $("#economicModal");
 
+    if (existing) {
 
-    if (old) {
-        old.remove();
+        existing.remove();
     }
-
-
-    const e =
-        state.economic;
 
 
     const modal =
         document.createElement("div");
 
-
     modal.id =
         "economicModal";
 
-
-    modal.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:4000;
-        background:rgba(0,0,0,.78);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:18px;
-        direction:rtl;
-    `;
+    modal.className =
+        "modal-overlay";
 
 
     modal.innerHTML = `
 
-        <div style="
-            width:100%;
-            max-width:460px;
-            max-height:90vh;
-            overflow:auto;
-            background:#071a34;
-            border:1px solid rgba(91,140,190,.28);
-            border-radius:24px;
-            padding:20px;
-            color:#fff;
-            box-shadow:0 20px 60px rgba(0,0,0,.4);
-        ">
+        <div class="modal-card economic-modal">
 
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                margin-bottom:18px;
-            ">
+            <button
+                class="modal-close"
+                data-close-modal
+            >
+                ×
+            </button>
 
-                <div>
 
-                    <div style="
-                        font-size:19px;
-                        font-weight:800;
-                    ">
-                        🌐 مركز اقتصاد 3Migo
-                    </div>
+            <div class="modal-icon">
+                🏛️
+            </div>
 
-                    <div style="
-                        color:#8095ad;
-                        font-size:12px;
-                        margin-top:4px;
-                    ">
-                        بيانات Economic Engine الحالية
-                    </div>
 
-                </div>
+            <h2>
+                3Migo Economy Center
+            </h2>
+
+
+            <p class="modal-subtitle">
+                طبقة الاقتصاد والمساهمات
+            </p>
+
+
+            <div class="economic-grid">
+
+                ${economicCard(
+                    "⛏️",
+                    "Total Mined",
+                    `${formatNumber(
+                        state.economic.totalMined
+                    )} 3M`
+                )}
+
+
+                ${economicCard(
+                    "🔒",
+                    "Locked",
+                    `${formatNumber(
+                        state.economic.locked3m
+                    )} 3M`
+                )}
+
+
+                ${economicCard(
+                    "💰",
+                    "Economic Available",
+                    `${formatNumber(
+                        state.economic.unlocked3m
+                    )} 3M`
+                )}
+
+
+                ${economicCard(
+                    "🎁",
+                    "Airdrop",
+                    `${formatNumber(
+                        state.economic.airdrop3m
+                    )} 3M`
+                )}
+
+
+                ${economicCard(
+                    "⚡",
+                    "Contribution",
+                    formatNumber(
+                        state.economic.contributionScore
+                    )
+                )}
+
+
+                ${economicCard(
+                    "🛡️",
+                    "Trust",
+                    formatNumber(
+                        state.economic.trustScore
+                    )
+                )}
+
+            </div>
+
+
+            <div class="economy-level">
+
+                <span>
+                    Experience
+                </span>
+
+                <strong>
+                    LV.${state.experience.level}
+                    •
+                    ${escapeHTML(
+                        state.experience.levelName
+                    )}
+                </strong>
+
+            </div>
+
+
+            <div class="economic-warning">
+
+                <strong>
+                    ⚠️ ملاحظة اقتصادية
+                </strong>
+
+                <p>
+                    هذه البيانات تعكس أرصدة وحسابات
+                    النظام الحالية. لا تمثل قيمة سوقية
+                    للعملة ولا إيراداً نقدياً محققاً.
+                </p>
+
+            </div>
+
+
+            <div class="modal-actions">
 
                 <button
-                    id="closeEconomic"
-                    type="button"
-                    style="
-                        background:transparent;
-                        color:#9aabc0;
-                        border:0;
-                        font-size:26px;
-                    "
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-            <div style="
-                display:grid;
-                grid-template-columns:1fr 1fr;
-                gap:10px;
-            ">
-
-                ${economicCard(
-                    "إجمالي التعدين",
-                    "economicTotalMined",
-                    e.totalMined,
-                    "3M"
-                )}
-
-                ${economicCard(
-                    "مقفل 🔒",
-                    "economicLocked",
-                    e.locked3m,
-                    "3M"
-                )}
-
-                ${economicCard(
-                    "متاح اقتصادي",
-                    "economicUnlocked",
-                    e.unlocked3m,
-                    "3M"
-                )}
-
-                ${economicCard(
-                    "Airdrop 🎁",
-                    "economicAirdrop",
-                    e.airdrop3m,
-                    "3M"
-                )}
-
-                ${economicCard(
-                    "المساهمة ⭐",
-                    "economicContribution",
-                    e.contributionScore,
-                    "Score"
-                )}
-
-                ${economicCard(
-                    "الثقة 🛡️",
-                    "economicTrust",
-                    e.trustScore,
-                    "/ 100"
-                )}
-
-            </div>
-
-
-            <div style="
-                margin-top:14px;
-                background:rgba(22,140,255,.07);
-                border:1px solid rgba(22,140,255,.16);
-                border-radius:15px;
-                padding:13px;
-                font-size:12px;
-                color:#a9bad0;
-                line-height:1.7;
-            ">
-                💡 هذه الأرقام مأخوذة من Economic API.
-                الواجهة لا تضيف إليها إيرادات أو قيمة سوقية
-                من عندها.
-            </div>
-
-
-            <div style="
-                margin-top:14px;
-                padding:14px;
-                border-radius:15px;
-                background:#0b2443;
-                color:#93a8bf;
-                font-size:11px;
-                line-height:1.7;
-            ">
-                🔗 مسار الاقتصاد المستقبلي:
-                <br>
-                الإعلان/المساهمة → حدث موثق → Revenue Ledger
-                → Economic Allocation → Reward Rules
-            </div>
-
-
-            <div style="
-                display:grid;
-                grid-template-columns:1fr 1fr;
-                gap:9px;
-                margin-top:14px;
-            ">
-
-                <button
-                    id="economicAirdropBtn"
-                    type="button"
-                    style="
-                        padding:13px;
-                        border:0;
-                        border-radius:13px;
-                        background:#102f52;
-                        color:#fff;
-                        font-weight:700;
-                    "
+                    class="primary-btn"
+                    data-economic-airdrop
                 >
                     🎁 Airdrop
                 </button>
 
 
                 <button
-                    id="economicSpendBtn"
-                    type="button"
-                    style="
-                        padding:13px;
-                        border:0;
-                        border-radius:13px;
-                        background:#168cff;
-                        color:#fff;
-                        font-weight:700;
-                    "
+                    class="secondary-btn"
+                    data-economic-spend
                 >
-                    💳 استخدام 3M
+                    💳 Spend
                 </button>
 
             </div>
@@ -1772,82 +1412,49 @@ function showEconomicDashboard() {
     document.body.appendChild(modal);
 
 
-    $("closeEconomic")
-        ?.addEventListener(
-            "click",
-            () => modal.remove()
-        );
-
-
-    $("economicAirdropBtn")
-        ?.addEventListener(
-            "click",
-            showAirdropPreview
-        );
-
-
-    $("economicSpendBtn")
-        ?.addEventListener(
-            "click",
-            showSpendDialog
-        );
-
-
     modal.addEventListener(
         "click",
-        event => {
+        async event => {
 
-            if (event.target === modal) {
+            if (
+                event.target === modal ||
+                event.target.closest(
+                    "[data-close-modal]"
+                )
+            ) {
+
                 modal.remove();
+
+                return;
             }
 
+
+            if (
+                event.target.closest(
+                    "[data-economic-airdrop]"
+                )
+            ) {
+
+                await loadAirdropPreview();
+
+                showAirdropPreview();
+
+                return;
+            }
+
+
+            if (
+                event.target.closest(
+                    "[data-economic-spend]"
+                )
+            ) {
+
+                modal.remove();
+
+                showSpendDialog();
+            }
         }
     );
-}
-
-
-function economicCard(
-    title,
-    id,
-    value,
-    suffix
-) {
-
-    return `
-
-        <div style="
-            background:rgba(255,255,255,.045);
-            border-radius:15px;
-            padding:14px;
-        ">
-
-            <small style="
-                color:#7f94ad;
-            ">
-                ${title}
-            </small>
-
-            <strong
-                id="${id}"
-                style="
-                    display:block;
-                    margin-top:7px;
-                    font-size:20px;
-                "
-            >
-                ${formatNumber(value)}
-            </strong>
-
-            <span style="
-                color:#6e849e;
-                font-size:11px;
-            ">
-                ${suffix}
-            </span>
-
-        </div>
-
-    `;
 }
 
 
@@ -1857,79 +1464,84 @@ function economicCard(
 
 async function loadAirdropPreview() {
 
-    if (!state.telegramId) {
-        return null;
-    }
-
-
-    const data =
-        await apiRequest(
-            `/economic/airdrop/${state.telegramId}`
-        );
-
-
-    state.airdropPreview =
-        data?.result ||
-        data;
-
-
-    return state.airdropPreview;
-}
-
-
-async function showAirdropPreview() {
-
     try {
 
-        showToast(
-            "جاري حساب تقدير Airdrop..."
-        );
-
-
         const data =
-            await loadAirdropPreview();
-
-
-        if (!data) {
-
-            showToast(
-                "تعذر حساب Airdrop."
-            );
-
-            return;
-        }
-
-
-        const amount =
-            safeNumber(
-                data.estimated_airdrop_3m
+            await apiRequest(
+                `/economic/airdrop/${state.telegramId}`
             );
 
 
-        const contribution =
-            safeNumber(
-                data.user_contribution_score
-            );
+        state.airdropPreview =
+            data?.result ||
+            data ||
+            null;
 
 
-        const totalContribution =
-            safeNumber(
-                data.total_contribution_score
-            );
-
-
-        showToast(
-            `تقدير Airdrop: ${formatNumber(amount)} 3M | مساهمتك: ${formatNumber(contribution)} من ${formatNumber(totalContribution)}`,
-            6000
-        );
-
+        return state.airdropPreview;
 
     } catch (error) {
 
-        showToast(
-            `تعذر حساب Airdrop: ${error.message}`
+        console.error(
+            "loadAirdropPreview:",
+            error
         );
+
+        showToast(
+            `تعذر تحميل Airdrop: ${error.message}`
+        );
+
+        return null;
     }
+}
+
+
+function showAirdropPreview() {
+
+    const data =
+        state.airdropPreview;
+
+
+    if (!data) {
+
+        showToast(
+            "لا توجد بيانات Airdrop متاحة حالياً."
+        );
+
+        return;
+    }
+
+
+    const estimated =
+        safeNumber(
+            data.estimated_airdrop ??
+            data.airdrop_3m ??
+            data.amount_3m ??
+            data.estimated_3m ??
+            0
+        );
+
+
+    const userContribution =
+        safeNumber(
+            data.user_contribution ??
+            data.contribution_score ??
+            0
+        );
+
+
+    const totalContribution =
+        safeNumber(
+            data.total_contribution ??
+            data.total_contribution_score ??
+            0
+        );
+
+
+    showToast(
+        `Airdrop تقديري: ${formatNumber(estimated)} 3M | مساهمتك: ${formatNumber(userContribution)} | الإجمالي: ${formatNumber(totalContribution)}`,
+        6000
+    );
 }
 
 
@@ -1939,151 +1551,97 @@ async function showAirdropPreview() {
 
 function showSpendDialog() {
 
-    const old =
-        $("spendModal");
+    const existing =
+        $("#spendModal");
 
+    if (existing) {
 
-    if (old) {
-        old.remove();
+        existing.remove();
     }
-
-
-    const available =
-        safeNumber(
-            state.economic.unlocked3m
-        );
 
 
     const modal =
         document.createElement("div");
 
-
     modal.id =
         "spendModal";
 
-
-    modal.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:5000;
-        background:rgba(0,0,0,.78);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:18px;
-        direction:rtl;
-    `;
+    modal.className =
+        "modal-overlay";
 
 
     modal.innerHTML = `
 
-        <div style="
-            width:100%;
-            max-width:420px;
-            background:#071a34;
-            border:1px solid rgba(91,140,190,.28);
-            border-radius:22px;
-            padding:20px;
-            color:#fff;
-        ">
+        <div class="modal-card">
 
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                margin-bottom:18px;
-            ">
+            <button
+                class="modal-close"
+                data-close-modal
+            >
+                ×
+            </button>
 
-                <strong style="font-size:18px;">
-                    💳 استخدام 3M
+
+            <div class="modal-icon">
+                💳
+            </div>
+
+
+            <h2>
+                Economic Spend
+            </h2>
+
+
+            <p class="modal-subtitle">
+                استخدام الرصيد الاقتصادي المتاح
+            </p>
+
+
+            <div class="wallet-metric">
+
+                <span>
+                    Economic Available
+                </span>
+
+                <strong>
+                    ${formatNumber(
+                        state.economic.unlocked3m
+                    )} 3M
                 </strong>
-
-                <button
-                    id="closeSpend"
-                    type="button"
-                    style="
-                        background:transparent;
-                        border:0;
-                        color:#9aabc0;
-                        font-size:25px;
-                    "
-                >
-                    ×
-                </button>
 
             </div>
 
 
-            <div style="
-                background:rgba(255,255,255,.04);
-                padding:13px;
-                border-radius:13px;
-                margin-bottom:14px;
-                color:#9fb1c7;
-                font-size:13px;
-            ">
-                الرصيد الاقتصادي المتاح:
-                <strong style="color:#fff;">
-                    ${formatNumber(available)} 3M
-                </strong>
-            </div>
-
+            <label>
+                الخدمة
+            </label>
 
             <input
                 id="spendService"
                 type="text"
-                value="3Migo AI Service"
-                maxlength="200"
-                placeholder="اسم الخدمة"
-                style="
-                    width:100%;
-                    box-sizing:border-box;
-                    padding:12px;
-                    border-radius:12px;
-                    border:1px solid rgba(255,255,255,.1);
-                    background:#0b2443;
-                    color:#fff;
-                    margin-bottom:12px;
-                    outline:none;
-                "
+                placeholder="مثال: service"
+                maxlength="100"
             />
 
+
+            <label>
+                المبلغ 3M
+            </label>
 
             <input
                 id="spendAmount"
                 type="number"
-                min="0.01"
+                min="0"
                 step="0.01"
-                max="${available}"
-                value="1"
-                style="
-                    width:100%;
-                    box-sizing:border-box;
-                    padding:12px;
-                    border-radius:12px;
-                    border:1px solid rgba(255,255,255,.1);
-                    background:#0b2443;
-                    color:#fff;
-                    margin-bottom:14px;
-                    outline:none;
-                "
+                placeholder="0"
             />
 
 
             <button
-                id="confirmSpend"
-                type="button"
-                style="
-                    width:100%;
-                    padding:13px;
-                    border:0;
-                    border-radius:13px;
-                    background:#168cff;
-                    color:#fff;
-                    font-weight:800;
-                "
+                class="primary-btn"
+                data-execute-spend
             >
-                تأكيد استخدام 3M
+                تأكيد الاستخدام
             </button>
 
         </div>
@@ -2093,28 +1651,31 @@ function showSpendDialog() {
     document.body.appendChild(modal);
 
 
-    $("closeSpend")
-        ?.addEventListener(
-            "click",
-            () => modal.remove()
-        );
-
-
-    $("confirmSpend")
-        ?.addEventListener(
-            "click",
-            () => executeSpend(modal)
-        );
-
-
     modal.addEventListener(
         "click",
         event => {
 
-            if (event.target === modal) {
+            if (
+                event.target === modal ||
+                event.target.closest(
+                    "[data-close-modal]"
+                )
+            ) {
+
                 modal.remove();
+
+                return;
             }
 
+
+            if (
+                event.target.closest(
+                    "[data-execute-spend]"
+                )
+            ) {
+
+                executeSpend(modal);
+            }
         }
     );
 }
@@ -2122,26 +1683,26 @@ function showSpendDialog() {
 
 async function executeSpend(modal) {
 
+    const serviceInput =
+        modal.querySelector(
+            "#spendService"
+        );
+
+
+    const amountInput =
+        modal.querySelector(
+            "#spendAmount"
+        );
+
+
     const service =
-        String(
-            $("spendService")?.value || ""
-        ).trim();
+        serviceInput?.value.trim();
 
 
     const amount =
         safeNumber(
-            $("spendAmount")?.value
+            amountInput?.value
         );
-
-
-    const available =
-        safeNumber(
-            state.economic.unlocked3m
-        );
-
-
-    const button =
-        $("confirmSpend");
 
 
     if (!service) {
@@ -2154,7 +1715,9 @@ async function executeSpend(modal) {
     }
 
 
-    if (amount <= 0) {
+    if (
+        amount <= 0
+    ) {
 
         showToast(
             "أدخل مبلغاً صحيحاً."
@@ -2164,109 +1727,84 @@ async function executeSpend(modal) {
     }
 
 
-    if (amount > available) {
+    if (
+        amount >
+        state.economic.unlocked3m
+    ) {
 
         showToast(
-            `الرصيد الاقتصادي المتاح فقط ${formatNumber(available)} 3M`
+            "الرصيد الاقتصادي المتاح غير كافٍ."
         );
 
         return;
     }
 
 
+    const button =
+        modal.querySelector(
+            "[data-execute-spend]"
+        );
+
+
     if (button) {
 
         button.disabled = true;
-
-        button.textContent =
-            "جاري التنفيذ...";
+        button.textContent = "جارٍ التنفيذ...";
     }
 
 
     try {
 
-        const reference =
-            `miniapp_spend_${Date.now()}`;
+        await apiRequest(
+            `/economic/spend/${state.telegramId}`,
+            {
+                method: "POST",
 
+                body: {
 
-        const data =
-            await apiRequest(
-                `/economic/spend/${state.telegramId}`,
-                {
+                    service,
 
-                    method: "POST",
+                    amount_3m:
+                        amount,
 
-                    body: {
-
-                        service,
-
-                        amount_3m:
-                            amount,
-
-                        reference
-
-                    }
-
+                    reference:
+                        `miniapp_spend_${Date.now()}`
                 }
-            );
-
-
-        const result =
-            data?.result ||
-            data;
-
-
-        if (result?.success === false) {
-
-            throw new Error(
-                result?.message ||
-                "فشلت العملية."
-            );
-        }
-
-
-        /*
-         * Re-sync both wallet layers
-         * after economic spend.
-         */
-
-        await Promise.allSettled([
-
-            loadUser(),
-
-            loadEconomicProfile()
-
-        ]);
-
-
-        modal?.remove();
+            }
+        );
 
 
         showToast(
-            `تم استخدام ${formatNumber(amount)} 3M بنجاح ✅`,
-            5000
+            "تم تسجيل الاستخدام بنجاح."
         );
+
+
+        modal.remove();
+
+
+        await loadUser();
+
+        await loadEconomicProfile();
 
 
     } catch (error) {
 
         console.error(
-            "Spend error:",
+            "executeSpend:",
             error
         );
 
 
         showToast(
-            `تعذر استخدام 3M: ${error.message}`
+            `فشل الاستخدام: ${error.message}`
         );
 
 
         if (button) {
 
             button.disabled = false;
-
             button.textContent =
-                "تأكيد استخدام 3M";
+                "تأكيد الاستخدام";
         }
     }
 }
@@ -2276,19 +1814,23 @@ async function executeSpend(modal) {
    MINING
    ========================================================= */
 
-function formatTime(seconds) {
+function formatTime(totalSeconds) {
 
-    seconds =
+    const seconds =
         Math.max(
             0,
             Math.floor(
-                safeNumber(seconds)
+                safeNumber(
+                    totalSeconds
+                )
             )
         );
 
 
     const hours =
-        Math.floor(seconds / 3600);
+        Math.floor(
+            seconds / 3600
+        );
 
 
     const minutes =
@@ -2302,106 +1844,121 @@ function formatTime(seconds) {
 
 
     return [
-
         String(hours).padStart(2, "0"),
-
         String(minutes).padStart(2, "0"),
-
         String(secs).padStart(2, "0")
-
     ].join(":");
 }
 
 
+/* =========================================================
+   MINING UI
+   ========================================================= */
+
 function updateMiningUI() {
 
-    const stateElement =
-        $("miningState");
-
+    const stateEl =
+        $("#miningState");
 
     const button =
-        $("mineBtn");
+        $("#mineBtn");
+
+    const rateEl =
+        $("#rate");
 
 
-    if (!state.miningActive) {
+    if (rateEl) {
 
-        if (stateElement) {
-            stateElement.textContent = "جاهز";
-        }
-
-
-        if (button) {
-
-            button.disabled = false;
+        rateEl.textContent =
+            `${formatNumber(
+                state.miningReward
+            )} 3M / ${MINING_CYCLE_HOURS}h`;
+    }
 
 
-            const strong =
-                button.querySelector("strong");
-
-
-            const small =
-                button.querySelector("small");
-
-
-            if (strong) {
-                strong.textContent =
-                    "ابدأ التعدين";
-            }
-
-
-            if (small) {
-                small.textContent =
-                    "ابدأ جلسة 12 ساعة";
-            }
-        }
-
+    if (!stateEl || !button) {
 
         return;
     }
 
 
-    if (stateElement) {
-
-        stateElement.textContent =
-            formatTime(
-                state.miningRemaining
-            );
-    }
+    const strong =
+        stateEl.querySelector("strong");
 
 
-    if (button) {
-
-        button.disabled = true;
-
-
-        const strong =
-            button.querySelector("strong");
+    const small =
+        stateEl.querySelector("small");
 
 
-        const small =
-            button.querySelector("small");
-
+    if (state.miningActive) {
 
         if (strong) {
+
             strong.textContent =
-                "التعدين نشط";
+                "⛏️ Mining Active";
         }
 
 
         if (small) {
+
             small.textContent =
-                "انتظر حتى انتهاء الدورة";
+                formatTime(
+                    state.miningRemaining
+                );
         }
+
+
+        button.disabled =
+            state.miningRemaining > 0;
+
+
+        button.textContent =
+            state.miningRemaining > 0
+                ? "⛏️ Mining..."
+                : "🎁 Claim 3M";
+
+
+        button.classList.add(
+            "mining-active"
+        );
+
+
+    } else {
+
+        if (strong) {
+
+            strong.textContent =
+                "⚡ Ready to Mine";
+        }
+
+
+        if (small) {
+
+            small.textContent =
+                `${formatNumber(
+                    state.miningReward
+                )} 3M reward`;
+        }
+
+
+        button.disabled = false;
+
+        button.textContent =
+            "⛏️ Start Mining";
+
+
+        button.classList.remove(
+            "mining-active"
+        );
     }
 }
 
 
+/* =========================================================
+   MINING STATUS
+   ========================================================= */
+
 async function loadMiningStatus() {
-
-    if (!state.telegramId) {
-        return;
-    }
-
 
     try {
 
@@ -2413,51 +1970,59 @@ async function loadMiningStatus() {
 
         state.miningActive =
             Boolean(
-                data?.active ??
-                data?.is_active
+                data.active ??
+                data.is_active ??
+                false
             );
 
 
         state.miningRemaining =
-            safeNumber(
-                data?.remaining_seconds ??
-                data?.remaining ??
-                data?.seconds_remaining
+            Math.max(
+                0,
+                safeNumber(
+                    data.remaining_seconds ??
+                    data.remaining ??
+                    data.seconds_remaining ??
+                    0
+                )
             );
 
 
         state.miningReward =
             safeNumber(
-                data?.reward_3m ??
-                data?.reward ??
+                data.reward_3m ??
+                data.reward ??
+                10,
                 10
             );
 
 
-        const rate =
-            $("rate");
+        updateMiningUI();
 
 
-        if (rate) {
-            rate.textContent =
-                `+${state.miningReward}`;
+        if (state.miningActive) {
+
+            startMiningCountdown();
         }
 
 
-        updateMiningUI();
-
-        startMiningCountdown();
-
+        return data;
 
     } catch (error) {
 
-        console.warn(
-            "Mining status unavailable:",
+        console.error(
+            "loadMiningStatus:",
             error
         );
+
+        return null;
     }
 }
 
+
+/* =========================================================
+   MINING COUNTDOWN
+   ========================================================= */
 
 function startMiningCountdown() {
 
@@ -2466,60 +2031,89 @@ function startMiningCountdown() {
     );
 
 
-    if (!state.miningActive) {
+    state.miningTimer =
+        setInterval(
+            () => {
 
-        updateMiningUI();
+                if (
+                    !state.miningActive
+                ) {
+
+                    clearInterval(
+                        state.miningTimer
+                    );
+
+                    return;
+                }
+
+
+                state.miningRemaining =
+                    Math.max(
+                        0,
+                        state.miningRemaining - 1
+                    );
+
+
+                updateMiningUI();
+
+
+                if (
+                    state.miningRemaining <= 0
+                ) {
+
+                    clearInterval(
+                        state.miningTimer
+                    );
+
+
+                    state.miningActive =
+                        true;
+
+
+                    updateMiningUI();
+
+
+                    showToast(
+                        "⏰ دورة التعدين اكتملت. يمكنك الآن المطالبة بالمكافأة."
+                    );
+                }
+
+            },
+            1000
+        );
+}
+
+
+/* =========================================================
+   START MINING
+   ========================================================= */
+
+async function startMining() {
+
+    if (
+        state.miningActive &&
+        state.miningRemaining > 0
+    ) {
+
+        showToast(
+            `التعدين مستمر: ${formatTime(
+                state.miningRemaining
+            )}`
+        );
 
         return;
     }
 
 
-    updateMiningUI();
+    const button =
+        $("#mineBtn");
 
 
-    state.miningTimer =
-        setInterval(() => {
+    if (button) {
 
-            if (state.miningRemaining > 0) {
-
-                state.miningRemaining--;
-
-                updateMiningUI();
-
-                return;
-            }
-
-
-            clearInterval(
-                state.miningTimer
-            );
-
-
-            state.miningActive = false;
-
-            state.miningRemaining = 0;
-
-
-            updateMiningUI();
-
-
-            showToast(
-                "اكتملت دورة التعدين. يمكنك استلام المكافأة."
-            );
-
-        }, 1000);
-}
-
-
-async function startMining() {
-
-    if (state.miningActive) {
-
-        showToast(
-            `التعدين نشط — ${formatTime(state.miningRemaining)}`
-        );
-
-        return;
+        button.disabled = true;
+        button.textContent =
+            "⏳ Starting...";
     }
 
 
@@ -2534,21 +2128,30 @@ async function startMining() {
             );
 
 
-        state.miningActive = true;
+        state.miningActive =
+            Boolean(
+                data.active ??
+                data.is_active ??
+                true
+            );
 
 
         state.miningRemaining =
-            safeNumber(
-                data?.remaining_seconds ??
-                data?.remaining ??
-                MINING_CYCLE_SECONDS
+            Math.max(
+                0,
+                safeNumber(
+                    data.remaining_seconds ??
+                    data.remaining ??
+                    MINING_CYCLE_SECONDS
+                )
             );
 
 
         state.miningReward =
             safeNumber(
-                data?.reward_3m ??
-                data?.reward ??
+                data.reward_3m ??
+                data.reward ??
+                10,
                 10
             );
 
@@ -2559,18 +2162,33 @@ async function startMining() {
 
 
         showToast(
-            "تم بدء جلسة التعدين لمدة 12 ساعة ⛏️"
+            `⛏️ بدأ التعدين — المكافأة ${formatNumber(
+                state.miningReward
+            )} 3M`
         );
 
 
     } catch (error) {
 
+        console.error(
+            "startMining:",
+            error
+        );
+
+
         showToast(
             `تعذر بدء التعدين: ${error.message}`
         );
+
+
+        updateMiningUI();
     }
 }
 
+
+/* =========================================================
+   CLAIM MINING
+   ========================================================= */
 
 async function claimMining() {
 
@@ -2585,76 +2203,83 @@ async function claimMining() {
             );
 
 
-        const reward =
-            safeNumber(
-                data?.reward_3m ??
-                data?.reward ??
-                state.miningReward
-            );
+        showToast(
+            `🎉 تمت المطالبة بالمكافأة: ${
+                formatNumber(
+                    safeNumber(
+                        data?.reward_3m ??
+                        data?.reward ??
+                        state.miningReward
+                    )
+                )
+            } 3M`
+        );
 
 
         state.miningActive = false;
-
         state.miningRemaining = 0;
 
 
-        updateMiningUI();
-
-
-        /*
-         * Backend is authoritative.
-         * Do not rely only on local balance increment.
-         */
-
-        await Promise.allSettled([
-
-            loadUser(),
-
-            loadEconomicProfile(),
-
-            loadMiningStatus()
-
-        ]);
-
-
-        updateExperienceLevel();
-
-
-        showToast(
-            `تم استلام ${formatNumber(reward)} 3M بنجاح 🎉`
+        clearInterval(
+            state.miningTimer
         );
+
+
+        await loadUser();
+
+        await loadEconomicProfile();
+
+        await loadMiningStatus();
 
 
     } catch (error) {
 
-        showToast(
-            `تعذر استلام المكافأة: ${error.message}`
+        console.error(
+            "claimMining:",
+            error
         );
+
+
+        showToast(
+            `تعذر المطالبة: ${error.message}`
+        );
+
+
+        await loadMiningStatus();
     }
 }
 
 
-function handleMiningButton() {
+/* =========================================================
+   MINING BUTTON
+   ========================================================= */
 
-    if (state.miningActive) {
+async function handleMiningButton() {
 
-        if (state.miningRemaining <= 0) {
+    if (
+        state.miningActive
+    ) {
 
-            claimMining();
+        if (
+            state.miningRemaining <= 0
+        ) {
+
+            await claimMining();
 
         } else {
 
             showToast(
-                `التعدين مستمر — ${formatTime(state.miningRemaining)}`
+                `التعدين مستمر — ${formatTime(
+                    state.miningRemaining
+                )}`
             );
         }
-
 
         return;
     }
 
 
-    startMining();
+    await startMining();
 }
 
 
@@ -2665,17 +2290,18 @@ function handleMiningButton() {
 function renderTasksLoading() {
 
     const container =
-        $("tasksContainer");
+        $("#tasksContainer");
 
-
-    if (!container) {
-        return;
-    }
+    if (!container) return;
 
 
     container.innerHTML = `
-        <div class="task-loading">
-            ⏳ جاري تحميل المهام...
+
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <span>
+                جاري تحميل المهام...
+            </span>
         </div>
     `;
 }
@@ -2684,16 +2310,14 @@ function renderTasksLoading() {
 function renderTasksError(message) {
 
     const container =
-        $("tasksContainer");
+        $("#tasksContainer");
 
-
-    if (!container) {
-        return;
-    }
+    if (!container) return;
 
 
     container.innerHTML = `
-        <div class="task-error">
+
+        <div class="empty-state error">
             ⚠️ ${escapeHTML(message)}
         </div>
     `;
@@ -2703,130 +2327,122 @@ function renderTasksError(message) {
 function renderTasks() {
 
     const container =
-        $("tasksContainer");
+        $("#tasksContainer");
+
+    if (!container) return;
 
 
-    if (!container) {
-        return;
-    }
-
-
-    if (
-        !Array.isArray(state.tasks) ||
-        state.tasks.length === 0
-    ) {
+    if (!state.tasks.length) {
 
         container.innerHTML = `
-            <div class="task-loading">
+
+            <div class="empty-state">
                 لا توجد مهام متاحة حالياً.
             </div>
         `;
-
-
-        analyzeAdGalaxy();
 
         return;
     }
 
 
     container.innerHTML =
-        state.tasks.map(task => {
+        state.tasks
+            .map(task => {
 
-            const id =
-                safeNumber(task.id);
+                const id =
+                    task.id ??
+                    task.task_id ??
+                    "";
 
 
-            const title =
-                escapeHTML(
+                const title =
                     task.title ||
-                    "مهمة 3Migo"
-                );
+                    "Task";
 
 
-            const description =
-                escapeHTML(
+                const description =
                     task.description ||
-                    ""
-                );
+                    "";
 
 
-            const reward =
-                safeNumber(
-                    task.reward_3m ??
-                    task.reward
-                );
+                const reward =
+                    safeNumber(
+                        task.reward_3m ??
+                        task.reward ??
+                        0
+                    );
 
 
-            const completed =
-                Number(task.completed) === 1 ||
-                task.completed === true;
+                const completed =
+                    Number(task.completed) === 1 ||
+                    task.completed === true;
 
 
-            return `
+                return `
 
-                <div
-                    class="task-card"
-                    data-task-id="${id}"
-                >
+                    <div class="task-card">
 
-                    <div class="task-card-content">
-
-                        <div class="task-card-title">
-                            ${title}
+                        <div class="task-icon">
+                            ${
+                                completed
+                                    ? "✅"
+                                    : "🎯"
+                            }
                         </div>
 
-                        <div class="task-card-description">
-                            ${description}
+
+                        <div class="task-content">
+
+                            <h3>
+                                ${escapeHTML(title)}
+                            </h3>
+
+                            <p>
+                                ${escapeHTML(
+                                    description
+                                )}
+                            </p>
+
+                            <strong>
+                                +${formatNumber(
+                                    reward
+                                )} 3M
+                            </strong>
+
                         </div>
 
-                        <div class="task-card-reward">
-                            +${formatNumber(reward)} 3M
-                        </div>
+
+                        <button
+                            ${
+                                completed
+                                    ? "disabled"
+                                    : ""
+                            }
+                            data-complete-task="${escapeHTML(
+                                id
+                            )}"
+                        >
+                            ${
+                                completed
+                                    ? "Completed"
+                                    : "Complete"
+                            }
+                        </button>
 
                     </div>
-
-
-                    <button
-                        type="button"
-                        class="task-button ${completed ? "completed" : ""}"
-                        data-complete-task="${id}"
-                        ${completed ? "disabled" : ""}
-                    >
-                        ${completed ? "✓ مكتملة" : "إنجاز"}
-                    </button>
-
-                </div>
-
-            `;
-
-        }).join("");
-
-
-    analyzeAdGalaxy();
-
-    updateExperienceLevel();
+                `;
+            })
+            .join("");
 }
 
 
+/* =========================================================
+   LOAD TASKS
+   ========================================================= */
+
 async function loadTasks() {
 
-    if (!state.telegramId) {
-
-        renderTasksError(
-            "لم يتم التعرف على المستخدم."
-        );
-
-        return;
-    }
-
-
-    if (state.loadingTasks) {
-        return;
-    }
-
-
     state.loadingTasks = true;
-
 
     renderTasksLoading();
 
@@ -2839,38 +2455,38 @@ async function loadTasks() {
             );
 
 
-        if (Array.isArray(data)) {
-
-            state.tasks = data;
-
-        } else if (
-            Array.isArray(data?.tasks)
-        ) {
-
-            state.tasks =
-                data.tasks;
-
-        } else {
-
-            state.tasks = [];
-        }
+        state.tasks =
+            Array.isArray(data)
+                ? data
+                : Array.isArray(data?.tasks)
+                    ? data.tasks
+                    : [];
 
 
         renderTasks();
 
+        analyzeAdGalaxy();
+
+
+        return state.tasks;
 
     } catch (error) {
 
         console.error(
-            "Tasks error:",
+            "loadTasks:",
             error
         );
 
 
+        state.tasks = [];
+
         renderTasksError(
-            "تعذر تحميل المهام. حاول مرة أخرى."
+            error.message ||
+            "تعذر تحميل المهام"
         );
 
+
+        throw error;
 
     } finally {
 
@@ -2879,57 +2495,13 @@ async function loadTasks() {
 }
 
 
+/* =========================================================
+   COMPLETE TASK
+   ========================================================= */
+
 async function completeTask(taskId) {
 
-    if (!taskId) {
-        return;
-    }
-
-
-    const task =
-        state.tasks.find(
-            item =>
-                Number(item.id) ===
-                Number(taskId)
-        );
-
-
-    if (!task) {
-
-        showToast(
-            "المهمة غير موجودة."
-        );
-
-        return;
-    }
-
-
-    if (
-        Number(task.completed) === 1 ||
-        task.completed === true
-    ) {
-
-        showToast(
-            "هذه المهمة مكتملة بالفعل."
-        );
-
-        return;
-    }
-
-
-    const button =
-        document.querySelector(
-            `[data-complete-task="${taskId}"]`
-        );
-
-
-    if (button) {
-
-        button.disabled = true;
-
-        button.textContent =
-            "جاري التنفيذ...";
-    }
+    if (!taskId) return;
 
 
     try {
@@ -2943,70 +2515,52 @@ async function completeTask(taskId) {
             );
 
 
-        const reward =
-            safeNumber(
-                data?.reward_3m ??
-                data?.reward ??
-                task.reward_3m
-            );
-
-
-        task.completed = 1;
-
-
-        /*
-         * Backend remains authoritative.
-         * Re-load wallet after completion.
-         */
-
-        await Promise.allSettled([
-
-            loadUser(),
-
-            loadEconomicProfile(),
-
-            loadTasks()
-
-        ]);
-
-
-        updateExperienceLevel();
-
-
         showToast(
-            `تم إنجاز المهمة وإضافة ${formatNumber(reward)} 3M 🎉`
+            `🎉 تمت المهمة ${
+                data?.reward_3m !== undefined
+                    ? `+${formatNumber(
+                        data.reward_3m
+                    )} 3M`
+                    : "بنجاح"
+            }`
         );
 
+
+        await loadUser();
+
+        await loadEconomicProfile();
+
+        await loadTasks();
+
+
+        return data;
 
     } catch (error) {
 
         console.error(
-            "Complete task error:",
+            "completeTask:",
             error
         );
-
-
-        if (button) {
-
-            button.disabled = false;
-
-            button.textContent =
-                "إنجاز";
-        }
 
 
         showToast(
             `تعذر إكمال المهمة: ${error.message}`
         );
+
+        throw error;
     }
 }
 
+
+/* =========================================================
+   TASK EVENTS
+   ========================================================= */
 
 function setupTaskEvents() {
 
     document.addEventListener(
         "click",
-        event => {
+        async event => {
 
             const button =
                 event.target.closest(
@@ -3014,50 +2568,63 @@ function setupTaskEvents() {
                 );
 
 
-            if (!button) {
-                return;
-            }
+            if (!button) return;
 
 
             const taskId =
-                button.getAttribute(
-                    "data-complete-task"
-                );
+                button.dataset.completeTask;
 
 
-            completeTask(taskId);
+            if (!taskId) return;
 
+
+            button.disabled = true;
+
+            button.textContent =
+                "..." ;
+
+
+            try {
+
+                await completeTask(taskId);
+
+            } catch (error) {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Complete";
+            }
         }
     );
 }
 
 
+/* =========================================================
+   SCROLL TASKS
+   ========================================================= */
+
 function scrollToTasks() {
 
     const section =
-        $("tasksSection");
+        $("#tasksSection");
 
 
-    if (!section) {
-        return;
+    if (section) {
+
+        section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
     }
 
 
-    section.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
-
-
-    setTimeout(
-        loadTasks,
-        150
-    );
+    loadTasks().catch(() => {});
 }
 
 
 /* =========================================================
-   DAILY
+   DAILY REWARD
    ========================================================= */
 
 async function dailyReward() {
@@ -3081,29 +2648,35 @@ async function dailyReward() {
             );
 
 
-        /*
-         * Re-sync from backend.
-         */
-
-        await Promise.allSettled([
-
-            loadUser(),
-
-            loadEconomicProfile()
-
-        ]);
-
-
         showToast(
-            `تم استلام المكافأة اليومية: ${formatNumber(reward)} 3M 🎁`
+            `🎁 Daily Reward +${formatNumber(
+                reward
+            )} 3M`
         );
 
+
+        await loadUser();
+
+        await loadEconomicProfile();
+
+        await loadTasks();
+
+
+        return data;
 
     } catch (error) {
 
-        showToast(
-            `تعذر استلام المكافأة اليومية: ${error.message}`
+        console.error(
+            "dailyReward:",
+            error
         );
+
+
+        showToast(
+            `Daily Reward: ${error.message}`
+        );
+
+        throw error;
     }
 }
 
@@ -3128,243 +2701,169 @@ async function loadReferral() {
 
         return data;
 
-
     } catch (error) {
 
         console.error(
-            "Referral error:",
+            "loadReferral:",
             error
         );
 
 
-        showToast(
-            "تعذر تحميل بيانات الإحالة."
-        );
+        state.referral = null;
 
-
-        return null;
+        throw error;
     }
 }
 
 
+/* =========================================================
+   REFERRAL MODAL
+   ========================================================= */
+
 function showReferralModal(data) {
 
-    if (!data) {
-        return;
+    const existing =
+        $("#referralModal");
+
+    if (existing) {
+
+        existing.remove();
     }
 
 
     const code =
-        data.referral_code ||
+        data?.referral_code ??
+        data?.code ??
         `3M${state.telegramId}`;
 
 
-    const referralLink =
-        data.referral_link ||
+    const link =
+        data?.referral_link ??
         `https://t.me/${BOT_USERNAME}?start=ref_${code}`;
 
 
-    const old =
-        $("referralModal");
+    const count =
+        safeNumber(
+            data?.referral_count ??
+            data?.count ??
+            data?.referred_users ??
+            0
+        );
 
 
-    if (old) {
-        old.remove();
-    }
+    const rewards =
+        safeNumber(
+            data?.referral_rewards ??
+            data?.rewards_3m ??
+            data?.rewards ??
+            0
+        );
 
 
     const modal =
         document.createElement("div");
 
-
     modal.id =
         "referralModal";
 
-
-    modal.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:3000;
-        background:rgba(0,0,0,.72);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-    `;
+    modal.className =
+        "modal-overlay";
 
 
     modal.innerHTML = `
 
-        <div style="
-            width:100%;
-            max-width:430px;
-            background:#071a34;
-            border:1px solid rgba(91,140,190,.25);
-            border-radius:22px;
-            padding:20px;
-            color:#fff;
-            direction:rtl;
-        ">
+        <div class="modal-card referral-modal">
 
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                margin-bottom:18px;
-            ">
+            <button
+                class="modal-close"
+                data-close-modal
+            >
+                ×
+            </button>
 
-                <strong style="font-size:18px;">
-                    👥 الإحالات
-                </strong>
 
-                <button
-                    id="closeReferral"
-                    type="button"
-                    style="
-                        background:transparent;
-                        color:#91a4bd;
-                        border:0;
-                        font-size:24px;
-                    "
-                >
-                    ×
-                </button>
-
+            <div class="modal-icon">
+                🤝
             </div>
 
 
-            <div style="
-                background:rgba(255,255,255,.04);
-                border-radius:15px;
-                padding:15px;
-                margin-bottom:12px;
-            ">
+            <h2>
+                Referral Hub
+            </h2>
 
-                <small style="
-                    color:#8195ad;
-                    display:block;
-                    margin-bottom:7px;
-                ">
-                    كود الإحالة
-                </small>
 
-                <strong style="
-                    color:#55aaff;
-                    font-size:20px;
-                ">
+            <p class="modal-subtitle">
+                ادعُ أصدقاءك إلى 3Migo
+            </p>
+
+
+            <div class="referral-code-box">
+
+                <span>
+                    Your Code
+                </span>
+
+                <strong>
                     ${escapeHTML(code)}
                 </strong>
 
             </div>
 
 
-            <div style="
-                background:rgba(255,255,255,.04);
-                border-radius:15px;
-                padding:12px;
-                margin-bottom:12px;
-                word-break:break-all;
-                direction:ltr;
-                text-align:left;
-                font-size:11px;
-                color:#9fb1c7;
-            ">
-                ${escapeHTML(referralLink)}
-            </div>
+            <div class="referral-link-box">
 
-
-            <div style="
-                display:grid;
-                grid-template-columns:1fr 1fr;
-                gap:9px;
-            ">
+                <input
+                    id="referralLink"
+                    readonly
+                    value="${escapeHTML(link)}"
+                />
 
                 <button
-                    id="copyReferral"
-                    type="button"
-                    style="
-                        padding:12px;
-                        border:0;
-                        border-radius:12px;
-                        background:#168cff;
-                        color:#fff;
-                        font-weight:bold;
-                    "
+                    data-copy-referral
                 >
-                    📋 نسخ الرابط
-                </button>
-
-
-                <button
-                    id="shareReferral"
-                    type="button"
-                    style="
-                        padding:12px;
-                        border:0;
-                        border-radius:12px;
-                        background:#102c4d;
-                        color:#fff;
-                        font-weight:bold;
-                    "
-                >
-                    📤 مشاركة
+                    📋
                 </button>
 
             </div>
 
 
-            <div style="
-                display:grid;
-                grid-template-columns:1fr 1fr;
-                gap:9px;
-                margin-top:12px;
-            ">
+            <div class="referral-stats">
 
-                <div style="
-                    background:rgba(255,255,255,.04);
-                    padding:12px;
-                    border-radius:12px;
-                    text-align:center;
-                ">
-
-                    <small style="
-                        display:block;
-                        color:#7187a2;
-                        margin-bottom:5px;
-                    ">
-                        عدد الإحالات
-                    </small>
-
+                <div>
                     <strong>
-                        ${formatNumber(data.referral_count)}
+                        ${formatNumber(
+                            count,
+                            0
+                        )}
                     </strong>
 
+                    <span>
+                        Referrals
+                    </span>
                 </div>
 
 
-                <div style="
-                    background:rgba(255,255,255,.04);
-                    padding:12px;
-                    border-radius:12px;
-                    text-align:center;
-                ">
-
-                    <small style="
-                        display:block;
-                        color:#7187a2;
-                        margin-bottom:5px;
-                    ">
-                        مكافآت الإحالة
-                    </small>
-
+                <div>
                     <strong>
-                        ${formatNumber(data.referral_rewards)}
-                        3M
+                        ${formatNumber(
+                            rewards
+                        )}
                     </strong>
 
+                    <span>
+                        Rewards
+                    </span>
                 </div>
 
             </div>
+
+
+            <button
+                class="primary-btn"
+                data-share-referral
+            >
+                📤 Share on Telegram
+            </button>
 
         </div>
     `;
@@ -3373,53 +2872,68 @@ function showReferralModal(data) {
     document.body.appendChild(modal);
 
 
-    $("closeReferral")
-        ?.addEventListener(
-            "click",
-            () => modal.remove()
-        );
+    modal.addEventListener(
+        "click",
+        async event => {
+
+            if (
+                event.target === modal ||
+                event.target.closest(
+                    "[data-close-modal]"
+                )
+            ) {
+
+                modal.remove();
+
+                return;
+            }
 
 
-    $("copyReferral")
-        ?.addEventListener(
-            "click",
-            async () => {
+            if (
+                event.target.closest(
+                    "[data-copy-referral]"
+                )
+            ) {
 
                 try {
 
                     await navigator.clipboard.writeText(
-                        referralLink
+                        link
                     );
-
 
                     showToast(
                         "تم نسخ رابط الإحالة."
                     );
 
-
                 } catch {
 
                     showToast(
-                        "تعذر نسخ الرابط."
+                        "تعذر النسخ تلقائياً."
                     );
                 }
+
+                return;
             }
-        );
 
 
-    $("shareReferral")
-        ?.addEventListener(
-            "click",
-            () => {
+            if (
+                event.target.closest(
+                    "[data-share-referral]"
+                )
+            ) {
 
                 const shareUrl =
-                    `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent("انضم إلى 3Migo وابدأ جمع 3M 🚀")}`;
+                    `https://t.me/share/url?url=${encodeURIComponent(
+                        link
+                    )}&text=${encodeURIComponent(
+                        "انضم إلى 3Migo 🚀"
+                    )}`;
 
 
                 if (
                     tg &&
                     typeof tg.openTelegramLink ===
-                    "function"
+                        "function"
                 ) {
 
                     tg.openTelegramLink(
@@ -3434,17 +2948,6 @@ function showReferralModal(data) {
                     );
                 }
             }
-        );
-
-
-    modal.addEventListener(
-        "click",
-        event => {
-
-            if (event.target === modal) {
-                modal.remove();
-            }
-
         }
     );
 }
@@ -3452,552 +2955,358 @@ function showReferralModal(data) {
 
 async function showReferral() {
 
-    const data =
-        await loadReferral();
+    try {
+
+        const data =
+            await loadReferral();
 
 
-    if (data) {
-        showReferralModal(data);
+        showReferralModal(
+            data
+        );
+
+    } catch (error) {
+
+        showToast(
+            `تعذر تحميل الإحالة: ${error.message}`
+        );
     }
 }
 
 
 /* =========================================================
-   WALLET V4 — FIXED
+   WALLET
    ========================================================= */
 
 async function showWallet() {
 
-    const old =
-        $("walletModal");
-
-
-    if (old) {
-        old.remove();
-    }
-
-
-    /*
-     * IMPORTANT:
-     * Load BOTH layers before rendering wallet.
-     */
-
-    await Promise.allSettled([
-
-        loadUser(),
-
-        loadEconomicProfile()
-
-    ]);
-
-
-    let transactions = [];
+    showToast(
+        "جاري تحميل المحفظة..."
+    );
 
 
     try {
 
-        const response =
-            await apiRequest(
-                `/transactions/${state.telegramId}`
+        await Promise.all([
+            loadUser(),
+            loadEconomicProfile()
+        ]);
+
+
+        let transactions = [];
+
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/transactions/${state.telegramId}`
+                );
+
+
+            transactions =
+                Array.isArray(data)
+                    ? data
+                    : Array.isArray(
+                        data?.transactions
+                    )
+                        ? data.transactions
+                        : [];
+
+        } catch (error) {
+
+            console.log(
+                "Transactions unavailable:",
+                error
             );
+        }
 
 
-        transactions =
-            Array.isArray(response)
-                ? response
-                : response?.transactions ||
-                  [];
+        const existing =
+            $("#walletModal");
 
-    } catch (error) {
+        if (existing) {
 
-        console.warn(
-            "Transactions unavailable:",
-            error
-        );
-    }
+            existing.remove();
+        }
 
 
-    const modal =
-        document.createElement("div");
+        const modal =
+            document.createElement("div");
+
+        modal.id =
+            "walletModal";
+
+        modal.className =
+            "modal-overlay";
 
 
-    modal.id =
-        "walletModal";
+        modal.innerHTML = `
 
-
-    modal.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:4500;
-        background:rgba(0,0,0,.80);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:18px;
-        direction:rtl;
-    `;
-
-
-    /*
-     * =====================================================
-     * IMPORTANT WALLET SEPARATION
-     *
-     * Available = MAIN USER BALANCE
-     * Economic Available = ECONOMIC ENGINE BALANCE
-     * =====================================================
-     */
-
-    const available =
-        safeNumber(
-            state.balance
-        );
-
-
-    const economicAvailable =
-        safeNumber(
-            state.economic.unlocked3m
-        );
-
-
-    const locked =
-        safeNumber(
-            state.economic.locked3m
-        );
-
-
-    const totalMined =
-        safeNumber(
-            state.economic.totalMined
-        );
-
-
-    const airdrop =
-        safeNumber(
-            state.economic.airdrop3m
-        );
-
-
-    const contribution =
-        safeNumber(
-            state.economic.contributionScore
-        );
-
-
-    const trust =
-        safeNumber(
-            state.economic.trustScore
-        );
-
-
-    modal.innerHTML = `
-
-        <div style="
-            width:100%;
-            max-width:490px;
-            max-height:92vh;
-            overflow:auto;
-            background:
-                radial-gradient(
-                    circle at top right,
-                    rgba(25,121,255,.13),
-                    transparent 35%
-                ),
-                #061a34;
-            border:1px solid rgba(91,140,190,.28);
-            border-radius:27px;
-            color:#fff;
-            box-shadow:0 25px 80px rgba(0,0,0,.55);
-        ">
-
-
-            <div style="
-                padding:20px;
-                border-bottom:1px solid rgba(255,255,255,.07);
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-            ">
-
-                <div>
-
-                    <div style="
-                        font-size:23px;
-                        font-weight:900;
-                    ">
-                        💎 Wallet
-                    </div>
-
-                    <div style="
-                        color:#8296ae;
-                        font-size:11px;
-                        margin-top:4px;
-                    ">
-                        3Migo Economy Experience
-                    </div>
-
-                </div>
-
+            <div class="modal-card wallet-modal">
 
                 <button
-                    id="closeWallet"
-                    type="button"
-                    style="
-                        width:42px;
-                        height:42px;
-                        border:0;
-                        border-radius:13px;
-                        background:rgba(255,255,255,.06);
-                        color:#9eb1c8;
-                        font-size:25px;
-                    "
+                    class="modal-close"
+                    data-close-modal
                 >
                     ×
                 </button>
 
-            </div>
 
-
-            <!-- =================================================
-                 MAIN AVAILABLE BALANCE
-                 ================================================= -->
-
-            <div style="
-                margin:18px;
-                padding:22px;
-                border-radius:24px;
-                background:
-                    linear-gradient(
-                        145deg,
-                        #123d69,
-                        #09294d
-                    );
-                border:1px solid rgba(61,158,255,.28);
-                text-align:center;
-            ">
-
-                <div style="
-                    color:#9fb3ca;
-                    font-size:12px;
-                ">
-                    Available
+                <div class="modal-icon">
+                    💎
                 </div>
 
-                <div style="
-                    margin-top:7px;
-                    font-size:42px;
-                    font-weight:900;
-                ">
-                    ${formatNumber(available)}
-                </div>
 
-                <div style="
-                    color:#4ca5ff;
-                    font-size:18px;
-                    font-weight:800;
-                ">
-                    3M
-                </div>
-
-                <div style="
-                    margin-top:8px;
-                    color:#7892ad;
-                    font-size:10px;
-                ">
-                    الرصيد الرئيسي الفعلي من User API
-                </div>
-
-            </div>
+                <h2>
+                    3Migo Wallet
+                </h2>
 
 
-            <!-- =================================================
-                 CORE BALANCES
-                 ================================================= -->
-
-            <div style="
-                padding:0 18px;
-                display:grid;
-                grid-template-columns:1fr 1fr;
-                gap:10px;
-            ">
-
-                ${walletMetric(
-                    "💎 Economic Available",
-                    economicAvailable,
-                    "3M"
-                )}
-
-                ${walletMetric(
-                    "🔒 Locked",
-                    locked,
-                    "3M"
-                )}
-
-                ${walletMetric(
-                    "⛏️ Total Mined",
-                    totalMined,
-                    "3M"
-                )}
-
-                ${walletMetric(
-                    "🎁 Airdrop",
-                    airdrop,
-                    "3M"
-                )}
-
-                ${walletMetric(
-                    "⭐ Contribution",
-                    contribution,
-                    "Score"
-                )}
-
-                ${walletMetric(
-                    "🛡️ Trust",
-                    trust,
-                    "/ 100"
-                )}
-
-                ${walletMetric(
-                    "🏆 Level",
-                    `Lv.${state.experience.level}`,
-                    state.experience.levelName
-                )}
-
-            </div>
+                <p class="modal-subtitle">
+                    Your 3Migo financial center
+                </p>
 
 
-            <!-- =================================================
-                 BALANCE EXPLANATION
-                 ================================================= -->
+                <div class="wallet-main-balance">
 
-            <div style="
-                margin:14px 18px 0;
-                padding:14px;
-                border-radius:15px;
-                background:#0a2340;
-                color:#8ea4bd;
-                font-size:11px;
-                line-height:1.8;
-            ">
+                    <span>
+                        Main Available
+                    </span>
 
-                <div>
-                    💎 <strong style="color:#dce8f4;">
-                    الرصيد الرئيسي:
+                    <strong>
+                        ${formatNumber(
+                            state.balance
+                        )}
                     </strong>
-                    ${formatNumber(state.balance)} 3M
+
+                    <small>
+                        3M
+                    </small>
+
                 </div>
 
-                <div style="margin-top:5px;">
-                    🌐 <strong style="color:#dce8f4;">
-                    المتاح الاقتصادي:
+
+                <div class="wallet-metrics">
+
+                    ${walletMetric(
+                        "Economic Available",
+                        state.economic.unlocked3m,
+                        "3M"
+                    )}
+
+
+                    ${walletMetric(
+                        "Locked",
+                        state.economic.locked3m,
+                        "3M"
+                    )}
+
+
+                    ${walletMetric(
+                        "Total Mined",
+                        state.economic.totalMined,
+                        "3M"
+                    )}
+
+
+                    ${walletMetric(
+                        "Airdrop",
+                        state.economic.airdrop3m,
+                        "3M"
+                    )}
+
+
+                    ${walletMetric(
+                        "Contribution",
+                        state.economic.contributionScore,
+                        ""
+                    )}
+
+
+                    ${walletMetric(
+                        "Trust",
+                        state.economic.trustScore,
+                        ""
+                    )}
+
+                </div>
+
+
+                <div class="wallet-level">
+
+                    <span>
+                        Experience
+                    </span>
+
+                    <strong>
+                        LV.${state.experience.level}
+                        •
+                        ${escapeHTML(
+                            state.experience.levelName
+                        )}
                     </strong>
-                    ${formatNumber(economicAvailable)} 3M
+
                 </div>
 
-                <div style="
-                    margin-top:7px;
-                    color:#687f99;
-                ">
-                    يتم عرض طبقة الرصيد الرئيسي وطبقة الاقتصاد
-                    بشكل منفصل حتى لا تختلط البيانات.
+
+                <div class="modal-actions">
+
+                    <button
+                        class="primary-btn"
+                        data-wallet-economy
+                    >
+                        🏛️ Economy
+                    </button>
+
+
+                    <button
+                        class="secondary-btn"
+                        data-wallet-spend
+                    >
+                        💳 Spend
+                    </button>
+
+                </div>
+
+
+                <div class="transactions-section">
+
+                    <h3>
+                        Recent Transactions
+                    </h3>
+
+                    <div class="transactions-list">
+
+                        ${
+                            transactions.length
+                                ? transactions
+                                    .slice(0, 20)
+                                    .map(
+                                        renderTransaction
+                                    )
+                                    .join("")
+                                : `
+                                    <div class="empty-state">
+                                        لا توجد معاملات متاحة.
+                                    </div>
+                                `
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <div class="economic-warning">
+
+                    <p>
+                        Available أعلاه هو الرصيد الرئيسي
+                        من User API.
+                        Economic Available منفصل
+                        ويأتي من Economic API.
+                    </p>
+
                 </div>
 
             </div>
+        `;
 
 
-            <!-- =================================================
-                 ACTIONS
-                 ================================================= -->
-
-            <div style="
-                padding:0 18px;
-                margin-top:13px;
-                display:grid;
-                grid-template-columns:1fr 1fr;
-                gap:10px;
-            ">
-
-                <button
-                    id="walletEconomicBtn"
-                    type="button"
-                    style="
-                        padding:14px;
-                        border:0;
-                        border-radius:14px;
-                        background:#168cff;
-                        color:#fff;
-                        font-weight:800;
-                    "
-                >
-                    🌐 الاقتصاد
-                </button>
+        document.body.appendChild(modal);
 
 
-                <button
-                    id="walletSpendBtn"
-                    type="button"
-                    style="
-                        padding:14px;
-                        border:0;
-                        border-radius:14px;
-                        background:#102f52;
-                        color:#fff;
-                        font-weight:800;
-                    "
-                >
-                    💳 استخدام 3M
-                </button>
+        modal.addEventListener(
+            "click",
+            event => {
 
-            </div>
+                if (
+                    event.target === modal ||
+                    event.target.closest(
+                        "[data-close-modal]"
+                    )
+                ) {
 
+                    modal.remove();
 
-            <!-- =================================================
-                 TRANSACTIONS
-                 ================================================= -->
-
-            <div style="
-                margin:18px;
-                padding-bottom:18px;
-            ">
-
-                <div style="
-                    color:#a9bad0;
-                    font-size:14px;
-                    font-weight:800;
-                    margin-bottom:10px;
-                ">
-                    📋 آخر العمليات
-                </div>
-
-
-                ${
-                    transactions.length
-                        ? transactions
-                            .slice(0, 10)
-                            .map(renderTransaction)
-                            .join("")
-                        : `
-                            <div style="
-                                background:#0c2747;
-                                border-radius:14px;
-                                padding:15px;
-                                color:#7389a3;
-                                text-align:center;
-                                font-size:12px;
-                            ">
-                                لا توجد عمليات مسجلة حالياً.
-                            </div>
-                        `
+                    return;
                 }
 
-            </div>
 
-        </div>
-    `;
+                if (
+                    event.target.closest(
+                        "[data-wallet-economy]"
+                    )
+                ) {
+
+                    modal.remove();
+
+                    showEconomicDashboard();
+
+                    return;
+                }
 
 
-    document.body.appendChild(modal);
+                if (
+                    event.target.closest(
+                        "[data-wallet-spend]"
+                    )
+                ) {
 
+                    modal.remove();
 
-    $("closeWallet")
-        ?.addEventListener(
-            "click",
-            () => modal.remove()
-        );
-
-
-    $("walletEconomicBtn")
-        ?.addEventListener(
-            "click",
-            () => {
-
-                modal.remove();
-
-                showEconomicDashboard();
-
+                    showSpendDialog();
+                }
             }
         );
 
+    } catch (error) {
 
-    $("walletSpendBtn")
-        ?.addEventListener(
-            "click",
-            () => {
-
-                modal.remove();
-
-                showSpendDialog();
-
-            }
+        console.error(
+            "showWallet:",
+            error
         );
 
 
-    modal.addEventListener(
-        "click",
-        event => {
-
-            if (event.target === modal) {
-                modal.remove();
-            }
-
-        }
-    );
+        showToast(
+            `تعذر فتح المحفظة: ${error.message}`
+        );
+    }
 }
 
 
 function walletMetric(
     title,
     value,
-    suffix
+    suffix = ""
 ) {
 
     return `
 
-        <div style="
-            background:#0c2747;
-            border-radius:16px;
-            padding:14px;
-        ">
+        <div class="wallet-metric">
 
-            <div style="
-                color:#8297af;
-                font-size:11px;
-            ">
-                ${title}
-            </div>
-
-            <strong style="
-                display:block;
-                margin-top:6px;
-                font-size:19px;
-            ">
-                ${
-                    typeof value === "number"
-                        ? formatNumber(value)
-                        : escapeHTML(value)
-                }
-            </strong>
-
-            <span style="
-                color:#5b9fe5;
-                font-size:10px;
-            ">
-                ${escapeHTML(suffix)}
+            <span>
+                ${escapeHTML(title)}
             </span>
+
+            <strong>
+                ${formatNumber(value)}
+                ${suffix
+                    ? ` ${escapeHTML(suffix)}`
+                    : ""}
+            </strong>
 
         </div>
     `;
 }
 
 
-/* =========================================================
-   TRANSACTION RENDER
-   ========================================================= */
-
 function renderTransaction(transaction) {
 
-    if (!transaction) {
-        return "";
-    }
+    const type =
+        transaction.type ||
+        transaction.action ||
+        "Transaction";
 
 
     const amount =
@@ -4009,21 +3318,10 @@ function renderTransaction(transaction) {
         );
 
 
-    const type =
-        escapeHTML(
-            transaction.type ||
-            transaction.action ||
-            transaction.description ||
-            "عملية"
-        );
-
-
-    const date =
-        escapeHTML(
-            transaction.created_at ||
-            transaction.date ||
-            ""
-        );
+    const created =
+        transaction.created_at ||
+        transaction.timestamp ||
+        "";
 
 
     const positive =
@@ -4032,283 +3330,192 @@ function renderTransaction(transaction) {
 
     return `
 
-        <div style="
-            background:#0c2747;
-            border-radius:14px;
-            padding:12px 14px;
-            margin-bottom:8px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:10px;
-        ">
+        <div class="transaction-item">
 
-            <div style="
-                min-width:0;
-            ">
+            <div class="transaction-icon">
+                ${positive ? "↗️" : "↘️"}
+            </div>
 
-                <div style="
-                    color:#d8e3ef;
-                    font-size:12px;
-                    overflow:hidden;
-                    text-overflow:ellipsis;
-                    white-space:nowrap;
-                ">
-                    ${type}
-                </div>
+            <div class="transaction-content">
 
-                ${
-                    date
-                        ? `
-                            <div style="
-                                color:#637b96;
-                                font-size:10px;
-                                margin-top:4px;
-                            ">
-                                ${date}
-                            </div>
-                          `
-                        : ""
-                }
+                <strong>
+                    ${escapeHTML(type)}
+                </strong>
+
+                <small>
+                    ${escapeHTML(
+                        String(created)
+                    )}
+                </small>
 
             </div>
 
-
-            <strong style="
-                color:${positive ? "#53b1ff" : "#ff8585"};
-                white-space:nowrap;
-                font-size:13px;
-            ">
+            <strong class="transaction-amount">
                 ${positive ? "+" : ""}
                 ${formatNumber(amount)}
                 3M
             </strong>
 
         </div>
-
     `;
 }
 
 
 /* =========================================================
-   3MIGO AI EXPERIENCE
-   =========================================================
-   Current version:
-   - Real chat UI.
-   - Local knowledge responses.
-   - No claim of connected AI.
-   - Ready for future AI API adapter.
+   3MIGO AI
+   LOCAL KNOWLEDGE UI
    ========================================================= */
 
 const AI_KNOWLEDGE = {
 
-    "كيف أزيد مكافآتي؟":
-        `
-        يمكنك زيادة مساهمتك من خلال النشاط المتاح فعلياً
-        في 3Migo مثل التعدين والمهام والإحالات عندما تكون
-        متاحة. أما المكافآت الاقتصادية النهائية فتخضع لقواعد
-        النظام والبيانات التي تصل إلى Economic Engine.
-        `,
+    rewards: `
+        يمكنك زيادة مكافآتك من خلال الالتزام بدورات
+        التعدين، تنفيذ المهام المتاحة، استخدام المكافأة
+        اليومية، والمشاركة في الإحالات وفق القواعد
+        الموجودة في النظام.
+    `,
 
-    "ما الفرق بين Locked وUnlocked؟":
-        `
-        Locked هو رصيد اقتصادي مقيد وفق قواعد النظام،
-        بينما Unlocked هو الرصيد الاقتصادي المتاح للاستخدام
-        في الخدمات التي تسمح بها Economic Engine.
-        `,
+    locked: `
+        Locked يمثل الرصيد الاقتصادي المقيد وفق بيانات
+        Economic API، بينما Economic Available يمثل
+        الرصيد الاقتصادي المتاح للاستخدام وفق النظام.
+        ولا ينبغي الخلط بينهما وبين Main Available
+        الموجود في User API.
+    `,
 
-    "كيف يعمل اقتصاد 3Migo؟":
-        `
-        الفكرة الحالية هي فصل النشاط عن الاقتصاد الحقيقي.
-        الحدث أو المساهمة يجب أن تكون موثقة، ثم يمكن لاحقاً
-        تسجيل الإيراد في Revenue Ledger وتطبيق قواعد التخصيص
-        قبل احتساب أي مكافأة اقتصادية.
-        `,
+    economy: `
+        اقتصاد 3Migo في هذه المرحلة يعتمد على البيانات
+        والحسابات الموجودة في النظام. واجهة التطبيق لا
+        تضيف إيرادات أو قيمة سوقية من تلقاء نفسها.
+        أي إيراد حقيقي يحتاج إلى مصدر فعلي ومسجل في
+        النظام.
+    `,
 
-    "ما المهام المتاحة؟":
-        `
-        يمكنني عرض المهام التي وصلت فعلياً من Tasks API.
-        افتح قسم المهام لرؤية المهام الحالية والمكافآت
-        المرتبطة بها.
-        `
-
+    tasks: `
+        المهام المتاحة يتم تحميلها مباشرة من Tasks API.
+        يمكن أن تشمل مهام زيارة أو قناة أو ترويج أو
+        أنواعاً أخرى بحسب ما يقدمه الخادم.
+    `
 };
 
 
 function show3MigoAI() {
 
-    const old =
-        $("aiModal");
+    const existing =
+        $("#aiModal");
 
+    if (existing) {
 
-    if (old) {
-        old.remove();
+        existing.remove();
     }
 
 
     const modal =
         document.createElement("div");
 
-
     modal.id =
         "aiModal";
 
-
-    modal.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:7000;
-        background:rgba(0,0,0,.84);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:12px;
-        direction:rtl;
-    `;
+    modal.className =
+        "modal-overlay";
 
 
     modal.innerHTML = `
 
-        <div style="
-            width:100%;
-            max-width:500px;
-            height:min(92vh,700px);
-            background:#06182f;
-            border:1px solid rgba(91,140,190,.28);
-            border-radius:27px;
-            display:flex;
-            flex-direction:column;
-            overflow:hidden;
-            color:#fff;
-        ">
+        <div class="modal-card ai-modal">
 
-            <div style="
-                padding:17px;
-                border-bottom:1px solid rgba(255,255,255,.07);
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-            ">
-
-                <div>
-
-                    <div style="
-                        font-size:20px;
-                        font-weight:900;
-                    ">
-                        🤖 3Migo AI
-                    </div>
-
-                    <div style="
-                        color:#7e95ae;
-                        font-size:10px;
-                        margin-top:4px;
-                    ">
-                        Economy Assistant Interface
-                    </div>
-
-                </div>
+            <button
+                class="modal-close"
+                data-close-modal
+            >
+                ×
+            </button>
 
 
-                <button
-                    id="closeAI"
-                    type="button"
-                    style="
-                        width:40px;
-                        height:40px;
-                        border:0;
-                        border-radius:12px;
-                        background:rgba(255,255,255,.06);
-                        color:#9eb1c8;
-                        font-size:24px;
-                    "
-                >
-                    ×
-                </button>
-
+            <div class="modal-icon">
+                🤖
             </div>
 
 
-            <div style="
-                padding:12px;
-                background:rgba(255,181,71,.05);
-                border-bottom:1px solid rgba(255,255,255,.05);
-                color:#a99b82;
-                font-size:10px;
-                line-height:1.6;
-            ">
-                ℹ️ هذه واجهة المساعد فقط.
-                محرك AI خارجي غير متصل حالياً، لذلك لن ندّعي
-                وجود ذكاء اصطناعي فعلي أو إجابات مولدة من نموذج.
+            <h2>
+                3Migo AI
+            </h2>
+
+
+            <p class="modal-subtitle">
+                مساعدك داخل منظومة 3Migo
+            </p>
+
+
+            <div class="ai-status">
+                🟢 Local Knowledge Engine
             </div>
 
 
             <div
                 id="aiMessages"
-                style="
-                    flex:1;
-                    overflow:auto;
-                    padding:14px;
-                "
-            ></div>
+                class="ai-messages"
+            >
 
-
-            <div style="
-                padding:10px;
-                border-top:1px solid rgba(255,255,255,.07);
-            ">
-
-                <div
-                    id="aiQuickQuestions"
-                    style="
-                        display:flex;
-                        gap:7px;
-                        overflow-x:auto;
-                        padding-bottom:9px;
-                    "
-                ></div>
-
-
-                <div style="
-                    display:flex;
-                    gap:7px;
-                ">
-
-                    <input
-                        id="aiInput"
-                        type="text"
-                        maxlength="300"
-                        placeholder="اكتب سؤالك..."
-                        style="
-                            flex:1;
-                            min-width:0;
-                            padding:12px;
-                            border-radius:13px;
-                            border:1px solid rgba(255,255,255,.09);
-                            background:#0b2443;
-                            color:#fff;
-                            outline:none;
-                        "
-                    />
-
-
-                    <button
-                        id="aiSend"
-                        type="button"
-                        style="
-                            width:52px;
-                            border:0;
-                            border-radius:13px;
-                            background:#168cff;
-                            color:#fff;
-                            font-size:18px;
-                        "
-                    >
-                        ➤
-                    </button>
-
+                <div class="ai-message assistant">
+                    مرحباً بك في 3Migo AI.
+                    اسألني عن التعدين أو المحفظة
+                    أو الاقتصاد أو المهام.
                 </div>
 
+            </div>
+
+
+            <div class="ai-quick-actions">
+
+                <button
+                    data-ai-question="rewards"
+                >
+                    💰 زيادة المكافآت
+                </button>
+
+                <button
+                    data-ai-question="locked"
+                >
+                    🔒 Locked / Available
+                </button>
+
+                <button
+                    data-ai-question="economy"
+                >
+                    🏛️ الاقتصاد
+                </button>
+
+                <button
+                    data-ai-question="tasks"
+                >
+                    🎯 المهام
+                </button>
+
+            </div>
+
+
+            <div class="ai-input-row">
+
+                <input
+                    id="aiInput"
+                    type="text"
+                    placeholder="اكتب سؤالك..."
+                    maxlength="500"
+                />
+
+                <button
+                    data-ai-send
+                >
+                    ➤
+                </button>
+
+            </div>
+
+
+            <div class="ai-disclaimer">
+                AI Engine الحالي محلي داخل الواجهة،
+                وليس اتصالاً بخدمة ذكاء اصطناعي خارجية.
             </div>
 
         </div>
@@ -4318,297 +3525,288 @@ function show3MigoAI() {
     document.body.appendChild(modal);
 
 
-    $("closeAI")
-        ?.addEventListener(
-            "click",
-            () => modal.remove()
+    const input =
+        modal.querySelector(
+            "#aiInput"
         );
-
-
-    const quickContainer =
-        $("aiQuickQuestions");
-
-
-    Object.keys(AI_KNOWLEDGE)
-        .forEach(question => {
-
-            const button =
-                document.createElement("button");
-
-
-            button.type =
-                "button";
-
-
-            button.textContent =
-                question;
-
-
-            button.style.cssText = `
-                flex:0 0 auto;
-                padding:8px 10px;
-                border:1px solid rgba(255,255,255,.08);
-                border-radius:12px;
-                background:#0b2443;
-                color:#dce8f4;
-                font-size:10px;
-            `;
-
-
-            button.addEventListener(
-                "click",
-                () => ask3MigoAI(question)
-            );
-
-
-            quickContainer?.appendChild(button);
-
-        });
-
-
-    $("aiSend")
-        ?.addEventListener(
-            "click",
-            () => {
-
-                const question =
-                    String(
-                        $("aiInput")?.value || ""
-                    ).trim();
-
-
-                if (question) {
-                    ask3MigoAI(question);
-                }
-
-            }
-        );
-
-
-    $("aiInput")
-        ?.addEventListener(
-            "keydown",
-            event => {
-
-                if (event.key === "Enter") {
-
-                    event.preventDefault();
-
-                    const question =
-                        String(
-                            $("aiInput")?.value || ""
-                        ).trim();
-
-
-                    if (question) {
-                        ask3MigoAI(question);
-                    }
-                }
-
-            }
-        );
-
-
-    addAIMessage(
-        "assistant",
-        "مرحباً بك في 3Migo AI Experience 👋<br><br>اختر أحد الأسئلة الجاهزة أو اكتب سؤالك. حالياً أنا واجهة معرفة محلية وليست متصلة بمحرك AI خارجي."
-    );
 
 
     modal.addEventListener(
         "click",
         event => {
 
-            if (event.target === modal) {
+            if (
+                event.target === modal ||
+                event.target.closest(
+                    "[data-close-modal]"
+                )
+            ) {
+
                 modal.remove();
+
+                return;
             }
 
+
+            const questionButton =
+                event.target.closest(
+                    "[data-ai-question]"
+                );
+
+
+            if (questionButton) {
+
+                const key =
+                    questionButton.dataset.aiQuestion;
+
+
+                const answer =
+                    AI_KNOWLEDGE[key] ||
+                    "لا توجد إجابة متاحة.";
+
+
+                addAIMessage(
+                    key,
+                    answer
+                );
+
+                return;
+            }
+
+
+            if (
+                event.target.closest(
+                    "[data-ai-send]"
+                )
+            ) {
+
+                ask3MigoAI(
+                    input?.value || "",
+                    modal
+                );
+            }
         }
     );
-}
 
 
-function normalizeQuestion(question) {
+    if (input) {
 
-    return String(question || "")
-        .trim()
-        .replace(/\s+/g, " ");
-}
+        input.addEventListener(
+            "keydown",
+            event => {
 
+                if (
+                    event.key === "Enter"
+                ) {
 
-function findAIAnswer(question) {
-
-    const normalized =
-        normalizeQuestion(question);
-
-
-    for (
-        const key of Object.keys(AI_KNOWLEDGE)
-    ) {
-
-        if (
-            normalized.includes(key) ||
-            key.includes(normalized)
-        ) {
-
-            return AI_KNOWLEDGE[key];
-        }
+                    ask3MigoAI(
+                        input.value,
+                        modal
+                    );
+                }
+            }
+        );
     }
+}
 
 
-    const lower =
-        normalized.toLowerCase();
+function addAIMessage(
+    userMessage,
+    assistantMessage
+) {
+
+    const container =
+        $("#aiMessages");
+
+    if (!container) return;
+
+
+    const user =
+        document.createElement("div");
+
+    user.className =
+        "ai-message user";
+
+
+    user.textContent =
+        userMessage;
+
+
+    container.appendChild(user);
+
+
+    const assistant =
+        document.createElement("div");
+
+    assistant.className =
+        "ai-message assistant";
+
+
+    assistant.textContent =
+        assistantMessage;
+
+
+    container.appendChild(
+        assistant
+    );
+
+
+    container.scrollTop =
+        container.scrollHeight;
+
+
+    state.aiMessages.push({
+        user: userMessage,
+        assistant: assistantMessage
+    });
+}
+
+
+function findAIAnswer(message) {
+
+    const text =
+        String(message)
+            .toLowerCase();
 
 
     if (
-        lower.includes("wallet") ||
-        lower.includes("محفظ")
+        text.includes("reward") ||
+        text.includes("مكاف") ||
+        text.includes("ربح") ||
+        text.includes("تعدين")
+    ) {
+
+        return AI_KNOWLEDGE.rewards;
+    }
+
+
+    if (
+        text.includes("locked") ||
+        text.includes("available") ||
+        text.includes("رصيد") ||
+        text.includes("مقفل")
+    ) {
+
+        return AI_KNOWLEDGE.locked;
+    }
+
+
+    if (
+        text.includes("economy") ||
+        text.includes("اقتصاد") ||
+        text.includes("قيمة")
+    ) {
+
+        return AI_KNOWLEDGE.economy;
+    }
+
+
+    if (
+        text.includes("task") ||
+        text.includes("مهام")
+    ) {
+
+        return AI_KNOWLEDGE.tasks;
+    }
+
+
+    if (
+        text.includes("wallet") ||
+        text.includes("محفظ")
     ) {
 
         return `
-            افتح Wallet لمشاهدة Available وEconomic Available
-            وLocked وTotal Mined وAirdrop وContribution وTrust
-            وآخر العمليات.
+            محفظتك تحتوي على Main Available من User API،
+            بالإضافة إلى Economic Available وLocked من
+            Economic API. يتم عرضهما منفصلين لتجنب
+            الخلط بين الطبقتين.
         `;
     }
 
 
     if (
-        lower.includes("ad") ||
-        lower.includes("إعلان") ||
-        lower.includes("اعلان")
+        text.includes("level") ||
+        text.includes("مستوى") ||
+        text.includes("xp")
     ) {
 
         return `
-            Ad Galaxy جاهزة لعرض الحملات الفعلية.
-            لا يتم اعتبار الإعلان إيراداً حقيقياً إلا بعد
-            وجود مزود/حملة فعلية وآلية تحقق وربطها بالـRevenue Ledger.
-        `;
-    }
-
-
-    if (
-        lower.includes("level") ||
-        lower.includes("مستوى")
-    ) {
-
-        return `
-            مستوى التجربة الحالي يتم حسابه في الواجهة فقط
-            من النشاط والمساهمة والثقة. لا يعتبر هذا المستوى
-            نظاماً رسمياً في الـBackend.
+            مستوى الخبرة الحالي هو
+            LV.${state.experience.level}
+            ${state.experience.levelName}
+            مع ${formatNumber(
+                state.experience.score,
+                0
+            )} XP.
+            هذا نظام تجربة واجهة Frontend ولا يمثل
+            قيمة مالية.
         `;
     }
 
 
     return `
-        لم أجد إجابة معرفة لهذا السؤال في النسخة الحالية.
-        يمكنك تجربة أحد الأسئلة الجاهزة حول المحفظة أو التعدين
-        أو Ad Galaxy أو اقتصاد 3Migo.
+        أستطيع مساعدتك حالياً في:
+        التعدين، المكافآت، المحفظة، الاقتصاد،
+        المهام ومستوى الخبرة.
     `;
 }
 
 
-function addAIMessage(type, message) {
+function ask3MigoAI(
+    message,
+    modal
+) {
 
-    const container =
-        $("aiMessages");
+    const text =
+        String(message || "")
+            .trim();
 
 
-    if (!container) {
+    if (!text) {
+
+        showToast(
+            "اكتب سؤالك أولاً."
+        );
+
         return;
     }
-
-
-    const bubble =
-        document.createElement("div");
-
-
-    bubble.style.cssText = `
-        max-width:88%;
-        margin-bottom:10px;
-        padding:11px 13px;
-        border-radius:15px;
-        line-height:1.7;
-        font-size:12px;
-        ${
-            type === "user"
-                ? `
-                    margin-right:auto;
-                    background:#168cff;
-                    color:#fff;
-                  `
-                : `
-                    margin-left:auto;
-                    background:#0b294a;
-                    color:#dce8f4;
-                  `
-        }
-    `;
-
-
-    bubble.innerHTML =
-        escapeHTML(message)
-            .replace(/\n/g, "<br>");
-
-
-    container.appendChild(bubble);
-
-    container.scrollTop =
-        container.scrollHeight;
-}
-
-
-function ask3MigoAI(question) {
-
-    const normalized =
-        normalizeQuestion(question);
-
-
-    if (!normalized) {
-        return;
-    }
-
-
-    const input =
-        $("aiInput");
-
-
-    if (input) {
-        input.value = "";
-    }
-
-
-    addAIMessage(
-        "user",
-        normalized
-    );
 
 
     const answer =
-        findAIAnswer(normalized);
+        findAIAnswer(text);
 
 
-    setTimeout(
-        () => {
-
-            addAIMessage(
-                "assistant",
-                answer
-            );
-
-        },
-        180
+    addAIMessage(
+        text,
+        answer
     );
+
+
+    const input =
+        modal?.querySelector(
+            "#aiInput"
+        );
+
+
+    if (input) {
+
+        input.value = "";
+
+        input.focus();
+    }
 }
 
 
 /* =========================================================
-   V4 HUB
+   V4 / MASTER HUB
    ========================================================= */
 
 function injectV4HubButton() {
 
-    if ($("v4HubButton")) {
+    if (
+        $("#v4HubButton")
+    ) {
+
         return;
     }
 
@@ -4616,38 +3814,14 @@ function injectV4HubButton() {
     const button =
         document.createElement("button");
 
-
     button.id =
         "v4HubButton";
-
 
     button.type =
         "button";
 
-
-    button.textContent =
-        "⚡ 3Migo V4";
-
-
-    button.style.cssText = `
-        position:fixed;
-        bottom:18px;
-        left:18px;
-        z-index:2500;
-        border:1px solid rgba(82,170,255,.35);
-        border-radius:18px;
-        padding:11px 14px;
-        background:
-            linear-gradient(
-                135deg,
-                #123d69,
-                #0a294a
-            );
-        color:#fff;
-        font-weight:900;
-        font-size:11px;
-        box-shadow:0 10px 30px rgba(0,0,0,.35);
-    `;
+    button.innerHTML =
+        "⚡ 3Migo V5";
 
 
     button.addEventListener(
@@ -4656,257 +3830,8 @@ function injectV4HubButton() {
     );
 
 
-    document.body.appendChild(button);
-}
-
-
-function showV4Hub() {
-
-    const old =
-        $("v4HubModal");
-
-
-    if (old) {
-        old.remove();
-    }
-
-
-    const modal =
-        document.createElement("div");
-
-
-    modal.id =
-        "v4HubModal";
-
-
-    modal.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:5500;
-        background:rgba(0,0,0,.80);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:15px;
-        direction:rtl;
-    `;
-
-
-    modal.innerHTML = `
-
-        <div style="
-            width:100%;
-            max-width:470px;
-            background:#06182f;
-            border:1px solid rgba(91,140,190,.28);
-            border-radius:27px;
-            padding:20px;
-            color:#fff;
-        ">
-
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-            ">
-
-                <div>
-
-                    <div style="
-                        font-size:22px;
-                        font-weight:900;
-                    ">
-                        ⚡ 3Migo V4
-                    </div>
-
-                    <div style="
-                        color:#8197b0;
-                        font-size:11px;
-                        margin-top:4px;
-                    ">
-                        Economy Experience
-                    </div>
-
-                </div>
-
-
-                <button
-                    id="closeV4Hub"
-                    type="button"
-                    style="
-                        background:transparent;
-                        color:#9aabc0;
-                        border:0;
-                        font-size:25px;
-                    "
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-            <div style="
-                margin-top:17px;
-                padding:16px;
-                border-radius:19px;
-                background:
-                    linear-gradient(
-                        135deg,
-                        #103963,
-                        #09233f
-                    );
-            ">
-
-                <div style="
-                    color:#8da5bf;
-                    font-size:11px;
-                ">
-                    مستوى تجربة المستخدم
-                </div>
-
-                <strong style="
-                    display:block;
-                    margin-top:6px;
-                    font-size:24px;
-                ">
-                    Lv.${state.experience.level}
-                    ${escapeHTML(
-                        state.experience.levelName
-                    )}
-                </strong>
-
-                <div style="
-                    margin-top:11px;
-                    height:7px;
-                    background:rgba(255,255,255,.08);
-                    border-radius:10px;
-                    overflow:hidden;
-                ">
-
-                    <div style="
-                        width:${state.experience.progress}%;
-                        height:100%;
-                        background:#52aaff;
-                    "></div>
-
-                </div>
-
-                <div style="
-                    margin-top:7px;
-                    color:#7189a3;
-                    font-size:10px;
-                ">
-                    Experience Score:
-                    ${state.experience.score}/100
-                </div>
-
-            </div>
-
-
-            <div style="
-                display:grid;
-                grid-template-columns:1fr 1fr;
-                gap:10px;
-                margin-top:13px;
-            ">
-
-                ${v4HubButton(
-                    "📢",
-                    "Ad Galaxy",
-                    "showAdGalaxy"
-                )}
-
-                ${v4HubButton(
-                    "💎",
-                    "Wallet",
-                    "showWallet"
-                )}
-
-                ${v4HubButton(
-                    "🤖",
-                    "3Migo AI",
-                    "show3MigoAI"
-                )}
-
-                ${v4HubButton(
-                    "🌐",
-                    "Economy Center",
-                    "showEconomicDashboard"
-                )}
-
-            </div>
-
-
-            <div style="
-                margin-top:14px;
-                padding:13px;
-                border-radius:15px;
-                background:#0a2340;
-                color:#839ab3;
-                font-size:10px;
-                line-height:1.7;
-            ">
-                طبقة V4 تعمل فوق الـAPI الحالية.
-                لا يتم إنشاء إيرادات أو أرصدة اقتصادية
-                من الواجهة.
-            </div>
-
-        </div>
-    `;
-
-
-    document.body.appendChild(modal);
-
-
-    $("closeV4Hub")
-        ?.addEventListener(
-            "click",
-            () => modal.remove()
-        );
-
-
-    modal.querySelectorAll(
-        "[data-v4-open]"
-    ).forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const action =
-                    button.getAttribute(
-                        "data-v4-open"
-                    );
-
-
-                modal.remove();
-
-
-                if (
-                    typeof window[action] ===
-                    "function"
-                ) {
-
-                    window[action]();
-
-                }
-
-            }
-        );
-
-    });
-
-
-    modal.addEventListener(
-        "click",
-        event => {
-
-            if (event.target === modal) {
-                modal.remove();
-            }
-
-        }
+    document.body.appendChild(
+        button
     );
 }
 
@@ -4914,40 +3839,235 @@ function showV4Hub() {
 function v4HubButton(
     icon,
     title,
+    subtitle,
     action
 ) {
 
     return `
 
         <button
-            type="button"
-            data-v4-open="${action}"
-            style="
-                padding:17px 10px;
-                border:1px solid rgba(255,255,255,.06);
-                border-radius:17px;
-                background:#0a2340;
-                color:#fff;
-                text-align:right;
-            "
+            class="v4-hub-action"
+            data-hub-action="${escapeHTML(action)}"
         >
 
-            <span style="
-                font-size:21px;
-            ">
+            <span class="v4-hub-icon">
                 ${icon}
             </span>
 
-            <strong style="
-                display:block;
-                margin-top:7px;
-                font-size:12px;
-            ">
-                ${title}
-            </strong>
+            <span class="v4-hub-text">
+
+                <strong>
+                    ${escapeHTML(title)}
+                </strong>
+
+                <small>
+                    ${escapeHTML(subtitle)}
+                </small>
+
+            </span>
+
+            <span>
+                →
+            </span>
 
         </button>
     `;
+}
+
+
+function showV4Hub() {
+
+    const existing =
+        $("#v4HubModal");
+
+    if (existing) {
+
+        existing.remove();
+    }
+
+
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "v4HubModal";
+
+    modal.className =
+        "modal-overlay";
+
+
+    modal.innerHTML = `
+
+        <div class="modal-card v4-hub-modal">
+
+            <button
+                class="modal-close"
+                data-close-modal
+            >
+                ×
+            </button>
+
+
+            <div class="modal-icon">
+                ⚡
+            </div>
+
+
+            <h2>
+                3Migo Master Hub
+            </h2>
+
+
+            <p class="modal-subtitle">
+                مركز التحكم بالتجربة الجديدة
+            </p>
+
+
+            <div class="v4-hub-level">
+
+                <div>
+
+                    <span>
+                        Current Level
+                    </span>
+
+                    <strong>
+                        LV.${state.experience.level}
+                        •
+                        ${escapeHTML(
+                            state.experience.levelName
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Experience
+                    </span>
+
+                    <strong>
+                        ${formatNumber(
+                            state.experience.score,
+                            0
+                        )} XP
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="v4-hub-actions">
+
+                ${v4HubButton(
+                    "🌌",
+                    "Ad Galaxy",
+                    "Explore ad tasks",
+                    "ad-galaxy"
+                )}
+
+
+                ${v4HubButton(
+                    "💎",
+                    "Wallet",
+                    "Main & economic balances",
+                    "wallet"
+                )}
+
+
+                ${v4HubButton(
+                    "🤖",
+                    "3Migo AI",
+                    "Smart local assistant",
+                    "ai"
+                )}
+
+
+                ${v4HubButton(
+                    "🏛️",
+                    "Economy Center",
+                    "Economic experience",
+                    "economic"
+                )}
+
+            </div>
+
+
+            <div class="economic-warning">
+
+                <p>
+                    Master Hub هو طبقة تجربة للواجهة.
+                    البيانات المالية الفعلية تأتي من
+                    API الخلفي.
+                </p>
+
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === modal ||
+                event.target.closest(
+                    "[data-close-modal]"
+                )
+            ) {
+
+                modal.remove();
+
+                return;
+            }
+
+
+            const button =
+                event.target.closest(
+                    "[data-hub-action]"
+                );
+
+
+            if (!button) return;
+
+
+            const action =
+                button.dataset.hubAction;
+
+
+            modal.remove();
+
+
+            switch (action) {
+
+                case "ad-galaxy":
+                    showAdGalaxy();
+                    break;
+
+                case "wallet":
+                    showWallet();
+                    break;
+
+                case "ai":
+                    show3MigoAI();
+                    break;
+
+                case "economic":
+                    showEconomicDashboard();
+                    break;
+            }
+        }
+    );
 }
 
 
@@ -4957,47 +4077,89 @@ function v4HubButton(
 
 function showProfile() {
 
-    const username =
-        state.username
-            ? `@${state.username}`
-            : "مستخدم 3Migo";
-
-
     showToast(
-        `${username} — ID: ${state.telegramId}`,
+        `👤 @${state.username} | Telegram ID: ${state.telegramId}`,
         5000
     );
 }
 
 
 /* =========================================================
-   ACTION HANDLER
+   BOTTOM NAV
+   ========================================================= */
+
+function setActiveNavigation(action) {
+
+    const navButtons =
+        $all(
+            "[data-action]"
+        );
+
+
+    navButtons.forEach(button => {
+
+        const current =
+            button.dataset.action;
+
+
+        if (
+            [
+                "home",
+                "mine",
+                "tasks",
+                "wallet",
+                "profile"
+            ].includes(current)
+        ) {
+
+            button.classList.toggle(
+                "active",
+                current === action
+            );
+        }
+    });
+}
+
+
+/* =========================================================
+   ACTIONS
    ========================================================= */
 
 function setupActions() {
 
     document.addEventListener(
         "click",
-        event => {
+        async event => {
 
-            const element =
+            const button =
                 event.target.closest(
                     "[data-action]"
                 );
 
 
-            if (!element) {
-                return;
-            }
+            if (!button) return;
 
 
             const action =
-                element.getAttribute(
-                    "data-action"
-                );
+                button.dataset.action;
+
+
+            setActiveNavigation(
+                action
+            );
 
 
             switch (action) {
+
+                case "home":
+
+                    window.scrollTo({
+                        top: 0,
+                        behavior: "smooth"
+                    });
+
+                    break;
+
 
                 case "tasks":
 
@@ -5008,31 +4170,38 @@ function setupActions() {
 
                 case "mine":
 
-                    window.scrollTo({
-                        top: 0,
-                        behavior: "smooth"
-                    });
+                    const miningSection =
+                        $("#miningSection") ||
+                        $("#mineBtn");
+
+                    if (miningSection) {
+
+                        miningSection.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center"
+                        });
+                    }
 
                     break;
 
 
                 case "daily":
 
-                    dailyReward();
+                    await dailyReward();
 
                     break;
 
 
                 case "referral":
 
-                    showReferral();
+                    await showReferral();
 
                     break;
 
 
                 case "wallet":
 
-                    showWallet();
+                    await showWallet();
 
                     break;
 
@@ -5052,6 +4221,8 @@ function setupActions() {
 
 
                 case "airdrop":
+
+                    await loadAirdropPreview();
 
                     showAirdropPreview();
 
@@ -5084,32 +4255,8 @@ function setupActions() {
                     showV4Hub();
 
                     break;
-
             }
-
         }
-    );
-}
-
-
-/* =========================================================
-   MINING BUTTON SETUP
-   ========================================================= */
-
-function setupMining() {
-
-    const button =
-        $("mineBtn");
-
-
-    if (!button) {
-        return;
-    }
-
-
-    button.addEventListener(
-        "click",
-        handleMiningButton
     );
 }
 
@@ -5120,33 +4267,39 @@ function setupMining() {
 
 function setupEconomicButton() {
 
-    const selectors = [
-
-        "[data-action='economic']",
-
-        "#economicBtn",
-
-        "#economicDashboardBtn"
-
-    ];
-
-
     const button =
         document.querySelector(
-            selectors.join(",")
-        );
+            "[data-action='economic']"
+        ) ||
+        $("#economicBtn") ||
+        $("#economicDashboardBtn");
+
+
+    if (!button) return;
 
 
     if (
-        button &&
-        !button.hasAttribute("data-action")
+        button.dataset.economicBound ===
+        "true"
     ) {
 
-        button.addEventListener(
-            "click",
-            showEconomicDashboard
-        );
+        return;
     }
+
+
+    button.dataset.economicBound =
+        "true";
+
+
+    button.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            showEconomicDashboard();
+        }
+    );
 }
 
 
@@ -5156,118 +4309,225 @@ function setupEconomicButton() {
 
 function setupV4Actions() {
 
-    const adButtons =
-        document.querySelectorAll(
-            "[data-action='ad-galaxy']"
+    const buttons =
+        $all(
+            "[data-action='ad-galaxy'], [data-action='ai']"
         );
 
 
-    adButtons.forEach(button => {
+    buttons.forEach(button => {
 
         if (
-            button.dataset.v4Bound === "1"
+            button.dataset.v4Bound ===
+            "true"
         ) {
+
             return;
         }
 
 
         button.dataset.v4Bound =
-            "1";
-
-
-        button.addEventListener(
-            "click",
-            showAdGalaxy
-        );
-
-    });
-
-
-    const aiButtons =
-        document.querySelectorAll(
-            "[data-action='ai']"
-        );
-
-
-    aiButtons.forEach(button => {
-
-        if (
-            button.dataset.v4Bound === "1"
-        ) {
-            return;
-        }
-
-
-        button.dataset.v4Bound =
-            "1";
-
-
-        button.addEventListener(
-            "click",
-            show3MigoAI
-        );
-
+            "true";
     });
 }
 
 
 /* =========================================================
-   INITIALIZATION
+   MINING SETUP
+   ========================================================= */
+
+function setupMining() {
+
+    const button =
+        $("#mineBtn");
+
+
+    if (!button) return;
+
+
+    if (
+        button.dataset.miningBound ===
+        "true"
+    ) {
+
+        return;
+    }
+
+
+    button.dataset.miningBound =
+        "true";
+
+
+    button.addEventListener(
+        "click",
+        handleMiningButton
+    );
+}
+
+
+/* =========================================================
+   MASTER UI LIVE SYNC
+   ========================================================= */
+
+function refreshMasterUI() {
+
+    updateBalanceUI();
+
+    updateEconomicUI();
+
+    updateExperienceLevel();
+
+    updateExperienceUI();
+
+    updateMiningUI();
+
+    analyzeAdGalaxy();
+}
+
+
+/* =========================================================
+   PAGE VISIBILITY
+   ========================================================= */
+
+function setupVisibilitySync() {
+
+    document.addEventListener(
+        "visibilitychange",
+        async () => {
+
+            if (
+                document.visibilityState ===
+                "visible"
+            ) {
+
+                try {
+
+                    await loadUser();
+
+                    await loadEconomicProfile();
+
+                    await loadMiningStatus();
+
+                    refreshMasterUI();
+
+                } catch (error) {
+
+                    console.log(
+                        "Visibility sync:",
+                        error
+                    );
+                }
+            }
+        }
+    );
+}
+
+
+/* =========================================================
+   ESC KEY
+   ========================================================= */
+
+function setupEscapeKey() {
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key !==
+                "Escape"
+            ) {
+
+                return;
+            }
+
+
+            const modals =
+                $all(
+                    ".modal-overlay"
+                );
+
+
+            const last =
+                modals[
+                    modals.length - 1
+                ];
+
+
+            if (last) {
+
+                last.remove();
+            }
+        }
+    );
+}
+
+
+/* =========================================================
+   INITIALIZE
    ========================================================= */
 
 async function initializeApp() {
 
-    console.log(
-        "3Migo Coin Mini App v4.0.1 starting..."
-    );
-
-
     try {
 
+        getTelegramUser();
+
+
         /*
-         * 1. Identify Telegram user
+         * Register / verify user first.
          */
 
         await ensureUserRegistered();
 
 
         /*
-         * 2. Main wallet
+         * Main account data.
          */
 
         await loadUser();
 
 
         /*
-         * 3. Economic Engine
+         * Economic layer.
          */
 
         await loadEconomicProfile();
 
 
         /*
-         * 4. Mining
+         * Mining state.
          */
 
         await loadMiningStatus();
 
 
         /*
-         * 5. Tasks
+         * Tasks.
          */
 
-        await loadTasks();
+        try {
+
+            await loadTasks();
+
+        } catch (error) {
+
+            console.log(
+                "Initial tasks load failed:",
+                error
+            );
+        }
 
 
         /*
-         * 6. Experience
+         * Experience layer.
          */
 
         updateExperienceLevel();
 
 
         /*
-         * 7. Event handlers
+         * UI events.
          */
 
         setupTaskEvents();
@@ -5280,35 +4540,35 @@ async function initializeApp() {
 
         setupV4Actions();
 
+        setupVisibilitySync();
+
+        setupEscapeKey();
+
 
         /*
-         * 8. V4 floating hub
+         * Master Hub.
          */
 
         injectV4HubButton();
 
 
         /*
-         * 9. Final UI refresh
+         * Final synchronization.
          */
 
-        updateBalanceUI();
-
-        updateMiningUI();
-
-        updateEconomicUI();
-
-        updateExperienceUI();
+        refreshMasterUI();
 
 
         console.log(
-            "3Migo Coin Mini App v4.0.1 ready.",
+            "3Migo V5 initialized",
             {
-
                 telegramId:
                     state.telegramId,
 
-                mainBalance:
+                username:
+                    state.username,
+
+                balance:
                     state.balance,
 
                 economic:
@@ -5318,11 +4578,7 @@ async function initializeApp() {
                     state.experience,
 
                 adGalaxy:
-                    state.adGalaxy,
-
-                tasks:
-                    state.tasks.length
-
+                    state.adGalaxy
             }
         );
 
@@ -5330,14 +4586,14 @@ async function initializeApp() {
     } catch (error) {
 
         console.error(
-            "3Migo Mini App initialization error:",
+            "3Migo initialization error:",
             error
         );
 
 
         showToast(
             "حدث خطأ أثناء تشغيل 3Migo. حاول إعادة فتح التطبيق.",
-            5000
+            6000
         );
     }
 }
@@ -5391,13 +4647,14 @@ window.ThreeMigo = {
 
     showV4Hub,
 
-    updateExperienceLevel
+    updateExperienceLevel,
 
+    refreshMasterUI
 };
 
 
 /* =========================================================
-   GLOBAL V4 ACCESS
+   GLOBAL V5 FUNCTIONS
    ========================================================= */
 
 window.showAdGalaxy =
@@ -5421,7 +4678,8 @@ window.showEconomicDashboard =
    ========================================================= */
 
 if (
-    document.readyState === "loading"
+    document.readyState ===
+    "loading"
 ) {
 
     document.addEventListener(
