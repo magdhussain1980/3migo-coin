@@ -1,8 +1,16 @@
 /* =========================================================
    3Migo Coin - Telegram Mini App
    Frontend Controller
-   Version 3.1.0
-   Wallet + Economic API + Referral + Mining + Tasks
+   Version 4.0.0
+   Economy Experience Layer
+
+   IMPORTANT:
+   - Frontend/UI layer only.
+   - Existing API contracts preserved.
+   - No fake revenue.
+   - No fake market value.
+   - No changes to economic_engine.py.
+   - No changes to database.
    ========================================================= */
 
 "use strict";
@@ -60,9 +68,8 @@ const state = {
 
     username: "",
 
-
     /* =====================================================
-       LEGACY WALLET / BALANCE
+       LEGACY WALLET
        ===================================================== */
 
     balance: 0,
@@ -128,6 +135,55 @@ const state = {
     },
 
 
+    /* =====================================================
+       V4 EXPERIENCE
+       ===================================================== */
+
+    experience: {
+
+        level: 1,
+
+        levelName: "Explorer",
+
+        progress: 0,
+
+        score: 0,
+
+        nextScore: 100,
+
+        source: "Frontend Experience Layer"
+
+    },
+
+
+    /* =====================================================
+       AD GALAXY
+       ===================================================== */
+
+    adGalaxy: {
+
+        available: 0,
+
+        completed: 0,
+
+        verified: 0,
+
+        loading: false,
+
+        connected: false,
+
+        providerConnected: false
+
+    },
+
+
+    /* =====================================================
+       AI UI
+       ===================================================== */
+
+    aiMessages: [],
+
+
     airdropPreview: null,
 
     loadingEconomic: false,
@@ -174,6 +230,15 @@ function formatNumber(value, decimals = 2) {
             minimumFractionDigits: 0,
             maximumFractionDigits: decimals
         });
+}
+
+
+function clamp(value, min, max) {
+
+    return Math.min(
+        max,
+        Math.max(min, value)
+    );
 }
 
 
@@ -477,11 +542,6 @@ async function loadUser() {
         }
 
 
-        /*
-         * Important:
-         * This is the main/legacy wallet balance.
-         */
-
         state.balance =
             safeNumber(
                 user.balance_3m ??
@@ -518,6 +578,8 @@ async function loadUser() {
 
 
         updateBalanceUI();
+
+        updateExperienceLevel();
 
 
         return user;
@@ -614,6 +676,8 @@ async function loadEconomicProfile() {
 
         updateEconomicUI();
 
+        updateExperienceLevel();
+
 
         return data;
 
@@ -676,6 +740,792 @@ function updateEconomicUI() {
             element.textContent =
                 formatNumber(value);
         });
+}
+
+
+/* =========================================================
+   V4 EXPERIENCE LEVEL
+   =========================================================
+   This is an EXPERIENCE/UI level only.
+   It is NOT an official backend economic level.
+   ========================================================= */
+
+function updateExperienceLevel() {
+
+    const activityScore =
+        clamp(
+            state.sessions * 5,
+            0,
+            100
+        );
+
+
+    const contributionScore =
+        clamp(
+            state.economic.contributionScore,
+            0,
+            100
+        );
+
+
+    const trustScore =
+        clamp(
+            state.economic.trustScore,
+            0,
+            100
+        );
+
+
+    const score =
+        Math.round(
+            activityScore * 0.30 +
+            contributionScore * 0.40 +
+            trustScore * 0.30
+        );
+
+
+    let level = 1;
+
+    let levelName = "Explorer";
+
+    if (score >= 80) {
+
+        level = 4;
+        levelName = "Builder";
+
+    } else if (score >= 60) {
+
+        level = 3;
+        levelName = "Contributor";
+
+    } else if (score >= 35) {
+
+        level = 2;
+        levelName = "Active";
+
+    }
+
+
+    const thresholds = {
+        1: 35,
+        2: 60,
+        3: 80,
+        4: 100
+    };
+
+
+    const previousThreshold =
+        level === 1
+            ? 0
+            : thresholds[level - 1];
+
+
+    const nextThreshold =
+        thresholds[level];
+
+
+    const progress =
+        level >= 4
+            ? 100
+            : clamp(
+                (
+                    (score - previousThreshold) /
+                    (nextThreshold - previousThreshold)
+                ) * 100,
+                0,
+                100
+            );
+
+
+    state.experience = {
+
+        level,
+
+        levelName,
+
+        progress,
+
+        score,
+
+        nextScore:
+            nextThreshold,
+
+        source:
+            "Frontend Experience Layer"
+
+    };
+
+
+    updateExperienceUI();
+}
+
+
+function updateExperienceUI() {
+
+    const level =
+        $("v4Level");
+
+
+    if (level) {
+
+        level.textContent =
+            `Lv.${state.experience.level} ${state.experience.levelName}`;
+    }
+
+
+    const score =
+        $("v4ExperienceScore");
+
+
+    if (score) {
+
+        score.textContent =
+            `${state.experience.score}/100`;
+    }
+
+
+    const progress =
+        $("v4LevelProgress");
+
+
+    if (progress) {
+
+        progress.style.width =
+            `${state.experience.progress}%`;
+    }
+}
+
+
+/* =========================================================
+   AD GALAXY DATA
+   ========================================================= */
+
+function analyzeAdGalaxy() {
+
+    const tasks =
+        Array.isArray(state.tasks)
+            ? state.tasks
+            : [];
+
+
+    const adTasks =
+        tasks.filter(task => {
+
+            const type =
+                String(
+                    task?.task_type ||
+                    task?.type ||
+                    ""
+                ).toLowerCase();
+
+
+            const title =
+                String(
+                    task?.title ||
+                    ""
+                ).toLowerCase();
+
+
+            const description =
+                String(
+                    task?.description ||
+                    ""
+                ).toLowerCase();
+
+
+            return (
+                type.includes("ad") ||
+                type.includes("advert") ||
+                title.includes("إعلان") ||
+                title.includes("اعلان") ||
+                title.includes("ad ") ||
+                description.includes("إعلان") ||
+                description.includes("اعلان") ||
+                description.includes("advert")
+            );
+
+        });
+
+
+    const available =
+        adTasks.filter(
+            task =>
+                !(
+                    Number(task.completed) === 1 ||
+                    task.completed === true
+                )
+        ).length;
+
+
+    const completed =
+        adTasks.filter(
+            task =>
+                Number(task.completed) === 1 ||
+                task.completed === true
+        ).length;
+
+
+    state.adGalaxy.available =
+        available;
+
+    state.adGalaxy.completed =
+        completed;
+
+    state.adGalaxy.connected =
+        adTasks.length > 0;
+
+    state.adGalaxy.providerConnected =
+        false;
+
+
+    return adTasks;
+}
+
+
+/* =========================================================
+   AD GALAXY MODAL
+   ========================================================= */
+
+function showAdGalaxy() {
+
+    const old =
+        $("adGalaxyModal");
+
+
+    if (old) {
+        old.remove();
+    }
+
+
+    const adTasks =
+        analyzeAdGalaxy();
+
+
+    const available =
+        state.adGalaxy.available;
+
+
+    const completed =
+        state.adGalaxy.completed;
+
+
+    const total =
+        adTasks.length;
+
+
+    const progress =
+        total > 0
+            ? Math.round(
+                (completed / total) * 100
+            )
+            : 0;
+
+
+    const modal =
+        document.createElement("div");
+
+
+    modal.id =
+        "adGalaxyModal";
+
+
+    modal.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:6000;
+        background:rgba(0,0,0,.82);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:14px;
+        direction:rtl;
+    `;
+
+
+    modal.innerHTML = `
+
+        <div style="
+            width:100%;
+            max-width:500px;
+            max-height:94vh;
+            overflow:auto;
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(39,132,255,.18),
+                    transparent 35%
+                ),
+                #06162d;
+            border:1px solid rgba(79,157,255,.28);
+            border-radius:28px;
+            color:#fff;
+            box-shadow:0 30px 90px rgba(0,0,0,.6);
+        ">
+
+            <div style="
+                padding:20px;
+                border-bottom:1px solid rgba(255,255,255,.07);
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+            ">
+
+                <div>
+
+                    <div style="
+                        font-size:23px;
+                        font-weight:900;
+                    ">
+                        📢 Ad Galaxy
+                    </div>
+
+                    <div style="
+                        color:#8197b0;
+                        font-size:12px;
+                        margin-top:5px;
+                    ">
+                        مركز الإعلانات والمساهمات
+                    </div>
+
+                </div>
+
+                <button
+                    id="closeAdGalaxy"
+                    type="button"
+                    style="
+                        width:40px;
+                        height:40px;
+                        border:0;
+                        border-radius:12px;
+                        background:rgba(255,255,255,.06);
+                        color:#9db0c7;
+                        font-size:25px;
+                    "
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div style="padding:18px;">
+
+
+                <!-- STATUS -->
+
+                <div style="
+                    padding:16px;
+                    border-radius:20px;
+                    background:
+                        linear-gradient(
+                            135deg,
+                            #103963,
+                            #09233f
+                        );
+                    border:1px solid rgba(65,158,255,.25);
+                ">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                    ">
+
+                        <div>
+
+                            <div style="
+                                color:#90a7c0;
+                                font-size:12px;
+                            ">
+                                الإعلانات المتاحة
+                            </div>
+
+                            <strong style="
+                                display:block;
+                                font-size:30px;
+                                margin-top:5px;
+                            ">
+                                ${
+                                    total > 0
+                                        ? available
+                                        : "—"
+                                }
+                            </strong>
+
+                        </div>
+
+
+                        <div style="
+                            text-align:left;
+                        ">
+
+                            <div style="
+                                color:#90a7c0;
+                                font-size:12px;
+                            ">
+                                مساهمتك
+                            </div>
+
+                            <strong style="
+                                display:block;
+                                margin-top:5px;
+                                font-size:20px;
+                            ">
+                                ${
+                                    formatNumber(
+                                        state.economic
+                                            .contributionScore
+                                    )
+                                }
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        margin-top:15px;
+                        height:8px;
+                        background:rgba(255,255,255,.08);
+                        border-radius:20px;
+                        overflow:hidden;
+                    ">
+
+                        <div style="
+                            width:${progress}%;
+                            height:100%;
+                            background:#319bff;
+                            border-radius:20px;
+                            transition:width .4s ease;
+                        "></div>
+
+                    </div>
+
+
+                    <div style="
+                        margin-top:7px;
+                        color:#7890aa;
+                        font-size:10px;
+                    ">
+                        ${
+                            total > 0
+                                ? `${completed} مكتمل من ${total}`
+                                : "لا توجد بيانات إعلانات موصولة حالياً"
+                        }
+                    </div>
+
+                </div>
+
+
+                <!-- LEVEL -->
+
+                <div style="
+                    margin-top:12px;
+                    padding:15px;
+                    background:#0a2340;
+                    border-radius:18px;
+                ">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                    ">
+
+                        <div>
+
+                            <small style="
+                                color:#7f95ad;
+                            ">
+                                مستوى التجربة
+                            </small>
+
+                            <strong
+                                id="v4Level"
+                                style="
+                                    display:block;
+                                    margin-top:5px;
+                                    font-size:18px;
+                                "
+                            >
+                                Lv.${state.experience.level}
+                                ${escapeHTML(
+                                    state.experience.levelName
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <strong
+                            id="v4ExperienceScore"
+                            style="
+                                color:#52aaff;
+                                font-size:16px;
+                            "
+                        >
+                            ${state.experience.score}/100
+                        </strong>
+
+                    </div>
+
+
+                    <div style="
+                        margin-top:10px;
+                        height:6px;
+                        background:rgba(255,255,255,.08);
+                        border-radius:10px;
+                        overflow:hidden;
+                    ">
+
+                        <div
+                            id="v4LevelProgress"
+                            style="
+                                width:${state.experience.progress}%;
+                                height:100%;
+                                background:#52aaff;
+                            "
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- AD TASKS -->
+
+                <div style="
+                    margin-top:18px;
+                ">
+
+                    <div style="
+                        font-weight:800;
+                        margin-bottom:9px;
+                    ">
+                        🌌 Galaxy Feed
+                    </div>
+
+
+                    ${
+                        adTasks.length
+                            ? adTasks.map(
+                                renderAdGalaxyItem
+                            ).join("")
+                            : `
+                                <div style="
+                                    padding:18px;
+                                    border-radius:16px;
+                                    background:#0a2340;
+                                    color:#8095ad;
+                                    font-size:12px;
+                                    text-align:center;
+                                    line-height:1.8;
+                                ">
+                                    لا توجد حملات إعلانية فعلية
+                                    موصولة بالمنصة حالياً.
+                                </div>
+                            `
+                    }
+
+                </div>
+
+
+                <!-- IMPORTANT NOTICE -->
+
+                <div style="
+                    margin-top:15px;
+                    padding:15px;
+                    border-radius:17px;
+                    background:rgba(255,181,71,.07);
+                    border:1px solid rgba(255,181,71,.18);
+                    color:#b7a88f;
+                    font-size:11px;
+                    line-height:1.8;
+                ">
+                    ⚠️ <strong style="color:#e4c995;">
+                    تنبيه اقتصادي
+                    </strong><br>
+                    هذه الواجهة لا تعتبر مشاهدة الإعلان إيراداً
+                    بحد ذاتها. الإعلانات الحقيقية تحتاج إلى
+                    مزود إعلانات أو حملات فعلية وربط تحقق موثق.
+                    لن يتم عرض إيراد أو مكافأة اقتصادية حقيقية
+                    قبل وصول البيانات من النظام الخلفي.
+                </div>
+
+
+                <button
+                    id="adGalaxyRefresh"
+                    type="button"
+                    style="
+                        width:100%;
+                        margin-top:12px;
+                        padding:14px;
+                        border:0;
+                        border-radius:15px;
+                        background:#12365d;
+                        color:#fff;
+                        font-weight:800;
+                    "
+                >
+                    🔄 تحديث بيانات الإعلانات
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(modal);
+
+
+    $("closeAdGalaxy")
+        ?.addEventListener(
+            "click",
+            () => modal.remove()
+        );
+
+
+    $("adGalaxyRefresh")
+        ?.addEventListener(
+            "click",
+            async () => {
+
+                await loadTasks();
+
+                updateExperienceLevel();
+
+                modal.remove();
+
+                showAdGalaxy();
+
+            }
+        );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (event.target === modal) {
+                modal.remove();
+            }
+
+        }
+    );
+}
+
+
+function renderAdGalaxyItem(task) {
+
+    const id =
+        safeNumber(task.id);
+
+
+    const title =
+        escapeHTML(
+            task.title ||
+            "حملة إعلانية"
+        );
+
+
+    const description =
+        escapeHTML(
+            task.description ||
+            "حملة غير موصوفة"
+        );
+
+
+    const reward =
+        safeNumber(
+            task.reward_3m ??
+            task.reward
+        );
+
+
+    const completed =
+        Number(task.completed) === 1 ||
+        task.completed === true;
+
+
+    return `
+
+        <div style="
+            background:#0a2340;
+            border-radius:17px;
+            padding:14px;
+            margin-bottom:9px;
+            border:1px solid rgba(255,255,255,.04);
+        ">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                gap:10px;
+            ">
+
+                <div style="min-width:0;">
+
+                    <strong style="
+                        display:block;
+                        font-size:13px;
+                    ">
+                        ${title}
+                    </strong>
+
+                    <div style="
+                        color:#7188a2;
+                        font-size:10px;
+                        margin-top:5px;
+                        line-height:1.6;
+                    ">
+                        ${description}
+                    </div>
+
+                </div>
+
+
+                <div style="
+                    white-space:nowrap;
+                    color:#52aaff;
+                    font-weight:800;
+                    font-size:12px;
+                ">
+                    +${formatNumber(reward)} 3M
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="v4-ad-task-button"
+                data-complete-task="${id}"
+                ${completed ? "disabled" : ""}
+                style="
+                    width:100%;
+                    margin-top:11px;
+                    padding:10px;
+                    border:0;
+                    border-radius:11px;
+                    background:${
+                        completed
+                            ? "#18304a"
+                            : "#168cff"
+                    };
+                    color:#fff;
+                    font-weight:700;
+                "
+            >
+                ${
+                    completed
+                        ? "✓ مكتملة"
+                        : "فتح / إنجاز"
+                }
+            </button>
+
+        </div>
+    `;
 }
 
 
@@ -747,7 +1597,7 @@ function showEconomicDashboard() {
                         font-size:19px;
                         font-weight:800;
                     ">
-                        💎 اقتصاد 3Migo
+                        🌐 مركز اقتصاد 3Migo
                     </div>
 
                     <div style="
@@ -755,7 +1605,7 @@ function showEconomicDashboard() {
                         font-size:12px;
                         margin-top:4px;
                     ">
-                        Economic Layer v2.0
+                        بيانات Economic Engine الحالية
                     </div>
 
                 </div>
@@ -837,9 +1687,25 @@ function showEconomicDashboard() {
                 color:#a9bad0;
                 line-height:1.7;
             ">
-                💡 الرصيد الاقتصادي المقفول لا يستخدم مباشرة.
-                الرصيد الاقتصادي المتاح Unlocked يستخدم فقط
-                في الخدمات التي تعتمد على Economic Engine.
+                💡 هذه الأرقام مأخوذة من Economic API.
+                الواجهة لا تضيف إليها إيرادات أو قيمة سوقية
+                من عندها.
+            </div>
+
+
+            <div style="
+                margin-top:14px;
+                padding:14px;
+                border-radius:15px;
+                background:#0b2443;
+                color:#93a8bf;
+                font-size:11px;
+                line-height:1.7;
+            ">
+                🔗 مسار الاقتصاد المستقبلي:
+                <br>
+                الإعلان/المساهمة → حدث موثق → Revenue Ledger
+                → Economic Allocation → Reward Rules
             </div>
 
 
@@ -1718,6 +2584,8 @@ async function claimMining() {
 
         updateMiningUI();
 
+        updateExperienceLevel();
+
 
         showToast(
             `تم استلام ${formatNumber(reward)} 3M بنجاح 🎉`
@@ -1825,6 +2693,8 @@ function renderTasks() {
         `;
 
 
+        analyzeAdGalaxy();
+
         return;
     }
 
@@ -1900,6 +2770,11 @@ function renderTasks() {
             `;
 
         }).join("");
+
+
+    analyzeAdGalaxy();
+
+    updateExperienceLevel();
 }
 
 
@@ -2049,10 +2924,6 @@ async function completeTask(taskId) {
         task.completed = 1;
 
 
-        /*
-         * Update the main wallet.
-         */
-
         state.balance += reward;
 
         state.total += reward;
@@ -2063,6 +2934,8 @@ async function completeTask(taskId) {
         updateBalanceUI();
 
         renderTasks();
+
+        updateExperienceLevel();
 
 
         await loadEconomicProfile();
@@ -2184,7 +3057,6 @@ async function dailyReward() {
 
 
         updateBalanceUI();
-
 
         await loadEconomicProfile();
 
@@ -2558,21 +3430,8 @@ async function showReferral() {
 
 
 /* =========================================================
-   WALLET
+   WALLET V4
    ========================================================= */
-
-/*
- * IMPORTANT:
- *
- * The main wallet balance is the legacy/main application
- * balance stored in state.balance.
- *
- * Economic Engine balances are displayed separately.
- *
- * This prevents the wallet from showing 0 when the main
- * 3Migo balance contains coins that have not yet been moved
- * into the Economic Engine.
- */
 
 async function showWallet() {
 
@@ -2584,10 +3443,6 @@ async function showWallet() {
         old.remove();
     }
 
-
-    /*
-     * Refresh both profiles before displaying wallet.
-     */
 
     await Promise.allSettled([
 
@@ -2645,25 +3500,39 @@ async function showWallet() {
     `;
 
 
-    const mainBalance =
-        safeNumber(state.balance);
-
-
-    const economicAvailable =
+    const available =
         safeNumber(
             state.economic.unlocked3m
         );
 
 
-    const economicLocked =
+    const locked =
         safeNumber(
             state.economic.locked3m
         );
 
 
-    const economicAirdrop =
+    const totalMined =
+        safeNumber(
+            state.economic.totalMined
+        );
+
+
+    const airdrop =
         safeNumber(
             state.economic.airdrop3m
+        );
+
+
+    const contribution =
+        safeNumber(
+            state.economic.contributionScore
+        );
+
+
+    const trust =
+        safeNumber(
+            state.economic.trustScore
         );
 
 
@@ -2671,21 +3540,25 @@ async function showWallet() {
 
         <div style="
             width:100%;
-            max-width:470px;
+            max-width:490px;
             max-height:92vh;
             overflow:auto;
-            background:#061a34;
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(25,121,255,.13),
+                    transparent 35%
+                ),
+                #061a34;
             border:1px solid rgba(91,140,190,.28);
-            border-radius:26px;
+            border-radius:27px;
             color:#fff;
             box-shadow:0 25px 80px rgba(0,0,0,.55);
         ">
 
 
-            <!-- HEADER -->
-
             <div style="
-                padding:20px 20px 15px;
+                padding:20px;
                 border-bottom:1px solid rgba(255,255,255,.07);
                 display:flex;
                 justify-content:space-between;
@@ -2695,18 +3568,18 @@ async function showWallet() {
                 <div>
 
                     <div style="
-                        font-size:22px;
+                        font-size:23px;
                         font-weight:900;
                     ">
-                        💰 محفظة 3Migo
+                        💎 Wallet
                     </div>
 
                     <div style="
                         color:#8296ae;
-                        font-size:12px;
-                        margin-top:5px;
+                        font-size:11px;
+                        margin-top:4px;
                     ">
-                        الرصيد والحركات الاقتصادية
+                        3Migo Economy Experience
                     </div>
 
                 </div>
@@ -2731,66 +3604,166 @@ async function showWallet() {
             </div>
 
 
-            <!-- MAIN WALLET BALANCE -->
+            <!-- AVAILABLE -->
 
             <div style="
                 margin:18px;
                 padding:22px;
                 border-radius:24px;
-                background:linear-gradient(
-                    145deg,
-                    #123d69,
-                    #09294d
-                );
+                background:
+                    linear-gradient(
+                        145deg,
+                        #123d69,
+                        #09294d
+                    );
                 border:1px solid rgba(61,158,255,.28);
                 text-align:center;
-                box-shadow:
-                    inset 0 1px 0 rgba(255,255,255,.05);
             ">
 
                 <div style="
                     color:#9fb3ca;
-                    font-size:14px;
+                    font-size:12px;
                 ">
-                    الرصيد الكلي
+                    Available
                 </div>
 
-
                 <div style="
-                    margin-top:8px;
-                    font-size:46px;
+                    margin-top:7px;
+                    font-size:42px;
                     font-weight:900;
-                    letter-spacing:.5px;
                 ">
-                    ${formatNumber(mainBalance)}
+                    ${formatNumber(available)}
                 </div>
 
-
                 <div style="
-                    margin-top:2px;
                     color:#4ca5ff;
-                    font-size:20px;
+                    font-size:18px;
                     font-weight:800;
                 ">
                     3M
                 </div>
 
+            </div>
 
-                <div style="
-                    margin-top:12px;
-                    color:#8197b0;
-                    font-size:11px;
-                ">
-                    الرصيد الرئيسي في حساب 3Migo
-                </div>
+
+            <!-- CORE BALANCES -->
+
+            <div style="
+                padding:0 18px;
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:10px;
+            ">
+
+                ${walletMetric(
+                    "🔒 Locked",
+                    locked,
+                    "3M"
+                )}
+
+                ${walletMetric(
+                    "⛏️ Total Mined",
+                    totalMined,
+                    "3M"
+                )}
+
+                ${walletMetric(
+                    "🎁 Airdrop",
+                    airdrop,
+                    "3M"
+                )}
+
+                ${walletMetric(
+                    "⭐ Contribution",
+                    contribution,
+                    "Score"
+                )}
+
+                ${walletMetric(
+                    "🛡️ Trust",
+                    trust,
+                    "/ 100"
+                )}
+
+                ${walletMetric(
+                    "🏆 Level",
+                    `Lv.${state.experience.level}`,
+                    state.experience.levelName
+                )}
 
             </div>
 
 
-            <!-- ECONOMIC BALANCE -->
+            <!-- MAIN BALANCE NOTE -->
+
+            <div style="
+                margin:14px 18px 0;
+                padding:13px;
+                border-radius:15px;
+                background:#0a2340;
+                color:#8ea4bd;
+                font-size:11px;
+                line-height:1.7;
+            ">
+                الرصيد الرئيسي:
+                <strong style="color:#dce8f4;">
+                    ${formatNumber(state.balance)} 3M
+                </strong>
+                <br>
+                يتم عرض الرصيد الرئيسي منفصلاً عن الرصيد الاقتصادي
+                حتى لا تختلط طبقات النظام.
+            </div>
+
+
+            <!-- ACTIONS -->
 
             <div style="
                 padding:0 18px;
+                margin-top:13px;
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:10px;
+            ">
+
+                <button
+                    id="walletEconomicBtn"
+                    type="button"
+                    style="
+                        padding:14px;
+                        border:0;
+                        border-radius:14px;
+                        background:#168cff;
+                        color:#fff;
+                        font-weight:800;
+                    "
+                >
+                    🌐 الاقتصاد
+                </button>
+
+
+                <button
+                    id="walletSpendBtn"
+                    type="button"
+                    style="
+                        padding:14px;
+                        border:0;
+                        border-radius:14px;
+                        background:#102f52;
+                        color:#fff;
+                        font-weight:800;
+                    "
+                >
+                    💳 استخدام 3M
+                </button>
+
+            </div>
+
+
+            <!-- TRANSACTIONS -->
+
+            <div style="
+                margin:18px;
+                padding-bottom:18px;
             ">
 
                 <div style="
@@ -2799,297 +3772,29 @@ async function showWallet() {
                     font-weight:800;
                     margin-bottom:10px;
                 ">
-                    💎 الرصيد الاقتصادي
+                    📋 آخر العمليات
                 </div>
 
 
-                <div style="
-                    display:grid;
-                    grid-template-columns:1fr 1fr;
-                    gap:10px;
-                ">
-
-
-                    <div style="
-                        background:#0c2747;
-                        border-radius:16px;
-                        padding:15px;
-                    ">
-
-                        <div style="
-                            color:#8297af;
-                            font-size:12px;
-                        ">
-                            متاح
-                        </div>
-
-                        <strong style="
-                            display:block;
-                            margin-top:6px;
-                            font-size:21px;
-                        ">
-                            ${formatNumber(economicAvailable)}
-                        </strong>
-
-                        <span style="
-                            color:#5b9fe5;
-                            font-size:11px;
-                        ">
-                            3M
-                        </span>
-
-                    </div>
-
-
-                    <div style="
-                        background:#0c2747;
-                        border-radius:16px;
-                        padding:15px;
-                    ">
-
-                        <div style="
-                            color:#8297af;
-                            font-size:12px;
-                        ">
-                            مقفل 🔒
-                        </div>
-
-                        <strong style="
-                            display:block;
-                            margin-top:6px;
-                            font-size:21px;
-                        ">
-                            ${formatNumber(economicLocked)}
-                        </strong>
-
-                        <span style="
-                            color:#5b9fe5;
-                            font-size:11px;
-                        ">
-                            3M
-                        </span>
-
-                    </div>
-
-
-                    <div style="
-                        background:#0c2747;
-                        border-radius:16px;
-                        padding:15px;
-                    ">
-
-                        <div style="
-                            color:#8297af;
-                            font-size:12px;
-                        ">
-                            إجمالي التعدين ⛏️
-                        </div>
-
-                        <strong style="
-                            display:block;
-                            margin-top:6px;
-                            font-size:21px;
-                        ">
-                            ${formatNumber(state.economic.totalMined)}
-                        </strong>
-
-                        <span style="
-                            color:#5b9fe5;
-                            font-size:11px;
-                        ">
-                            3M
-                        </span>
-
-                    </div>
-
-
-                    <div style="
-                        background:#0c2747;
-                        border-radius:16px;
-                        padding:15px;
-                    ">
-
-                        <div style="
-                            color:#8297af;
-                            font-size:12px;
-                        ">
-                            Airdrop 🎁
-                        </div>
-
-                        <strong style="
-                            display:block;
-                            margin-top:6px;
-                            font-size:21px;
-                        ">
-                            ${formatNumber(economicAirdrop)}
-                        </strong>
-
-                        <span style="
-                            color:#5b9fe5;
-                            font-size:11px;
-                        ">
-                            3M
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <!-- CONTRIBUTION + TRUST -->
-
-                <div style="
-                    margin-top:10px;
-                    display:grid;
-                    grid-template-columns:1fr 1fr;
-                    gap:10px;
-                ">
-
-                    <div style="
-                        background:#0c2747;
-                        border-radius:16px;
-                        padding:15px;
-                    ">
-
-                        <div style="
-                            color:#8297af;
-                            font-size:12px;
-                        ">
-                            المساهمة ⭐
-                        </div>
-
-                        <strong style="
-                            display:block;
-                            margin-top:6px;
-                            font-size:20px;
-                        ">
-                            ${formatNumber(state.economic.contributionScore)}
-                        </strong>
-
-                        <span style="
-                            color:#7189a3;
-                            font-size:11px;
-                        ">
-                            Score
-                        </span>
-
-                    </div>
-
-
-                    <div style="
-                        background:#0c2747;
-                        border-radius:16px;
-                        padding:15px;
-                    ">
-
-                        <div style="
-                            color:#8297af;
-                            font-size:12px;
-                        ">
-                            الثقة 🛡️
-                        </div>
-
-                        <strong style="
-                            display:block;
-                            margin-top:6px;
-                            font-size:20px;
-                        ">
-                            ${formatNumber(state.economic.trustScore)}
-                        </strong>
-
-                        <span style="
-                            color:#7189a3;
-                            font-size:11px;
-                        ">
-                            / 100
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <!-- ACTIONS -->
-
-                <div style="
-                    display:grid;
-                    grid-template-columns:1fr 1fr;
-                    gap:10px;
-                    margin-top:14px;
-                ">
-
-                    <button
-                        id="walletEconomicBtn"
-                        type="button"
-                        style="
-                            padding:14px;
-                            border:0;
-                            border-radius:14px;
-                            background:#168cff;
-                            color:#fff;
-                            font-weight:800;
-                        "
-                    >
-                        💎 الاقتصاد
-                    </button>
-
-
-                    <button
-                        id="walletSpendBtn"
-                        type="button"
-                        style="
-                            padding:14px;
-                            border:0;
-                            border-radius:14px;
-                            background:#102f52;
-                            color:#fff;
-                            font-weight:800;
-                        "
-                    >
-                        💳 استخدام 3M
-                    </button>
-
-                </div>
-
-
-                <!-- TRANSACTIONS -->
-
-                <div style="
-                    margin-top:18px;
-                    padding-bottom:20px;
-                ">
-
-                    <div style="
-                        color:#a9bad0;
-                        font-size:14px;
-                        font-weight:800;
-                        margin-bottom:10px;
-                    ">
-                        📋 آخر العمليات
-                    </div>
-
-
-                    ${
-                        transactions.length
-                            ? transactions
-                                .slice(0, 10)
-                                .map(renderTransaction)
-                                .join("")
-                            : `
-                                <div style="
-                                    background:#0c2747;
-                                    border-radius:14px;
-                                    padding:15px;
-                                    color:#7389a3;
-                                    text-align:center;
-                                    font-size:12px;
-                                ">
-                                    لا توجد عمليات مسجلة حالياً.
-                                </div>
-                            `
-                    }
-
-                </div>
+                ${
+                    transactions.length
+                        ? transactions
+                            .slice(0, 10)
+                            .map(renderTransaction)
+                            .join("")
+                        : `
+                            <div style="
+                                background:#0c2747;
+                                border-radius:14px;
+                                padding:15px;
+                                color:#7389a3;
+                                text-align:center;
+                                font-size:12px;
+                            ">
+                                لا توجد عمليات مسجلة حالياً.
+                            </div>
+                        `
+                }
 
             </div>
 
@@ -3143,6 +3848,51 @@ async function showWallet() {
 
         }
     );
+}
+
+
+function walletMetric(
+    title,
+    value,
+    suffix
+) {
+
+    return `
+
+        <div style="
+            background:#0c2747;
+            border-radius:16px;
+            padding:14px;
+        ">
+
+            <div style="
+                color:#8297af;
+                font-size:11px;
+            ">
+                ${title}
+            </div>
+
+            <strong style="
+                display:block;
+                margin-top:6px;
+                font-size:19px;
+            ">
+                ${
+                    typeof value === "number"
+                        ? formatNumber(value)
+                        : escapeHTML(value)
+                }
+            </strong>
+
+            <span style="
+                color:#5b9fe5;
+                font-size:10px;
+            ">
+                ${escapeHTML(suffix)}
+            </span>
+
+        </div>
+    `;
 }
 
 
@@ -3243,6 +3993,867 @@ function renderTransaction(transaction) {
 
         </div>
 
+    `;
+}
+
+
+/* =========================================================
+   3MIGO AI EXPERIENCE
+   =========================================================
+   Current version:
+   - Real chat UI.
+   - Local knowledge responses.
+   - No claim of connected AI.
+   - Ready for future AI API adapter.
+   ========================================================= */
+
+const AI_KNOWLEDGE = {
+
+    "كيف أزيد مكافآتي؟":
+        `
+        يمكنك زيادة مساهمتك من خلال النشاط المتاح فعلياً
+        في 3Migo مثل التعدين والمهام والإحالات عندما تكون
+        متاحة. أما المكافآت الاقتصادية النهائية فتخضع لقواعد
+        النظام والبيانات التي تصل إلى Economic Engine.
+        `,
+
+    "ما الفرق بين Locked وUnlocked؟":
+        `
+        Locked هو رصيد اقتصادي مقيد وفق قواعد النظام،
+        بينما Unlocked هو الرصيد الاقتصادي المتاح للاستخدام
+        في الخدمات التي تسمح بها Economic Engine.
+        `,
+
+    "كيف يعمل اقتصاد 3Migo؟":
+        `
+        الفكرة الحالية هي فصل النشاط عن الاقتصاد الحقيقي.
+        الحدث أو المساهمة يجب أن تكون موثقة، ثم يمكن لاحقاً
+        تسجيل الإيراد في Revenue Ledger وتطبيق قواعد التخصيص
+        قبل احتساب أي مكافأة اقتصادية.
+        `,
+
+    "ما المهام المتاحة؟":
+        `
+        يمكنني عرض المهام التي وصلت فعلياً من Tasks API.
+        افتح قسم المهام لرؤية المهام الحالية والمكافآت
+        المرتبطة بها.
+        `
+
+};
+
+
+function show3MigoAI() {
+
+    const old =
+        $("aiModal");
+
+
+    if (old) {
+        old.remove();
+    }
+
+
+    const modal =
+        document.createElement("div");
+
+
+    modal.id =
+        "aiModal";
+
+
+    modal.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:7000;
+        background:rgba(0,0,0,.84);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:12px;
+        direction:rtl;
+    `;
+
+
+    modal.innerHTML = `
+
+        <div style="
+            width:100%;
+            max-width:500px;
+            height:min(92vh,700px);
+            background:#06182f;
+            border:1px solid rgba(91,140,190,.28);
+            border-radius:27px;
+            display:flex;
+            flex-direction:column;
+            overflow:hidden;
+            color:#fff;
+        ">
+
+            <div style="
+                padding:17px;
+                border-bottom:1px solid rgba(255,255,255,.07);
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+            ">
+
+                <div>
+
+                    <div style="
+                        font-size:20px;
+                        font-weight:900;
+                    ">
+                        🤖 3Migo AI
+                    </div>
+
+                    <div style="
+                        color:#7e95ae;
+                        font-size:10px;
+                        margin-top:4px;
+                    ">
+                        Economy Assistant Interface
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="closeAI"
+                    type="button"
+                    style="
+                        width:40px;
+                        height:40px;
+                        border:0;
+                        border-radius:12px;
+                        background:rgba(255,255,255,.06);
+                        color:#9eb1c8;
+                        font-size:24px;
+                    "
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div style="
+                padding:12px;
+                background:rgba(255,181,71,.05);
+                border-bottom:1px solid rgba(255,255,255,.05);
+                color:#a99b82;
+                font-size:10px;
+                line-height:1.6;
+            ">
+                ℹ️ هذه واجهة المساعد فقط.
+                محرك AI خارجي غير متصل حالياً، لذلك لن ندّعي
+                وجود ذكاء اصطناعي فعلي أو إجابات مولدة من نموذج.
+            </div>
+
+
+            <div
+                id="aiMessages"
+                style="
+                    flex:1;
+                    overflow:auto;
+                    padding:14px;
+                "
+            ></div>
+
+
+            <div style="
+                padding:10px;
+                border-top:1px solid rgba(255,255,255,.07);
+            ">
+
+                <div
+                    id="aiQuickQuestions"
+                    style="
+                        display:flex;
+                        gap:7px;
+                        overflow-x:auto;
+                        padding-bottom:9px;
+                    "
+                ></div>
+
+
+                <div style="
+                    display:flex;
+                    gap:7px;
+                ">
+
+                    <input
+                        id="aiInput"
+                        type="text"
+                        maxlength="300"
+                        placeholder="اكتب سؤالك..."
+                        style="
+                            flex:1;
+                            min-width:0;
+                            padding:12px;
+                            border-radius:13px;
+                            border:1px solid rgba(255,255,255,.09);
+                            background:#0b2443;
+                            color:#fff;
+                            outline:none;
+                        "
+                    />
+
+
+                    <button
+                        id="aiSend"
+                        type="button"
+                        style="
+                            width:52px;
+                            border:0;
+                            border-radius:13px;
+                            background:#168cff;
+                            color:#fff;
+                            font-size:18px;
+                        "
+                    >
+                        ➤
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(modal);
+
+
+    $("closeAI")
+        ?.addEventListener(
+            "click",
+            () => modal.remove()
+        );
+
+
+    const quickContainer =
+        $("aiQuickQuestions");
+
+
+    Object.keys(AI_KNOWLEDGE)
+        .forEach(question => {
+
+            const button =
+                document.createElement("button");
+
+
+            button.type =
+                "button";
+
+
+            button.textContent =
+                question;
+
+
+            button.style.cssText = `
+                flex:0 0 auto;
+                padding:8px 10px;
+                border:1px solid rgba(255,255,255,.08);
+                border-radius:12px;
+                background:#0b2443;
+                color:#dce8f4;
+                font-size:10px;
+            `;
+
+
+            button.addEventListener(
+                "click",
+                () => ask3MigoAI(question)
+            );
+
+
+            quickContainer?.appendChild(button);
+
+        });
+
+
+    $("aiSend")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                const question =
+                    String(
+                        $("aiInput")?.value || ""
+                    ).trim();
+
+
+                if (question) {
+                    ask3MigoAI(question);
+                }
+
+            }
+        );
+
+
+    $("aiInput")
+        ?.addEventListener(
+            "keydown",
+            event => {
+
+                if (event.key === "Enter") {
+
+                    event.preventDefault();
+
+                    const question =
+                        String(
+                            $("aiInput")?.value || ""
+                        ).trim();
+
+
+                    if (question) {
+                        ask3MigoAI(question);
+                    }
+                }
+
+            }
+        );
+
+
+    addAIMessage(
+        "assistant",
+        "مرحباً بك في 3Migo AI Experience 👋<br><br>اختر أحد الأسئلة الجاهزة أو اكتب سؤالك. حالياً أنا واجهة معرفة محلية وليست متصلة بمحرك AI خارجي."
+    );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (event.target === modal) {
+                modal.remove();
+            }
+
+        }
+    );
+}
+
+
+function normalizeQuestion(question) {
+
+    return String(question || "")
+        .trim()
+        .replace(/\s+/g, " ");
+}
+
+
+function findAIAnswer(question) {
+
+    const normalized =
+        normalizeQuestion(question);
+
+
+    for (
+        const key of Object.keys(AI_KNOWLEDGE)
+    ) {
+
+        if (
+            normalized.includes(key) ||
+            key.includes(normalized)
+        ) {
+
+            return AI_KNOWLEDGE[key];
+        }
+    }
+
+
+    const lower =
+        normalized.toLowerCase();
+
+
+    if (
+        lower.includes("wallet") ||
+        lower.includes("محفظ")
+    ) {
+
+        return `
+            افتح Wallet لمشاهدة Available وLocked
+            وTotal Mined وAirdrop وContribution وTrust
+            وآخر العمليات.
+        `;
+    }
+
+
+    if (
+        lower.includes("ad") ||
+        lower.includes("إعلان") ||
+        lower.includes("اعلان")
+    ) {
+
+        return `
+            Ad Galaxy جاهزة لعرض الحملات الفعلية.
+            لا يتم اعتبار الإعلان إيراداً حقيقياً إلا بعد
+            وجود مزود/حملة فعلية وآلية تحقق وربطها بالـRevenue Ledger.
+        `;
+    }
+
+
+    if (
+        lower.includes("level") ||
+        lower.includes("مستوى")
+    ) {
+
+        return `
+            مستوى التجربة الحالي يتم حسابه في الواجهة فقط
+            من النشاط والمساهمة والثقة. لا يعتبر هذا المستوى
+            نظاماً رسمياً في الـBackend.
+        `;
+    }
+
+
+    return `
+        لم أجد إجابة معرفة لهذا السؤال في النسخة الحالية.
+        يمكنك تجربة أحد الأسئلة الجاهزة حول المحفظة أو التعدين
+        أو Ad Galaxy أو اقتصاد 3Migo.
+    `;
+}
+
+
+function addAIMessage(type, message) {
+
+    const container =
+        $("aiMessages");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const bubble =
+        document.createElement("div");
+
+
+    bubble.style.cssText = `
+        max-width:88%;
+        margin-bottom:10px;
+        padding:11px 13px;
+        border-radius:15px;
+        line-height:1.7;
+        font-size:12px;
+        ${
+            type === "user"
+                ? `
+                    margin-right:auto;
+                    background:#168cff;
+                    color:#fff;
+                  `
+                : `
+                    margin-left:auto;
+                    background:#0b294a;
+                    color:#dce8f4;
+                  `
+        }
+    `;
+
+
+    bubble.innerHTML =
+        escapeHTML(message)
+            .replace(/\n/g, "<br>");
+
+
+    container.appendChild(bubble);
+
+    container.scrollTop =
+        container.scrollHeight;
+}
+
+
+function ask3MigoAI(question) {
+
+    const normalized =
+        normalizeQuestion(question);
+
+
+    if (!normalized) {
+        return;
+    }
+
+
+    const input =
+        $("aiInput");
+
+
+    if (input) {
+        input.value = "";
+    }
+
+
+    addAIMessage(
+        "user",
+        normalized
+    );
+
+
+    const answer =
+        findAIAnswer(normalized);
+
+
+    setTimeout(
+        () => {
+
+            addAIMessage(
+                "assistant",
+                answer
+            );
+
+        },
+        180
+    );
+}
+
+
+/* =========================================================
+   V4 HUB
+   ========================================================= */
+
+function injectV4HubButton() {
+
+    if ($("v4HubButton")) {
+        return;
+    }
+
+
+    const button =
+        document.createElement("button");
+
+
+    button.id =
+        "v4HubButton";
+
+
+    button.type =
+        "button";
+
+
+    button.textContent =
+        "⚡ 3Migo V4";
+
+
+    button.style.cssText = `
+        position:fixed;
+        bottom:18px;
+        left:18px;
+        z-index:2500;
+        border:1px solid rgba(82,170,255,.35);
+        border-radius:18px;
+        padding:11px 14px;
+        background:
+            linear-gradient(
+                135deg,
+                #123d69,
+                #0a294a
+            );
+        color:#fff;
+        font-weight:900;
+        font-size:11px;
+        box-shadow:0 10px 30px rgba(0,0,0,.35);
+    `;
+
+
+    button.addEventListener(
+        "click",
+        showV4Hub
+    );
+
+
+    document.body.appendChild(button);
+}
+
+
+function showV4Hub() {
+
+    const old =
+        $("v4HubModal");
+
+
+    if (old) {
+        old.remove();
+    }
+
+
+    const modal =
+        document.createElement("div");
+
+
+    modal.id =
+        "v4HubModal";
+
+
+    modal.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:5500;
+        background:rgba(0,0,0,.80);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:15px;
+        direction:rtl;
+    `;
+
+
+    modal.innerHTML = `
+
+        <div style="
+            width:100%;
+            max-width:470px;
+            background:#06182f;
+            border:1px solid rgba(91,140,190,.28);
+            border-radius:27px;
+            padding:20px;
+            color:#fff;
+        ">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+            ">
+
+                <div>
+
+                    <div style="
+                        font-size:22px;
+                        font-weight:900;
+                    ">
+                        ⚡ 3Migo V4
+                    </div>
+
+                    <div style="
+                        color:#8197b0;
+                        font-size:11px;
+                        margin-top:4px;
+                    ">
+                        Economy Experience
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="closeV4Hub"
+                    type="button"
+                    style="
+                        background:transparent;
+                        color:#9aabc0;
+                        border:0;
+                        font-size:25px;
+                    "
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div style="
+                margin-top:17px;
+                padding:16px;
+                border-radius:19px;
+                background:
+                    linear-gradient(
+                        135deg,
+                        #103963,
+                        #09233f
+                    );
+            ">
+
+                <div style="
+                    color:#8da5bf;
+                    font-size:11px;
+                ">
+                    مستوى تجربة المستخدم
+                </div>
+
+                <strong style="
+                    display:block;
+                    margin-top:6px;
+                    font-size:24px;
+                ">
+                    Lv.${state.experience.level}
+                    ${escapeHTML(
+                        state.experience.levelName
+                    )}
+                </strong>
+
+                <div style="
+                    margin-top:11px;
+                    height:7px;
+                    background:rgba(255,255,255,.08);
+                    border-radius:10px;
+                    overflow:hidden;
+                ">
+
+                    <div style="
+                        width:${state.experience.progress}%;
+                        height:100%;
+                        background:#52aaff;
+                    "></div>
+
+                </div>
+
+                <div style="
+                    margin-top:7px;
+                    color:#7189a3;
+                    font-size:10px;
+                ">
+                    Experience Score:
+                    ${state.experience.score}/100
+                </div>
+
+            </div>
+
+
+            <div style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:10px;
+                margin-top:13px;
+            ">
+
+                ${v4HubButton(
+                    "📢",
+                    "Ad Galaxy",
+                    "showAdGalaxy"
+                )}
+
+                ${v4HubButton(
+                    "💎",
+                    "Wallet",
+                    "showWallet"
+                )}
+
+                ${v4HubButton(
+                    "🤖",
+                    "3Migo AI",
+                    "show3MigoAI"
+                )}
+
+                ${v4HubButton(
+                    "🌐",
+                    "Economy Center",
+                    "showEconomicDashboard"
+                )}
+
+            </div>
+
+
+            <div style="
+                margin-top:14px;
+                padding:13px;
+                border-radius:15px;
+                background:#0a2340;
+                color:#839ab3;
+                font-size:10px;
+                line-height:1.7;
+            ">
+                طبقة V4 تعمل فوق الـAPI الحالية.
+                لا يتم إنشاء إيرادات أو أرصدة اقتصادية
+                من الواجهة.
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(modal);
+
+
+    $("closeV4Hub")
+        ?.addEventListener(
+            "click",
+            () => modal.remove()
+        );
+
+
+    modal.querySelectorAll(
+        "[data-v4-open]"
+    ).forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const action =
+                    button.getAttribute(
+                        "data-v4-open"
+                    );
+
+
+                modal.remove();
+
+
+                if (
+                    typeof window[action] ===
+                    "function"
+                ) {
+
+                    window[action]();
+
+                }
+
+            }
+        );
+
+    });
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (event.target === modal) {
+                modal.remove();
+            }
+
+        }
+    );
+}
+
+
+function v4HubButton(
+    icon,
+    title,
+    action
+) {
+
+    return `
+
+        <button
+            type="button"
+            data-v4-open="${action}"
+            style="
+                padding:17px 10px;
+                border:1px solid rgba(255,255,255,.06);
+                border-radius:17px;
+                background:#0a2340;
+                color:#fff;
+                text-align:right;
+            "
+        >
+
+            <span style="
+                font-size:21px;
+            ">
+                ${icon}
+            </span>
+
+            <strong style="
+                display:block;
+                margin-top:7px;
+                font-size:12px;
+            ">
+                ${title}
+            </strong>
+
+        </button>
     `;
 }
 
@@ -3360,6 +4971,27 @@ function setupActions() {
 
                     break;
 
+
+                case "ad-galaxy":
+
+                    showAdGalaxy();
+
+                    break;
+
+
+                case "ai":
+
+                    show3MigoAI();
+
+                    break;
+
+
+                case "v4":
+
+                    showV4Hub();
+
+                    break;
+
             }
 
         }
@@ -3426,13 +5058,74 @@ function setupEconomicButton() {
 
 
 /* =========================================================
+   V4 ACTION BUTTONS
+   ========================================================= */
+
+function setupV4Actions() {
+
+    const adButtons =
+        document.querySelectorAll(
+            "[data-action='ad-galaxy']"
+        );
+
+
+    adButtons.forEach(button => {
+
+        if (
+            button.dataset.v4Bound === "1"
+        ) {
+            return;
+        }
+
+
+        button.dataset.v4Bound =
+            "1";
+
+
+        button.addEventListener(
+            "click",
+            showAdGalaxy
+        );
+
+    });
+
+
+    const aiButtons =
+        document.querySelectorAll(
+            "[data-action='ai']"
+        );
+
+
+    aiButtons.forEach(button => {
+
+        if (
+            button.dataset.v4Bound === "1"
+        ) {
+            return;
+        }
+
+
+        button.dataset.v4Bound =
+            "1";
+
+
+        button.addEventListener(
+            "click",
+            show3MigoAI
+        );
+
+    });
+}
+
+
+/* =========================================================
    INITIALIZATION
    ========================================================= */
 
 async function initializeApp() {
 
     console.log(
-        "3Migo Coin Mini App v3.1.0 starting..."
+        "3Migo Coin Mini App v4.0.0 starting..."
     );
 
 
@@ -3446,17 +5139,14 @@ async function initializeApp() {
 
 
         /*
-         * 2. Load MAIN wallet
-         *
-         * This is important because the wallet's main
-         * balance comes from /user/{telegram_id}.
+         * 2. Main wallet
          */
 
         await loadUser();
 
 
         /*
-         * 3. Load Economic Engine separately
+         * 3. Economic Engine
          */
 
         await loadEconomicProfile();
@@ -3477,7 +5167,14 @@ async function initializeApp() {
 
 
         /*
-         * 6. Event handlers
+         * 6. Experience
+         */
+
+        updateExperienceLevel();
+
+
+        /*
+         * 7. Event handlers
          */
 
         setupTaskEvents();
@@ -3488,9 +5185,18 @@ async function initializeApp() {
 
         setupEconomicButton();
 
+        setupV4Actions();
+
 
         /*
-         * 7. Final UI refresh
+         * 8. V4 floating hub
+         */
+
+        injectV4HubButton();
+
+
+        /*
+         * 9. Final UI refresh
          */
 
         updateBalanceUI();
@@ -3499,9 +5205,11 @@ async function initializeApp() {
 
         updateEconomicUI();
 
+        updateExperienceUI();
+
 
         console.log(
-            "3Migo Coin Mini App ready.",
+            "3Migo Coin Mini App v4.0.0 ready.",
             {
 
                 telegramId:
@@ -3512,6 +5220,12 @@ async function initializeApp() {
 
                 economic:
                     state.economic,
+
+                experience:
+                    state.experience,
+
+                adGalaxy:
+                    state.adGalaxy,
 
                 tasks:
                     state.tasks.length
@@ -3576,9 +5290,37 @@ window.ThreeMigo = {
 
     showSpendDialog,
 
-    executeSpend
+    executeSpend,
+
+    showAdGalaxy,
+
+    show3MigoAI,
+
+    showV4Hub,
+
+    updateExperienceLevel
 
 };
+
+
+/* =========================================================
+   GLOBAL V4 ACCESS
+   ========================================================= */
+
+window.showAdGalaxy =
+    showAdGalaxy;
+
+window.show3MigoAI =
+    show3MigoAI;
+
+window.showV4Hub =
+    showV4Hub;
+
+window.showWallet =
+    showWallet;
+
+window.showEconomicDashboard =
+    showEconomicDashboard;
 
 
 /* =========================================================
