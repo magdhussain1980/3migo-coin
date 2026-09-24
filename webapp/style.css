@@ -1,26 +1,141 @@
+/* =========================================================
+   3Migo Coin — Visual Experience Layer
+   STYLE.CSS
+   Version 4.1
+   Premium Space / Gold / Neon UI
+
+   IMPORTANT:
+   - CSS ONLY
+   - Existing JS classes preserved
+   - No API changes
+   - No database changes
+   - No economic logic changes
+   ========================================================= */
+
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+:root {
+    --bg-main: #020817;
+    --bg-secondary: #061329;
+    --bg-card: rgba(8, 25, 51, 0.88);
+    --bg-card-soft: rgba(255, 255, 255, 0.045);
+
+    --blue: #168cff;
+    --blue-light: #55b7ff;
+    --blue-dark: #0754a5;
+
+    --cyan: #32e6ff;
+    --cyan-soft: #73f1ff;
+
+    --gold: #ffc94a;
+    --gold-light: #ffe59a;
+    --gold-dark: #d99316;
+
+    --purple: #9b6cff;
+    --purple-light: #c3a5ff;
+
+    --green: #35d995;
+    --green-light: #78f3bd;
+
+    --orange: #ff9f43;
+    --pink: #f66cff;
+
+    --text: #ffffff;
+    --text-soft: #a7bad1;
+    --text-muted: #6e849f;
+
+    --border: rgba(126, 181, 238, 0.16);
+
+    --shadow:
+        0 18px 45px rgba(0, 0, 0, 0.35);
+
+    --glow-blue:
+        0 0 25px rgba(22, 140, 255, 0.22);
+
+    --glow-gold:
+        0 0 28px rgba(255, 201, 74, 0.20);
+
+    --radius-lg: 22px;
+    --radius-md: 17px;
+    --radius-sm: 12px;
+}
+
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+
 html {
     scroll-behavior: smooth;
 }
 
+
 body {
     font-family: Arial, Tahoma, sans-serif;
-    background: #031024;
-    color: #ffffff;
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(24, 104, 190, 0.20),
+            transparent 38%
+        ),
+        radial-gradient(
+            circle at 90% 35%,
+            rgba(126, 64, 255, 0.08),
+            transparent 30%
+        ),
+        linear-gradient(
+            180deg,
+            #020817 0%,
+            #031024 48%,
+            #020817 100%
+        );
+
+    color: var(--text);
     min-height: 100vh;
-    padding-bottom: 90px;
+    padding-bottom: 100px;
+
+    overflow-x: hidden;
 }
+
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+
+    background-image:
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(255,255,255,0.025) 1px,
+            transparent 1px
+        );
+
+    background-size: 35px 35px;
+    opacity: 0.45;
+}
+
 
 button {
     font-family: inherit;
     cursor: pointer;
     border: none;
+    -webkit-tap-highlight-color: transparent;
 }
+
+
+button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+}
+
 
 .app {
     width: 100%;
@@ -30,153 +145,375 @@ button {
 }
 
 
-/* ================= HEADER ================= */
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     padding: 8px 4px 18px;
 }
+
 
 .brand-name {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
 }
+
 
 .brand-name strong {
     font-size: 18px;
+    letter-spacing: 0.3px;
 }
 
+
 .brand-name small {
-    color: #91a4bd;
-    font-size: 11px;
+    color: var(--text-muted);
+    font-size: 10px;
+    letter-spacing: 0.6px;
 }
+
 
 .verified {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     width: 17px;
     height: 17px;
+
     border-radius: 50%;
-    background: #168cff;
+
+    background:
+        linear-gradient(
+            145deg,
+            #3fc9ff,
+            #168cff
+        );
+
     color: #fff;
-    font-size: 11px;
+    font-size: 10px;
+
+    box-shadow:
+        0 0 12px rgba(22, 140, 255, 0.35);
 }
+
 
 .beta {
-    background: rgba(22, 140, 255, 0.15);
-    border: 1px solid rgba(22, 140, 255, 0.35);
-    color: #55aaff;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(22,140,255,0.17),
+            rgba(126,75,255,0.12)
+        );
+
+    border: 1px solid rgba(85,183,255,0.28);
+
+    color: var(--blue-light);
+
     border-radius: 20px;
-    padding: 6px 10px;
-    font-size: 10px;
-    font-weight: bold;
+
+    padding: 6px 11px;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    box-shadow:
+        0 0 18px rgba(22,140,255,0.08);
 }
 
 
-/* ================= BRAND ================= */
+/* =========================================================
+   BRAND / HERO
+   ========================================================= */
 
 .brand-section {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 16px;
+    gap: 15px;
+
+    margin-bottom: 17px;
+
+    position: relative;
 }
 
+
 .coin-logo {
-    width: 58px;
-    height: 58px;
+    width: 62px;
+    height: 62px;
+
+    flex-shrink: 0;
+
     border-radius: 50%;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, #168cff, #063b82);
-    box-shadow: 0 8px 25px rgba(22, 140, 255, 0.25);
-    font-weight: 900;
+
+    background:
+        radial-gradient(
+            circle at 32% 25%,
+            #fff4b7 0%,
+            #ffd95d 22%,
+            #e6a72c 52%,
+            #8d5108 100%
+        );
+
+    color: #241500;
+
+    border: 2px solid rgba(255,231,143,0.9);
+
+    box-shadow:
+        inset 0 2px 4px rgba(255,255,255,0.65),
+        inset 0 -5px 8px rgba(97,48,0,0.35),
+        0 0 22px rgba(255,201,74,0.25),
+        0 10px 28px rgba(0,0,0,0.3);
+
+    font-weight: 1000;
     font-size: 18px;
+
+    position: relative;
 }
+
+
+.coin-logo::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 5px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,255,255,0.32);
+}
+
 
 .brand-text h1 {
-    font-size: 26px;
+    font-size: 27px;
+    line-height: 1.05;
+    letter-spacing: -0.6px;
 }
+
 
 .brand-text p {
-    margin-top: 4px;
-    color: #91a4bd;
-    font-size: 12px;
+    margin-top: 5px;
+
+    color: var(--text-soft);
+
+    font-size: 11px;
+
+    line-height: 1.5;
 }
 
 
-/* ================= BALANCE ================= */
+/* =========================================================
+   BALANCE / WALLET HERO
+   ========================================================= */
 
 .balance-card {
-    background: linear-gradient(
-        145deg,
-        #0b2344,
-        #06172f
-    );
+    position: relative;
+    overflow: hidden;
 
-    border: 1px solid rgba(74, 142, 218, 0.25);
-    border-radius: 22px;
-    padding: 20px;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.22);
+    background:
+        radial-gradient(
+            circle at 85% 10%,
+            rgba(255,201,74,0.13),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 10% 100%,
+            rgba(22,140,255,0.15),
+            transparent 35%
+        ),
+        linear-gradient(
+            145deg,
+            #0b2548,
+            #05152d
+        );
+
+    border: 1px solid rgba(112,178,239,0.25);
+
+    border-radius: var(--radius-lg);
+
+    padding: 21px;
+
+    box-shadow:
+        var(--shadow),
+        var(--glow-blue);
+
+    isolation: isolate;
 }
+
+
+.balance-card::before {
+    content: "";
+
+    position: absolute;
+
+    width: 150px;
+    height: 150px;
+
+    right: -70px;
+    top: -70px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,201,74,0.18),
+            transparent 65%
+        );
+
+    pointer-events: none;
+}
+
+
+.balance-card::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(85,183,255,0.7),
+            rgba(255,201,74,0.7),
+            transparent
+        );
+
+    opacity: 0.7;
+}
+
 
 .balance-title {
-    color: #91a4bd;
-    font-size: 13px;
+    color: var(--text-soft);
+    font-size: 12px;
+    letter-spacing: 0.3px;
 }
+
 
 .balance {
     margin-top: 7px;
-    font-size: 38px;
-    font-weight: 900;
+
+    font-size: 39px;
+    font-weight: 1000;
+
+    letter-spacing: -1px;
+
+    text-shadow:
+        0 4px 18px rgba(0,0,0,0.3);
 }
+
 
 .balance span {
     font-size: 15px;
-    color: #55aaff;
+
+    color: var(--gold-light);
+
     margin-right: 5px;
+
+    text-shadow:
+        0 0 12px rgba(255,201,74,0.25);
 }
+
 
 .balance-note {
     margin-top: 7px;
-    color: #7086a1;
-    font-size: 10px;
+
+    color: var(--text-muted);
+
+    font-size: 9px;
 }
 
 
-/* ================= MINING ================= */
+/* =========================================================
+   MINING
+   ========================================================= */
 
 .mine-button {
     width: 100%;
+
     margin-top: 18px;
-    padding: 14px;
-    border-radius: 16px;
-    background: linear-gradient(
-        135deg,
-        #168cff,
-        #0754a5
-    );
+
+    padding: 15px;
+
+    border-radius: 17px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #168cff 0%,
+            #0963c3 55%,
+            #07498e 100%
+        );
+
     color: #fff;
+
     display: flex;
     align-items: center;
+
     gap: 13px;
+
     text-align: right;
-    box-shadow: 0 8px 25px rgba(22, 140, 255, 0.2);
-    transition: 0.2s;
+
+    border: 1px solid rgba(111,210,255,0.25);
+
+    box-shadow:
+        0 10px 28px rgba(22,140,255,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.18);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease;
 }
+
+
+.mine-button:hover {
+    filter: brightness(1.08);
+
+    box-shadow:
+        0 12px 34px rgba(22,140,255,0.30);
+}
+
 
 .mine-button:active {
-    transform: scale(0.98);
+    transform: scale(0.975);
 }
 
+
 .mine-icon {
-    font-size: 27px;
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background:
+        rgba(255,255,255,0.13);
+
+    font-size: 25px;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.15);
 }
+
 
 .mine-content {
     display: flex;
@@ -184,382 +521,780 @@ button {
     gap: 4px;
 }
 
+
 .mine-content strong {
     font-size: 15px;
 }
 
+
 .mine-content small {
     opacity: 0.75;
-    font-size: 11px;
+    font-size: 10px;
 }
+
 
 .mining-status {
     display: grid;
+
     grid-template-columns: 1fr 1fr;
+
     gap: 10px;
+
     margin-top: 12px;
 }
 
+
 .mining-status > div {
-    background: rgba(255,255,255,0.04);
-    border-radius: 13px;
-    padding: 11px;
+    position: relative;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.055),
+            rgba(255,255,255,0.025)
+        );
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    border-radius: 14px;
+
+    padding: 12px;
+
     display: flex;
     flex-direction: column;
-    gap: 4px;
+
+    gap: 5px;
+
+    overflow: hidden;
 }
+
+
+.mining-status > div::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 2px;
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--gold),
+            var(--blue)
+        );
+
+    opacity: 0.65;
+}
+
 
 .mining-status strong {
     font-size: 15px;
 }
 
+
 .mining-status small {
-    color: #778da8;
-    font-size: 10px;
+    color: var(--text-muted);
+    font-size: 9px;
 }
 
 
-/* ================= FEATURES ================= */
+/* =========================================================
+   FEATURE CARDS
+   ========================================================= */
 
 .features {
     display: grid;
+
     grid-template-columns: 1fr 1fr;
+
     gap: 10px;
+
     margin-top: 14px;
 }
 
+
 .feature-card {
-    min-height: 105px;
+    min-height: 112px;
+
     padding: 15px;
+
     border-radius: 18px;
-    background: #071a34;
-    border: 1px solid rgba(91, 140, 190, 0.18);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(11,35,68,0.96),
+            rgba(5,20,42,0.96)
+        );
+
+    border: 1px solid rgba(91,140,190,0.18);
+
     color: #fff;
+
     text-align: right;
+
     display: flex;
     flex-direction: column;
+
     align-items: flex-start;
     justify-content: center;
-    gap: 5px;
-    transition: 0.2s;
+
+    gap: 6px;
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+
+    position: relative;
+
+    overflow: hidden;
 }
+
+
+.feature-card::after {
+    content: "";
+
+    position: absolute;
+
+    width: 80px;
+    height: 80px;
+
+    right: -35px;
+    bottom: -40px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(85,183,255,0.14),
+            transparent 70%
+        );
+}
+
+
+.feature-card:hover {
+    transform: translateY(-2px);
+
+    border-color:
+        rgba(85,183,255,0.32);
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.18);
+}
+
 
 .feature-card:active {
     transform: scale(0.97);
 }
 
+
 .feature-icon {
-    font-size: 24px;
+    font-size: 25px;
+
+    filter:
+        drop-shadow(
+            0 0 8px rgba(85,183,255,0.2)
+        );
 }
+
 
 .feature-card strong {
     font-size: 14px;
 }
 
+
 .feature-card small {
     color: #7e94ae;
-    font-size: 10px;
+    font-size: 9px;
+    line-height: 1.4;
 }
 
 
-/* ================= STATISTICS ================= */
+/* =========================================================
+   STATISTICS
+   ========================================================= */
 
 .statistics {
     margin-top: 16px;
-    background: #06172e;
+
+    background:
+        linear-gradient(
+            145deg,
+            #071a34,
+            #041126
+        );
+
     border-radius: 20px;
-    padding: 16px;
-    border: 1px solid rgba(91, 140, 190, 0.15);
+
+    padding: 17px;
+
+    border: 1px solid rgba(91,140,190,0.15);
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.18);
 }
+
 
 .section-title {
     display: flex;
     align-items: center;
+
     gap: 7px;
+
     font-weight: 800;
     font-size: 15px;
+
     margin-bottom: 13px;
 }
 
+
 .statistics-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
     gap: 8px;
 }
 
+
 .stat-box {
-    background: rgba(255,255,255,0.035);
+    background:
+        rgba(255,255,255,0.035);
+
+    border: 1px solid rgba(255,255,255,0.04);
+
     border-radius: 13px;
-    padding: 12px 7px;
+
+    padding: 13px 7px;
+
     text-align: center;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
 }
+
+
+.stat-box:hover {
+    background:
+        rgba(255,255,255,0.055);
+
+    transform: translateY(-1px);
+}
+
 
 .stat-box small {
     display: block;
-    color: #7187a2;
+
+    color: var(--text-muted);
+
     font-size: 9px;
+
     margin-bottom: 7px;
 }
 
+
 .stat-box strong {
     font-size: 13px;
+
+    color: var(--text);
 }
 
 
-/* ================================================= */
-/* ================= TASKS SECTION ================== */
-/* ================================================= */
+/* =========================================================
+   TASKS / REWARDS
+   ========================================================= */
 
 .tasks-section {
     margin-top: 16px;
+
     padding: 17px;
-    background: linear-gradient(
-        145deg,
-        #081d38,
-        #05142a
-    );
-    border: 1px solid rgba(52, 145, 238, 0.22);
+
+    background:
+        radial-gradient(
+            circle at 90% 0%,
+            rgba(255,159,67,0.10),
+            transparent 30%
+        ),
+        linear-gradient(
+            145deg,
+            #091e3b,
+            #051329
+        );
+
+    border: 1px solid rgba(255,159,67,0.20);
+
     border-radius: 21px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+
+    box-shadow:
+        0 12px 32px rgba(0,0,0,0.20);
 }
+
 
 .tasks-section-title {
     margin-bottom: 15px;
 }
 
+
 .tasks-section-title span:first-child {
     font-size: 20px;
+
+    filter:
+        drop-shadow(
+            0 0 8px rgba(255,159,67,0.25)
+        );
 }
+
 
 .tasks-header {
     display: flex;
+
     justify-content: space-between;
     align-items: center;
+
     gap: 10px;
+
     padding-bottom: 13px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.07);
 }
+
 
 .tasks-header > div:first-child {
     display: flex;
     flex-direction: column;
+
     gap: 5px;
 }
+
 
 .tasks-header strong {
     font-size: 14px;
 }
+
 
 .tasks-header small {
     color: #7389a4;
     font-size: 10px;
 }
 
+
 .tasks-total-badge {
-    min-width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: rgba(22, 140, 255, 0.14);
-    border: 1px solid rgba(22, 140, 255, 0.25);
+    min-width: 42px;
+    height: 42px;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,159,67,0.16),
+            rgba(255,201,74,0.08)
+        );
+
+    border:
+        1px solid rgba(255,159,67,0.25);
+
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #55aaff;
+
+    color: var(--gold-light);
+
     font-size: 11px;
     font-weight: bold;
+
+    box-shadow:
+        0 0 16px rgba(255,159,67,0.08);
 }
+
 
 .tasks-container {
     margin-top: 12px;
+
     display: flex;
     flex-direction: column;
+
     gap: 9px;
 }
 
+
 .task-loading {
     min-height: 70px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     gap: 8px;
+
     color: #8195ad;
+
     font-size: 11px;
 }
 
 
-/* Task card generated by app.js */
+/* =========================================================
+   TASK CARD
+   ========================================================= */
 
 .task-card {
-    background: rgba(255,255,255,0.035);
-    border: 1px solid rgba(111, 153, 194, 0.15);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.045),
+            rgba(255,255,255,0.025)
+        );
+
+    border:
+        1px solid rgba(255,179,91,0.10);
+
     border-radius: 15px;
+
     padding: 13px;
+
     display: flex;
     align-items: center;
+
     gap: 10px;
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease;
 }
+
+
+.task-card:hover {
+    transform: translateY(-1px);
+
+    border-color:
+        rgba(255,179,91,0.22);
+}
+
 
 .task-card-content {
     flex: 1;
     min-width: 0;
 }
 
+
 .task-card-title {
     font-weight: 800;
     font-size: 13px;
+
     line-height: 1.5;
 }
+
 
 .task-card-description {
     margin-top: 3px;
+
     color: #7187a2;
+
     font-size: 10px;
+
     line-height: 1.5;
 }
 
+
 .task-card-reward {
     margin-top: 5px;
-    color: #55aaff;
+
+    color: var(--gold-light);
+
     font-size: 11px;
+
     font-weight: bold;
 }
 
+
 .task-button {
     min-width: 75px;
+
     padding: 9px 8px;
+
     border-radius: 10px;
-    background: #168cff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #168cff,
+            #0754a5
+        );
+
     color: #fff;
+
     font-size: 10px;
     font-weight: bold;
+
+    box-shadow:
+        0 5px 14px rgba(22,140,255,0.15);
+
+    transition:
+        transform 0.15s ease,
+        filter 0.15s ease;
 }
+
+
+.task-button:hover {
+    filter: brightness(1.08);
+}
+
 
 .task-button:active {
     transform: scale(0.96);
 }
 
+
 .task-button.completed {
-    background: rgba(46, 190, 120, 0.15);
-    color: #54d89b;
-    border: 1px solid rgba(46, 190, 120, 0.25);
+    background:
+        rgba(46,190,120,0.13);
+
+    color: var(--green-light);
+
+    border:
+        1px solid rgba(46,190,120,0.25);
+
+    box-shadow: none;
 }
+
 
 .task-error {
     padding: 15px;
+
     text-align: center;
+
     color: #ff8b8b;
+
     font-size: 11px;
-    background: rgba(255, 80, 80, 0.06);
+
+    background:
+        rgba(255,80,80,0.06);
+
     border-radius: 12px;
 }
 
+
 .tasks-footer {
     margin-top: 12px;
+
     padding-top: 10px;
-    border-top: 1px solid rgba(255,255,255,0.06);
+
+    border-top:
+        1px solid rgba(255,255,255,0.06);
+
     text-align: center;
 }
 
+
 .tasks-footer small {
     color: #61758d;
+
     font-size: 9px;
 }
 
 
-/* ================= PROMOTION ================= */
+/* =========================================================
+   PROMOTION / 3MIGO BRAND
+   ========================================================= */
 
 .promotion {
     margin-top: 16px;
+
     padding: 20px;
+
     border-radius: 21px;
-    background: linear-gradient(
-        135deg,
-        #0b2a50,
-        #071a34
-    );
+
+    background:
+        radial-gradient(
+            circle at 85% 50%,
+            rgba(255,201,74,0.14),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #0b2a50,
+            #071a34
+        );
 
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border: 1px solid rgba(74, 142, 218, 0.18);
+
+    border:
+        1px solid rgba(255,201,74,0.16);
+
+    box-shadow:
+        0 12px 32px rgba(0,0,0,0.18);
+
+    overflow: hidden;
 }
+
 
 .promotion-text {
     display: flex;
     flex-direction: column;
+
     gap: 5px;
 }
+
 
 .promotion-text small {
     color: #7790ab;
     font-size: 10px;
 }
 
+
 .promotion-text h2 {
     font-size: 23px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #fff,
+            var(--gold-light)
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
 }
+
 
 .promotion-text p {
     color: #8094ac;
+
     font-size: 10px;
+
     line-height: 1.6;
 }
 
+
 .promotion-coin {
-    width: 55px;
-    height: 55px;
+    width: 57px;
+    height: 57px;
+
+    flex-shrink: 0;
+
     border-radius: 50%;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #168cff;
-    font-weight: 900;
-    box-shadow: 0 8px 25px rgba(22, 140, 255, 0.25);
+
+    background:
+        radial-gradient(
+            circle at 30% 25%,
+            #fff4b4,
+            #ffc94a 35%,
+            #d68c12 75%,
+            #8a4e00
+        );
+
+    color: #2d1900;
+
+    border:
+        1px solid rgba(255,237,169,0.8);
+
+    font-weight: 1000;
+
+    box-shadow:
+        inset 0 2px 3px rgba(255,255,255,0.5),
+        0 0 24px rgba(255,201,74,0.22),
+        0 8px 24px rgba(0,0,0,0.25);
 }
 
 
-/* ================= ROADMAP ================= */
+/* =========================================================
+   ROADMAP / ECONOMY
+   ========================================================= */
 
 .roadmap {
     margin-top: 16px;
+
     padding: 17px;
-    background: #06172e;
+
+    background:
+        linear-gradient(
+            145deg,
+            #061c2a,
+            #041327
+        );
+
     border-radius: 20px;
-    border: 1px solid rgba(91, 140, 190, 0.15);
+
+    border:
+        1px solid rgba(53,217,149,0.14);
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.18);
 }
+
 
 .roadmap-item {
     display: flex;
     align-items: center;
+
     gap: 12px;
+
     padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.05);
 }
+
 
 .roadmap-item:last-child {
     border-bottom: none;
 }
 
+
 .roadmap-item > span {
-    width: 28px;
-    height: 28px;
+    width: 29px;
+    height: 29px;
+
+    flex-shrink: 0;
+
     border-radius: 50%;
-    background: rgba(22,140,255,0.12);
-    color: #55aaff;
+
+    background:
+        rgba(53,217,149,0.10);
+
+    color: var(--green-light);
+
+    border:
+        1px solid rgba(53,217,149,0.18);
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    box-shadow:
+        0 0 14px rgba(53,217,149,0.08);
 }
+
 
 .roadmap-item div {
     display: flex;
     flex-direction: column;
+
     gap: 4px;
 }
+
 
 .roadmap-item strong {
     font-size: 12px;
 }
+
 
 .roadmap-item small {
     color: #7288a2;
@@ -567,96 +1302,366 @@ button {
 }
 
 
-/* ================= FOOTER ================= */
-
-.app-footer {
-    text-align: center;
-    padding: 25px 10px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.app-footer strong {
-    font-size: 12px;
-}
-
-.app-footer small {
-    color: #566b84;
-    font-size: 9px;
-}
-
-
-/* ================= BOTTOM NAV ================= */
+/* =========================================================
+   BOTTOM NAVIGATION
+   ========================================================= */
 
 .bottom-nav {
     position: fixed;
+
     left: 50%;
     bottom: 10px;
+
     transform: translateX(-50%);
+
     width: calc(100% - 20px);
+
     max-width: 500px;
+
     height: 68px;
-    background: rgba(4, 18, 37, 0.96);
-    border: 1px solid rgba(91, 140, 190, 0.2);
-    border-radius: 20px;
-    backdrop-filter: blur(12px);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(7,25,49,0.97),
+            rgba(3,14,30,0.98)
+        );
+
+    border:
+        1px solid rgba(110,178,235,0.20);
+
+    border-radius: 21px;
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
     z-index: 1000;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,0.42),
+        0 0 25px rgba(22,140,255,0.07);
 }
 
+
+.bottom-nav::before {
+    content: "";
+
+    position: absolute;
+
+    left: 12%;
+    right: 12%;
+    top: 0;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(85,183,255,0.55),
+            rgba(255,201,74,0.55),
+            transparent
+        );
+}
+
+
 .bottom-nav button {
+    position: relative;
+
     background: transparent;
+
     color: #647a94;
+
     display: flex;
     flex-direction: column;
+
     align-items: center;
     justify-content: center;
+
     gap: 4px;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
 }
+
 
 .bottom-nav button span {
     font-size: 19px;
+
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
+
 
 .bottom-nav button small {
-    font-size: 9px;
+    font-size: 8px;
 }
+
+
+.bottom-nav button:hover {
+    color: #a9c6e5;
+}
+
 
 .bottom-nav button.active {
-    color: #55aaff;
+    color: var(--blue-light);
 }
 
 
-/* ================= TOAST ================= */
+.bottom-nav button.active span {
+    transform: translateY(-1px);
+
+    filter:
+        drop-shadow(
+            0 0 8px rgba(85,183,255,0.45)
+        );
+}
+
+
+.bottom-nav button.active::after {
+    content: "";
+
+    position: absolute;
+
+    bottom: 5px;
+
+    width: 22px;
+    height: 3px;
+
+    border-radius: 5px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--cyan),
+            var(--blue)
+        );
+
+    box-shadow:
+        0 0 9px rgba(50,230,255,0.45);
+}
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
 
 .toast {
     position: fixed;
+
     left: 50%;
     bottom: 90px;
-    transform: translateX(-50%) translateY(20px);
-    background: #102a49;
+
+    transform:
+        translateX(-50%)
+        translateY(20px);
+
+    background:
+        linear-gradient(
+            145deg,
+            #12345a,
+            #081d38
+        );
+
     color: #fff;
+
     padding: 11px 16px;
-    border-radius: 12px;
+
+    border:
+        1px solid rgba(85,183,255,0.18);
+
+    border-radius: 13px;
+
     font-size: 11px;
+
     opacity: 0;
+
     pointer-events: none;
-    transition: 0.25s;
+
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+
     z-index: 2000;
-    max-width: calc(100% - 40px);
+
+    max-width:
+        calc(100% - 40px);
+
     text-align: center;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.30);
 }
+
 
 .toast.show {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+
+    transform:
+        translateX(-50%)
+        translateY(0);
 }
 
 
-/* ================= MOBILE ================= */
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.app-footer {
+    text-align: center;
+
+    padding: 27px 10px 15px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+
+.app-footer strong {
+    font-size: 12px;
+
+    color: #b7c8dc;
+}
+
+
+.app-footer small {
+    color: #566b84;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+::-webkit-scrollbar-thumb {
+    background:
+        rgba(85,183,255,0.20);
+
+    border-radius: 10px;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+    background:
+        rgba(85,183,255,0.35);
+}
+
+
+/* =========================================================
+   SELECTION
+   ========================================================= */
+
+::selection {
+    background:
+        rgba(22,140,255,0.35);
+
+    color: #fff;
+}
+
+
+/* =========================================================
+   SUBTLE ANIMATION
+   ========================================================= */
+
+@keyframes coinPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            inset 0 2px 4px rgba(255,255,255,0.65),
+            inset 0 -5px 8px rgba(97,48,0,0.35),
+            0 0 22px rgba(255,201,74,0.20),
+            0 10px 28px rgba(0,0,0,0.3);
+    }
+
+    50% {
+        box-shadow:
+            inset 0 2px 4px rgba(255,255,255,0.65),
+            inset 0 -5px 8px rgba(97,48,0,0.35),
+            0 0 32px rgba(255,201,74,0.32),
+            0 10px 28px rgba(0,0,0,0.3);
+    }
+}
+
+
+.coin-logo {
+    animation:
+        coinPulse 3.5s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .app {
+        padding: 12px;
+    }
+
+    .brand-section {
+        gap: 13px;
+    }
+
+    .coin-logo {
+        width: 58px;
+        height: 58px;
+        font-size: 17px;
+    }
+
+    .brand-text h1 {
+        font-size: 24px;
+    }
+
+    .balance-card {
+        padding: 19px;
+    }
+
+    .balance {
+        font-size: 36px;
+    }
+
+    .feature-card {
+        min-height: 105px;
+    }
+
+    .promotion {
+        padding: 17px;
+    }
+
+    .promotion-text h2 {
+        font-size: 21px;
+    }
+
+    .promotion-coin {
+        width: 52px;
+        height: 52px;
+    }
+
+}
+
 
 @media (max-width: 360px) {
 
@@ -664,8 +1669,25 @@ button {
         padding: 10px;
     }
 
+    .brand-text h1 {
+        font-size: 22px;
+    }
+
     .balance {
         font-size: 32px;
+    }
+
+    .features {
+        gap: 8px;
+    }
+
+    .feature-card {
+        min-height: 100px;
+        padding: 13px;
+    }
+
+    .feature-icon {
+        font-size: 22px;
     }
 
     .task-card {
@@ -679,4 +1701,23 @@ button {
     .bottom-nav {
         width: calc(100% - 14px);
     }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+
 }
