@@ -1,10 +1,12 @@
 /* =========================================================
    3Migo Coin - Telegram Mini App
    Frontend Controller
-   Version 2.2.0
+   Version 3.0.0
+   Economic API Integration
    ========================================================= */
 
 "use strict";
+
 
 /* =========================================================
    TELEGRAM
@@ -34,13 +36,17 @@ if (tg) {
    CONFIG
    ========================================================= */
 
-const API_BASE = window.location.origin;
+const API_BASE =
+    window.location.origin;
 
-const BOT_USERNAME = "threemigosmart_bot";
+const BOT_USERNAME =
+    "threemigosmart_bot";
 
-const FALLBACK_TELEGRAM_ID = 1;
+const FALLBACK_TELEGRAM_ID =
+    1;
 
-const MINING_CYCLE_HOURS = 12;
+const MINING_CYCLE_HOURS =
+    12;
 
 const MINING_CYCLE_SECONDS =
     MINING_CYCLE_HOURS * 60 * 60;
@@ -58,6 +64,7 @@ const state = {
 
     username: "",
 
+    /* Legacy balance */
     balance: 0,
 
     total: 0,
@@ -66,6 +73,7 @@ const state = {
 
     sessions: 0,
 
+    /* Legacy mining */
     miningActive: false,
 
     miningRemaining: 0,
@@ -74,13 +82,42 @@ const state = {
 
     miningTimer: null,
 
+    /* Tasks */
     tasks: [],
 
     referral: null,
 
     loadingTasks: false,
 
-    loadingUser: false
+    loadingUser: false,
+
+    /* =====================================================
+       ECONOMIC LAYER
+       ===================================================== */
+
+    economic: {
+
+        totalMined: 0,
+
+        locked3m: 0,
+
+        unlocked3m: 0,
+
+        airdrop3m: 0,
+
+        contributionScore: 0,
+
+        trustScore: 100,
+
+        loaded: false,
+
+        loading: false
+
+    },
+
+    airdropPreview: null,
+
+    loadingEconomic: false
 
 };
 
@@ -94,9 +131,13 @@ function $(id) {
 }
 
 
-function safeNumber(value, fallback = 0) {
+function safeNumber(
+    value,
+    fallback = 0
+) {
 
-    const number = Number(value);
+    const number =
+        Number(value);
 
     return Number.isFinite(number)
         ? number
@@ -136,7 +177,6 @@ function getTelegramUser() {
             "Telegram user unavailable:",
             error
         );
-
     }
 
     return {
@@ -147,7 +187,7 @@ function getTelegramUser() {
 
 
 /* =========================================================
-   API
+   API REQUEST
    ========================================================= */
 
 async function apiRequest(
@@ -159,12 +199,20 @@ async function apiRequest(
         `${API_BASE}${endpoint}`;
 
     const config = {
-        method: options.method || "GET",
+
+        method:
+            options.method || "GET",
+
         headers: {
-            "Content-Type": "application/json",
+
+            "Content-Type":
+                "application/json",
+
             ...(options.headers || {})
+
         }
     };
+
 
     if (
         options.body !== undefined &&
@@ -177,26 +225,54 @@ async function apiRequest(
                 : JSON.stringify(options.body);
     }
 
+
     const response =
-        await fetch(url, config);
+        await fetch(
+            url,
+            config
+        );
+
 
     let data = null;
 
+
     try {
-        data = await response.json();
+
+        data =
+            await response.json();
+
     } catch {
+
         data = null;
     }
 
+
     if (!response.ok) {
 
-        const message =
+        let message =
             data?.detail ||
             data?.message ||
+            data?.error ||
             `HTTP ${response.status}`;
+
+
+        if (
+            Array.isArray(data?.detail)
+        ) {
+
+            message =
+                data.detail
+                    .map(item =>
+                        item?.msg ||
+                        JSON.stringify(item)
+                    )
+                    .join(", ");
+        }
+
 
         throw new Error(message);
     }
+
 
     return data;
 }
@@ -211,24 +287,31 @@ function showToast(
     duration = 3000
 ) {
 
-    const toast = $("toast");
+    const toast =
+        $("toast");
 
     if (!toast) {
         return;
     }
 
-    toast.textContent = message;
+
+    toast.textContent =
+        message;
 
     toast.classList.add("show");
+
 
     clearTimeout(
         showToast.timer
     );
 
+
     showToast.timer =
         setTimeout(() => {
 
-            toast.classList.remove("show");
+            toast.classList.remove(
+                "show"
+            );
 
         }, duration);
 }
@@ -243,11 +326,15 @@ async function ensureUserRegistered() {
     const user =
         getTelegramUser();
 
-    state.telegramUser = user;
+
+    state.telegramUser =
+        user;
+
 
     state.telegramId =
         user?.id ||
         FALLBACK_TELEGRAM_ID;
+
 
     state.username =
         user?.username ||
@@ -260,6 +347,7 @@ async function ensureUserRegistered() {
             await apiRequest(
                 `/user/${state.telegramId}`
             );
+
 
         if (existing) {
             return existing;
@@ -278,9 +366,11 @@ async function ensureUserRegistered() {
         return await apiRequest(
             "/register",
             {
+
                 method: "POST",
 
                 body: {
+
                     telegram_id:
                         state.telegramId,
 
@@ -288,7 +378,9 @@ async function ensureUserRegistered() {
                         state.username,
 
                     referral_code: ""
+
                 }
+
             }
         );
 
@@ -305,13 +397,14 @@ async function ensureUserRegistered() {
 
 
 /* =========================================================
-   UPDATE BALANCE UI
+   UPDATE LEGACY BALANCE UI
    ========================================================= */
 
 function updateBalanceUI() {
 
     const balance =
         $("balance");
+
 
     if (balance) {
 
@@ -324,6 +417,7 @@ function updateBalanceUI() {
     const total =
         $("total");
 
+
     if (total) {
 
         total.textContent =
@@ -333,6 +427,7 @@ function updateBalanceUI() {
 
     const today =
         $("today");
+
 
     if (today) {
 
@@ -344,10 +439,1000 @@ function updateBalanceUI() {
     const sessions =
         $("sessions");
 
+
     if (sessions) {
 
         sessions.textContent =
-            String(state.sessions);
+            String(
+                state.sessions
+            );
+    }
+}
+
+
+/* =========================================================
+   ECONOMIC PROFILE
+   ========================================================= */
+
+async function loadEconomicProfile() {
+
+    if (!state.telegramId) {
+        return null;
+    }
+
+
+    if (state.loadingEconomic) {
+        return null;
+    }
+
+
+    state.loadingEconomic =
+        true;
+
+
+    try {
+
+        const data =
+            await apiRequest(
+                `/economic/user/${state.telegramId}`
+            );
+
+
+        if (!data) {
+            return null;
+        }
+
+
+        state.economic.totalMined =
+            safeNumber(
+                data.total_mined
+            );
+
+
+        state.economic.locked3m =
+            safeNumber(
+                data.locked_3m
+            );
+
+
+        state.economic.unlocked3m =
+            safeNumber(
+                data.unlocked_3m
+            );
+
+
+        state.economic.airdrop3m =
+            safeNumber(
+                data.airdrop_3m
+            );
+
+
+        state.economic.contributionScore =
+            safeNumber(
+                data.contribution_score
+            );
+
+
+        state.economic.trustScore =
+            safeNumber(
+                data.trust_score,
+                100
+            );
+
+
+        state.economic.loaded =
+            true;
+
+
+        updateEconomicUI();
+
+
+        return data;
+
+    } catch (error) {
+
+        console.warn(
+            "Economic profile unavailable:",
+            error
+        );
+
+
+        return null;
+
+    } finally {
+
+        state.loadingEconomic =
+            false;
+    }
+}
+
+
+/* =========================================================
+   UPDATE ECONOMIC UI
+   ========================================================= */
+
+function updateEconomicUI() {
+
+    const map = {
+
+        "economicTotalMined":
+            state.economic.totalMined,
+
+        "economicLocked":
+            state.economic.locked3m,
+
+        "economicUnlocked":
+            state.economic.unlocked3m,
+
+        "economicAirdrop":
+            state.economic.airdrop3m,
+
+        "economicContribution":
+            state.economic.contributionScore,
+
+        "economicTrust":
+            state.economic.trustScore
+
+    };
+
+
+    Object.entries(map)
+        .forEach(
+            ([id, value]) => {
+
+                const element =
+                    $(id);
+
+                if (!element) {
+                    return;
+                }
+
+
+                element.textContent =
+                    safeNumber(value)
+                        .toLocaleString(
+                            "en-US",
+                            {
+                                maximumFractionDigits: 2
+                            }
+                        );
+            }
+        );
+}
+
+
+/* =========================================================
+   ECONOMIC DASHBOARD
+   ========================================================= */
+
+function showEconomicDashboard() {
+
+    const old =
+        $("economicModal");
+
+
+    if (old) {
+        old.remove();
+    }
+
+
+    const e =
+        state.economic;
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "economicModal";
+
+
+    modal.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:4000;
+        background:rgba(0,0,0,.78);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:18px;
+        direction:rtl;
+    `;
+
+
+    modal.innerHTML = `
+
+        <div style="
+            width:100%;
+            max-width:460px;
+            max-height:90vh;
+            overflow:auto;
+            background:#071a34;
+            border:1px solid rgba(91,140,190,.28);
+            border-radius:24px;
+            padding:20px;
+            color:#fff;
+            box-shadow:0 20px 60px rgba(0,0,0,.4);
+        ">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:18px;
+            ">
+
+                <div>
+
+                    <div style="
+                        font-size:19px;
+                        font-weight:800;
+                    ">
+                        💎 اقتصاد 3Migo
+                    </div>
+
+                    <div style="
+                        color:#8095ad;
+                        font-size:12px;
+                        margin-top:4px;
+                    ">
+                        Economic Layer v2.0
+                    </div>
+
+                </div>
+
+                <button
+                    id="closeEconomic"
+                    type="button"
+                    style="
+                        background:transparent;
+                        color:#9aabc0;
+                        border:0;
+                        font-size:26px;
+                        cursor:pointer;
+                    "
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:10px;
+            ">
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:15px;
+                    padding:14px;
+                ">
+                    <small style="color:#7f94ad;">
+                        إجمالي التعدين
+                    </small>
+                    <strong
+                        id="economicTotalMined"
+                        style="
+                            display:block;
+                            margin-top:7px;
+                            font-size:20px;
+                        "
+                    >
+                        ${e.totalMined.toLocaleString()}
+                    </strong>
+                    <span style="color:#6e849e;font-size:11px;">
+                        3M
+                    </span>
+                </div>
+
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:15px;
+                    padding:14px;
+                ">
+                    <small style="color:#7f94ad;">
+                        Locked
+                    </small>
+                    <strong
+                        id="economicLocked"
+                        style="
+                            display:block;
+                            margin-top:7px;
+                            font-size:20px;
+                        "
+                    >
+                        ${e.locked3m.toLocaleString()}
+                    </strong>
+                    <span style="color:#6e849e;font-size:11px;">
+                        3M
+                    </span>
+                </div>
+
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:15px;
+                    padding:14px;
+                ">
+                    <small style="color:#7f94ad;">
+                        Unlocked
+                    </small>
+                    <strong
+                        id="economicUnlocked"
+                        style="
+                            display:block;
+                            margin-top:7px;
+                            font-size:20px;
+                        "
+                    >
+                        ${e.unlocked3m.toLocaleString()}
+                    </strong>
+                    <span style="color:#6e849e;font-size:11px;">
+                        3M
+                    </span>
+                </div>
+
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:15px;
+                    padding:14px;
+                ">
+                    <small style="color:#7f94ad;">
+                        Airdrop
+                    </small>
+                    <strong
+                        id="economicAirdrop"
+                        style="
+                            display:block;
+                            margin-top:7px;
+                            font-size:20px;
+                        "
+                    >
+                        ${e.airdrop3m.toLocaleString()}
+                    </strong>
+                    <span style="color:#6e849e;font-size:11px;">
+                        3M
+                    </span>
+                </div>
+
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:15px;
+                    padding:14px;
+                ">
+                    <small style="color:#7f94ad;">
+                        Contribution
+                    </small>
+                    <strong
+                        id="economicContribution"
+                        style="
+                            display:block;
+                            margin-top:7px;
+                            font-size:20px;
+                        "
+                    >
+                        ${e.contributionScore.toLocaleString()}
+                    </strong>
+                </div>
+
+
+                <div style="
+                    background:rgba(255,255,255,.045);
+                    border-radius:15px;
+                    padding:14px;
+                ">
+                    <small style="color:#7f94ad;">
+                        Trust Score
+                    </small>
+                    <strong
+                        id="economicTrust"
+                        style="
+                            display:block;
+                            margin-top:7px;
+                            font-size:20px;
+                        "
+                    >
+                        ${e.trustScore.toLocaleString()}
+                    </strong>
+                    <span style="color:#6e849e;font-size:11px;">
+                        / 100
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div style="
+                margin-top:14px;
+                background:rgba(22,140,255,.07);
+                border:1px solid rgba(22,140,255,.16);
+                border-radius:15px;
+                padding:13px;
+                font-size:12px;
+                color:#a9bad0;
+                line-height:1.7;
+            ">
+                💡 الرصيد المقفول لا يمكن استخدامه مباشرة.
+                الرصيد المتاح Unlocked هو الذي يمكن استخدامه
+                في الخدمات المدعومة داخل النظام.
+            </div>
+
+
+            <div style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:9px;
+                margin-top:14px;
+            ">
+
+                <button
+                    id="economicAirdropBtn"
+                    type="button"
+                    style="
+                        padding:13px;
+                        border:0;
+                        border-radius:13px;
+                        background:#102f52;
+                        color:#fff;
+                        font-weight:700;
+                        cursor:pointer;
+                    "
+                >
+                    🎁 Airdrop
+                </button>
+
+
+                <button
+                    id="economicSpendBtn"
+                    type="button"
+                    style="
+                        padding:13px;
+                        border:0;
+                        border-radius:13px;
+                        background:#168cff;
+                        color:#fff;
+                        font-weight:700;
+                        cursor:pointer;
+                    "
+                >
+                    💳 استخدام 3M
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    $("closeEconomic")
+        ?.addEventListener(
+            "click",
+            () => modal.remove()
+        );
+
+
+    $("economicAirdropBtn")
+        ?.addEventListener(
+            "click",
+            showAirdropPreview
+        );
+
+
+    $("economicSpendBtn")
+        ?.addEventListener(
+            "click",
+            showSpendDialog
+        );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === modal
+            ) {
+
+                modal.remove();
+            }
+        }
+    );
+}
+
+
+/* =========================================================
+   AIRDROP PREVIEW
+   ========================================================= */
+
+async function loadAirdropPreview() {
+
+    if (!state.telegramId) {
+        return null;
+    }
+
+
+    try {
+
+        const data =
+            await apiRequest(
+                `/economic/airdrop/${state.telegramId}`
+            );
+
+
+        state.airdropPreview =
+            data?.result ||
+            data;
+
+
+        return state.airdropPreview;
+
+    } catch (error) {
+
+        console.warn(
+            "Airdrop preview error:",
+            error
+        );
+
+        throw error;
+    }
+}
+
+
+async function showAirdropPreview() {
+
+    try {
+
+        showToast(
+            "جاري حساب تقدير الـ Airdrop..."
+        );
+
+
+        const data =
+            await loadAirdropPreview();
+
+
+        if (!data) {
+
+            showToast(
+                "تعذر حساب Airdrop."
+            );
+
+            return;
+        }
+
+
+        const amount =
+            safeNumber(
+                data.estimated_airdrop_3m
+            );
+
+
+        const pool =
+            safeNumber(
+                data.eligible_pool
+            );
+
+
+        const contribution =
+            safeNumber(
+                data.user_contribution_score
+            );
+
+
+        const totalContribution =
+            safeNumber(
+                data.total_contribution_score
+            );
+
+
+        showToast(
+            `تقدير Airdrop: ${amount.toLocaleString()} 3M | مساهمتك: ${contribution} من ${totalContribution}`,
+            6000
+        );
+
+
+        console.log(
+            "3Migo Airdrop Preview:",
+            data
+        );
+
+    } catch (error) {
+
+        showToast(
+            `تعذر حساب Airdrop: ${error.message}`
+        );
+    }
+}
+
+
+/* =========================================================
+   SPEND 3M
+   ========================================================= */
+
+function showSpendDialog() {
+
+    const old =
+        $("spendModal");
+
+
+    if (old) {
+        old.remove();
+    }
+
+
+    const available =
+        safeNumber(
+            state.economic.unlocked3m
+        );
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "spendModal";
+
+
+    modal.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:5000;
+        background:rgba(0,0,0,.78);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:18px;
+        direction:rtl;
+    `;
+
+
+    modal.innerHTML = `
+
+        <div style="
+            width:100%;
+            max-width:420px;
+            background:#071a34;
+            border:1px solid rgba(91,140,190,.28);
+            border-radius:22px;
+            padding:20px;
+            color:#fff;
+        ">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:18px;
+            ">
+
+                <strong style="font-size:18px;">
+                    💳 استخدام 3M
+                </strong>
+
+                <button
+                    id="closeSpend"
+                    type="button"
+                    style="
+                        background:transparent;
+                        border:0;
+                        color:#9aabc0;
+                        font-size:25px;
+                    "
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div style="
+                background:rgba(255,255,255,.04);
+                padding:13px;
+                border-radius:13px;
+                margin-bottom:14px;
+                color:#9fb1c7;
+                font-size:13px;
+            ">
+                الرصيد المتاح:
+                <strong style="color:#fff;">
+                    ${available.toFixed(2)} 3M
+                </strong>
+            </div>
+
+
+            <label style="
+                display:block;
+                color:#8fa3bb;
+                font-size:12px;
+                margin-bottom:6px;
+            ">
+                الخدمة
+            </label>
+
+            <input
+                id="spendService"
+                type="text"
+                value="3Migo AI Service"
+                maxlength="200"
+                style="
+                    width:100%;
+                    box-sizing:border-box;
+                    padding:12px;
+                    border-radius:12px;
+                    border:1px solid rgba(255,255,255,.1);
+                    background:#0b2443;
+                    color:#fff;
+                    margin-bottom:12px;
+                    outline:none;
+                "
+            />
+
+
+            <label style="
+                display:block;
+                color:#8fa3bb;
+                font-size:12px;
+                margin-bottom:6px;
+            ">
+                المبلغ 3M
+            </label>
+
+            <input
+                id="spendAmount"
+                type="number"
+                min="0.01"
+                step="0.01"
+                max="${available}"
+                value="1"
+                style="
+                    width:100%;
+                    box-sizing:border-box;
+                    padding:12px;
+                    border-radius:12px;
+                    border:1px solid rgba(255,255,255,.1);
+                    background:#0b2443;
+                    color:#fff;
+                    margin-bottom:14px;
+                    outline:none;
+                "
+            />
+
+
+            <button
+                id="confirmSpend"
+                type="button"
+                style="
+                    width:100%;
+                    padding:13px;
+                    border:0;
+                    border-radius:13px;
+                    background:#168cff;
+                    color:#fff;
+                    font-weight:800;
+                    cursor:pointer;
+                "
+            >
+                تأكيد استخدام 3M
+            </button>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    $("closeSpend")
+        ?.addEventListener(
+            "click",
+            () => modal.remove()
+        );
+
+
+    $("confirmSpend")
+        ?.addEventListener(
+            "click",
+            () => executeSpend(modal)
+        );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === modal
+            ) {
+
+                modal.remove();
+            }
+        }
+    );
+}
+
+
+async function executeSpend(modal) {
+
+    const serviceInput =
+        $("spendService");
+
+
+    const amountInput =
+        $("spendAmount");
+
+
+    const button =
+        $("confirmSpend");
+
+
+    const service =
+        String(
+            serviceInput?.value || ""
+        ).trim();
+
+
+    const amount =
+        safeNumber(
+            amountInput?.value
+        );
+
+
+    const available =
+        safeNumber(
+            state.economic.unlocked3m
+        );
+
+
+    if (!service) {
+
+        showToast(
+            "أدخل اسم الخدمة."
+        );
+
+        return;
+    }
+
+
+    if (
+        amount <= 0
+    ) {
+
+        showToast(
+            "أدخل مبلغاً صحيحاً."
+        );
+
+        return;
+    }
+
+
+    if (
+        amount > available
+    ) {
+
+        showToast(
+            `الرصيد المتاح فقط ${available.toFixed(2)} 3M`
+        );
+
+        return;
+    }
+
+
+    if (button) {
+
+        button.disabled =
+            true;
+
+        button.textContent =
+            "جاري التنفيذ...";
+    }
+
+
+    try {
+
+        const reference =
+            `miniapp_spend_${Date.now()}`;
+
+
+        const data =
+            await apiRequest(
+                `/economic/spend/${state.telegramId}`,
+                {
+
+                    method: "POST",
+
+                    body: {
+
+                        service,
+
+                        amount_3m:
+                            amount,
+
+                        reference
+
+                    }
+
+                }
+            );
+
+
+        const result =
+            data?.result ||
+            data;
+
+
+        if (
+            result?.success === false
+        ) {
+
+            throw new Error(
+                result?.message ||
+                "فشلت عملية الاستخدام."
+            );
+        }
+
+
+        state.economic.unlocked3m =
+            Math.max(
+                0,
+                state.economic.unlocked3m -
+                amount
+            );
+
+
+        updateEconomicUI();
+
+
+        modal?.remove();
+
+
+        showToast(
+            `تم استخدام ${amount} 3M في ${service} بنجاح ✅`,
+            5000
+        );
+
+
+        await loadEconomicProfile();
+
+
+    } catch (error) {
+
+        console.error(
+            "Spend error:",
+            error
+        );
+
+
+        showToast(
+            `تعذر استخدام 3M: ${error.message}`
+        );
+
+
+        if (button) {
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "تأكيد استخدام 3M";
+        }
     }
 }
 
@@ -362,7 +1447,10 @@ async function loadUser() {
         return;
     }
 
-    state.loadingUser = true;
+
+    state.loadingUser =
+        true;
+
 
     try {
 
@@ -370,6 +1458,7 @@ async function loadUser() {
             await apiRequest(
                 `/user/${state.telegramId}`
             );
+
 
         if (!user) {
             return;
@@ -415,9 +1504,12 @@ async function loadUser() {
             "Unable to load user:",
             error
         );
-    }
 
-    state.loadingUser = false;
+    } finally {
+
+        state.loadingUser =
+            false;
+    }
 }
 
 
@@ -453,9 +1545,16 @@ function formatTime(seconds) {
 
 
     return [
-        String(hours).padStart(2, "0"),
-        String(minutes).padStart(2, "0"),
-        String(secs).padStart(2, "0")
+
+        String(hours)
+            .padStart(2, "0"),
+
+        String(minutes)
+            .padStart(2, "0"),
+
+        String(secs)
+            .padStart(2, "0")
+
     ].join(":");
 }
 
@@ -465,6 +1564,7 @@ function updateMiningUI() {
     const stateElement =
         $("miningState");
 
+
     const button =
         $("mineBtn");
 
@@ -472,30 +1572,44 @@ function updateMiningUI() {
     if (!state.miningActive) {
 
         if (stateElement) {
+
             stateElement.textContent =
                 "جاهز";
         }
 
+
         if (button) {
 
-            button.disabled = false;
+            button.disabled =
+                false;
+
 
             const strong =
-                button.querySelector("strong");
+                button.querySelector(
+                    "strong"
+                );
+
 
             const small =
-                button.querySelector("small");
+                button.querySelector(
+                    "small"
+                );
+
 
             if (strong) {
+
                 strong.textContent =
                     "ابدأ التعدين";
             }
 
+
             if (small) {
+
                 small.textContent =
                     "ابدأ جلسة 12 ساعة";
             }
         }
+
 
         return;
     }
@@ -512,20 +1626,31 @@ function updateMiningUI() {
 
     if (button) {
 
-        button.disabled = true;
+        button.disabled =
+            true;
+
 
         const strong =
-            button.querySelector("strong");
+            button.querySelector(
+                "strong"
+            );
+
 
         const small =
-            button.querySelector("small");
+            button.querySelector(
+                "small"
+            );
+
 
         if (strong) {
+
             strong.textContent =
                 "التعدين نشط";
         }
 
+
         if (small) {
+
             small.textContent =
                 "انتظر حتى انتهاء الدورة";
         }
@@ -542,6 +1667,7 @@ async function loadMiningStatus() {
     if (!state.telegramId) {
         return;
     }
+
 
     try {
 
@@ -576,6 +1702,7 @@ async function loadMiningStatus() {
 
         const rate =
             $("rate");
+
 
         if (rate) {
 
@@ -639,13 +1766,17 @@ function startMiningCountdown() {
                 state.miningTimer
             );
 
+
             state.miningActive =
                 false;
+
 
             state.miningRemaining =
                 0;
 
+
             updateMiningUI();
+
 
             showToast(
                 "اكتملت دورة التعدين. يمكنك الآن استلام مكافأتك."
@@ -706,6 +1837,7 @@ async function startMining() {
 
         startMiningCountdown();
 
+
         showToast(
             "تم بدء جلسة التعدين لمدة 12 ساعة ⛏️"
         );
@@ -747,26 +1879,43 @@ async function claimMining() {
         state.miningActive =
             false;
 
+
         state.miningRemaining =
             0;
 
 
-        state.balance += reward;
+        state.balance +=
+            reward;
 
-        state.total += reward;
 
-        state.today += reward;
+        state.total +=
+            reward;
 
-        state.sessions += 1;
+
+        state.today +=
+            reward;
+
+
+        state.sessions +=
+            1;
 
 
         updateBalanceUI();
 
         updateMiningUI();
 
+
         showToast(
             `تم استلام ${reward} 3M بنجاح 🎉`
         );
+
+
+        /*
+         * Refresh economic profile.
+         * لا نفترض أن التعدين القديم يساوي
+         * Economic Mining.
+         */
+        await loadEconomicProfile();
 
     } catch (error) {
 
@@ -798,8 +1947,10 @@ function handleMiningButton() {
             );
         }
 
+
         return;
     }
+
 
     startMining();
 }
@@ -814,9 +1965,11 @@ function renderTasksLoading() {
     const container =
         $("tasksContainer");
 
+
     if (!container) {
         return;
     }
+
 
     container.innerHTML = `
         <div class="task-loading">
@@ -832,9 +1985,11 @@ function renderTasksError(message) {
     const container =
         $("tasksContainer");
 
+
     if (!container) {
         return;
     }
+
 
     container.innerHTML = `
         <div class="task-error">
@@ -848,6 +2003,7 @@ function renderTasks() {
 
     const container =
         $("tasksContainer");
+
 
     if (!container) {
         return;
@@ -865,6 +2021,7 @@ function renderTasks() {
             </div>
         `;
 
+
         return;
     }
 
@@ -873,7 +2030,9 @@ function renderTasks() {
         state.tasks.map(task => {
 
             const id =
-                safeNumber(task.id);
+                safeNumber(
+                    task.id
+                );
 
 
             const title =
@@ -905,6 +2064,7 @@ function renderTasks() {
 
 
             return `
+
                 <div
                     class="task-card"
                     data-task-id="${id}"
@@ -926,6 +2086,7 @@ function renderTasks() {
 
                     </div>
 
+
                     <button
                         type="button"
                         class="task-button ${completed ? "completed" : ""}"
@@ -936,6 +2097,7 @@ function renderTasks() {
                     </button>
 
                 </div>
+
             `;
 
         }).join("");
@@ -954,6 +2116,7 @@ async function loadTasks() {
             "لم يتم التعرف على المستخدم."
         );
 
+
         return;
     }
 
@@ -963,7 +2126,9 @@ async function loadTasks() {
     }
 
 
-    state.loadingTasks = true;
+    state.loadingTasks =
+        true;
+
 
     renderTasksLoading();
 
@@ -982,7 +2147,9 @@ async function loadTasks() {
                 data;
 
         } else if (
-            Array.isArray(data?.tasks)
+            Array.isArray(
+                data?.tasks
+            )
         ) {
 
             state.tasks =
@@ -1010,7 +2177,8 @@ async function loadTasks() {
 
     } finally {
 
-        state.loadingTasks = false;
+        state.loadingTasks =
+            false;
     }
 }
 
@@ -1040,6 +2208,7 @@ async function completeTask(taskId) {
             "المهمة غير موجودة."
         );
 
+
         return;
     }
 
@@ -1053,6 +2222,7 @@ async function completeTask(taskId) {
             "هذه المهمة مكتملة بالفعل."
         );
 
+
         return;
     }
 
@@ -1065,7 +2235,8 @@ async function completeTask(taskId) {
 
     if (button) {
 
-        button.disabled = true;
+        button.disabled =
+            true;
 
         button.textContent =
             "جاري التنفيذ...";
@@ -1091,14 +2262,20 @@ async function completeTask(taskId) {
             );
 
 
-        task.completed = 1;
+        task.completed =
+            1;
 
 
-        state.balance += reward;
+        state.balance +=
+            reward;
 
-        state.total += reward;
 
-        state.today += reward;
+        state.total +=
+            reward;
+
+
+        state.today +=
+            reward;
 
 
         updateBalanceUI();
@@ -1106,10 +2283,12 @@ async function completeTask(taskId) {
         renderTasks();
 
 
+        await loadEconomicProfile();
+
+
         showToast(
             `تم إنجاز المهمة وإضافة ${reward} 3M 🎉`
         );
-
 
     } catch (error) {
 
@@ -1121,7 +2300,8 @@ async function completeTask(taskId) {
 
         if (button) {
 
-            button.disabled = false;
+            button.disabled =
+                false;
 
             button.textContent =
                 "إنجاز";
@@ -1162,7 +2342,9 @@ function setupTaskEvents() {
                 );
 
 
-            completeTask(taskId);
+            completeTask(
+                taskId
+            );
 
         }
     );
@@ -1177,6 +2359,7 @@ function scrollToTasks() {
 
     const section =
         $("tasksSection");
+
 
     if (!section) {
         return;
@@ -1222,14 +2405,22 @@ async function dailyReward() {
             );
 
 
-        state.balance += reward;
+        state.balance +=
+            reward;
 
-        state.total += reward;
 
-        state.today += reward;
+        state.total +=
+            reward;
+
+
+        state.today +=
+            reward;
 
 
         updateBalanceUI();
+
+
+        await loadEconomicProfile();
 
 
         showToast(
@@ -1262,6 +2453,7 @@ async function loadReferral() {
         state.referral =
             data;
 
+
         return data;
 
     } catch (error) {
@@ -1271,9 +2463,11 @@ async function loadReferral() {
             error
         );
 
+
         showToast(
             "تعذر تحميل بيانات الإحالة."
         );
+
 
         return null;
     }
@@ -1312,7 +2506,9 @@ function showReferralModal(data) {
 
 
     const modal =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     modal.id =
@@ -1355,6 +2551,7 @@ function showReferralModal(data) {
                     👥 الإحالات
                 </strong>
 
+
                 <button
                     id="closeReferral"
                     type="button"
@@ -1384,6 +2581,7 @@ function showReferralModal(data) {
                 ">
                     كود الإحالة
                 </small>
+
 
                 <strong style="
                     color:#55aaff;
@@ -1430,6 +2628,7 @@ function showReferralModal(data) {
                     📋 نسخ الرابط
                 </button>
 
+
                 <button
                     id="shareReferral"
                     type="button"
@@ -1469,6 +2668,7 @@ function showReferralModal(data) {
                         عدد الإحالات
                     </small>
 
+
                     <strong>
                         ${safeNumber(data.referral_count)}
                     </strong>
@@ -1491,6 +2691,7 @@ function showReferralModal(data) {
                         مكافآت الإحالة
                     </small>
 
+
                     <strong>
                         ${safeNumber(data.referral_rewards).toFixed(2)}
                         3M
@@ -1504,7 +2705,9 @@ function showReferralModal(data) {
     `;
 
 
-    document.body.appendChild(modal);
+    document.body.appendChild(
+        modal
+    );
 
 
     $("closeReferral")
@@ -1524,6 +2727,7 @@ function showReferralModal(data) {
                     await navigator.clipboard.writeText(
                         referralLink
                     );
+
 
                     showToast(
                         "تم نسخ رابط الإحالة."
@@ -1547,9 +2751,11 @@ function showReferralModal(data) {
                 const shareUrl =
                     `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent("انضم إلى 3Migo وابدأ جمع 3M 🚀")}`;
 
+
                 if (
                     tg &&
-                    typeof tg.openTelegramLink === "function"
+                    typeof tg.openTelegramLink ===
+                    "function"
                 ) {
 
                     tg.openTelegramLink(
@@ -1574,6 +2780,7 @@ function showReferralModal(data) {
             if (
                 event.target === modal
             ) {
+
                 modal.remove();
             }
         }
@@ -1590,8 +2797,12 @@ async function showReferral() {
     const data =
         await loadReferral();
 
+
     if (data) {
-        showReferralModal(data);
+
+        showReferralModal(
+            data
+        );
     }
 }
 
@@ -1604,6 +2815,9 @@ async function showWallet() {
 
     try {
 
+        await loadEconomicProfile();
+
+
         const transactions =
             await apiRequest(
                 `/transactions/${state.telegramId}`
@@ -1611,13 +2825,40 @@ async function showWallet() {
 
 
         const list =
-            Array.isArray(transactions)
+            Array.isArray(
+                transactions
+            )
                 ? transactions
-                : transactions?.transactions || [];
+                : transactions?.transactions ||
+                  [];
+
+
+        const e =
+            state.economic;
 
 
         let message =
-            `رصيدك الحالي: ${state.balance.toFixed(2)} 3M`;
+            `الرصيد الحالي: ${state.balance.toFixed(2)} 3M`;
+
+
+        message +=
+            `\n\n💎 Economic Balance`;
+
+
+        message +=
+            `\nمتاح: ${e.unlocked3m.toFixed(2)} 3M`;
+
+
+        message +=
+            `\nمقفل: ${e.locked3m.toFixed(2)} 3M`;
+
+
+        message +=
+            `\nContribution: ${e.contributionScore}`;
+
+
+        message +=
+            `\nTrust: ${e.trustScore}/100`;
 
 
         if (list.length > 0) {
@@ -1627,7 +2868,11 @@ async function showWallet() {
         }
 
 
-        showToast(message);
+        showToast(
+            message,
+            7000
+        );
+
 
     } catch (error) {
 
@@ -1729,6 +2974,27 @@ function setupActions() {
 
                     break;
 
+
+                case "economic":
+
+                    showEconomicDashboard();
+
+                    break;
+
+
+                case "airdrop":
+
+                    showAirdropPreview();
+
+                    break;
+
+
+                case "spend":
+
+                    showSpendDialog();
+
+                    break;
+
             }
         }
     );
@@ -1744,6 +3010,7 @@ function setupMining() {
     const button =
         $("mineBtn");
 
+
     if (!button) {
         return;
     }
@@ -1757,50 +3024,128 @@ function setupMining() {
 
 
 /* =========================================================
+   OPTIONAL ECONOMIC BUTTON
+   ========================================================= */
+
+function setupEconomicButton() {
+
+    const selectors = [
+
+        "[data-action='economic']",
+
+        "#economicBtn",
+
+        "#economicDashboardBtn"
+
+    ];
+
+
+    const button =
+        document.querySelector(
+            selectors.join(",")
+        );
+
+
+    if (
+        button &&
+        !button.hasAttribute(
+            "data-action"
+        )
+    ) {
+
+        button.addEventListener(
+            "click",
+            showEconomicDashboard
+        );
+    }
+}
+
+
+/* =========================================================
    INITIALIZATION
    ========================================================= */
 
 async function initializeApp() {
 
     console.log(
-        "3Migo Coin Mini App starting..."
+        "3Migo Coin Mini App v3.0.0 starting..."
     );
 
 
-    await ensureUserRegistered();
+    try {
+
+        await ensureUserRegistered();
 
 
-    await loadUser();
+        /*
+         * Legacy profile
+         */
+        await loadUser();
 
 
-    await loadMiningStatus();
+        /*
+         * New Economic Engine profile
+         */
+        await loadEconomicProfile();
 
 
-    await loadTasks();
+        /*
+         * Legacy mining
+         */
+        await loadMiningStatus();
 
 
-    setupTaskEvents();
-
-    setupActions();
-
-    setupMining();
-
-
-    updateBalanceUI();
-
-    updateMiningUI();
+        /*
+         * Tasks
+         */
+        await loadTasks();
 
 
-    console.log(
-        "3Migo Coin Mini App ready.",
-        {
-            telegramId:
-                state.telegramId,
+        setupTaskEvents();
 
-            tasks:
-                state.tasks.length
-        }
-    );
+        setupActions();
+
+        setupMining();
+
+        setupEconomicButton();
+
+
+        updateBalanceUI();
+
+        updateMiningUI();
+
+        updateEconomicUI();
+
+
+        console.log(
+            "3Migo Coin Mini App ready.",
+            {
+
+                telegramId:
+                    state.telegramId,
+
+                tasks:
+                    state.tasks.length,
+
+                economic:
+                    state.economic
+
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "3Migo Mini App initialization error:",
+            error
+        );
+
+
+        showToast(
+            "حدث خطأ أثناء تشغيل 3Migo. حاول إعادة فتح التطبيق.",
+            5000
+        );
+    }
 }
 
 
@@ -1830,7 +3175,19 @@ window.ThreeMigo = {
 
     showWallet,
 
-    showProfile
+    showProfile,
+
+    loadEconomicProfile,
+
+    showEconomicDashboard,
+
+    loadAirdropPreview,
+
+    showAirdropPreview,
+
+    showSpendDialog,
+
+    executeSpend
 
 };
 
