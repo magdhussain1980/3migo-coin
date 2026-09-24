@@ -242,6 +242,207 @@
     </section>
 
 
+    <!-- ================================================= -->
+    <!-- ================= REFERRAL SECTION =============== -->
+    <!-- ================================================= -->
+
+    <section id="referralSection"
+             class="referral-section"
+             style="display:none;">
+
+        <div class="section-title">
+
+            👥
+            برنامج الإحالة
+
+        </div>
+
+
+        <div class="referral-card">
+
+            <div class="referral-header">
+
+                <div>
+
+                    <strong>
+                        ادعُ أصدقاءك
+                    </strong>
+
+                    <small>
+                        شارك رابطك واحصل على مكافآت
+                    </small>
+
+                </div>
+
+                <div class="referral-icon">
+                    🎁
+                </div>
+
+            </div>
+
+
+            <!-- REFERRAL LINK -->
+
+            <div class="referral-link-box">
+
+                <small>
+                    رابط الإحالة الخاص بك
+                </small>
+
+                <div class="referral-link-row">
+
+                    <input id="referralLink"
+                           type="text"
+                           readonly
+                           value="جاري إنشاء الرابط...">
+
+                    <button id="copyReferralBtn"
+                            type="button">
+
+                        نسخ
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- REFERRAL CODE -->
+
+            <div class="referral-code-box">
+
+                <small>
+                    كود الإحالة
+                </small>
+
+                <strong id="referralCode">
+                    —
+                </strong>
+
+            </div>
+
+
+            <!-- REFERRAL STATS -->
+
+            <div class="referral-stats">
+
+                <div>
+
+                    <strong id="referralCount">
+                        0
+                    </strong>
+
+                    <small>
+                        الإحالات
+                    </small>
+
+                </div>
+
+
+                <div>
+
+                    <strong id="referralRewards">
+                        0 3M
+                    </strong>
+
+                    <small>
+                        مكافآت الإحالة
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- SHARE BUTTON -->
+
+            <button id="shareReferralBtn"
+                    class="referral-share-button"
+                    type="button">
+
+                📤 مشاركة رابط الإحالة
+
+            </button>
+
+
+            <!-- GIFTS -->
+
+            <div class="referral-gifts">
+
+                <div class="gift-title">
+                    🎁 هدايا الإحالة
+                </div>
+
+                <div class="gift-grid">
+
+                    <div class="gift-box">
+
+                        <span>
+                            👤
+                        </span>
+
+                        <strong>
+                            +25 3M
+                        </strong>
+
+                        <small>
+                            لكل إحالة مؤهلة
+                        </small>
+
+                    </div>
+
+
+                    <div class="gift-box">
+
+                        <span>
+                            👥
+                        </span>
+
+                        <strong>
+                            +100 3M
+                        </strong>
+
+                        <small>
+                            عند الوصول إلى 5 إحالات
+                        </small>
+
+                    </div>
+
+
+                    <div class="gift-box">
+
+                        <span>
+                            🚀
+                        </span>
+
+                        <strong>
+                            +250 3M
+                        </strong>
+
+                        <small>
+                            عند الوصول إلى 10 إحالات
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="referral-note">
+
+                المكافآت التجريبية تخضع لشروط الأهلية
+                والتحقق من النشاط.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
     <!-- ================= STATISTICS ================= -->
 
     <section class="statistics">
@@ -341,11 +542,6 @@
 
         </div>
 
-
-        <!--
-            app.js سيقوم بتحميل المهام من API
-            ووضع البطاقات هنا
-        -->
 
         <div id="tasksContainer"
              class="tasks-container">
