@@ -1,155 +1,183 @@
 /* =========================================================
-3Migo Coin — Telegram Mini App
-STYLE SHEET
-Version 5.2.1
-3MIGO SMART — Premium Economy Experience
+   3Migo Coin — Telegram Mini App
+   STYLE SHEET
+   VERSION 5.3
+   3MIGO SMART — DIGITAL ECONOMY EXPERIENCE
 
-IMPORTANT:
+   V5.3 DESIGN:
+   - Premium 3Migo Financial Card
+   - Circular Mining Core
+   - 12H Mining Timeline Visual
+   - Referral ID / Barcode Visual
+   - Growth Index Visual System
+   - Wallet / Referral / Tasks / AI / Profile styling
+   - Mobile First
+   - Existing IDs preserved
+   - Existing classes preserved
+   - Existing data-action contracts preserved
+   - Compatible with app.js V5.0
+   - NO API / DB / Economic Engine changes
+========================================================= */
 
-- Frontend styling only.
-- Existing IDs preserved.
-- Existing classes preserved.
-- Existing data-action contracts preserved.
-- Compatible with app.js V5.0.
-- No API / database / economic engine changes.
-  ========================================================= */
 
 /* =========================================================
-
-1. RESET & ROOT
-   ========================================================= */
+   01. ROOT
+========================================================= */
 
 :root {
---bg: #03070d;
---bg-soft: #071019;
---bg-deep: #02050a;
 
---bg-card: rgba(10, 17, 27, 0.88);
---bg-card-2: rgba(16, 24, 35, 0.94);
+    --bg: #02060b;
+    --bg-deep: #010308;
+    --bg-soft: #07111c;
 
---gold: #f7931a;
---gold-light: #ffb84d;
---gold-soft: #ffcc70;
---gold-pale: #ffe0a3;
+    --card: rgba(9, 16, 25, 0.94);
+    --card-2: rgba(14, 23, 35, 0.97);
+    --card-3: rgba(19, 30, 44, 0.98);
 
---orange: #ff8a00;
---orange-dark: #c96500;
+    --gold: #f7931a;
+    --gold-light: #ffbd55;
+    --gold-soft: #ffd98a;
+    --gold-pale: #ffe9bd;
 
---cyan: #5bdcff;
---cyan-soft: #8be8ff;
+    --orange: #ff8a00;
+    --orange-dark: #b95700;
 
---blue: #1769ff;
---blue-light: #4da3ff;
+    --cyan: #55ddff;
+    --cyan-soft: #9aeaff;
 
---green: #25d366;
---green-soft: #6fffa0;
+    --blue: #1769ff;
+    --blue-light: #56a8ff;
 
---red: #ff5c5c;
---yellow: #ffd54a;
+    --green: #25d366;
+    --green-soft: #74ffa7;
 
---white: #ffffff;
---text: #f6f8fb;
---text-soft: #dce4ed;
---muted: #8e9bab;
+    --red: #ff5b64;
+    --yellow: #ffd84d;
 
---border: rgba(255, 255, 255, 0.09);
---border-gold: rgba(247, 147, 26, 0.30);
---border-cyan: rgba(91, 220, 255, 0.25);
+    --white: #ffffff;
+    --text: #f7f9fc;
+    --text-soft: #dbe5ef;
+    --muted: #8997a7;
 
---shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    --border: rgba(255,255,255,.08);
+    --border-soft: rgba(255,255,255,.05);
+    --border-gold: rgba(247,147,26,.28);
+    --border-cyan: rgba(85,221,255,.20);
 
---shadow-gold:
-    0 0 20px rgba(247, 147, 26, 0.18),
-    0 0 55px rgba(247, 147, 26, 0.08);
+    --shadow:
+        0 18px 55px rgba(0,0,0,.40);
 
---shadow-blue:
-    0 0 24px rgba(23, 105, 255, 0.16);
+    --shadow-gold:
+        0 0 22px rgba(247,147,26,.15),
+        0 0 65px rgba(247,147,26,.06);
 
---radius-sm: 10px;
---radius-md: 16px;
---radius-lg: 22px;
---radius-xl: 30px;
---radius-pill: 999px;
+    --shadow-cyan:
+        0 0 25px rgba(85,221,255,.12);
 
---transition: 180ms ease;
+    --radius-sm: 10px;
+    --radius-md: 15px;
+    --radius-lg: 21px;
+    --radius-xl: 29px;
+    --radius-pill: 999px;
 
+    --transition: 180ms ease;
+
+    --mine-progress: 0deg;
 }
 
+
 /* =========================================================
-02. RESET
+   02. RESET
 ========================================================= */
 
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  }
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 html {
-scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 body {
-font-family:
-Arial,
-Tahoma,
-sans-serif;
+    min-height: 100vh;
 
-background:
-    radial-gradient(
-        circle at 50% -10%,
-        rgba(247, 147, 26, 0.08),
-        transparent 32%
-    ),
-    radial-gradient(
-        circle at 0% 35%,
-        rgba(23, 105, 255, 0.06),
-        transparent 28%
-    ),
-    var(--bg);
+    font-family:
+        Arial,
+        Tahoma,
+        sans-serif;
 
-color: var(--white);
+    color: var(--white);
 
-min-height: 100vh;
+    background:
+        radial-gradient(
+            circle at 50% -15%,
+            rgba(247,147,26,.11),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 0% 35%,
+            rgba(23,105,255,.07),
+            transparent 27%
+        ),
+        radial-gradient(
+            circle at 100% 65%,
+            rgba(85,221,255,.035),
+            transparent 28%
+        ),
+        var(--bg);
 
-padding-bottom: 96px;
+    padding-bottom: 100px;
 
-overflow-x: hidden;
+    overflow-x: hidden;
 
--webkit-font-smoothing: antialiased;
-text-rendering: optimizeLegibility;
-
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
 button,
 input,
 textarea,
 select {
-font-family: inherit;
+    font-family: inherit;
 }
 
 button {
-cursor: pointer;
--webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
 button:disabled {
-cursor: not-allowed;
-opacity: 0.55;
+    cursor: not-allowed;
 }
 
 img {
-max-width: 100%;
-display: block;
+    max-width: 100%;
+    display: block;
 }
 
 a {
-color: inherit;
-text-decoration: none;
+    color: inherit;
+    text-decoration: none;
 }
 
+h1,
+h2,
+h3,
+h4,
+p,
+span,
+div {
+    overflow-wrap: break-word;
+}
+
+
 /* =========================================================
-03. GLOBAL SAFETY
+   03. GLOBAL BUTTON SAFETY
 ========================================================= */
 
 button,
@@ -163,2908 +191,3917 @@ button,
 #shareReferralBtn,
 #economicDashboardBtn,
 .wallet-action {
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
-line-height: 1.2;
-text-align: center;
-vertical-align: middle;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    text-align: center;
+    vertical-align: middle;
 }
 
-h1,
-h2,
-h3,
-h4,
-p,
-span,
-div {
-overflow-wrap: break-word;
+.app button {
+    font-family: Arial, Tahoma, sans-serif;
 }
+
 
 /* =========================================================
-04. SCROLLBAR
+   04. SCROLLBAR
 ========================================================= */
 
 ::-webkit-scrollbar {
-width: 5px;
+    width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-background: var(--bg-deep);
+    background: var(--bg-deep);
 }
 
 ::-webkit-scrollbar-thumb {
-background: rgba(247, 147, 26, 0.45);
-border-radius: var(--radius-pill);
+    background: rgba(247,147,26,.45);
+    border-radius: var(--radius-pill);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-background: rgba(247, 147, 26, 0.75);
+    background: rgba(247,147,26,.75);
 }
 
+
 /* =========================================================
-05. APP CONTAINER
+   05. APP
 ========================================================= */
 
 .app {
-width: 100%;
-max-width: 720px;
-margin: 0 auto;
-position: relative;
-padding: 0 14px;
+    position: relative;
+
+    width: 100%;
+    max-width: 720px;
+
+    margin: 0 auto;
+
+    padding:
+        0 14px;
+
+    direction: rtl;
 }
 
 main {
-width: 100%;
+    width: 100%;
 }
 
+
 /* =========================================================
-06. TOP BAR
+   06. TOP BAR
 ========================================================= */
 
 .topbar {
-position: sticky;
-top: 0;
-z-index: 100;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 
-display: flex;
-align-items: center;
-justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-min-height: 58px;
-padding: 10px 4px;
+    min-height: 58px;
 
-background:
-    linear-gradient(
-        180deg,
-        rgba(3, 7, 13, 0.96),
-        rgba(3, 7, 13, 0.78)
-    );
+    padding: 10px 4px;
 
-backdrop-filter: blur(18px);
--webkit-backdrop-filter: blur(18px);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(2,6,11,.97),
+            rgba(2,6,11,.78)
+        );
 
-border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom:
+        1px solid rgba(255,255,255,.05);
 
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .topbar-left,
 .topbar-right {
-display: flex;
-align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .topbar-left {
-gap: 8px;
+    gap: 8px;
 }
 
 .topbar-right {
-gap: 8px;
+    gap: 8px;
 }
 
 .topbar-title {
-font-size: 17px;
-font-weight: 800;
-letter-spacing: 0.3px;
-white-space: nowrap;
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: .3px;
+    white-space: nowrap;
 }
 
 .verified {
-display: inline-flex;
-align-items: center;
-justify-content: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-width: 19px;
-height: 19px;
+    width: 19px;
+    height: 19px;
 
-flex: 0 0 19px;
+    flex: 0 0 19px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-color: #061018;
+    color: #061018;
 
-background:
-    linear-gradient(
-        135deg,
-        var(--cyan),
-        var(--cyan-soft)
-    );
+    background:
+        linear-gradient(
+            135deg,
+            var(--cyan),
+            var(--cyan-soft)
+        );
 
-font-size: 11px;
-font-weight: 900;
+    font-size: 11px;
+    font-weight: 900;
 
-box-shadow:
-    0 0 10px rgba(91, 220, 255, 0.35);
-
+    box-shadow:
+        0 0 13px rgba(85,221,255,.35);
 }
 
 .status-dot {
-width: 8px;
-height: 8px;
+    width: 8px;
+    height: 8px;
 
-flex: 0 0 8px;
+    flex: 0 0 8px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-background: var(--green);
+    background: var(--green);
 
-box-shadow:
-    0 0 0 4px rgba(37, 211, 102, 0.08),
-    0 0 14px rgba(37, 211, 102, 0.6);
+    box-shadow:
+        0 0 0 4px rgba(37,211,102,.08),
+        0 0 14px rgba(37,211,102,.60);
 
-animation: statusPulse 2s infinite ease-in-out;
-
+    animation:
+        statusPulse 2s infinite ease-in-out;
 }
 
 @keyframes statusPulse {
-0%,
-100% {
-opacity: 0.65;
-transform: scale(0.9);
+
+    0%,
+    100% {
+        opacity: .65;
+        transform: scale(.9);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
 }
 
-50% {
-    opacity: 1;
-    transform: scale(1.05);
-}
-
-}
 
 /* =========================================================
-07. HERO
+   07. HERO
 ========================================================= */
 
 .hero {
-position: relative;
+    position: relative;
 
-text-align: center;
+    padding: 15px 0 10px;
 
-padding: 15px 0 10px;
+    text-align: center;
 
-overflow: hidden;
-
+    overflow: hidden;
 }
 
 .hero::before {
-content: "";
+    content: "";
 
-position: absolute;
+    position: absolute;
 
-left: 50%;
-top: 20px;
+    left: 50%;
+    top: 5px;
 
-width: 300px;
-height: 190px;
+    width: 330px;
+    height: 200px;
 
-transform: translateX(-50%);
+    transform: translateX(-50%);
 
-background:
-    radial-gradient(
-        ellipse,
-        rgba(247, 147, 26, 0.14),
-        transparent 68%
-    );
+    background:
+        radial-gradient(
+            ellipse,
+            rgba(247,147,26,.15),
+            transparent 68%
+        );
 
-pointer-events: none;
-
+    pointer-events: none;
 }
 
+
 /* =========================================================
-08. COIN STAGE
+   08. COIN STAGE
 ========================================================= */
 
 .coin-stage {
-position: relative;
+    position: relative;
 
-width: 180px;
-height: 180px;
+    width: 180px;
+    height: 180px;
 
-margin: 0 auto 8px;
+    margin: 0 auto 8px;
 
-display: flex;
-align-items: center;
-justify-content: center;
-
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .coin-glow {
-position: absolute;
+    position: absolute;
 
-width: 140px;
-height: 140px;
+    width: 145px;
+    height: 145px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-background:
-    radial-gradient(
-        circle,
-        rgba(247, 147, 26, 0.35),
-        rgba(247, 147, 26, 0.06) 50%,
-        transparent 72%
-    );
+    background:
+        radial-gradient(
+            circle,
+            rgba(247,147,26,.36),
+            rgba(247,147,26,.06) 50%,
+            transparent 72%
+        );
 
-filter: blur(8px);
+    filter: blur(8px);
 
-animation: coinGlow 3.5s ease-in-out infinite;
-
+    animation:
+        coinGlow 3.5s ease-in-out infinite;
 }
 
 .coin-ring {
-position: absolute;
+    position: absolute;
 
-width: 166px;
-height: 166px;
+    width: 166px;
+    height: 166px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-border: 1px solid rgba(247, 147, 26, 0.27);
+    border:
+        1px solid rgba(247,147,26,.27);
 
-box-shadow:
-    0 0 18px rgba(247, 147, 26, 0.10),
-    inset 0 0 18px rgba(247, 147, 26, 0.06);
+    box-shadow:
+        0 0 18px rgba(247,147,26,.10),
+        inset 0 0 18px rgba(247,147,26,.06);
 
-animation: ringRotate 16s linear infinite;
-
+    animation:
+        ringRotate 16s linear infinite;
 }
 
 @keyframes ringRotate {
-from {
-transform: rotate(0deg);
-}
 
-to {
-    transform: rotate(360deg);
-}
+    from {
+        transform: rotate(0deg);
+    }
 
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes coinGlow {
-0%,
-100% {
-opacity: 0.65;
-transform: scale(0.94);
+
+    0%,
+    100% {
+        opacity: .65;
+        transform: scale(.94);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.06);
+    }
 }
 
-50% {
-    opacity: 1;
-    transform: scale(1.06);
-}
-
-}
 
 /* =========================================================
-09. 3M COIN LOGO
+   09. COIN LOGO
 ========================================================= */
 
 .coin-logo,
 .hero-logo {
-position: relative;
+    position: relative;
+    z-index: 3;
 
-z-index: 3;
+    width: 104px;
+    height: 104px;
 
-width: 104px;
-height: 104px;
+    flex: 0 0 104px;
 
-flex: 0 0 104px;
+    object-fit: cover;
 
-object-fit: cover;
+    border-radius: 50%;
 
-border-radius: 50%;
+    border:
+        5px solid #f6ad3c;
 
-border: 5px solid #f6ad3c;
+    background:
+        radial-gradient(
+            circle at 30% 25%,
+            #fff4d5,
+            #f7931a 34%,
+            #c86600 74%,
+            #713500
+        );
 
-background:
-    radial-gradient(
-        circle at 30% 25%,
-        #fff4d5,
-        #f7931a 34%,
-        #c86600 74%,
-        #713500
-    );
+    box-shadow:
+        0 0 0 4px rgba(255,207,125,.14),
+        0 0 0 9px rgba(247,147,26,.08),
+        inset 5px 5px 12px rgba(255,255,255,.45),
+        inset -7px -8px 15px rgba(78,35,0,.48),
+        0 12px 35px rgba(0,0,0,.55),
+        0 0 32px rgba(247,147,26,.23);
 
-box-shadow:
-    0 0 0 4px rgba(255, 207, 125, 0.14),
-    0 0 0 9px rgba(247, 147, 26, 0.08),
-    inset 5px 5px 12px rgba(255, 255, 255, 0.45),
-    inset -7px -8px 15px rgba(78, 35, 0, 0.48),
-    0 12px 35px rgba(0, 0, 0, 0.55),
-    0 0 32px rgba(247, 147, 26, 0.23);
-
-animation: coinFloat 4s ease-in-out infinite;
-
+    animation:
+        coinFloat 4s ease-in-out infinite;
 }
 
 .coin-logo::before,
 .hero-logo::before {
-content: "";
+    content: "";
 
-position: absolute;
+    position: absolute;
 
-inset: 7px;
+    inset: 7px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-border: 1px solid rgba(255, 240, 194, 0.65);
+    border:
+        1px solid rgba(255,240,194,.65);
 
-box-shadow:
-    inset 0 0 0 2px rgba(113, 53, 0, 0.25),
-    inset 0 0 10px rgba(255, 255, 255, 0.2);
-
-pointer-events: none;
-
+    pointer-events: none;
 }
 
 .coin-logo::after,
 .hero-logo::after {
-content: "3M • 3MIGO • 3M • 3MIGO";
+    content:
+        "3M • 3MIGO • 3M • 3MIGO";
 
-position: absolute;
+    position: absolute;
 
-left: 50%;
-bottom: 7px;
+    left: 50%;
+    bottom: 7px;
 
-width: 82%;
+    width: 82%;
 
-transform: translateX(-50%);
+    transform: translateX(-50%);
 
-color: rgba(255, 236, 181, 0.72);
+    color: rgba(255,236,181,.72);
 
-font-size: 4px;
-font-weight: 900;
+    font-size: 4px;
+    font-weight: 900;
 
-letter-spacing: 0.8px;
+    letter-spacing: .8px;
 
-white-space: nowrap;
+    white-space: nowrap;
 
-text-align: center;
-
-text-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.65);
-
-pointer-events: none;
-
+    text-align: center;
 }
 
 @keyframes coinFloat {
-0%,
-100% {
-transform: translateY(0) rotate(-1deg);
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-1deg);
+    }
+
+    50% {
+        transform: translateY(-4px) rotate(1deg);
+    }
 }
 
-50% {
-    transform: translateY(-4px) rotate(1deg);
-}
-
-}
 
 /* =========================================================
-10. BRAND TITLE
+   10. BRAND
 ========================================================= */
 
 .brand-title {
-position: relative;
+    position: relative;
+    z-index: 2;
 
-z-index: 2;
+    font-size: 27px;
+    line-height: 1.08;
 
-margin-top: 0;
+    font-weight: 900;
 
-font-size: 27px;
-line-height: 1.08;
+    letter-spacing: .2px;
 
-font-weight: 900;
+    direction: ltr;
 
-letter-spacing: 0.2px;
-
-text-shadow:
-    0 3px 18px rgba(0, 0, 0, 0.55);
-
-direction: ltr;
-
+    text-shadow:
+        0 3px 18px rgba(0,0,0,.55);
 }
 
 .brand-title .coin-symbol {
-display: inline-block;
+    display: inline-block;
 
-margin-right: 4px;
+    margin-right: 4px;
 
-color: var(--gold);
+    color: var(--gold);
 
-font-size: 28px;
+    font-size: 28px;
 
-text-shadow:
-    0 0 14px rgba(247, 147, 26, 0.45);
-
+    text-shadow:
+        0 0 14px rgba(247,147,26,.45);
 }
 
 .brand-subtitle {
-margin-top: 6px;
+    margin-top: 6px;
 
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 11px;
-font-weight: 700;
+    font-size: 11px;
+    font-weight: 700;
 
-letter-spacing: 1.5px;
+    letter-spacing: 1.5px;
 
-text-transform: uppercase;
+    text-transform: uppercase;
 
-direction: ltr;
-
+    direction: ltr;
 }
 
 .hero-badges {
-display: flex;
+    display: flex;
 
-justify-content: center;
-align-items: center;
+    justify-content: center;
+    align-items: center;
 
-flex-wrap: wrap;
+    flex-wrap: wrap;
 
-gap: 6px;
+    gap: 6px;
 
-margin-top: 10px;
-
+    margin-top: 10px;
 }
 
 .badge {
-display: inline-flex;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-align-items: center;
-justify-content: center;
+    min-height: 25px;
 
-min-height: 25px;
+    padding: 4px 10px;
 
-padding: 4px 10px;
+    border-radius: var(--radius-pill);
 
-border-radius: var(--radius-pill);
+    color: var(--text-soft);
 
-color: var(--text-soft);
+    background:
+        rgba(255,255,255,.045);
 
-background:
-    rgba(255, 255, 255, 0.045);
+    border:
+        1px solid var(--border);
 
-border: 1px solid var(--border);
+    font-size: 10px;
+    font-weight: 800;
 
-font-size: 10px;
-font-weight: 800;
-
-letter-spacing: 0.5px;
-
-white-space: nowrap;
-
+    white-space: nowrap;
 }
 
 .badge.gold {
-color: var(--gold-light);
-border-color: var(--border-gold);
+    color: var(--gold-light);
 
-background:
-    rgba(247, 147, 26, 0.08);
+    border-color:
+        var(--border-gold);
 
+    background:
+        rgba(247,147,26,.08);
 }
 
 .badge.cyan {
-color: var(--cyan);
-border-color: var(--border-cyan);
+    color: var(--cyan);
 
-background:
-    rgba(91, 220, 255, 0.06);
+    border-color:
+        var(--border-cyan);
 
+    background:
+        rgba(85,221,255,.06);
 }
 
+
 /* =========================================================
-11. SECTION SYSTEM
+   11. SECTION SYSTEM
 ========================================================= */
 
 section {
-width: 100%;
-margin-top: 16px;
+    width: 100%;
+
+    margin-top: 16px;
 }
 
 .section-title {
-display: flex;
+    display: flex;
 
-align-items: center;
-justify-content: space-between;
+    align-items: center;
+    justify-content: space-between;
 
-gap: 10px;
+    gap: 10px;
 
-margin-bottom: 10px;
+    margin-bottom: 10px;
 
-font-size: 14px;
-font-weight: 900;
-
-color: var(--text);
-
+    font-size: 14px;
+    font-weight: 900;
 }
 
 .section-title span {
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 11px;
-font-weight: 600;
+    font-size: 11px;
+    font-weight: 600;
 
-white-space: nowrap;
-
+    white-space: nowrap;
 }
 
+
 /* =========================================================
-12. GENERIC CARD
+   12. GENERIC CARD
 ========================================================= */
 
 .card {
-position: relative;
+    position: relative;
 
-padding: 16px;
+    padding: 16px;
 
-border-radius: var(--radius-lg);
+    border-radius: var(--radius-lg);
 
-background:
-    linear-gradient(
-        145deg,
-        rgba(19, 29, 41, 0.94),
-        rgba(7, 13, 21, 0.94)
-    );
+    background:
+        linear-gradient(
+            145deg,
+            rgba(19,29,41,.96),
+            rgba(6,12,20,.96)
+        );
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-box-shadow: var(--shadow);
+    box-shadow:
+        var(--shadow);
 
-overflow: hidden;
+    overflow: hidden;
 
+    isolation: isolate;
 }
 
 .card::before {
-content: "";
+    content: "";
 
-position: absolute;
+    position: absolute;
 
-left: 0;
-top: 0;
+    left: 0;
+    top: 0;
 
-width: 100%;
-height: 1px;
+    width: 100%;
+    height: 1px;
 
-background:
-    linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.16),
-        transparent
-    );
-
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.16),
+            transparent
+        );
 }
 
+
 /* =========================================================
-13. BALANCE CARD
+   13. 3MIGO PREMIUM FINANCIAL CARD
 ========================================================= */
 
 .balance-card {
-position: relative;
+    position: relative;
 
-padding: 18px;
+    min-height: 345px;
 
-border-radius: var(--radius-xl);
+    padding: 22px;
 
-background:
-    radial-gradient(
-        circle at 85% 15%,
-        rgba(247, 147, 26, 0.16),
-        transparent 35%
-    ),
-    linear-gradient(
-        145deg,
-        rgba(24, 31, 42, 0.97),
-        rgba(7, 12, 20, 0.97)
-    );
+    border-radius: 28px;
 
-border: 1px solid rgba(247, 147, 26, 0.18);
+    overflow: hidden;
 
-box-shadow:
-    var(--shadow),
-    var(--shadow-gold);
+    background:
 
-overflow: hidden;
+        /* metallic light */
+        linear-gradient(
+            115deg,
+            transparent 15%,
+            rgba(255,255,255,.035) 35%,
+            transparent 54%
+        ),
 
-direction: rtl;
+        /* gold atmosphere */
+        radial-gradient(
+            circle at 88% 12%,
+            rgba(247,147,26,.22),
+            transparent 30%
+        ),
 
+        radial-gradient(
+            circle at 12% 92%,
+            rgba(85,221,255,.08),
+            transparent 30%
+        ),
+
+        /* card body */
+        linear-gradient(
+            145deg,
+            #172334 0%,
+            #0d1724 42%,
+            #050b13 100%
+        );
+
+    border:
+        1px solid rgba(255,201,108,.28);
+
+    box-shadow:
+        var(--shadow),
+        var(--shadow-gold),
+        inset 0 1px 0 rgba(255,255,255,.14);
+
+    direction: rtl;
+
+    isolation: isolate;
 }
+
+
+/* metallic edge */
+
+.balance-card::before {
+    content: "";
+
+    position: absolute;
+
+    left: 18px;
+    top: 19px;
+
+    width: 47px;
+    height: 35px;
+
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff0c0,
+            #d99a3d 35%,
+            #8f5d1f 70%,
+            #efbd65
+        );
+
+    border:
+        1px solid rgba(255,232,177,.55);
+
+    box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.7),
+        0 3px 12px rgba(0,0,0,.35);
+
+    opacity: .95;
+
+    z-index: 1;
+}
+
+
+/* decorative circuit lines */
 
 .balance-card::after {
-content: "";
+    content: "";
 
-position: absolute;
+    position: absolute;
 
-right: -60px;
-bottom: -70px;
+    right: -72px;
+    bottom: -80px;
 
-width: 160px;
-height: 160px;
+    width: 210px;
+    height: 210px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-border: 1px solid rgba(247, 147, 26, 0.10);
+    border:
+        1px solid rgba(247,147,26,.14);
 
-box-shadow:
-    0 0 0 15px rgba(247, 147, 26, 0.025),
-    0 0 0 30px rgba(247, 147, 26, 0.018);
+    box-shadow:
+        0 0 0 16px rgba(247,147,26,.025),
+        0 0 0 34px rgba(247,147,26,.018),
+        0 0 0 55px rgba(247,147,26,.012);
 
-pointer-events: none;
+    pointer-events: none;
 
+    z-index: 0;
 }
 
-.balance-label {
-color: var(--muted);
-
-font-size: 11px;
-font-weight: 700;
-
-letter-spacing: 0.4px;
-
-text-align: right;
-
+.balance-card > * {
+    position: relative;
+    z-index: 3;
 }
+
+
+/* small digital identity */
+
+.balance-card .balance-label {
+    margin-top: 3px;
+
+    color: rgba(255,255,255,.66);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 1.1px;
+
+    text-align: right;
+
+    text-transform: uppercase;
+}
+
+.balance-card .balance-label::after {
+    content: " • DIGITAL ASSET";
+
+    color: rgba(247,147,26,.68);
+
+    font-size: 8px;
+}
+
+
+/* balance */
 
 .balance-value {
-margin-top: 5px;
+    margin-top: 18px;
 
-display: flex;
+    display: flex;
 
-align-items: baseline;
+    align-items: baseline;
+    justify-content: center;
 
-justify-content: flex-start;
+    gap: 8px;
 
-gap: 7px;
+    font-size:
+        clamp(39px, 11vw, 59px);
 
-font-size: 38px;
-line-height: 1;
+    line-height: 1;
 
-font-weight: 900;
+    font-weight: 900;
 
-color: var(--white);
+    color: var(--white);
 
-text-shadow:
-    0 3px 20px rgba(0, 0, 0, 0.5);
+    direction: ltr;
 
-direction: ltr;
+    white-space: nowrap;
 
-white-space: nowrap;
-
+    text-shadow:
+        0 4px 22px rgba(0,0,0,.52),
+        0 0 22px rgba(247,147,26,.08);
 }
 
 .balance-value .unit {
-color: var(--gold-light);
+    color: var(--gold-light);
 
-font-size: 15px;
-font-weight: 900;
+    font-size: 15px;
+    font-weight: 900;
 
-letter-spacing: 0.8px;
-
+    letter-spacing: 1px;
 }
 
+
+/* card meta */
+
 .balance-meta {
-display: flex;
+    display: flex;
 
-align-items: center;
+    align-items: center;
+    justify-content: space-between;
 
-justify-content: space-between;
+    gap: 10px;
 
-margin-top: 14px;
+    margin-top: 11px;
 
-gap: 10px;
-
-direction: rtl;
-
+    direction: rtl;
 }
 
 .rate {
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 11px;
+    font-size: 10px;
 
-line-height: 1.4;
+    line-height: 1.4;
 
-text-align: right;
-
+    text-align: right;
 }
 
 .rate strong {
-color: var(--gold-light);
+    color: var(--gold-light);
 }
 
+
 /* =========================================================
-14. MAIN MINING BUTTON — CRITICAL FIX
+   14. MINING CORE
 ========================================================= */
 
 #mineBtn {
-position: relative;
+    --ring-color:
+        rgba(247,147,26,.96);
 
-display: flex;
+    position: relative;
 
-align-items: center;
-justify-content: center;
+    display: flex;
 
-width: 100%;
-min-height: 54px;
+    align-items: center;
+    justify-content: center;
 
-margin-top: 16px;
+    width: 154px;
+    height: 154px;
 
-padding: 13px 18px;
+    min-height: 154px;
 
-border: 0;
+    margin:
+        23px auto 0;
 
-border-radius: 16px;
+    padding: 0;
 
-color: #180c00;
+    border-radius: 50%;
 
-background:
-    linear-gradient(
-        135deg,
-        #ffd36a 0%,
-        #f7931a 48%,
-        #d96b00 100%
-    );
+    border:
+        5px solid rgba(255,202,108,.18);
 
-box-shadow:
-    0 8px 25px rgba(247, 147, 26, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    color: #fff8e9;
 
-font-size: 15px;
+    background:
 
-font-weight: 900;
+        /* inner core */
+        radial-gradient(
+            circle,
+            #152231 0%,
+            #0b1420 53%,
+            #07101a 60%,
+            transparent 61%
+        ),
 
-line-height: 1.25;
+        /* mining timeline */
+        conic-gradient(
+            from -90deg,
+            var(--ring-color)
+                0deg
+                var(--mine-progress),
 
-text-align: center;
+            rgba(255,255,255,.08)
+                var(--mine-progress)
+                360deg
+        );
 
-white-space: nowrap;
+    box-shadow:
+        0 0 0 6px rgba(247,147,26,.035),
+        0 0 0 10px rgba(255,255,255,.025),
+        0 12px 38px rgba(0,0,0,.50),
+        0 0 30px rgba(247,147,26,.17),
+        inset 0 2px 10px rgba(255,255,255,.06);
 
-overflow: hidden;
+    font-size: 14px;
+    font-weight: 900;
 
-text-overflow: ellipsis;
+    line-height: 1.25;
 
-direction: rtl;
+    text-align: center;
 
-transition:
-    transform var(--transition),
-    box-shadow var(--transition),
-    filter var(--transition);
+    white-space: normal;
 
+    overflow: visible;
+
+    isolation: isolate;
+
+    transition:
+        transform var(--transition),
+        filter var(--transition),
+        box-shadow var(--transition);
 }
 
+
+/* orbital ring */
+
+#mineBtn::before {
+    content: "";
+
+    position: absolute;
+
+    inset: -10px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(247,147,26,.20);
+
+    background:
+        conic-gradient(
+            from -90deg,
+            rgba(255,218,139,.9),
+            rgba(247,147,26,.12),
+            rgba(85,221,255,.35),
+            rgba(247,147,26,.10),
+            rgba(255,218,139,.9)
+        );
+
+    -webkit-mask:
+        radial-gradient(
+            farthest-side,
+            transparent calc(100% - 2px),
+            #000 0
+        );
+
+    mask:
+        radial-gradient(
+            farthest-side,
+            transparent calc(100% - 2px),
+            #000 0
+        );
+
+    opacity: .72;
+
+    z-index: -1;
+}
+
+
+/* idle mining pulse */
+
 #mineBtn:hover {
-filter: brightness(1.07);
+    filter: brightness(1.08);
 
-box-shadow:
-    0 10px 30px rgba(247, 147, 26, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-
+    box-shadow:
+        0 0 0 7px rgba(247,147,26,.05),
+        0 14px 42px rgba(0,0,0,.52),
+        0 0 42px rgba(247,147,26,.25);
 }
 
 #mineBtn:active {
-transform: scale(0.98);
+    transform: scale(.95);
 }
+
+
+/* active mining states */
+
+#mineBtn:disabled,
+#mineBtn.is-mining,
+#mineBtn.mining-active,
+#mineBtn.active,
+#mineBtn[aria-pressed="true"] {
+
+    --ring-color:
+        rgba(85,221,255,.95);
+
+    color: var(--cyan-soft);
+
+    animation:
+        miningCorePulse 2.2s ease-in-out infinite;
+}
+
+#mineBtn:disabled::before,
+#mineBtn.is-mining::before,
+#mineBtn.mining-active::before,
+#mineBtn.active::before,
+#mineBtn[aria-pressed="true"]::before {
+
+    animation:
+        miningOrbit 2.5s linear infinite;
+}
+
+@keyframes miningCorePulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 7px rgba(85,221,255,.035),
+            0 12px 38px rgba(0,0,0,.50),
+            0 0 28px rgba(85,221,255,.15);
+    }
+
+    50% {
+        box-shadow:
+            0 0 0 10px rgba(85,221,255,.05),
+            0 14px 44px rgba(0,0,0,.54),
+            0 0 48px rgba(85,221,255,.25);
+    }
+}
+
+@keyframes miningOrbit {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* mining status */
 
 #miningState {
-margin-top: 9px;
+    display: block;
 
-padding: 0 4px;
+    width: fit-content;
+    max-width: 92%;
 
-text-align: center;
+    margin:
+        16px auto 0;
 
-color: var(--muted);
+    padding:
+        7px 13px;
 
-font-size: 10px;
+    border-radius: var(--radius-pill);
 
-line-height: 1.45;
+    color: var(--muted);
 
-direction: rtl;
+    background:
+        rgba(255,255,255,.035);
 
+    border:
+        1px solid rgba(255,255,255,.07);
+
+    font-size: 10px;
+
+    line-height: 1.4;
+
+    text-align: center;
+
+    direction: rtl;
 }
 
+#miningState:not(:empty)::before {
+    content: "●";
+
+    margin-left: 6px;
+
+    color: var(--gold-light);
+
+    font-size: 8px;
+}
+
+
 /* =========================================================
-15. QUICK ACTIONS
+   15. QUICK ACTIONS
 ========================================================= */
 
 .quick-actions {
-display: grid;
+    display: grid;
 
-grid-template-columns: repeat(4, 1fr);
+    grid-template-columns:
+        repeat(4, 1fr);
 
-gap: 8px;
-
+    gap: 8px;
 }
 
 .quick-action,
 .action-card {
-position: relative;
+    position: relative;
 
-min-height: 74px;
+    min-height: 76px;
 
-padding: 9px 6px;
+    padding: 9px 6px;
 
-border-radius: 17px;
+    display: flex;
 
-display: flex;
+    flex-direction: column;
 
-flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-align-items: center;
-justify-content: center;
+    gap: 6px;
 
-gap: 6px;
+    color: var(--text);
 
-color: var(--text);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,28,40,.97),
+            rgba(7,13,21,.97)
+        );
 
-background:
-    linear-gradient(
-        145deg,
-        rgba(18, 28, 40, 0.96),
-        rgba(8, 14, 22, 0.96)
-    );
+    border:
+        1px solid var(--border);
 
-border: 1px solid var(--border);
+    border-radius: 17px;
 
-overflow: hidden;
+    overflow: hidden;
 
-transition:
-    transform var(--transition),
-    border-color var(--transition),
-    background var(--transition);
-
+    transition:
+        transform var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition);
 }
 
 .quick-action:hover,
 .action-card:hover {
-transform: translateY(-2px);
+    transform: translateY(-2px);
 
-border-color:
-    rgba(247, 147, 26, 0.30);
+    border-color:
+        rgba(247,147,26,.30);
 
-background:
-    linear-gradient(
-        145deg,
-        rgba(29, 38, 51, 0.98),
-        rgba(10, 17, 26, 0.98)
-    );
-
+    box-shadow:
+        0 10px 28px rgba(0,0,0,.25),
+        0 0 18px rgba(247,147,26,.07);
 }
 
 .quick-action .icon,
 .action-card .icon {
-flex: 0 0 auto;
-font-size: 22px;
-line-height: 1;
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    color: var(--gold-light);
+
+    background:
+        rgba(247,147,26,.08);
+
+    border:
+        1px solid rgba(247,147,26,.10);
+
+    font-size: 18px;
 }
 
 .quick-action span,
 .action-card span {
-max-width: 100%;
+    max-width: 100%;
 
-font-size: 10px;
-font-weight: 800;
+    color: var(--text-soft);
 
-color: var(--text-soft);
+    font-size: 10px;
+    font-weight: 800;
 
-line-height: 1.2;
+    line-height: 1.2;
 
-text-align: center;
+    text-align: center;
 
-white-space: nowrap;
+    white-space: nowrap;
 
-overflow: hidden;
+    overflow: hidden;
 
-text-overflow: ellipsis;
-
+    text-overflow: ellipsis;
 }
 
+
 /* =========================================================
-16. EXPERIENCE
+   16. EXPERIENCE
 ========================================================= */
 
 .experience-card {
-padding: 16px;
+    padding: 16px;
 
-border-radius: var(--radius-lg);
+    border-radius: var(--radius-lg);
 
-background:
-    linear-gradient(
-        135deg,
-        rgba(14, 24, 38, 0.95),
-        rgba(6, 13, 22, 0.95)
-    );
+    background:
+        linear-gradient(
+            135deg,
+            rgba(14,24,38,.96),
+            rgba(6,13,22,.96)
+        );
 
-border: 1px solid rgba(91, 220, 255, 0.12);
+    border:
+        1px solid rgba(85,221,255,.12);
 
-box-shadow:
-    var(--shadow),
-    var(--shadow-blue);
-
+    box-shadow:
+        var(--shadow),
+        var(--shadow-cyan);
 }
 
 .experience-header {
-display: flex;
+    display: flex;
 
-align-items: center;
-justify-content: space-between;
+    align-items: center;
+    justify-content: space-between;
 
-gap: 10px;
-
+    gap: 10px;
 }
 
 .experience-level {
-color: var(--cyan);
+    color: var(--cyan);
 
-font-size: 18px;
-font-weight: 900;
-
+    font-size: 18px;
+    font-weight: 900;
 }
 
 .experience-score {
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 11px;
+    font-size: 11px;
 
-direction: ltr;
-
+    direction: ltr;
 }
 
 .experience-progress {
-position: relative;
+    position: relative;
 
-height: 9px;
+    height: 9px;
 
-margin-top: 12px;
+    margin-top: 12px;
 
-border-radius: var(--radius-pill);
+    border-radius: var(--radius-pill);
 
-background:
-    rgba(255, 255, 255, 0.06);
+    background:
+        rgba(255,255,255,.06);
 
-overflow: hidden;
-
+    overflow: hidden;
 }
 
 #v4LevelProgress {
-width: 0;
-height: 100%;
+    width: 0;
+    height: 100%;
 
-border-radius: inherit;
+    border-radius: inherit;
 
-background:
-    linear-gradient(
-        90deg,
-        #1769ff,
-        #5bdcff
-    );
+    background:
+        linear-gradient(
+            90deg,
+            #1769ff,
+            #55ddff
+        );
 
-box-shadow:
-    0 0 14px rgba(91, 220, 255, 0.28);
+    box-shadow:
+        0 0 14px rgba(85,221,255,.28);
 
-transition: width 0.5s ease;
-
+    transition:
+        width .5s ease;
 }
 
+
 /* =========================================================
-17. REFERRAL
+   17. REFERRAL — DIGITAL MEMBER CARD
 ========================================================= */
 
 .referral-card,
 #referralSection {
-position: relative;
+    position: relative;
 
-padding: 16px;
+    padding: 18px;
 
-border-radius: var(--radius-lg);
+    min-height: 230px;
 
-background:
-    radial-gradient(
-        circle at 90% 10%,
-        rgba(247, 147, 26, 0.12),
-        transparent 35%
-    ),
-    var(--bg-card);
+    border-radius: 25px;
 
-border: 1px solid var(--border-gold);
+    background:
 
-box-shadow: var(--shadow);
+        linear-gradient(
+            115deg,
+            transparent 18%,
+            rgba(255,255,255,.025) 38%,
+            transparent 58%
+        ),
 
-overflow: hidden;
+        radial-gradient(
+            circle at 92% 8%,
+            rgba(247,147,26,.16),
+            transparent 30%
+        ),
 
+        linear-gradient(
+            145deg,
+            #152131,
+            #07101a
+        );
+
+    border:
+        1px solid rgba(247,147,26,.24);
+
+    box-shadow:
+        var(--shadow),
+        var(--shadow-gold);
+
+    overflow: hidden;
+
+    isolation: isolate;
 }
 
+.referral-card::before {
+    content: "3MIGO MEMBER";
+
+    position: absolute;
+
+    left: 17px;
+    top: 15px;
+
+    color:
+        rgba(255,255,255,.28);
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 1.8px;
+
+    direction: ltr;
+}
+
+.referral-card::after {
+    content: "";
+
+    position: absolute;
+
+    right: -55px;
+    bottom: -70px;
+
+    width: 180px;
+    height: 180px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(247,147,26,.13);
+
+    box-shadow:
+        0 0 0 15px rgba(247,147,26,.025),
+        0 0 0 32px rgba(247,147,26,.015);
+
+    pointer-events: none;
+}
+
+.referral-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+
+/* referral link */
+
 .referral-link-box {
-display: flex;
+    display: flex;
 
-align-items: center;
+    align-items: center;
 
-gap: 8px;
+    gap: 8px;
 
-margin-top: 10px;
+    margin-top: 13px;
 
-direction: ltr;
-
+    direction: ltr;
 }
 
 #referralLink {
-flex: 1;
+    flex: 1;
 
-min-width: 0;
+    min-width: 0;
 
-height: 40px;
+    height: 40px;
 
-padding: 10px 12px;
+    padding:
+        10px 12px;
 
-border-radius: 12px;
+    border-radius: 12px;
 
-color: var(--text-soft);
+    color: var(--text-soft);
 
-background:
-    rgba(0, 0, 0, 0.22);
+    background:
+        rgba(0,0,0,.28);
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-font-size: 10px;
+    font-size: 10px;
 
-line-height: 20px;
+    line-height: 20px;
 
-overflow: hidden;
+    direction: ltr;
 
-text-overflow: ellipsis;
+    overflow: hidden;
 
-white-space: nowrap;
+    text-overflow: ellipsis;
 
-direction: ltr;
-
+    white-space: nowrap;
 }
+
+
+/* referral buttons */
 
 #copyReferralBtn,
 #shareReferralBtn {
-flex: 0 0 auto;
+    flex: 0 0 auto;
 
-min-height: 40px;
+    min-height: 40px;
 
-border: 0;
+    border: 0;
 
-padding: 9px 12px;
+    padding:
+        9px 12px;
 
-border-radius: 11px;
+    border-radius: 11px;
 
-color: #160c00;
+    color: #160c00;
 
-background:
-    linear-gradient(
-        135deg,
-        var(--gold-light),
-        var(--gold)
-    );
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold-light),
+            var(--gold)
+        );
 
-font-size: 11px;
+    font-size: 10px;
+    font-weight: 900;
 
-font-weight: 900;
-
-line-height: 1.2;
-
-text-align: center;
-
-white-space: nowrap;
-
+    white-space: nowrap;
 }
 
+
+/* =========================================================
+   18. REFERRAL BARCODE VISUAL
+========================================================= */
+
+/*
+   إذا كان هناك عنصر يحمل:
+   .referral-barcode
+   أو .barcode
+   يمكن استخدامه مباشرة.
+*/
+
+.referral-barcode,
+.barcode {
+    position: relative;
+
+    width: 100%;
+    height: 42px;
+
+    margin-top: 13px;
+
+    padding:
+        6px 10px;
+
+    border-radius: 9px;
+
+    background:
+        #f4efe2;
+
+    border:
+        1px solid rgba(255,255,255,.32);
+
+    overflow: hidden;
+
+    direction: ltr;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 3px;
+}
+
+.referral-barcode::before,
+.barcode::before {
+    content: "";
+
+    width: 92%;
+    height: 25px;
+
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #111 0px,
+            #111 2px,
+            transparent 2px,
+            transparent 4px,
+            #111 4px,
+            #111 5px,
+            transparent 5px,
+            transparent 8px,
+            #111 8px,
+            #111 11px,
+            transparent 11px,
+            transparent 14px
+        );
+
+    opacity: .92;
+}
+
+.referral-id,
+.member-id {
+    display: block;
+
+    margin-top: 7px;
+
+    color: var(--gold-light);
+
+    font-size: 10px;
+    font-weight: 900;
+
+    letter-spacing: 1.2px;
+
+    direction: ltr;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   19. REFERRAL STATS
+========================================================= */
+
 .referral-stats {
-display: grid;
+    display: grid;
 
-grid-template-columns: repeat(3, 1fr);
+    grid-template-columns:
+        repeat(3, 1fr);
 
-gap: 8px;
+    gap: 8px;
 
-margin-top: 12px;
-
+    margin-top: 12px;
 }
 
 .referral-stat {
-padding: 11px 7px;
+    padding: 11px 7px;
 
-text-align: center;
+    text-align: center;
 
-border-radius: 13px;
+    border-radius: 13px;
 
-background:
-    rgba(255, 255, 255, 0.035);
+    background:
+        rgba(255,255,255,.035);
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-overflow: hidden;
-
+    overflow: hidden;
 }
 
 .referral-stat strong {
-display: block;
+    display: block;
 
-color: var(--gold-light);
+    color: var(--gold-light);
 
-font-size: 16px;
+    font-size: 16px;
 
-line-height: 1.15;
+    line-height: 1.15;
 
-direction: ltr;
-
+    direction: ltr;
 }
 
 .referral-stat span {
-display: block;
+    display: block;
 
-margin-top: 3px;
+    margin-top: 3px;
 
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 9px;
+    font-size: 9px;
 
-line-height: 1.25;
-
+    line-height: 1.25;
 }
 
+
 /* =========================================================
-18. STATISTICS
+   20. STATISTICS
 ========================================================= */
 
 .stats-grid {
-display: grid;
+    display: grid;
 
-grid-template-columns: repeat(3, 1fr);
+    grid-template-columns:
+        repeat(3, 1fr);
 
-gap: 8px;
-
+    gap: 8px;
 }
 
 .stat-card {
-padding: 14px 9px;
+    padding: 14px 9px;
 
-border-radius: 16px;
+    border-radius: 16px;
 
-text-align: center;
+    text-align: center;
 
-background:
-    rgba(255, 255, 255, 0.035);
+    background:
+        rgba(255,255,255,.035);
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-overflow: hidden;
-
+    overflow: hidden;
 }
 
 .stat-card strong {
-display: block;
+    display: block;
 
-color: var(--white);
+    color: var(--white);
 
-font-size: 18px;
-font-weight: 900;
+    font-size: 18px;
+    font-weight: 900;
 
-line-height: 1.15;
+    line-height: 1.15;
 
-direction: ltr;
-
+    direction: ltr;
 }
 
 .stat-card span {
-display: block;
+    display: block;
 
-margin-top: 5px;
+    margin-top: 5px;
 
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 9px;
+    font-size: 9px;
 
-line-height: 1.3;
-
+    line-height: 1.3;
 }
 
+
 /* =========================================================
-19. ECONOMIC ENGINE
+   21. ECONOMIC ENGINE
 ========================================================= */
 
 .economic-card {
-position: relative;
+    position: relative;
 
-padding: 17px;
+    padding: 17px;
 
-border-radius: var(--radius-xl);
+    border-radius: var(--radius-xl);
 
-background:
-    radial-gradient(
-        circle at 15% 0%,
-        rgba(91, 220, 255, 0.08),
-        transparent 34%
-    ),
-    radial-gradient(
-        circle at 100% 100%,
-        rgba(247, 147, 26, 0.10),
-        transparent 36%
-    ),
-    linear-gradient(
-        145deg,
-        rgba(15, 24, 35, 0.97),
-        rgba(5, 11, 18, 0.97)
-    );
+    background:
 
-border: 1px solid rgba(91, 220, 255, 0.13);
+        radial-gradient(
+            circle at 15% 0%,
+            rgba(85,221,255,.08),
+            transparent 34%
+        ),
 
-box-shadow: var(--shadow);
+        radial-gradient(
+            circle at 100% 100%,
+            rgba(247,147,26,.10),
+            transparent 36%
+        ),
 
-overflow: hidden;
+        linear-gradient(
+            145deg,
+            rgba(15,24,35,.97),
+            rgba(5,11,18,.97)
+        );
 
+    border:
+        1px solid rgba(85,221,255,.13);
+
+    box-shadow:
+        var(--shadow);
+
+    overflow: hidden;
 }
 
 .economic-grid {
-display: grid;
+    display: grid;
 
-grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+        repeat(2, 1fr);
 
-gap: 8px;
+    gap: 8px;
 
-margin-top: 12px;
-
+    margin-top: 12px;
 }
 
 .economic-item {
-min-width: 0;
+    min-width: 0;
 
-padding: 12px;
+    padding: 12px;
 
-border-radius: 14px;
+    border-radius: 14px;
 
-background:
-    rgba(255, 255, 255, 0.035);
+    background:
+        rgba(255,255,255,.035);
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-overflow: hidden;
-
+    overflow: hidden;
 }
 
 .economic-item .label {
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 9px;
+    font-size: 9px;
 
-line-height: 1.35;
-
+    line-height: 1.35;
 }
 
 .economic-item .value {
-margin-top: 5px;
+    margin-top: 5px;
 
-color: var(--text);
+    color: var(--text);
 
-font-size: 15px;
-font-weight: 900;
+    font-size: 15px;
+    font-weight: 900;
 
-line-height: 1.2;
+    line-height: 1.2;
 
-direction: ltr;
+    direction: ltr;
 
-overflow-wrap: anywhere;
-
+    overflow-wrap: anywhere;
 }
 
 .economic-item.gold .value {
-color: var(--gold-light);
+    color: var(--gold-light);
 }
 
 .economic-item.cyan .value {
-color: var(--cyan);
+    color: var(--cyan);
 }
 
 .economic-item.green .value {
-color: var(--green-soft);
+    color: var(--green-soft);
 }
 
 #economicDashboardBtn {
-display: flex;
+    display: flex;
 
-align-items: center;
-justify-content: center;
+    align-items: center;
+    justify-content: center;
 
-width: 100%;
+    width: 100%;
 
-min-height: 44px;
+    min-height: 44px;
 
-margin-top: 13px;
+    margin-top: 13px;
 
-padding: 11px 12px;
+    padding: 11px 12px;
 
-border-radius: 13px;
+    border-radius: 13px;
 
-color: var(--cyan);
+    color: var(--cyan);
 
-background:
-    rgba(91, 220, 255, 0.06);
+    background:
+        rgba(85,221,255,.06);
 
-border: 1px solid rgba(91, 220, 255, 0.18);
+    border:
+        1px solid rgba(85,221,255,.18);
 
-font-size: 11px;
-
-font-weight: 900;
-
-line-height: 1.25;
-
-text-align: center;
-
-white-space: nowrap;
-
+    font-size: 11px;
+    font-weight: 900;
 }
 
+
 /* =========================================================
-20. TASKS
+   22. 3M GROWTH INDEX
+========================================================= */
+
+.growth-index,
+.growth-card,
+#growthSection {
+    position: relative;
+
+    padding: 19px;
+
+    border-radius: 27px;
+
+    background:
+
+        radial-gradient(
+            circle at 50% 30%,
+            rgba(247,147,26,.12),
+            transparent 30%
+        ),
+
+        radial-gradient(
+            circle at 15% 100%,
+            rgba(85,221,255,.07),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            145deg,
+            #101d2c,
+            #050b13
+        );
+
+    border:
+        1px solid rgba(247,147,26,.20);
+
+    box-shadow:
+        var(--shadow),
+        var(--shadow-gold);
+
+    overflow: hidden;
+
+    isolation: isolate;
+}
+
+.growth-index::before,
+.growth-card::before,
+#growthSection::before {
+    content: "";
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 225px;
+    height: 225px;
+
+    transform:
+        translate(-50%,-50%);
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(247,147,26,.09);
+
+    box-shadow:
+        0 0 0 16px rgba(247,147,26,.018),
+        0 0 0 34px rgba(247,147,26,.012),
+        0 0 0 55px rgba(247,147,26,.008);
+
+    pointer-events: none;
+}
+
+.growth-header {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+.growth-title {
+    color: var(--text);
+
+    font-size: 12px;
+    font-weight: 900;
+
+    letter-spacing: .5px;
+}
+
+.growth-title span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: var(--muted);
+
+    font-size: 8px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    direction: ltr;
+}
+
+.growth-live {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding:
+        5px 9px;
+
+    border-radius: var(--radius-pill);
+
+    color: var(--green-soft);
+
+    background:
+        rgba(37,211,102,.06);
+
+    border:
+        1px solid rgba(37,211,102,.13);
+
+    font-size: 8px;
+    font-weight: 900;
+}
+
+.growth-live::before {
+    content: "";
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: var(--green);
+
+    box-shadow:
+        0 0 8px rgba(37,211,102,.7);
+}
+
+
+/* central gauge */
+
+.growth-gauge {
+    position: relative;
+    z-index: 2;
+
+    width: 205px;
+    height: 205px;
+
+    margin:
+        20px auto 10px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #0b1520 0%,
+            #08111b 56%,
+            transparent 57%
+        ),
+
+        conic-gradient(
+            from -90deg,
+            var(--gold)
+                0deg
+                var(--growth-progress, 260deg),
+
+            rgba(255,255,255,.07)
+                var(--growth-progress, 260deg)
+                360deg
+        );
+
+    box-shadow:
+        0 0 0 8px rgba(247,147,26,.025),
+        0 0 0 12px rgba(255,255,255,.015),
+        0 0 40px rgba(247,147,26,.14);
+
+    isolation: isolate;
+}
+
+.growth-gauge::before {
+    content: "";
+
+    position: absolute;
+
+    inset: -8px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(247,147,26,.20);
+
+    animation:
+        growthOrbit 12s linear infinite;
+}
+
+@keyframes growthOrbit {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.growth-index-value {
+    position: relative;
+    z-index: 2;
+
+    color: var(--white);
+
+    font-size:
+        clamp(39px, 12vw, 57px);
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    direction: ltr;
+
+    text-shadow:
+        0 0 25px rgba(247,147,26,.20);
+}
+
+.growth-index-unit {
+    position: relative;
+    z-index: 2;
+
+    margin-top: 7px;
+
+    color: var(--gold-light);
+
+    font-size: 9px;
+    font-weight: 900;
+
+    letter-spacing: 2px;
+
+    direction: ltr;
+}
+
+.growth-change {
+    position: relative;
+    z-index: 2;
+
+    margin-top: 6px;
+
+    color: var(--green-soft);
+
+    font-size: 10px;
+    font-weight: 900;
+
+    direction: ltr;
+}
+
+
+/* growth metrics */
+
+.growth-metrics {
+    position: relative;
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 7px;
+
+    margin-top: 14px;
+}
+
+.growth-metric {
+    padding: 10px 6px;
+
+    border-radius: 13px;
+
+    text-align: center;
+
+    background:
+        rgba(255,255,255,.035);
+
+    border:
+        1px solid rgba(255,255,255,.065);
+}
+
+.growth-metric strong {
+    display: block;
+
+    color: var(--text);
+
+    font-size: 13px;
+    font-weight: 900;
+
+    direction: ltr;
+}
+
+.growth-metric span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: var(--muted);
+
+    font-size: 8px;
+}
+
+
+/* growth periods */
+
+.growth-periods {
+    position: relative;
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 7px;
+
+    margin-top: 11px;
+}
+
+.growth-periods button {
+    min-height: 34px;
+
+    border-radius: 10px;
+
+    color: var(--muted);
+
+    background:
+        rgba(255,255,255,.035);
+
+    border:
+        1px solid var(--border);
+
+    font-size: 9px;
+    font-weight: 900;
+
+    direction: ltr;
+}
+
+.growth-periods button.active {
+    color: #160c00;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold-light),
+            var(--gold)
+        );
+
+    border-color:
+        rgba(255,215,130,.30);
+}
+
+
+/* =========================================================
+   23. GROWTH CHART
+========================================================= */
+
+.growth-chart {
+    position: relative;
+
+    height: 110px;
+
+    margin-top: 15px;
+
+    border-radius: 15px;
+
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(255,255,255,.035) 0,
+            rgba(255,255,255,.035) 1px,
+            transparent 1px,
+            transparent 27px
+        );
+
+    border:
+        1px solid rgba(255,255,255,.045);
+
+    overflow: hidden;
+}
+
+.growth-chart::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    top: 50%;
+
+    border-top:
+        1px dashed rgba(255,255,255,.08);
+}
+
+.growth-line {
+    position: absolute;
+
+    left: 3%;
+    right: 3%;
+
+    bottom: 23%;
+
+    height: 2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--cyan),
+            var(--gold),
+            var(--gold-light)
+        );
+
+    transform:
+        rotate(-4deg);
+
+    box-shadow:
+        0 0 12px rgba(247,147,26,.32);
+}
+
+.growth-chart .point {
+    position: absolute;
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background:
+        var(--gold-light);
+
+    box-shadow:
+        0 0 10px rgba(247,147,26,.65);
+}
+
+
+/* =========================================================
+   24. TASKS
 ========================================================= */
 
 #tasksSection {
-scroll-margin-top: 70px;
+    scroll-margin-top: 70px;
 }
 
 #tasksContainer {
-display: flex;
+    display: flex;
 
-flex-direction: column;
+    flex-direction: column;
 
-gap: 9px;
-
+    gap: 9px;
 }
 
 .task-card {
-position: relative;
+    position: relative;
 
-display: flex;
+    display: flex;
 
-align-items: center;
+    align-items: center;
 
-gap: 12px;
+    gap: 12px;
 
-padding: 13px;
+    padding: 13px;
 
-border-radius: 16px;
+    border-radius: 16px;
 
-background:
-    linear-gradient(
-        145deg,
-        rgba(16, 25, 36, 0.94),
-        rgba(7, 13, 21, 0.94)
-    );
+    background:
+        linear-gradient(
+            145deg,
+            rgba(16,25,36,.96),
+            rgba(7,13,21,.96)
+        );
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-overflow: hidden;
+    overflow: hidden;
 
-transition:
-    transform var(--transition),
-    border-color var(--transition);
-
+    transition:
+        transform var(--transition),
+        border-color var(--transition);
 }
 
 .task-card:hover {
-transform: translateY(-1px);
+    transform: translateY(-1px);
 
-border-color:
-    rgba(247, 147, 26, 0.24);
-
+    border-color:
+        rgba(247,147,26,.24);
 }
 
 .task-icon {
-width: 40px;
-height: 40px;
+    width: 40px;
+    height: 40px;
 
-flex: 0 0 40px;
+    flex: 0 0 40px;
 
-display: flex;
+    display: flex;
 
-align-items: center;
-justify-content: center;
+    align-items: center;
+    justify-content: center;
 
-border-radius: 13px;
+    border-radius: 13px;
 
-background:
-    rgba(247, 147, 26, 0.09);
+    background:
+        rgba(247,147,26,.09);
 
-border: 1px solid rgba(247, 147, 26, 0.15);
+    border:
+        1px solid rgba(247,147,26,.15);
 
-font-size: 18px;
-
+    font-size: 18px;
 }
 
 .task-content {
-flex: 1;
+    flex: 1;
 
-min-width: 0;
+    min-width: 0;
 
-direction: rtl;
+    direction: rtl;
 
-text-align: right;
-
+    text-align: right;
 }
 
 .task-title {
-color: var(--text);
+    color: var(--text);
 
-font-size: 12px;
-font-weight: 900;
+    font-size: 12px;
+    font-weight: 900;
 
-line-height: 1.3;
-
+    line-height: 1.3;
 }
 
 .task-description {
-margin-top: 3px;
+    margin-top: 3px;
 
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 9px;
+    font-size: 9px;
 
-line-height: 1.45;
-
+    line-height: 1.45;
 }
 
 .task-reward {
-margin-top: 5px;
+    margin-top: 5px;
 
-color: var(--gold-light);
+    color: var(--gold-light);
 
-font-size: 10px;
-font-weight: 900;
+    font-size: 10px;
+    font-weight: 900;
 
-direction: ltr;
-
+    direction: ltr;
 }
 
 .task-btn,
 .complete-task-btn {
-flex: 0 0 auto;
+    flex: 0 0 auto;
 
-min-height: 36px;
+    min-height: 36px;
 
-padding: 9px 11px;
+    padding:
+        9px 11px;
 
-border: 0;
+    border-radius: 11px;
 
-border-radius: 11px;
+    border:
+        1px solid rgba(255,210,120,.25);
 
-color: #160c00;
+    color: #160c00;
 
-background:
-    linear-gradient(
-        135deg,
-        var(--gold-light),
-        var(--gold)
-    );
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold-light),
+            var(--gold)
+        );
 
-font-size: 9px;
-
-font-weight: 900;
-
-line-height: 1.2;
-
-text-align: center;
-
-white-space: nowrap;
-
+    font-size: 9px;
+    font-weight: 900;
 }
 
+
 /* =========================================================
-21. MASTER SERVICES
+   25. MASTER SERVICES / AI
 ========================================================= */
 
 .master-services {
-display: grid;
+    display: grid;
 
-grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+        repeat(2, 1fr);
 
-gap: 10px;
-
+    gap: 10px;
 }
 
 .master-service {
-position: relative;
+    position: relative;
 
-min-height: 135px;
+    min-height: 135px;
 
-padding: 16px;
+    padding: 16px;
 
-border-radius: 20px;
+    border-radius: 20px;
 
-overflow: hidden;
+    overflow: hidden;
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-background:
-    linear-gradient(
-        145deg,
-        rgba(18, 29, 43, 0.95),
-        rgba(6, 13, 21, 0.95)
-    );
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,29,43,.96),
+            rgba(6,13,21,.96)
+        );
 
-transition:
-    transform var(--transition),
-    border-color var(--transition);
-
+    transition:
+        transform var(--transition),
+        border-color var(--transition);
 }
 
 .master-service:hover {
-transform: translateY(-2px);
+    transform: translateY(-2px);
 
-border-color:
-    rgba(247, 147, 26, 0.28);
-
+    border-color:
+        rgba(247,147,26,.28);
 }
 
 .master-service::after {
-content: "";
+    content: "";
 
-position: absolute;
+    position: absolute;
 
-width: 90px;
-height: 90px;
+    width: 90px;
+    height: 90px;
 
-right: -25px;
-bottom: -30px;
+    right: -25px;
+    bottom: -30px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-background:
-    rgba(247, 147, 26, 0.07);
+    background:
+        rgba(247,147,26,.07);
 
-filter: blur(3px);
-
-pointer-events: none;
-
+    filter: blur(3px);
 }
 
 .master-service .service-icon {
-font-size: 29px;
-line-height: 1;
+    font-size: 29px;
+    line-height: 1;
 }
 
 .master-service h3 {
-margin-top: 10px;
+    margin-top: 10px;
 
-font-size: 14px;
-font-weight: 900;
+    font-size: 14px;
+    font-weight: 900;
 
-line-height: 1.25;
-
+    line-height: 1.25;
 }
 
 .master-service p {
-margin-top: 5px;
+    margin-top: 5px;
 
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 9px;
+    font-size: 9px;
 
-line-height: 1.45;
-
+    line-height: 1.45;
 }
+
 
 /* =========================================================
-22. AD GALAXY
-========================================================= */
-
-.ad-galaxy {
-position: relative;
-
-padding: 18px;
-
-min-height: 150px;
-
-border-radius: 22px;
-
-background:
-    radial-gradient(
-        circle at 20% 25%,
-        rgba(247, 147, 26, 0.18),
-        transparent 30%
-    ),
-    radial-gradient(
-        circle at 80% 70%,
-        rgba(91, 220, 255, 0.10),
-        transparent 32%
-    ),
-    #07111d;
-
-border: 1px solid rgba(247, 147, 26, 0.18);
-
-overflow: hidden;
-
-}
-
-.ad-galaxy::before,
-.ad-galaxy::after {
-content: "";
-
-position: absolute;
-
-border-radius: 50%;
-
-background: rgba(255, 255, 255, 0.7);
-
-box-shadow:
-    30px 12px rgba(255, 255, 255, 0.35),
-    70px 45px rgba(255, 255, 255, 0.25),
-    125px 20px rgba(255, 255, 255, 0.45),
-    180px 75px rgba(255, 255, 255, 0.2);
-
-}
-
-.ad-galaxy::before {
-width: 2px;
-height: 2px;
-
-top: 20px;
-left: 25px;
-
-}
-
-.ad-galaxy::after {
-width: 3px;
-height: 3px;
-
-right: 35px;
-top: 35px;
-
-}
-
-.ad-galaxy h3 {
-position: relative;
-
-z-index: 2;
-
-font-size: 19px;
-font-weight: 900;
-
-color: var(--gold-light);
-
-line-height: 1.25;
-
-}
-
-.ad-galaxy p {
-position: relative;
-
-z-index: 2;
-
-margin-top: 7px;
-
-max-width: 80%;
-
-color: var(--text-soft);
-
-font-size: 10px;
-
-line-height: 1.5;
-
-}
-
-/* =========================================================
-23. AI SERVICE
+   26. AI ASSISTANT
 ========================================================= */
 
 .ai-service {
-position: relative;
+    position: relative;
 
-padding: 18px;
+    padding: 19px;
 
-border-radius: 22px;
+    border-radius: 24px;
 
-background:
-    linear-gradient(
-        145deg,
-        rgba(9, 25, 39, 0.97),
-        rgba(5, 12, 20, 0.97)
-    );
+    background:
+        radial-gradient(
+            circle at 90% 10%,
+            rgba(85,221,255,.13),
+            transparent 28%
+        ),
 
-border: 1px solid rgba(91, 220, 255, 0.16);
+        linear-gradient(
+            145deg,
+            rgba(9,25,39,.98),
+            rgba(5,12,20,.98)
+        );
 
-overflow: hidden;
+    border:
+        1px solid rgba(85,221,255,.16);
 
+    overflow: hidden;
 }
 
 .ai-service::before {
-content: "";
+    content: "";
 
-position: absolute;
+    position: absolute;
 
-width: 160px;
-height: 160px;
+    width: 175px;
+    height: 175px;
 
-right: -65px;
-top: -65px;
+    right: -75px;
+    top: -75px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-border: 1px solid rgba(91, 220, 255, 0.12);
+    border:
+        1px solid rgba(85,221,255,.13);
 
-box-shadow:
-    0 0 0 18px rgba(91, 220, 255, 0.025),
-    0 0 0 38px rgba(91, 220, 255, 0.018);
-
+    box-shadow:
+        0 0 0 20px rgba(85,221,255,.025),
+        0 0 0 42px rgba(85,221,255,.015);
 }
 
 .ai-service h3 {
-font-size: 18px;
-font-weight: 900;
+    font-size: 18px;
+    font-weight: 900;
 
-color: var(--cyan);
+    color: var(--cyan);
 
-line-height: 1.25;
-
+    line-height: 1.25;
 }
 
 .ai-service p {
-margin-top: 7px;
+    margin-top: 7px;
 
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 10px;
+    font-size: 10px;
 
-line-height: 1.5;
-
+    line-height: 1.5;
 }
 
+
 /* =========================================================
-24. PROMOTION
+   27. AD GALAXY
+========================================================= */
+
+.ad-galaxy {
+    position: relative;
+
+    min-height: 150px;
+
+    padding: 18px;
+
+    border-radius: 22px;
+
+    background:
+        radial-gradient(
+            circle at 20% 25%,
+            rgba(247,147,26,.18),
+            transparent 30%
+        ),
+
+        radial-gradient(
+            circle at 80% 70%,
+            rgba(85,221,255,.10),
+            transparent 32%
+        ),
+
+        #07111d;
+
+    border:
+        1px solid rgba(247,147,26,.18);
+
+    overflow: hidden;
+}
+
+.ad-galaxy h3 {
+    position: relative;
+    z-index: 2;
+
+    font-size: 19px;
+    font-weight: 900;
+
+    color: var(--gold-light);
+}
+
+.ad-galaxy p {
+    position: relative;
+    z-index: 2;
+
+    margin-top: 7px;
+
+    max-width: 80%;
+
+    color: var(--text-soft);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   28. PROMOTION
 ========================================================= */
 
 .promotion {
-position: relative;
+    position: relative;
 
-display: flex;
+    display: flex;
 
-align-items: center;
+    align-items: center;
 
-gap: 15px;
+    gap: 15px;
 
-padding: 16px;
+    padding: 16px;
 
-border-radius: 21px;
+    border-radius: 21px;
 
-background:
-    linear-gradient(
-        135deg,
-        rgba(247, 147, 26, 0.12),
-        rgba(9, 18, 29, 0.95)
-    );
+    background:
+        linear-gradient(
+            135deg,
+            rgba(247,147,26,.12),
+            rgba(9,18,29,.95)
+        );
 
-border: 1px solid rgba(247, 147, 26, 0.16);
+    border:
+        1px solid rgba(247,147,26,.16);
 
-overflow: hidden;
-
+    overflow: hidden;
 }
 
 .promotion-coin {
-position: relative;
+    position: relative;
 
-width: 66px;
-height: 66px;
+    width: 66px;
+    height: 66px;
 
-flex: 0 0 66px;
+    flex: 0 0 66px;
 
-display: flex;
+    display: flex;
 
-align-items: center;
-justify-content: center;
+    align-items: center;
+    justify-content: center;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-color: #301600;
+    color: #301600;
 
-background:
-    radial-gradient(
-        circle at 30% 25%,
-        #fff0c9,
-        #ffb52e 34%,
-        #e67a00 70%,
-        #a84900
-    );
+    background:
+        radial-gradient(
+            circle at 30% 25%,
+            #fff0c9,
+            #ffb52e 34%,
+            #e67a00 70%,
+            #a84900
+        );
 
-border: 3px solid #ffc95e;
+    border:
+        3px solid #ffc95e;
 
-box-shadow:
-    inset 3px 3px 8px rgba(255, 255, 255, 0.45),
-    inset -4px -5px 9px rgba(75, 29, 0, 0.38),
-    0 7px 18px rgba(0, 0, 0, 0.35),
-    0 0 20px rgba(247, 147, 26, 0.18);
+    box-shadow:
+        inset 3px 3px 8px rgba(255,255,255,.45),
+        inset -4px -5px 9px rgba(75,29,0,.38),
+        0 7px 18px rgba(0,0,0,.35),
+        0 0 20px rgba(247,147,26,.18);
 
-font-size: 20px;
-font-weight: 900;
-
-line-height: 1;
-
+    font-size: 20px;
+    font-weight: 900;
 }
 
 .promotion-coin::before {
-content: "";
+    content: "";
 
-position: absolute;
+    position: absolute;
 
-inset: 6px;
+    inset: 6px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-border: 1px solid rgba(255, 242, 205, 0.58);
-
+    border:
+        1px solid rgba(255,242,205,.58);
 }
 
 .promotion-content {
-flex: 1;
+    flex: 1;
 
-min-width: 0;
+    min-width: 0;
 
-direction: rtl;
+    direction: rtl;
 
-text-align: right;
-
+    text-align: right;
 }
 
 .promotion-content h3 {
-font-size: 15px;
-font-weight: 900;
-
-line-height: 1.3;
-
+    font-size: 15px;
+    font-weight: 900;
 }
 
 .promotion-content p {
-margin-top: 4px;
+    margin-top: 4px;
 
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 9px;
+    font-size: 9px;
 
-line-height: 1.45;
-
+    line-height: 1.45;
 }
 
+
 /* =========================================================
-25. ROADMAP
+   29. ROADMAP
 ========================================================= */
 
 .roadmap {
-display: flex;
+    display: flex;
 
-flex-direction: column;
+    flex-direction: column;
 
-gap: 8px;
-
+    gap: 8px;
 }
 
 .roadmap-item {
-position: relative;
+    position: relative;
 
-display: flex;
+    display: flex;
 
-align-items: flex-start;
+    align-items: flex-start;
 
-gap: 11px;
+    gap: 11px;
 
-padding: 13px;
+    padding: 13px;
 
-border-radius: 15px;
+    border-radius: 15px;
 
-background:
-    rgba(255, 255, 255, 0.035);
+    background:
+        rgba(255,255,255,.035);
 
-border: 1px solid var(--border);
-
+    border:
+        1px solid var(--border);
 }
 
 .roadmap-dot {
-width: 12px;
-height: 12px;
+    width: 12px;
+    height: 12px;
 
-flex: 0 0 12px;
+    flex: 0 0 12px;
 
-margin-top: 2px;
+    margin-top: 2px;
 
-border-radius: 50%;
+    border-radius: 50%;
 
-background:
-    var(--muted);
-
-box-shadow:
-    0 0 0 4px rgba(255, 255, 255, 0.035);
-
+    background:
+        var(--muted);
 }
 
 .roadmap-item.active .roadmap-dot {
-background: var(--gold);
+    background:
+        var(--gold);
 
-box-shadow:
-    0 0 0 4px rgba(247, 147, 26, 0.09),
-    0 0 14px rgba(247, 147, 26, 0.45);
-
+    box-shadow:
+        0 0 0 4px rgba(247,147,26,.09),
+        0 0 14px rgba(247,147,26,.45);
 }
 
 .roadmap-item.done .roadmap-dot {
-background: var(--green);
+    background:
+        var(--green);
 
-box-shadow:
-    0 0 0 4px rgba(37, 211, 102, 0.08),
-    0 0 14px rgba(37, 211, 102, 0.35);
-
+    box-shadow:
+        0 0 0 4px rgba(37,211,102,.08),
+        0 0 14px rgba(37,211,102,.35);
 }
 
 .roadmap-content {
-flex: 1;
+    flex: 1;
 
-min-width: 0;
+    min-width: 0;
 
-direction: rtl;
+    direction: rtl;
 
-text-align: right;
-
+    text-align: right;
 }
 
 .roadmap-content h4 {
-font-size: 12px;
-font-weight: 900;
-
-line-height: 1.3;
-
+    font-size: 12px;
+    font-weight: 900;
 }
 
 .roadmap-content p {
-margin-top: 4px;
+    margin-top: 4px;
 
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 9px;
+    font-size: 9px;
 
-line-height: 1.4;
-
+    line-height: 1.4;
 }
 
+
 /* =========================================================
-26. WALLET
+   30. WALLET — PREMIUM
 ========================================================= */
 
 .wallet-card {
-padding: 17px;
+    position: relative;
 
-border-radius: var(--radius-xl);
+    padding: 19px;
 
-background:
-    linear-gradient(
-        145deg,
-        rgba(17, 28, 42, 0.96),
-        rgba(6, 12, 20, 0.96)
-    );
+    border-radius: 26px;
 
-border: 1px solid var(--border);
+    background:
 
-box-shadow: var(--shadow);
+        linear-gradient(
+            115deg,
+            transparent 18%,
+            rgba(255,255,255,.025) 38%,
+            transparent 58%
+        ),
 
-direction: rtl;
+        radial-gradient(
+            circle at 88% 12%,
+            rgba(247,147,26,.15),
+            transparent 30%
+        ),
 
+        linear-gradient(
+            145deg,
+            #152131,
+            #06101a
+        );
+
+    border:
+        1px solid rgba(247,147,26,.18);
+
+    box-shadow:
+        var(--shadow),
+        var(--shadow-gold);
+
+    direction: rtl;
+
+    overflow: hidden;
+}
+
+.wallet-card::before {
+    content: "3MIGO WALLET";
+
+    position: absolute;
+
+    left: 17px;
+    top: 15px;
+
+    color: rgba(255,255,255,.25);
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 1.5px;
+
+    direction: ltr;
 }
 
 .wallet-balance {
-font-size: 30px;
-font-weight: 900;
+    margin-top: 17px;
 
-color: var(--white);
+    font-size:
+        clamp(30px, 9vw, 44px);
 
-line-height: 1.15;
+    font-weight: 900;
 
-direction: ltr;
+    color: var(--white);
 
+    line-height: 1.15;
+
+    direction: ltr;
 }
 
 .wallet-unit {
-color: var(--gold-light);
+    color: var(--gold-light);
 
-font-size: 13px;
-
+    font-size: 13px;
 }
 
 .wallet-actions {
-display: grid;
+    display: grid;
 
-grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+        repeat(2, 1fr);
 
-gap: 9px;
+    gap: 9px;
 
-margin-top: 14px;
-
+    margin-top: 14px;
 }
 
 .wallet-action {
-min-height: 42px;
+    min-height: 43px;
 
-padding: 11px 10px;
+    padding: 11px 10px;
 
-border-radius: 13px;
+    border-radius: 13px;
 
-color: var(--text);
+    color: var(--text);
 
-background:
-    rgba(255, 255, 255, 0.04);
+    background:
+        rgba(255,255,255,.04);
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-font-size: 10px;
-
-font-weight: 800;
-
-line-height: 1.2;
-
+    font-size: 10px;
+    font-weight: 800;
 }
 
+
 /* =========================================================
-27. TRANSACTIONS
+   31. TRANSACTIONS
 ========================================================= */
 
 .transactions {
-display: flex;
+    display: flex;
 
-flex-direction: column;
+    flex-direction: column;
 
-gap: 7px;
-
+    gap: 7px;
 }
 
 .transaction {
-display: flex;
+    display: flex;
 
-align-items: center;
-justify-content: space-between;
+    align-items: center;
+    justify-content: space-between;
 
-gap: 10px;
+    gap: 10px;
 
-padding: 11px 12px;
+    padding:
+        11px 12px;
 
-border-radius: 13px;
+    border-radius: 13px;
 
-background:
-    rgba(255, 255, 255, 0.03);
+    background:
+        rgba(255,255,255,.03);
 
-border: 1px solid rgba(255, 255, 255, 0.055);
-
+    border:
+        1px solid rgba(255,255,255,.055);
 }
 
 .transaction-info {
-min-width: 0;
+    min-width: 0;
 
-direction: rtl;
+    direction: rtl;
 
-text-align: right;
-
+    text-align: right;
 }
 
 .transaction-title {
-color: var(--text);
+    color: var(--text);
 
-font-size: 10px;
-font-weight: 800;
-
-line-height: 1.3;
-
+    font-size: 10px;
+    font-weight: 800;
 }
 
 .transaction-date {
-margin-top: 3px;
+    margin-top: 3px;
 
-color: var(--muted);
+    color: var(--muted);
 
-font-size: 8px;
-
+    font-size: 8px;
 }
 
 .transaction-amount {
-white-space: nowrap;
+    color: var(--gold-light);
 
-color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 900;
 
-font-size: 11px;
-font-weight: 900;
+    direction: ltr;
 
-direction: ltr;
-
+    white-space: nowrap;
 }
 
+
 /* =========================================================
-28. BUTTON SYSTEM
+   32. PROFILE
+========================================================= */
+
+.profile-card {
+    position: relative;
+
+    padding: 19px;
+
+    border-radius: 25px;
+
+    background:
+        radial-gradient(
+            circle at 15% 10%,
+            rgba(85,221,255,.10),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            145deg,
+            #132131,
+            #06101a
+        );
+
+    border:
+        1px solid rgba(85,221,255,.15);
+
+    box-shadow:
+        var(--shadow),
+        var(--shadow-cyan);
+
+    overflow: hidden;
+}
+
+.profile-avatar {
+    width: 76px;
+    height: 76px;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: var(--gold-light);
+
+    background:
+        radial-gradient(
+            circle at 35% 25%,
+            #fff0c8,
+            #f7931a 38%,
+            #783800
+        );
+
+    border:
+        3px solid rgba(255,210,120,.45);
+
+    box-shadow:
+        0 0 0 6px rgba(247,147,26,.05),
+        0 0 28px rgba(247,147,26,.18);
+
+    font-size: 27px;
+    font-weight: 900;
+}
+
+.profile-name {
+    margin-top: 11px;
+
+    color: var(--text);
+
+    font-size: 17px;
+    font-weight: 900;
+
+    text-align: center;
+}
+
+.profile-id {
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    direction: ltr;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   33. BUTTON SYSTEM
 ========================================================= */
 
 .primary-btn,
 .secondary-btn,
 .icon-btn {
-position: relative;
+    position: relative;
 
-display: inline-flex;
+    display: inline-flex;
 
-align-items: center;
-justify-content: center;
+    align-items: center;
+    justify-content: center;
 
-line-height: 1.2;
+    line-height: 1.2;
 
-text-align: center;
+    text-align: center;
 
-white-space: nowrap;
+    white-space: nowrap;
 
-overflow: hidden;
-
+    overflow: hidden;
 }
 
 .primary-btn {
-min-height: 44px;
+    min-height: 44px;
 
-border: 0;
+    padding:
+        11px 17px;
 
-padding: 11px 17px;
+    border-radius: 13px;
 
-border-radius: 13px;
+    border: 0;
 
-color: #160c00;
+    color: #160c00;
 
-background:
-    linear-gradient(
-        135deg,
-        var(--gold-light),
-        var(--gold)
-    );
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold-light),
+            var(--gold)
+        );
 
-font-size: 11px;
-font-weight: 900;
+    font-size: 11px;
+    font-weight: 900;
 
-box-shadow:
-    0 7px 18px rgba(247, 147, 26, 0.17);
-
+    box-shadow:
+        0 7px 18px rgba(247,147,26,.17);
 }
 
 .secondary-btn {
-min-height: 42px;
+    min-height: 42px;
 
-padding: 10px 15px;
+    padding:
+        10px 15px;
 
-border-radius: 13px;
+    border-radius: 13px;
 
-color: var(--text);
+    color: var(--text);
 
-background:
-    rgba(255, 255, 255, 0.045);
+    background:
+        rgba(255,255,255,.045);
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-font-size: 10px;
-font-weight: 800;
-
+    font-size: 10px;
+    font-weight: 800;
 }
 
 .icon-btn {
-width: 40px;
-height: 40px;
+    width: 40px;
+    height: 40px;
 
-flex: 0 0 40px;
+    flex: 0 0 40px;
 
-border-radius: 13px;
+    border-radius: 13px;
 
-color: var(--text);
+    color: var(--text);
 
-background:
-    rgba(255, 255, 255, 0.045);
+    background:
+        rgba(255,255,255,.045);
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-font-size: 17px;
-
+    font-size: 17px;
 }
 
+
 /* =========================================================
-29. MODALS
+   34. MODALS
 ========================================================= */
 
 .modal {
-position: fixed;
+    position: fixed;
 
-inset: 0;
+    inset: 0;
 
-z-index: 500;
+    z-index: 500;
 
-display: none;
+    display: none;
 
-align-items: flex-end;
-justify-content: center;
+    align-items: flex-end;
+    justify-content: center;
 
-padding: 12px;
+    padding: 12px;
 
-background:
-    rgba(0, 0, 0, 0.68);
+    background:
+        rgba(0,0,0,.68);
 
-backdrop-filter: blur(8px);
--webkit-backdrop-filter: blur(8px);
-
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .modal.active,
 .modal.show {
-display: flex;
+    display: flex;
 }
 
 .modal-content {
-width: 100%;
-max-width: 560px;
+    width: 100%;
+    max-width: 560px;
 
-max-height: 88vh;
+    max-height: 88vh;
 
-overflow-y: auto;
+    overflow-y: auto;
 
-padding: 19px;
+    padding: 19px;
 
-border-radius: 24px 24px 16px 16px;
+    border-radius:
+        24px 24px 16px 16px;
 
-background:
-    linear-gradient(
-        145deg,
-        #101b28,
-        #060c14
-    );
+    background:
+        linear-gradient(
+            145deg,
+            #101b28,
+            #060c14
+        );
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-box-shadow:
-    0 -15px 60px rgba(0, 0, 0, 0.45);
+    box-shadow:
+        0 -15px 60px rgba(0,0,0,.45);
 
-animation: modalUp 220ms ease-out;
-
+    animation:
+        modalUp 220ms ease-out;
 }
 
 @keyframes modalUp {
-from {
-transform: translateY(30px);
-opacity: 0;
-}
 
-to {
-    transform: translateY(0);
-    opacity: 1;
-}
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
 
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .modal-header {
-display: flex;
+    display: flex;
 
-align-items: center;
-justify-content: space-between;
+    align-items: center;
+    justify-content: space-between;
 
-gap: 10px;
+    gap: 10px;
 
-margin-bottom: 13px;
-
+    margin-bottom: 13px;
 }
 
 .modal-title {
-font-size: 17px;
-font-weight: 900;
-
-line-height: 1.3;
-
+    font-size: 17px;
+    font-weight: 900;
 }
 
 .modal-close {
-width: 34px;
-height: 34px;
+    width: 34px;
+    height: 34px;
 
-flex: 0 0 34px;
+    flex: 0 0 34px;
 
-display: inline-flex;
+    display: inline-flex;
 
-align-items: center;
-justify-content: center;
+    align-items: center;
+    justify-content: center;
 
-border-radius: 10px;
+    border-radius: 10px;
 
-color: var(--text);
+    color: var(--text);
 
-background:
-    rgba(255, 255, 255, 0.05);
+    background:
+        rgba(255,255,255,.05);
 
-border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-font-size: 17px;
-
+    font-size: 17px;
 }
 
+
 /* =========================================================
-30. TOAST
+   35. TOAST
 ========================================================= */
 
 #toast {
-position: fixed;
+    position: fixed;
 
-left: 50%;
-bottom: 83px;
+    left: 50%;
+    bottom: 83px;
 
-z-index: 1000;
+    z-index: 1000;
 
-width: max-content;
+    width: max-content;
 
-max-width: calc(100vw - 32px);
+    max-width:
+        calc(100vw - 32px);
 
-padding: 11px 15px;
+    padding:
+        11px 15px;
 
-transform:
-    translateX(-50%)
-    translateY(20px);
+    transform:
+        translateX(-50%)
+        translateY(20px);
 
-opacity: 0;
+    opacity: 0;
 
-pointer-events: none;
+    pointer-events: none;
 
-border-radius: 13px;
+    border-radius: 13px;
 
-color: var(--white);
+    color: var(--white);
 
-background:
-    rgba(13, 21, 31, 0.96);
+    background:
+        rgba(13,21,31,.96);
 
-border: 1px solid rgba(247, 147, 26, 0.22);
+    border:
+        1px solid rgba(247,147,26,.22);
 
-box-shadow:
-    0 12px 35px rgba(0, 0, 0, 0.4);
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.40);
 
-font-size: 11px;
-font-weight: 700;
+    font-size: 11px;
+    font-weight: 700;
 
-line-height: 1.35;
+    text-align: center;
 
-text-align: center;
-
-transition:
-    opacity 180ms ease,
-    transform 180ms ease;
-
+    transition:
+        opacity 180ms ease,
+        transform 180ms ease;
 }
 
 #toast.show {
-opacity: 1;
+    opacity: 1;
 
-transform:
-    translateX(-50%)
-    translateY(0);
-
+    transform:
+        translateX(-50%)
+        translateY(0);
 }
 
+
 /* =========================================================
-31. BOTTOM NAVIGATION
+   36. BOTTOM NAVIGATION
+   Supports 5–7 items
 ========================================================= */
 
 .bottom-nav {
-position: fixed;
+    position: fixed;
 
-left: 50%;
-bottom: 9px;
+    left: 50%;
+    bottom: 9px;
 
-z-index: 200;
+    z-index: 200;
 
-width: min(
-    calc(100% - 18px),
-    700px
-);
+    width:
+        min(
+            calc(100% - 18px),
+            700px
+        );
 
-transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
-display: grid;
+    display: grid;
 
-grid-template-columns: repeat(5, 1fr);
+    /*
+       auto-fit allows us to move from
+       the old 5 navigation items
+       to the new 7-section architecture.
+    */
 
-padding: 7px;
+    grid-template-columns:
+        repeat(auto-fit, minmax(55px, 1fr));
 
-border-radius: 21px;
+    gap: 3px;
 
-background:
-    rgba(8, 14, 22, 0.93);
+    padding: 7px;
 
-border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
 
-box-shadow:
-    0 14px 45px rgba(0, 0, 0, 0.52);
+    background:
+        rgba(7,13,21,.94);
 
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
+    border:
+        1px solid rgba(255,255,255,.08);
 
+    box-shadow:
+        0 14px 45px rgba(0,0,0,.52),
+        0 0 30px rgba(247,147,26,.04);
+
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
 }
 
 .bottom-nav button,
 .bottom-nav a {
-min-height: 51px;
+    min-height: 51px;
 
-display: flex;
+    display: flex;
 
-flex-direction: column;
+    flex-direction: column;
 
-align-items: center;
-justify-content: center;
+    align-items: center;
+    justify-content: center;
 
-gap: 3px;
+    gap: 3px;
 
-border: 0;
+    border: 0;
 
-border-radius: 15px;
+    border-radius: 15px;
 
-color: var(--muted);
+    color: var(--muted);
 
-background: transparent;
+    background:
+        transparent;
 
-font-size: 9px;
-font-weight: 800;
+    font-size: 8px;
+    font-weight: 800;
 
-line-height: 1.1;
+    line-height: 1.1;
 
-text-align: center;
+    text-align: center;
 
-white-space: nowrap;
+    white-space: nowrap;
 
-overflow: hidden;
+    overflow: hidden;
 
-transition:
-    color var(--transition),
-    background var(--transition);
-
+    transition:
+        color var(--transition),
+        background var(--transition),
+        transform var(--transition);
 }
 
 .bottom-nav button .nav-icon,
 .bottom-nav a .nav-icon {
-font-size: 18px;
-line-height: 1;
+    font-size: 18px;
+
+    line-height: 1;
 }
 
 .bottom-nav button.active,
 .bottom-nav a.active {
-color: var(--gold-light);
+    color: var(--gold-light);
 
-background:
-    rgba(247, 147, 26, 0.08);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(247,147,26,.13),
+            rgba(247,147,26,.045)
+        );
 
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.04);
 }
 
 .bottom-nav button.active .nav-icon,
 .bottom-nav a.active .nav-icon {
-filter:
-drop-shadow(
-0 0 7px
-rgba(247, 147, 26, 0.45)
-);
+    filter:
+        drop-shadow(
+            0 0 7px
+            rgba(247,147,26,.45)
+        );
 }
 
+
 /* =========================================================
-32. STATES
+   37. STATES
 ========================================================= */
 
 .loading {
-padding: 24px;
+    padding: 24px;
 
-text-align: center;
+    color: var(--muted);
 
-color: var(--muted);
+    text-align: center;
 
-font-size: 11px;
-
+    font-size: 11px;
 }
 
 .empty-state {
-padding: 25px 15px;
+    padding: 25px 15px;
 
-text-align: center;
+    color: var(--muted);
 
-color: var(--muted);
+    text-align: center;
 
-font-size: 11px;
-
+    font-size: 11px;
 }
 
 .error-state {
-padding: 15px;
+    padding: 15px;
 
-border-radius: 14px;
+    border-radius: 14px;
 
-color: #ffb1b1;
+    color: #ffb1b1;
 
-background:
-    rgba(255, 92, 92, 0.07);
+    background:
+        rgba(255,92,92,.07);
 
-border: 1px solid rgba(255, 92, 92, 0.16);
+    border:
+        1px solid rgba(255,92,92,.16);
 
-font-size: 10px;
+    font-size: 10px;
 
-line-height: 1.5;
-
+    line-height: 1.5;
 }
 
+
 /* =========================================================
-33. UTILITY CLASSES
+   38. UTILITIES
 ========================================================= */
 
 .hidden {
-display: none !important;
+    display: none !important;
 }
 
 .text-gold {
-color: var(--gold-light) !important;
+    color: var(--gold-light) !important;
 }
 
 .text-cyan {
-color: var(--cyan) !important;
+    color: var(--cyan) !important;
 }
 
 .text-green {
-color: var(--green-soft) !important;
+    color: var(--green-soft) !important;
 }
 
 .text-muted {
-color: var(--muted) !important;
+    color: var(--muted) !important;
 }
 
 .text-center {
-text-align: center !important;
+    text-align: center !important;
 }
 
 .mt-1 {
-margin-top: 6px;
+    margin-top: 6px;
 }
 
 .mt-2 {
-margin-top: 10px;
+    margin-top: 10px;
 }
 
 .mt-3 {
-margin-top: 15px;
+    margin-top: 15px;
 }
 
 .mt-4 {
-margin-top: 20px;
+    margin-top: 20px;
 }
 
+
 /* =========================================================
-34. FOOTER
+   39. FOOTER
 ========================================================= */
 
 footer {
-padding: 28px 8px 18px;
+    padding:
+        28px 8px 18px;
 
-text-align: center;
+    color: var(--muted);
 
-color: var(--muted);
+    font-size: 9px;
 
-font-size: 9px;
+    line-height: 1.6;
 
-line-height: 1.6;
-
+    text-align: center;
 }
 
 footer strong {
-color: var(--gold-light);
+    color: var(--gold-light);
 }
 
+
 /* =========================================================
-35. 3MIGO SMART IDENTITY
+   40. 3MIGO SMART IDENTITY
 ========================================================= */
 
 .threemigo-brand {
-color: var(--white);
+    color: var(--white);
 
-font-weight: 900;
+    font-weight: 900;
 
-direction: ltr;
-
+    direction: ltr;
 }
 
 .threemigo-brand .migo {
-color: var(--gold-light);
+    color: var(--gold-light);
 }
 
 .threemigo-brand .smart {
-color: var(--cyan);
+    color: var(--cyan);
 }
 
 .coin-symbol-large {
-color: var(--gold-light);
+    color: var(--gold-light);
 
-font-size: 32px;
-font-weight: 900;
+    font-size: 32px;
+    font-weight: 900;
 
-text-shadow:
-    0 0 18px rgba(247, 147, 26, 0.35);
+    direction: ltr;
 
-direction: ltr;
-
+    text-shadow:
+        0 0 18px rgba(247,147,26,.35);
 }
 
+
 /* =========================================================
-36. RESPONSIVE — TABLET
+   41. RESPONSIVE TABLET
 ========================================================= */
 
 @media (min-width: 600px) {
 
-.app {
-    padding-left: 20px;
-    padding-right: 20px;
+    .app {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .coin-stage {
+        width: 210px;
+        height: 210px;
+    }
+
+    .coin-ring {
+        width: 190px;
+        height: 190px;
+    }
+
+    .coin-logo,
+    .hero-logo {
+        width: 116px;
+        height: 116px;
+
+        flex-basis: 116px;
+    }
+
+    .balance-card {
+        min-height: 365px;
+    }
+
+    #mineBtn {
+        width: 166px;
+        height: 166px;
+        min-height: 166px;
+    }
+
+    .growth-gauge {
+        width: 225px;
+        height: 225px;
+    }
 }
 
-.coin-stage {
-    width: 210px;
-    height: 210px;
-}
-
-.coin-ring {
-    width: 190px;
-    height: 190px;
-}
-
-.coin-logo,
-.hero-logo {
-    width: 116px;
-    height: 116px;
-
-    flex-basis: 116px;
-}
-
-.balance-value {
-    font-size: 43px;
-}
-
-.quick-actions {
-    gap: 10px;
-}
-
-.quick-action {
-    min-height: 82px;
-}
-
-}
 
 /* =========================================================
-37. RESPONSIVE — SMALL PHONES
+   42. SMALL PHONES
 ========================================================= */
 
 @media (max-width: 520px) {
 
-.app {
-    padding-left: 12px;
-    padding-right: 12px;
+    .app {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .hero {
+        padding-top: 11px;
+    }
+
+    .coin-stage {
+        width: 168px;
+        height: 168px;
+    }
+
+    .coin-ring {
+        width: 156px;
+        height: 156px;
+    }
+
+    .coin-logo,
+    .hero-logo {
+        width: 94px;
+        height: 94px;
+
+        flex-basis: 94px;
+
+        border-width: 4px;
+    }
+
+    .brand-title {
+        font-size: 24px;
+    }
+
+    .brand-title .coin-symbol {
+        font-size: 25px;
+    }
+
+    .brand-subtitle {
+        font-size: 10px;
+        letter-spacing: 1.2px;
+    }
+
+    .balance-card {
+        min-height: 330px;
+
+        padding: 17px;
+    }
+
+    .balance-value {
+        font-size: 34px;
+    }
+
+    #mineBtn {
+        width: 142px;
+        height: 142px;
+        min-height: 142px;
+
+        margin-top: 20px;
+
+        font-size: 12px;
+    }
+
+    .quick-actions {
+        gap: 6px;
+    }
+
+    .quick-action,
+    .action-card {
+        min-height: 70px;
+
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .quick-action .icon,
+    .action-card .icon {
+        width: 28px;
+        height: 28px;
+
+        font-size: 17px;
+    }
+
+    .quick-action span,
+    .action-card span {
+        font-size: 9px;
+    }
+
+    .master-service {
+        min-height: 125px;
+    }
+
+    .promotion {
+        gap: 11px;
+    }
+
+    .promotion-coin {
+        width: 60px;
+        height: 60px;
+
+        flex-basis: 60px;
+    }
+
+    .growth-gauge {
+        width: 185px;
+        height: 185px;
+    }
+
+    .growth-index {
+        padding: 16px;
+    }
+
+    .growth-index-value {
+        font-size: 43px;
+    }
+
+    .bottom-nav {
+        width:
+            calc(100% - 14px);
+
+        padding: 6px;
+    }
+
+    .bottom-nav button,
+    .bottom-nav a {
+        min-height: 48px;
+
+        font-size: 7px;
+    }
+
+    .bottom-nav button .nav-icon,
+    .bottom-nav a .nav-icon {
+        font-size: 17px;
+    }
 }
 
-.hero {
-    padding-top: 11px;
-}
-
-.coin-stage {
-    width: 168px;
-    height: 168px;
-}
-
-.coin-ring {
-    width: 156px;
-    height: 156px;
-}
-
-.coin-logo,
-.hero-logo {
-    width: 94px;
-    height: 94px;
-
-    flex-basis: 94px;
-
-    border-width: 4px;
-}
-
-.brand-title {
-    font-size: 24px;
-}
-
-.brand-title .coin-symbol {
-    font-size: 25px;
-}
-
-.brand-subtitle {
-    font-size: 10px;
-    letter-spacing: 1.2px;
-}
-
-.balance-card {
-    padding: 17px;
-}
-
-.balance-value {
-    font-size: 34px;
-}
-
-#mineBtn {
-    min-height: 52px;
-
-    padding-left: 14px;
-    padding-right: 14px;
-
-    font-size: 14px;
-}
-
-.quick-actions {
-    gap: 6px;
-}
-
-.quick-action,
-.action-card {
-    min-height: 70px;
-
-    padding-left: 5px;
-    padding-right: 5px;
-}
-
-.quick-action .icon,
-.action-card .icon {
-    font-size: 19px;
-}
-
-.quick-action span,
-.action-card span {
-    font-size: 9px;
-}
-
-.master-service {
-    min-height: 125px;
-}
-
-.promotion {
-    gap: 11px;
-}
-
-.promotion-coin {
-    width: 60px;
-    height: 60px;
-
-    flex-basis: 60px;
-}
-
-}
 
 /* =========================================================
-38. RESPONSIVE — VERY SMALL PHONES
+   43. VERY SMALL PHONES
 ========================================================= */
 
 @media (max-width: 380px) {
 
-body {
-    padding-bottom: 90px;
+    body {
+        padding-bottom: 92px;
+    }
+
+    .app {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .topbar {
+        min-height: 53px;
+    }
+
+    .topbar-title {
+        font-size: 15px;
+    }
+
+    .coin-stage {
+        width: 150px;
+        height: 150px;
+    }
+
+    .coin-ring {
+        width: 138px;
+        height: 138px;
+    }
+
+    .coin-logo,
+    .hero-logo {
+        width: 84px;
+        height: 84px;
+
+        flex-basis: 84px;
+    }
+
+    .brand-title {
+        font-size: 22px;
+    }
+
+    .balance-card {
+        min-height: 315px;
+
+        padding: 15px;
+    }
+
+    .balance-value {
+        font-size: 31px;
+    }
+
+    #mineBtn {
+        width: 132px;
+        height: 132px;
+        min-height: 132px;
+
+        font-size: 11px;
+    }
+
+    .quick-actions {
+        gap: 5px;
+    }
+
+    .quick-action,
+    .action-card {
+        min-height: 65px;
+
+        border-radius: 14px;
+
+        font-size: 9px;
+    }
+
+    .quick-action .icon,
+    .action-card .icon {
+        width: 26px;
+        height: 26px;
+
+        font-size: 16px;
+    }
+
+    .economic-grid {
+        gap: 6px;
+    }
+
+    .economic-item {
+        padding:
+            10px 8px;
+    }
+
+    .economic-item .value {
+        font-size: 13px;
+    }
+
+    .growth-gauge {
+        width: 165px;
+        height: 165px;
+    }
+
+    .growth-index-value {
+        font-size: 38px;
+    }
+
+    .growth-metrics {
+        gap: 5px;
+    }
+
+    .growth-metric {
+        padding:
+            8px 4px;
+    }
+
+    .growth-metric strong {
+        font-size: 11px;
+    }
+
+    .bottom-nav {
+        bottom: 6px;
+
+        gap: 1px;
+    }
+
+    .bottom-nav button,
+    .bottom-nav a {
+        min-height: 45px;
+
+        font-size: 6.5px;
+
+        border-radius: 12px;
+    }
+
+    .bottom-nav button .nav-icon,
+    .bottom-nav a .nav-icon {
+        font-size: 16px;
+    }
 }
 
-.app {
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
-.topbar {
-    min-height: 53px;
-}
-
-.topbar-title {
-    font-size: 15px;
-}
-
-.coin-stage {
-    width: 150px;
-    height: 150px;
-}
-
-.coin-ring {
-    width: 138px;
-    height: 138px;
-}
-
-.coin-logo,
-.hero-logo {
-    width: 84px;
-    height: 84px;
-
-    flex-basis: 84px;
-}
-
-.brand-title {
-    font-size: 22px;
-}
-
-.balance-card {
-    padding: 15px;
-}
-
-.balance-value {
-    font-size: 31px;
-}
-
-#mineBtn {
-    min-height: 50px;
-
-    font-size: 13px;
-}
-
-.quick-action span,
-.action-card span {
-    font-size: 8px;
-}
-
-.quick-action {
-    min-height: 64px;
-}
-
-.economic-grid {
-    gap: 6px;
-}
-
-.economic-item {
-    padding: 10px 8px;
-}
-
-.economic-item .value {
-    font-size: 13px;
-}
-
-.bottom-nav {
-    bottom: 6px;
-}
-
-.bottom-nav button,
-.bottom-nav a {
-    min-height: 47px;
-
-    font-size: 8px;
-}
-
-.bottom-nav button .nav-icon,
-.bottom-nav a .nav-icon {
-    font-size: 17px;
-}
-
-}
 
 /* =========================================================
-39. RTL / LTR CONTROL
+   44. RTL / LTR CONTROL
 ========================================================= */
 
-/*
-Arabic content:
-direction: rtl
-
-Numeric / English / technical content:
-direction: ltr
-
-This prevents mixed Arabic-English strings from
-visually escaping their containers.
-*/
-
 [dir="rtl"] {
-text-align: right;
+    text-align: right;
 }
 
 [dir="ltr"] {
-text-align: left;
+    text-align: left;
 }
 
 #balance,
@@ -3080,72 +4117,80 @@ text-align: left;
 #referralRewards,
 #v4ExperienceScore,
 #rate {
-direction: ltr;
+    direction: ltr;
 
-unicode-bidi: plaintext;
-
+    unicode-bidi: plaintext;
 }
 
+
 /* =========================================================
-40. REDUCED MOTION
+   45. FOCUS
+========================================================= */
+
+button:focus-visible,
+a:focus-visible {
+    outline:
+        2px solid var(--cyan);
+
+    outline-offset:
+        2px;
+}
+
+
+/* =========================================================
+   46. REDUCED MOTION
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
-*,
-*::before,
-*::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
+    *,
+    *::before,
+    *::after {
+        animation-duration:
+            .01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        scroll-behavior:
+            auto !important;
+
+        transition-duration:
+            .01ms !important;
+    }
 }
 
-}
 
 /* =========================================================
-41. TELEGRAM SAFE AREA
+   47. TELEGRAM SAFE AREA
 ========================================================= */
 
 @supports (padding: max(0px)) {
 
-body {
-    padding-bottom:
-        max(
-            96px,
-            calc(78px + env(safe-area-inset-bottom))
-        );
+    body {
+        padding-bottom:
+            max(
+                100px,
+                calc(
+                    82px +
+                    env(safe-area-inset-bottom)
+                )
+            );
+    }
+
+    .bottom-nav {
+        bottom:
+            max(
+                8px,
+                env(safe-area-inset-bottom)
+            );
+    }
 }
 
-.bottom-nav {
-    bottom:
-        max(
-            8px,
-            env(safe-area-inset-bottom)
-        );
-}
-
-}
 
 /* =========================================================
-42. FINAL VISUAL POLISH
+   48. FINAL CARD ISOLATION
 ========================================================= */
-
-::selection {
-color: #1a0d00;
-
-background:
-    var(--gold-light);
-
-}
-
-button:focus-visible,
-a:focus-visible {
-outline: 2px solid var(--cyan);
-
-outline-offset: 2px;
-
-}
 
 .card,
 .balance-card,
@@ -3156,82 +4201,104 @@ outline-offset: 2px;
 .task-card,
 .promotion,
 .ad-galaxy,
-.ai-service {
-isolation: isolate;
+.ai-service,
+.growth-index,
+.growth-card,
+.profile-card {
+    isolation: isolate;
 }
 
+
 /* =========================================================
-43. MOBILE TEXT PROTECTION
+   49. MOBILE TEXT PROTECTION
 ========================================================= */
 
 @media (max-width: 520px) {
 
-.balance-label,
-.balance-meta,
-.rate,
-.experience-level,
-.experience-score,
-.section-title,
-.modal-title {
-    overflow-wrap: normal;
-    word-break: normal;
+    .balance-label,
+    .balance-meta,
+    .rate,
+    .experience-level,
+    .experience-score,
+    .section-title,
+    .modal-title {
+        overflow-wrap: normal;
+
+        word-break: normal;
+    }
+
+    #mineBtn,
+    #economicDashboardBtn,
+    #copyReferralBtn,
+    #shareReferralBtn,
+    .primary-btn,
+    .secondary-btn,
+    .task-btn,
+    .complete-task-btn {
+        writing-mode: horizontal-tb;
+    }
 }
 
-#mineBtn,
-#economicDashboardBtn,
-#copyReferralBtn,
-#shareReferralBtn,
-.primary-btn,
-.secondary-btn,
-.task-btn,
-.complete-task-btn {
-    writing-mode: horizontal-tb;
-}
-
-}
 
 /* =========================================================
-   37. 3MIGO BUTTON NORMALIZATION
-   Fix browser-default buttons
-   Preserve app.js V5.0 contracts
+   50. BUTTON NORMALIZATION
 ========================================================= */
 
-/* إزالة الشكل الافتراضي للمتصفح */
-button {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-
-    font-family: Arial, Tahoma, sans-serif;
+.app button {
     border: 0;
+
     outline: none;
 
-    -webkit-tap-highlight-color: transparent;
-}
+    -webkit-tap-highlight-color:
+        transparent;
 
-/* جميع الأزرار داخل التطبيق */
-.app button {
-    font-family: Arial, Tahoma, sans-serif;
+    font-family:
+        Arial,
+        Tahoma,
+        sans-serif;
+
     direction: rtl;
+
     text-align: center;
 }
 
-/* ---------------------------------------------------------
-   QUICK ACTIONS
---------------------------------------------------------- */
+.app button:focus {
+    outline: none;
+}
+
+.app button:focus-visible {
+    outline:
+        2px solid var(--cyan);
+
+    outline-offset: 2px;
+}
+
+.app button:not(:disabled) {
+    color: inherit;
+}
+
+
+/* =========================================================
+   51. QUICK ACTION BUTTONS
+========================================================= */
 
 .quick-actions button,
 .quick-actions .quick-action,
 .quick-actions [data-action] {
+
     position: relative;
 
-    min-height: 74px;
     width: 100%;
 
-    padding: 10px 7px;
+    min-height: 74px;
+
+    padding:
+        10px 7px;
 
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
     justify-content: center;
 
@@ -3244,20 +4311,19 @@ button {
     background:
         linear-gradient(
             145deg,
-            rgba(18, 28, 40, 0.98),
-            rgba(7, 13, 21, 0.98)
+            rgba(18,28,40,.98),
+            rgba(7,13,21,.98)
         );
 
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    border:
+        1px solid rgba(255,255,255,.09);
 
     box-shadow:
-        0 8px 22px rgba(0, 0, 0, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        0 8px 22px rgba(0,0,0,.22),
+        inset 0 1px 0 rgba(255,255,255,.04);
 
     font-size: 11px;
     font-weight: 800;
-
-    line-height: 1.2;
 
     transition:
         transform 180ms ease,
@@ -3266,43 +4332,28 @@ button {
         box-shadow 180ms ease;
 }
 
-/* منع الأسهم أو الرموز النصية من كسر شكل الزر */
-.quick-actions button::before,
-.quick-actions button::after,
-.quick-actions [data-action]::before,
-.quick-actions [data-action]::after {
-    box-sizing: border-box;
-}
-
-/* حالة الضغط */
 .quick-actions button:active,
 .quick-actions [data-action]:active {
-    transform: scale(0.96);
+    transform:
+        scale(.96);
 }
 
-/* Hover */
 .quick-actions button:hover,
 .quick-actions [data-action]:hover {
-    transform: translateY(-2px);
+    transform:
+        translateY(-2px);
 
     border-color:
-        rgba(247, 147, 26, 0.32);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(28, 39, 53, 0.98),
-            rgba(9, 16, 25, 0.98)
-        );
+        rgba(247,147,26,.32);
 
     box-shadow:
-        0 10px 28px rgba(0, 0, 0, 0.28),
-        0 0 18px rgba(247, 147, 26, 0.08);
+        0 10px 28px rgba(0,0,0,.28),
+        0 0 18px rgba(247,147,26,.08);
 }
 
 
 /* =========================================================
-   38. UNIVERSAL APP ACTION BUTTON
+   52. TASK / WALLET / GENERAL BUTTONS
 ========================================================= */
 
 .app button.primary-btn,
@@ -3314,251 +4365,82 @@ button {
     appearance: none;
     -webkit-appearance: none;
 
-    font-family: Arial, Tahoma, sans-serif;
-
     cursor: pointer;
-
-    outline: none;
-}
-
-/* منع الخلفية البيضاء الافتراضية */
-.app button:not(:disabled) {
-    color: inherit;
-}
-
-/* التركيز */
-.app button:focus {
-    outline: none;
-}
-
-.app button:focus-visible {
-    outline: 2px solid var(--cyan);
-    outline-offset: 2px;
 }
 
 
 /* =========================================================
-   39. ARABIC / RTL VISUAL CONTROL
+   53. NAVIGATION ACTIVE STATE
 ========================================================= */
 
-.app {
-    direction: rtl;
-}
-
-.app main,
-.app section,
-.app .card,
-.app .balance-card,
-.app .experience-card,
-.app .economic-card,
-.app .referral-card,
-.app .wallet-card {
-    direction: rtl;
-}
-
-/* العناوين العربية */
-.app h1,
-.app h2,
-.app h3,
-.app h4,
-.app p,
-.app span,
-.app label {
-    unicode-bidi: plaintext;
-}
-
-
-/* =========================================================
-   40. MINING BUTTON — PREMIUM 3MIGO
-========================================================= */
-
-#mineBtn {
-    appearance: none;
-    -webkit-appearance: none;
-
-    min-height: 56px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-    white-space: nowrap;
-
-    direction: rtl;
-
-    border: 1px solid rgba(255, 214, 125, 0.35);
+.bottom-nav button.active,
+.bottom-nav a.active {
+    color:
+        var(--gold-light) !important;
 
     background:
-        linear-gradient(
-            135deg,
-            #ffd86f 0%,
-            #ffb52e 32%,
-            #f7931a 68%,
-            #d96b00 100%
-        );
+        rgba(247,147,26,.09) !important;
 
     box-shadow:
-        0 10px 30px rgba(247, 147, 26, 0.24),
-        inset 0 1px 0 rgba(255, 255, 255, 0.65),
-        inset 0 -2px 0 rgba(125, 53, 0, 0.22);
-
-    font-size: 16px;
-    font-weight: 900;
+        inset 0 1px 0 rgba(255,255,255,.04);
 }
 
 
 /* =========================================================
-   41. TASK BUTTONS
+   54. PAGE NAVIGATION SUPPORT
+   Future app.js page states can use:
+   .page
+   .page.active
+   .view
+   .view.active
 ========================================================= */
 
-.task-btn,
-.complete-task-btn {
-    appearance: none;
-    -webkit-appearance: none;
+.page,
+.view {
+    width: 100%;
+}
 
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.page[hidden],
+.view[hidden] {
+    display: none !important;
+}
 
-    min-width: 70px;
-    min-height: 38px;
+.page.active,
+.view.active {
+    display: block;
+}
 
-    border: 1px solid rgba(255, 210, 120, 0.25);
+.page-enter,
+.view-enter {
+    animation:
+        pageEnter 220ms ease-out;
+}
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--gold-light),
-            var(--gold)
-        );
+@keyframes pageEnter {
 
-    color: #160c00;
+    from {
+        opacity: 0;
+        transform:
+            translateY(8px);
+    }
 
-    box-shadow:
-        0 5px 14px rgba(247, 147, 26, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.45);
-
-    font-size: 10px;
-    font-weight: 900;
+    to {
+        opacity: 1;
+        transform:
+            translateY(0);
+    }
 }
 
 
 /* =========================================================
-   42. BOTTOM NAV — NEVER WHITE
+   55. PREMIUM SCROLL TRANSITION FEEL
 ========================================================= */
 
-.bottom-nav button {
-    appearance: none;
-    -webkit-appearance: none;
-
-    border: 0 !important;
-
-    color: var(--muted) !important;
-
-    background: transparent !important;
-
-    box-shadow: none !important;
-
-    font-family: Arial, Tahoma, sans-serif;
-}
-
-.bottom-nav button.active {
-    color: var(--gold-light) !important;
-
-    background:
-        rgba(247, 147, 26, 0.09) !important;
+section {
+    scroll-margin-top: 70px;
 }
 
 
 /* =========================================================
-   43. QUICK ACTION ICONS
-========================================================= */
-
-.quick-action .icon,
-.action-card .icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 30px;
-    height: 30px;
-
-    border-radius: 10px;
-
-    background:
-        rgba(247, 147, 26, 0.08);
-
-    border: 1px solid rgba(247, 147, 26, 0.10);
-
-    font-size: 18px;
-}
-
-
-/* =========================================================
-   44. MOBILE BUTTON CORRECTION
-========================================================= */
-
-@media (max-width: 520px) {
-
-    .quick-actions button,
-    .quick-actions .quick-action,
-    .quick-actions [data-action] {
-        min-height: 70px;
-
-        padding: 9px 5px;
-
-        border-radius: 16px;
-
-        font-size: 10px;
-    }
-
-    .quick-action .icon,
-    .action-card .icon {
-        width: 28px;
-        height: 28px;
-
-        font-size: 17px;
-    }
-
-    #mineBtn {
-        min-height: 54px;
-
-        font-size: 15px;
-    }
-}
-
-
-/* =========================================================
-   45. VERY SMALL SCREEN
-========================================================= */
-
-@media (max-width: 380px) {
-
-    .quick-actions {
-        gap: 5px;
-    }
-
-    .quick-actions button,
-    .quick-actions .quick-action,
-    .quick-actions [data-action] {
-        min-height: 65px;
-
-        border-radius: 14px;
-
-        font-size: 9px;
-    }
-
-    .quick-action .icon,
-    .action-card .icon {
-        width: 26px;
-        height: 26px;
-
-        font-size: 16px;
-    }
-}
-
-
-/* =========================================================
-   END — BUTTON NORMALIZATION V5.2
+   56. END — 3MIGO STYLE V5.3
 ========================================================= */
