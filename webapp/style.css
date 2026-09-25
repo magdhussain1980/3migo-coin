@@ -3191,5 +3191,374 @@ isolation: isolate;
 }
 
 /* =========================================================
-END — 3Migo Coin STYLE V5.2.1
+   37. 3MIGO BUTTON NORMALIZATION
+   Fix browser-default buttons
+   Preserve app.js V5.0 contracts
+========================================================= */
+
+/* إزالة الشكل الافتراضي للمتصفح */
+button {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    font-family: Arial, Tahoma, sans-serif;
+    border: 0;
+    outline: none;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* جميع الأزرار داخل التطبيق */
+.app button {
+    font-family: Arial, Tahoma, sans-serif;
+    direction: rtl;
+    text-align: center;
+}
+
+/* ---------------------------------------------------------
+   QUICK ACTIONS
+--------------------------------------------------------- */
+
+.quick-actions button,
+.quick-actions .quick-action,
+.quick-actions [data-action] {
+    position: relative;
+
+    min-height: 74px;
+    width: 100%;
+
+    padding: 10px 7px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    border-radius: 17px;
+
+    color: var(--text);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 28, 40, 0.98),
+            rgba(7, 13, 21, 0.98)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.09);
+
+    box-shadow:
+        0 8px 22px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    font-size: 11px;
+    font-weight: 800;
+
+    line-height: 1.2;
+
+    transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+}
+
+/* منع الأسهم أو الرموز النصية من كسر شكل الزر */
+.quick-actions button::before,
+.quick-actions button::after,
+.quick-actions [data-action]::before,
+.quick-actions [data-action]::after {
+    box-sizing: border-box;
+}
+
+/* حالة الضغط */
+.quick-actions button:active,
+.quick-actions [data-action]:active {
+    transform: scale(0.96);
+}
+
+/* Hover */
+.quick-actions button:hover,
+.quick-actions [data-action]:hover {
+    transform: translateY(-2px);
+
+    border-color:
+        rgba(247, 147, 26, 0.32);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(28, 39, 53, 0.98),
+            rgba(9, 16, 25, 0.98)
+        );
+
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.28),
+        0 0 18px rgba(247, 147, 26, 0.08);
+}
+
+
+/* =========================================================
+   38. UNIVERSAL APP ACTION BUTTON
+========================================================= */
+
+.app button.primary-btn,
+.app button.secondary-btn,
+.app button.task-btn,
+.app button.complete-task-btn,
+.app button.wallet-action,
+.app button.icon-btn {
+    appearance: none;
+    -webkit-appearance: none;
+
+    font-family: Arial, Tahoma, sans-serif;
+
+    cursor: pointer;
+
+    outline: none;
+}
+
+/* منع الخلفية البيضاء الافتراضية */
+.app button:not(:disabled) {
+    color: inherit;
+}
+
+/* التركيز */
+.app button:focus {
+    outline: none;
+}
+
+.app button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+}
+
+
+/* =========================================================
+   39. ARABIC / RTL VISUAL CONTROL
+========================================================= */
+
+.app {
+    direction: rtl;
+}
+
+.app main,
+.app section,
+.app .card,
+.app .balance-card,
+.app .experience-card,
+.app .economic-card,
+.app .referral-card,
+.app .wallet-card {
+    direction: rtl;
+}
+
+/* العناوين العربية */
+.app h1,
+.app h2,
+.app h3,
+.app h4,
+.app p,
+.app span,
+.app label {
+    unicode-bidi: plaintext;
+}
+
+
+/* =========================================================
+   40. MINING BUTTON — PREMIUM 3MIGO
+========================================================= */
+
+#mineBtn {
+    appearance: none;
+    -webkit-appearance: none;
+
+    min-height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    white-space: nowrap;
+
+    direction: rtl;
+
+    border: 1px solid rgba(255, 214, 125, 0.35);
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffd86f 0%,
+            #ffb52e 32%,
+            #f7931a 68%,
+            #d96b00 100%
+        );
+
+    box-shadow:
+        0 10px 30px rgba(247, 147, 26, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65),
+        inset 0 -2px 0 rgba(125, 53, 0, 0.22);
+
+    font-size: 16px;
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   41. TASK BUTTONS
+========================================================= */
+
+.task-btn,
+.complete-task-btn {
+    appearance: none;
+    -webkit-appearance: none;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 70px;
+    min-height: 38px;
+
+    border: 1px solid rgba(255, 210, 120, 0.25);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold-light),
+            var(--gold)
+        );
+
+    color: #160c00;
+
+    box-shadow:
+        0 5px 14px rgba(247, 147, 26, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45);
+
+    font-size: 10px;
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   42. BOTTOM NAV — NEVER WHITE
+========================================================= */
+
+.bottom-nav button {
+    appearance: none;
+    -webkit-appearance: none;
+
+    border: 0 !important;
+
+    color: var(--muted) !important;
+
+    background: transparent !important;
+
+    box-shadow: none !important;
+
+    font-family: Arial, Tahoma, sans-serif;
+}
+
+.bottom-nav button.active {
+    color: var(--gold-light) !important;
+
+    background:
+        rgba(247, 147, 26, 0.09) !important;
+}
+
+
+/* =========================================================
+   43. QUICK ACTION ICONS
+========================================================= */
+
+.quick-action .icon,
+.action-card .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(247, 147, 26, 0.08);
+
+    border: 1px solid rgba(247, 147, 26, 0.10);
+
+    font-size: 18px;
+}
+
+
+/* =========================================================
+   44. MOBILE BUTTON CORRECTION
+========================================================= */
+
+@media (max-width: 520px) {
+
+    .quick-actions button,
+    .quick-actions .quick-action,
+    .quick-actions [data-action] {
+        min-height: 70px;
+
+        padding: 9px 5px;
+
+        border-radius: 16px;
+
+        font-size: 10px;
+    }
+
+    .quick-action .icon,
+    .action-card .icon {
+        width: 28px;
+        height: 28px;
+
+        font-size: 17px;
+    }
+
+    #mineBtn {
+        min-height: 54px;
+
+        font-size: 15px;
+    }
+}
+
+
+/* =========================================================
+   45. VERY SMALL SCREEN
+========================================================= */
+
+@media (max-width: 380px) {
+
+    .quick-actions {
+        gap: 5px;
+    }
+
+    .quick-actions button,
+    .quick-actions .quick-action,
+    .quick-actions [data-action] {
+        min-height: 65px;
+
+        border-radius: 14px;
+
+        font-size: 9px;
+    }
+
+    .quick-action .icon,
+    .action-card .icon {
+        width: 26px;
+        height: 26px;
+
+        font-size: 16px;
+    }
+}
+
+
+/* =========================================================
+   END — BUTTON NORMALIZATION V5.2
 ========================================================= */
