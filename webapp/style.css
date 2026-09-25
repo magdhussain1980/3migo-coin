@@ -1,2559 +1,3150 @@
 /* =========================================================
-   3Migo Coin — Telegram Mini App
-   STYLE SHEET
-   Version 5.2
-   3MIGO SMART — Premium Economy Experience
+3Migo Coin — Telegram Mini App
+STYLE SHEET
+Version 5.2.1
+3MIGO SMART — Premium Economy Experience
 
-   IMPORTANT:
-   - Frontend styling only.
-   - Existing IDs preserved.
-   - Existing classes preserved.
-   - Existing data-action contracts preserved.
-   - Compatible with app.js V5.0.
-   - No API / database / economic engine changes.
-========================================================= */
+IMPORTANT:
 
+- Frontend styling only.
+- Existing IDs preserved.
+- Existing classes preserved.
+- Existing data-action contracts preserved.
+- Compatible with app.js V5.0.
+- No API / database / economic engine changes.
+  ========================================================= */
 
 /* =========================================================
-   01. RESET & ROOT
-========================================================= */
+
+1. RESET & ROOT
+   ========================================================= */
 
 :root {
-    --bg: #03070d;
-    --bg-soft: #071019;
-    --bg-deep: #02050a;
+--bg: #03070d;
+--bg-soft: #071019;
+--bg-deep: #02050a;
 
-    --bg-card: rgba(10, 17, 27, 0.88);
-    --bg-card-2: rgba(16, 24, 35, 0.94);
+--bg-card: rgba(10, 17, 27, 0.88);
+--bg-card-2: rgba(16, 24, 35, 0.94);
 
-    --gold: #f7931a;
-    --gold-light: #ffb84d;
-    --gold-soft: #ffcc70;
-    --gold-pale: #ffe0a3;
+--gold: #f7931a;
+--gold-light: #ffb84d;
+--gold-soft: #ffcc70;
+--gold-pale: #ffe0a3;
 
-    --orange: #ff8a00;
-    --orange-dark: #c96500;
+--orange: #ff8a00;
+--orange-dark: #c96500;
 
-    --cyan: #5bdcff;
-    --cyan-soft: #8be8ff;
+--cyan: #5bdcff;
+--cyan-soft: #8be8ff;
 
-    --blue: #1769ff;
-    --blue-light: #4da3ff;
+--blue: #1769ff;
+--blue-light: #4da3ff;
 
-    --green: #25d366;
-    --green-soft: #6fffa0;
+--green: #25d366;
+--green-soft: #6fffa0;
 
-    --red: #ff5c5c;
-    --yellow: #ffd54a;
+--red: #ff5c5c;
+--yellow: #ffd54a;
 
-    --white: #ffffff;
-    --text: #f6f8fb;
-    --text-soft: #dce4ed;
-    --muted: #8e9bab;
+--white: #ffffff;
+--text: #f6f8fb;
+--text-soft: #dce4ed;
+--muted: #8e9bab;
 
-    --border: rgba(255, 255, 255, 0.09);
-    --border-gold: rgba(247, 147, 26, 0.30);
-    --border-cyan: rgba(91, 220, 255, 0.25);
+--border: rgba(255, 255, 255, 0.09);
+--border-gold: rgba(247, 147, 26, 0.30);
+--border-cyan: rgba(91, 220, 255, 0.25);
 
-    --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
-    --shadow-gold:
-        0 0 20px rgba(247, 147, 26, 0.18),
-        0 0 55px rgba(247, 147, 26, 0.08);
+--shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
 
-    --shadow-blue:
-        0 0 24px rgba(23, 105, 255, 0.16);
+--shadow-gold:
+    0 0 20px rgba(247, 147, 26, 0.18),
+    0 0 55px rgba(247, 147, 26, 0.08);
 
-    --radius-sm: 10px;
-    --radius-md: 16px;
-    --radius-lg: 22px;
-    --radius-xl: 30px;
-    --radius-pill: 999px;
+--shadow-blue:
+    0 0 24px rgba(23, 105, 255, 0.16);
 
-    --transition: 180ms ease;
+--radius-sm: 10px;
+--radius-md: 16px;
+--radius-lg: 22px;
+--radius-xl: 30px;
+--radius-pill: 999px;
+
+--transition: 180ms ease;
+
 }
+
+/* =========================================================
+02. RESET
+========================================================= */
 
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  }
 
 html {
-    scroll-behavior: smooth;
+scroll-behavior: smooth;
 }
 
 body {
-    font-family:
-        Arial,
-        Tahoma,
-        sans-serif;
+font-family:
+Arial,
+Tahoma,
+sans-serif;
 
-    background:
-        radial-gradient(
-            circle at 50% -10%,
-            rgba(247, 147, 26, 0.08),
-            transparent 32%
-        ),
-        radial-gradient(
-            circle at 0% 35%,
-            rgba(23, 105, 255, 0.06),
-            transparent 28%
-        ),
-        var(--bg);
+background:
+    radial-gradient(
+        circle at 50% -10%,
+        rgba(247, 147, 26, 0.08),
+        transparent 32%
+    ),
+    radial-gradient(
+        circle at 0% 35%,
+        rgba(23, 105, 255, 0.06),
+        transparent 28%
+    ),
+    var(--bg);
 
-    color: var(--white);
-    min-height: 100vh;
-    padding-bottom: 96px;
+color: var(--white);
 
-    overflow-x: hidden;
+min-height: 100vh;
 
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+padding-bottom: 96px;
+
+overflow-x: hidden;
+
+-webkit-font-smoothing: antialiased;
+text-rendering: optimizeLegibility;
+
 }
 
 button,
 input,
 textarea,
 select {
-    font-family: inherit;
+font-family: inherit;
 }
 
 button {
-    cursor: pointer;
+cursor: pointer;
+-webkit-tap-highlight-color: transparent;
 }
 
 button:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
+cursor: not-allowed;
+opacity: 0.55;
 }
 
 img {
-    max-width: 100%;
-    display: block;
+max-width: 100%;
+display: block;
 }
 
 a {
-    color: inherit;
-    text-decoration: none;
+color: inherit;
+text-decoration: none;
 }
 
+/* =========================================================
+03. GLOBAL SAFETY
+========================================================= */
+
+button,
+.primary-btn,
+.secondary-btn,
+.icon-btn,
+.task-btn,
+.complete-task-btn,
+#mineBtn,
+#copyReferralBtn,
+#shareReferralBtn,
+#economicDashboardBtn,
+.wallet-action {
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+line-height: 1.2;
+text-align: center;
+vertical-align: middle;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+span,
+div {
+overflow-wrap: break-word;
+}
 
 /* =========================================================
-   02. GLOBAL SCROLLBAR
+04. SCROLLBAR
 ========================================================= */
 
 ::-webkit-scrollbar {
-    width: 5px;
+width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg-deep);
+background: var(--bg-deep);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(247, 147, 26, 0.45);
-    border-radius: var(--radius-pill);
+background: rgba(247, 147, 26, 0.45);
+border-radius: var(--radius-pill);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(247, 147, 26, 0.75);
+background: rgba(247, 147, 26, 0.75);
 }
 
-
 /* =========================================================
-   03. APP CONTAINER
+05. APP CONTAINER
 ========================================================= */
 
 .app {
-    width: 100%;
-    max-width: 720px;
-    margin: 0 auto;
-    position: relative;
-    padding: 0 14px;
+width: 100%;
+max-width: 720px;
+margin: 0 auto;
+position: relative;
+padding: 0 14px;
 }
 
 main {
-    width: 100%;
+width: 100%;
 }
 
-
 /* =========================================================
-   04. TOP BAR
+06. TOP BAR
 ========================================================= */
 
 .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
+position: sticky;
+top: 0;
+z-index: 100;
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+display: flex;
+align-items: center;
+justify-content: space-between;
 
-    min-height: 58px;
-    padding: 10px 4px;
+min-height: 58px;
+padding: 10px 4px;
 
-    background:
-        linear-gradient(
-            180deg,
-            rgba(3, 7, 13, 0.96),
-            rgba(3, 7, 13, 0.78)
-        );
+background:
+    linear-gradient(
+        180deg,
+        rgba(3, 7, 13, 0.96),
+        rgba(3, 7, 13, 0.78)
+    );
 
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+backdrop-filter: blur(18px);
+-webkit-backdrop-filter: blur(18px);
 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+}
+
+.topbar-left,
+.topbar-right {
+display: flex;
+align-items: center;
 }
 
 .topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.topbar-title {
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: 0.3px;
+gap: 8px;
 }
 
 .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+gap: 8px;
+}
+
+.topbar-title {
+font-size: 17px;
+font-weight: 800;
+letter-spacing: 0.3px;
+white-space: nowrap;
 }
 
 .verified {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+display: inline-flex;
+align-items: center;
+justify-content: center;
 
-    width: 19px;
-    height: 19px;
+width: 19px;
+height: 19px;
 
-    border-radius: 50%;
+flex: 0 0 19px;
 
-    color: #061018;
-    background: linear-gradient(
+border-radius: 50%;
+
+color: #061018;
+
+background:
+    linear-gradient(
         135deg,
         var(--cyan),
         var(--cyan-soft)
     );
 
-    font-size: 11px;
-    font-weight: 900;
+font-size: 11px;
+font-weight: 900;
 
-    box-shadow:
-        0 0 10px rgba(91, 220, 255, 0.35);
+box-shadow:
+    0 0 10px rgba(91, 220, 255, 0.35);
+
 }
 
 .status-dot {
-    width: 8px;
-    height: 8px;
+width: 8px;
+height: 8px;
 
-    border-radius: 50%;
-    background: var(--green);
+flex: 0 0 8px;
 
-    box-shadow:
-        0 0 0 4px rgba(37, 211, 102, 0.08),
-        0 0 14px rgba(37, 211, 102, 0.6);
+border-radius: 50%;
 
-    animation: statusPulse 2s infinite ease-in-out;
+background: var(--green);
+
+box-shadow:
+    0 0 0 4px rgba(37, 211, 102, 0.08),
+    0 0 14px rgba(37, 211, 102, 0.6);
+
+animation: statusPulse 2s infinite ease-in-out;
+
 }
 
 @keyframes statusPulse {
-    0%,
-    100% {
-        opacity: 0.65;
-        transform: scale(0.9);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
+0%,
+100% {
+opacity: 0.65;
+transform: scale(0.9);
 }
 
+50% {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+}
 
 /* =========================================================
-   05. HERO
+07. HERO
 ========================================================= */
 
 .hero {
-    position: relative;
-    text-align: center;
+position: relative;
 
-    padding: 18px 0 12px;
+text-align: center;
 
-    overflow: hidden;
+padding: 15px 0 10px;
+
+overflow: hidden;
+
 }
 
 .hero::before {
-    content: "";
-    position: absolute;
+content: "";
 
-    left: 50%;
-    top: 25px;
+position: absolute;
 
-    width: 300px;
-    height: 180px;
+left: 50%;
+top: 20px;
 
-    transform: translateX(-50%);
+width: 300px;
+height: 190px;
 
-    background:
-        radial-gradient(
-            ellipse,
-            rgba(247, 147, 26, 0.13),
-            transparent 68%
-        );
+transform: translateX(-50%);
 
-    pointer-events: none;
+background:
+    radial-gradient(
+        ellipse,
+        rgba(247, 147, 26, 0.14),
+        transparent 68%
+    );
+
+pointer-events: none;
+
 }
 
+/* =========================================================
+08. COIN STAGE
+========================================================= */
+
 .coin-stage {
-    position: relative;
+position: relative;
 
-    width: 190px;
-    height: 190px;
+width: 180px;
+height: 180px;
 
-    margin: 0 auto 15px;
+margin: 0 auto 8px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+display: flex;
+align-items: center;
+justify-content: center;
+
 }
 
 .coin-glow {
-    position: absolute;
+position: absolute;
 
-    width: 145px;
-    height: 145px;
+width: 140px;
+height: 140px;
 
-    border-radius: 50%;
+border-radius: 50%;
 
-    background:
-        radial-gradient(
-            circle,
-            rgba(247, 147, 26, 0.35),
-            rgba(247, 147, 26, 0.06) 50%,
-            transparent 72%
-        );
+background:
+    radial-gradient(
+        circle,
+        rgba(247, 147, 26, 0.35),
+        rgba(247, 147, 26, 0.06) 50%,
+        transparent 72%
+    );
 
-    filter: blur(8px);
+filter: blur(8px);
 
-    animation: coinGlow 3.5s ease-in-out infinite;
+animation: coinGlow 3.5s ease-in-out infinite;
+
 }
 
 .coin-ring {
-    position: absolute;
+position: absolute;
 
-    width: 174px;
-    height: 174px;
+width: 166px;
+height: 166px;
 
-    border-radius: 50%;
+border-radius: 50%;
 
-    border: 1px solid rgba(247, 147, 26, 0.26);
+border: 1px solid rgba(247, 147, 26, 0.27);
 
-    box-shadow:
-        0 0 18px rgba(247, 147, 26, 0.10),
-        inset 0 0 18px rgba(247, 147, 26, 0.06);
+box-shadow:
+    0 0 18px rgba(247, 147, 26, 0.10),
+    inset 0 0 18px rgba(247, 147, 26, 0.06);
 
-    animation: ringRotate 16s linear infinite;
+animation: ringRotate 16s linear infinite;
+
 }
 
 @keyframes ringRotate {
-    from {
-        transform: rotate(0deg);
-    }
+from {
+transform: rotate(0deg);
+}
 
-    to {
-        transform: rotate(360deg);
-    }
+to {
+    transform: rotate(360deg);
+}
+
 }
 
 @keyframes coinGlow {
-    0%,
-    100% {
-        opacity: 0.65;
-        transform: scale(0.94);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.06);
-    }
+0%,
+100% {
+opacity: 0.65;
+transform: scale(0.94);
 }
+
+50% {
+    opacity: 1;
+    transform: scale(1.06);
+}
+
+}
+
+/* =========================================================
+09. 3M COIN LOGO
+========================================================= */
 
 .coin-logo,
 .hero-logo {
-    position: relative;
-    z-index: 3;
+position: relative;
 
-    width: 104px;
-    height: 104px;
+z-index: 3;
 
-    object-fit: cover;
+width: 104px;
+height: 104px;
 
-    border-radius: 50%;
+flex: 0 0 104px;
 
-    border: 5px solid #f6ad3c;
+object-fit: cover;
 
-    background:
-        radial-gradient(
-            circle at 30% 25%,
-            #fff4d5,
-            #f7931a 34%,
-            #c86600 74%,
-            #713500
-        );
+border-radius: 50%;
 
-    box-shadow:
-        0 0 0 4px rgba(255, 207, 125, 0.14),
-        0 0 0 9px rgba(247, 147, 26, 0.08),
-        inset 5px 5px 12px rgba(255, 255, 255, 0.45),
-        inset -7px -8px 15px rgba(78, 35, 0, 0.48),
-        0 12px 35px rgba(0, 0, 0, 0.55),
-        0 0 32px rgba(247, 147, 26, 0.23);
+border: 5px solid #f6ad3c;
 
-    animation: coinFloat 4s ease-in-out infinite;
+background:
+    radial-gradient(
+        circle at 30% 25%,
+        #fff4d5,
+        #f7931a 34%,
+        #c86600 74%,
+        #713500
+    );
+
+box-shadow:
+    0 0 0 4px rgba(255, 207, 125, 0.14),
+    0 0 0 9px rgba(247, 147, 26, 0.08),
+    inset 5px 5px 12px rgba(255, 255, 255, 0.45),
+    inset -7px -8px 15px rgba(78, 35, 0, 0.48),
+    0 12px 35px rgba(0, 0, 0, 0.55),
+    0 0 32px rgba(247, 147, 26, 0.23);
+
+animation: coinFloat 4s ease-in-out infinite;
+
 }
 
 .coin-logo::before,
 .hero-logo::before {
-    content: "";
+content: "";
 
-    position: absolute;
-    inset: 7px;
+position: absolute;
 
-    border-radius: 50%;
+inset: 7px;
 
-    border: 1px solid rgba(255, 240, 194, 0.65);
+border-radius: 50%;
 
-    box-shadow:
-        inset 0 0 0 2px rgba(113, 53, 0, 0.25),
-        inset 0 0 10px rgba(255, 255, 255, 0.2);
+border: 1px solid rgba(255, 240, 194, 0.65);
 
-    pointer-events: none;
+box-shadow:
+    inset 0 0 0 2px rgba(113, 53, 0, 0.25),
+    inset 0 0 10px rgba(255, 255, 255, 0.2);
+
+pointer-events: none;
+
 }
 
 .coin-logo::after,
 .hero-logo::after {
-    content: "3M • 3MIGO • 3M • 3MIGO";
+content: "3M • 3MIGO • 3M • 3MIGO";
 
-    position: absolute;
-    left: 50%;
-    bottom: 7px;
+position: absolute;
 
-    transform: translateX(-50%);
+left: 50%;
+bottom: 7px;
 
-    width: 82%;
+width: 82%;
 
-    color: rgba(255, 236, 181, 0.72);
+transform: translateX(-50%);
 
-    font-size: 4px;
-    font-weight: 900;
+color: rgba(255, 236, 181, 0.72);
 
-    letter-spacing: 1px;
+font-size: 4px;
+font-weight: 900;
 
-    white-space: nowrap;
+letter-spacing: 0.8px;
 
-    text-shadow:
-        0 1px 1px rgba(0, 0, 0, 0.65);
+white-space: nowrap;
 
-    pointer-events: none;
+text-align: center;
+
+text-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.65);
+
+pointer-events: none;
+
 }
 
 @keyframes coinFloat {
-    0%,
-    100% {
-        transform: translateY(0) rotate(-1deg);
-    }
-
-    50% {
-        transform: translateY(-5px) rotate(1deg);
-    }
+0%,
+100% {
+transform: translateY(0) rotate(-1deg);
 }
 
+50% {
+    transform: translateY(-4px) rotate(1deg);
+}
+
+}
 
 /* =========================================================
-   06. BRAND TITLE
+10. BRAND TITLE
 ========================================================= */
 
 .brand-title {
-    position: relative;
-    z-index: 2;
+position: relative;
 
-    margin-top: 2px;
+z-index: 2;
 
-    font-size: 27px;
-    line-height: 1.05;
+margin-top: 0;
 
-    font-weight: 900;
-    letter-spacing: 0.4px;
+font-size: 27px;
+line-height: 1.08;
 
-    text-shadow:
-        0 3px 18px rgba(0, 0, 0, 0.55);
+font-weight: 900;
+
+letter-spacing: 0.2px;
+
+text-shadow:
+    0 3px 18px rgba(0, 0, 0, 0.55);
+
+direction: ltr;
+
 }
 
 .brand-title .coin-symbol {
-    display: inline-block;
+display: inline-block;
 
-    margin-right: 4px;
+margin-right: 4px;
 
-    color: var(--gold);
+color: var(--gold);
 
-    font-size: 28px;
+font-size: 28px;
 
-    text-shadow:
-        0 0 14px rgba(247, 147, 26, 0.45);
+text-shadow:
+    0 0 14px rgba(247, 147, 26, 0.45);
+
 }
 
 .brand-subtitle {
-    margin-top: 7px;
+margin-top: 6px;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 11px;
-    font-weight: 700;
+font-size: 11px;
+font-weight: 700;
 
-    letter-spacing: 2px;
-    text-transform: uppercase;
+letter-spacing: 1.5px;
+
+text-transform: uppercase;
+
+direction: ltr;
+
 }
 
 .hero-badges {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+display: flex;
 
-    gap: 7px;
+justify-content: center;
+align-items: center;
 
-    margin-top: 12px;
+flex-wrap: wrap;
+
+gap: 6px;
+
+margin-top: 10px;
+
 }
 
 .badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+display: inline-flex;
 
-    min-height: 26px;
+align-items: center;
+justify-content: center;
 
-    padding: 4px 10px;
+min-height: 25px;
 
-    border-radius: var(--radius-pill);
+padding: 4px 10px;
 
-    color: var(--text-soft);
+border-radius: var(--radius-pill);
 
-    background:
-        rgba(255, 255, 255, 0.045);
+color: var(--text-soft);
 
-    border: 1px solid var(--border);
+background:
+    rgba(255, 255, 255, 0.045);
 
-    font-size: 10px;
-    font-weight: 800;
+border: 1px solid var(--border);
 
-    letter-spacing: 0.7px;
+font-size: 10px;
+font-weight: 800;
+
+letter-spacing: 0.5px;
+
+white-space: nowrap;
+
 }
 
 .badge.gold {
-    color: var(--gold-light);
-    border-color: var(--border-gold);
+color: var(--gold-light);
+border-color: var(--border-gold);
 
-    background:
-        rgba(247, 147, 26, 0.08);
+background:
+    rgba(247, 147, 26, 0.08);
+
 }
 
 .badge.cyan {
-    color: var(--cyan);
-    border-color: var(--border-cyan);
+color: var(--cyan);
+border-color: var(--border-cyan);
 
-    background:
-        rgba(91, 220, 255, 0.06);
+background:
+    rgba(91, 220, 255, 0.06);
+
 }
 
-
 /* =========================================================
-   07. SECTION SYSTEM
+11. SECTION SYSTEM
 ========================================================= */
 
 section {
-    width: 100%;
-    margin-top: 16px;
+width: 100%;
+margin-top: 16px;
 }
 
 .section-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+display: flex;
 
-    margin-bottom: 10px;
+align-items: center;
+justify-content: space-between;
 
-    font-size: 14px;
-    font-weight: 900;
+gap: 10px;
 
-    color: var(--text);
+margin-bottom: 10px;
+
+font-size: 14px;
+font-weight: 900;
+
+color: var(--text);
+
 }
 
 .section-title span {
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 600;
+color: var(--muted);
+
+font-size: 11px;
+font-weight: 600;
+
+white-space: nowrap;
+
 }
 
-
 /* =========================================================
-   08. GENERIC CARD
+12. GENERIC CARD
 ========================================================= */
 
 .card {
-    position: relative;
+position: relative;
 
-    padding: 16px;
+padding: 16px;
 
-    border-radius: var(--radius-lg);
+border-radius: var(--radius-lg);
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(19, 29, 41, 0.94),
-            rgba(7, 13, 21, 0.94)
-        );
+background:
+    linear-gradient(
+        145deg,
+        rgba(19, 29, 41, 0.94),
+        rgba(7, 13, 21, 0.94)
+    );
 
-    border: 1px solid var(--border);
+border: 1px solid var(--border);
 
-    box-shadow: var(--shadow);
+box-shadow: var(--shadow);
 
-    overflow: hidden;
+overflow: hidden;
+
 }
 
 .card::before {
-    content: "";
+content: "";
 
-    position: absolute;
-    left: 0;
-    top: 0;
+position: absolute;
 
-    width: 100%;
-    height: 1px;
+left: 0;
+top: 0;
 
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.16),
-            transparent
-        );
+width: 100%;
+height: 1px;
+
+background:
+    linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.16),
+        transparent
+    );
+
 }
 
-
 /* =========================================================
-   09. BALANCE CARD
+13. BALANCE CARD
 ========================================================= */
 
 .balance-card {
-    position: relative;
+position: relative;
 
-    padding: 20px;
+padding: 18px;
 
-    border-radius: var(--radius-xl);
+border-radius: var(--radius-xl);
 
-    background:
-        radial-gradient(
-            circle at 85% 15%,
-            rgba(247, 147, 26, 0.16),
-            transparent 35%
-        ),
-        linear-gradient(
-            145deg,
-            rgba(24, 31, 42, 0.97),
-            rgba(7, 12, 20, 0.97)
-        );
+background:
+    radial-gradient(
+        circle at 85% 15%,
+        rgba(247, 147, 26, 0.16),
+        transparent 35%
+    ),
+    linear-gradient(
+        145deg,
+        rgba(24, 31, 42, 0.97),
+        rgba(7, 12, 20, 0.97)
+    );
 
-    border: 1px solid rgba(247, 147, 26, 0.18);
+border: 1px solid rgba(247, 147, 26, 0.18);
 
-    box-shadow:
-        var(--shadow),
-        var(--shadow-gold);
+box-shadow:
+    var(--shadow),
+    var(--shadow-gold);
 
-    overflow: hidden;
+overflow: hidden;
+
+direction: rtl;
+
 }
 
 .balance-card::after {
-    content: "";
+content: "";
 
-    position: absolute;
-    right: -60px;
-    bottom: -70px;
+position: absolute;
 
-    width: 160px;
-    height: 160px;
+right: -60px;
+bottom: -70px;
 
-    border-radius: 50%;
+width: 160px;
+height: 160px;
 
-    border: 1px solid rgba(247, 147, 26, 0.10);
-    box-shadow:
-        0 0 0 15px rgba(247, 147, 26, 0.025),
-        0 0 0 30px rgba(247, 147, 26, 0.018);
+border-radius: 50%;
 
-    pointer-events: none;
+border: 1px solid rgba(247, 147, 26, 0.10);
+
+box-shadow:
+    0 0 0 15px rgba(247, 147, 26, 0.025),
+    0 0 0 30px rgba(247, 147, 26, 0.018);
+
+pointer-events: none;
+
 }
 
 .balance-label {
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 11px;
-    font-weight: 700;
+font-size: 11px;
+font-weight: 700;
 
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
+letter-spacing: 0.4px;
+
+text-align: right;
+
 }
 
 .balance-value {
-    margin-top: 5px;
+margin-top: 5px;
 
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
+display: flex;
 
-    font-size: 38px;
-    line-height: 1;
+align-items: baseline;
 
-    font-weight: 900;
+justify-content: flex-start;
 
-    color: var(--white);
+gap: 7px;
 
-    text-shadow:
-        0 3px 20px rgba(0, 0, 0, 0.5);
+font-size: 38px;
+line-height: 1;
+
+font-weight: 900;
+
+color: var(--white);
+
+text-shadow:
+    0 3px 20px rgba(0, 0, 0, 0.5);
+
+direction: ltr;
+
+white-space: nowrap;
+
 }
 
 .balance-value .unit {
-    color: var(--gold-light);
+color: var(--gold-light);
 
-    font-size: 15px;
-    font-weight: 900;
+font-size: 15px;
+font-weight: 900;
 
-    letter-spacing: 0.8px;
+letter-spacing: 0.8px;
+
 }
 
 .balance-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+display: flex;
 
-    margin-top: 14px;
+align-items: center;
 
-    gap: 10px;
+justify-content: space-between;
+
+margin-top: 14px;
+
+gap: 10px;
+
+direction: rtl;
+
 }
 
 .rate {
-    color: var(--muted);
-    font-size: 11px;
+color: var(--muted);
+
+font-size: 11px;
+
+line-height: 1.4;
+
+text-align: right;
+
 }
 
 .rate strong {
-    color: var(--gold-light);
+color: var(--gold-light);
 }
 
+/* =========================================================
+14. MAIN MINING BUTTON — CRITICAL FIX
+========================================================= */
+
 #mineBtn {
-    position: relative;
+position: relative;
 
-    width: 100%;
+display: flex;
 
-    margin-top: 16px;
-    padding: 14px 18px;
+align-items: center;
+justify-content: center;
 
-    border: 0;
-    border-radius: 16px;
+width: 100%;
+min-height: 54px;
 
-    color: #180c00;
+margin-top: 16px;
 
-    background:
-        linear-gradient(
-            135deg,
-            #ffd36a,
-            #f7931a 48%,
-            #d96b00
-        );
+padding: 13px 18px;
 
-    box-shadow:
-        0 8px 25px rgba(247, 147, 26, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.55);
+border: 0;
 
-    font-size: 15px;
-    font-weight: 900;
+border-radius: 16px;
 
-    transition:
-        transform var(--transition),
-        box-shadow var(--transition),
-        filter var(--transition);
+color: #180c00;
+
+background:
+    linear-gradient(
+        135deg,
+        #ffd36a 0%,
+        #f7931a 48%,
+        #d96b00 100%
+    );
+
+box-shadow:
+    0 8px 25px rgba(247, 147, 26, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+
+font-size: 15px;
+
+font-weight: 900;
+
+line-height: 1.25;
+
+text-align: center;
+
+white-space: nowrap;
+
+overflow: hidden;
+
+text-overflow: ellipsis;
+
+direction: rtl;
+
+transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    filter var(--transition);
+
 }
 
 #mineBtn:hover {
-    filter: brightness(1.07);
-    box-shadow:
-        0 10px 30px rgba(247, 147, 26, 0.30),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+filter: brightness(1.07);
+
+box-shadow:
+    0 10px 30px rgba(247, 147, 26, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
 }
 
 #mineBtn:active {
-    transform: scale(0.98);
+transform: scale(0.98);
 }
 
 #miningState {
-    margin-top: 9px;
+margin-top: 9px;
 
-    text-align: center;
+padding: 0 4px;
 
-    color: var(--muted);
+text-align: center;
 
-    font-size: 10px;
+color: var(--muted);
+
+font-size: 10px;
+
+line-height: 1.45;
+
+direction: rtl;
+
 }
 
-
 /* =========================================================
-   10. QUICK ACTIONS
+15. QUICK ACTIONS
 ========================================================= */
 
 .quick-actions {
-    display: grid;
+display: grid;
 
-    grid-template-columns: repeat(4, 1fr);
+grid-template-columns: repeat(4, 1fr);
 
-    gap: 8px;
+gap: 8px;
+
 }
 
 .quick-action,
 .action-card {
-    position: relative;
+position: relative;
 
-    min-height: 74px;
+min-height: 74px;
 
-    padding: 10px 7px;
+padding: 9px 6px;
 
-    border-radius: 17px;
+border-radius: 17px;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+display: flex;
 
-    gap: 6px;
+flex-direction: column;
 
-    color: var(--text);
+align-items: center;
+justify-content: center;
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(18, 28, 40, 0.96),
-            rgba(8, 14, 22, 0.96)
-        );
+gap: 6px;
 
-    border: 1px solid var(--border);
+color: var(--text);
 
-    transition:
-        transform var(--transition),
-        border-color var(--transition),
-        background var(--transition);
+background:
+    linear-gradient(
+        145deg,
+        rgba(18, 28, 40, 0.96),
+        rgba(8, 14, 22, 0.96)
+    );
+
+border: 1px solid var(--border);
+
+overflow: hidden;
+
+transition:
+    transform var(--transition),
+    border-color var(--transition),
+    background var(--transition);
+
 }
 
 .quick-action:hover,
 .action-card:hover {
-    transform: translateY(-2px);
+transform: translateY(-2px);
 
-    border-color:
-        rgba(247, 147, 26, 0.30);
+border-color:
+    rgba(247, 147, 26, 0.30);
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(29, 38, 51, 0.98),
-            rgba(10, 17, 26, 0.98)
-        );
+background:
+    linear-gradient(
+        145deg,
+        rgba(29, 38, 51, 0.98),
+        rgba(10, 17, 26, 0.98)
+    );
+
 }
 
 .quick-action .icon,
 .action-card .icon {
-    font-size: 22px;
+flex: 0 0 auto;
+font-size: 22px;
+line-height: 1;
 }
 
 .quick-action span,
 .action-card span {
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--text-soft);
+max-width: 100%;
+
+font-size: 10px;
+font-weight: 800;
+
+color: var(--text-soft);
+
+line-height: 1.2;
+
+text-align: center;
+
+white-space: nowrap;
+
+overflow: hidden;
+
+text-overflow: ellipsis;
+
 }
 
-
 /* =========================================================
-   11. EXPERIENCE
+16. EXPERIENCE
 ========================================================= */
 
 .experience-card {
-    padding: 16px;
+padding: 16px;
 
-    border-radius: var(--radius-lg);
+border-radius: var(--radius-lg);
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(14, 24, 38, 0.95),
-            rgba(6, 13, 22, 0.95)
-        );
+background:
+    linear-gradient(
+        135deg,
+        rgba(14, 24, 38, 0.95),
+        rgba(6, 13, 22, 0.95)
+    );
 
-    border: 1px solid rgba(91, 220, 255, 0.12);
+border: 1px solid rgba(91, 220, 255, 0.12);
 
-    box-shadow:
-        var(--shadow),
-        var(--shadow-blue);
+box-shadow:
+    var(--shadow),
+    var(--shadow-blue);
+
 }
 
 .experience-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+display: flex;
 
-    gap: 10px;
+align-items: center;
+justify-content: space-between;
+
+gap: 10px;
+
 }
 
 .experience-level {
-    color: var(--cyan);
+color: var(--cyan);
 
-    font-size: 18px;
-    font-weight: 900;
+font-size: 18px;
+font-weight: 900;
+
 }
 
 .experience-score {
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 11px;
+font-size: 11px;
+
+direction: ltr;
+
 }
 
 .experience-progress {
-    position: relative;
+position: relative;
 
-    height: 9px;
+height: 9px;
 
-    margin-top: 12px;
+margin-top: 12px;
 
-    border-radius: var(--radius-pill);
+border-radius: var(--radius-pill);
 
-    background:
-        rgba(255, 255, 255, 0.06);
+background:
+    rgba(255, 255, 255, 0.06);
 
-    overflow: hidden;
+overflow: hidden;
+
 }
 
 #v4LevelProgress {
-    width: 0;
-    height: 100%;
+width: 0;
+height: 100%;
 
-    border-radius: inherit;
+border-radius: inherit;
 
-    background:
-        linear-gradient(
-            90deg,
-            #1769ff,
-            #5bdcff
-        );
+background:
+    linear-gradient(
+        90deg,
+        #1769ff,
+        #5bdcff
+    );
 
-    box-shadow:
-        0 0 14px rgba(91, 220, 255, 0.28);
+box-shadow:
+    0 0 14px rgba(91, 220, 255, 0.28);
 
-    transition: width 0.5s ease;
+transition: width 0.5s ease;
+
 }
 
-
 /* =========================================================
-   12. REFERRAL
+17. REFERRAL
 ========================================================= */
 
 .referral-card,
 #referralSection {
-    position: relative;
+position: relative;
 
-    padding: 16px;
+padding: 16px;
 
-    border-radius: var(--radius-lg);
+border-radius: var(--radius-lg);
 
-    background:
-        radial-gradient(
-            circle at 90% 10%,
-            rgba(247, 147, 26, 0.12),
-            transparent 35%
-        ),
-        var(--bg-card);
+background:
+    radial-gradient(
+        circle at 90% 10%,
+        rgba(247, 147, 26, 0.12),
+        transparent 35%
+    ),
+    var(--bg-card);
 
-    border: 1px solid var(--border-gold);
+border: 1px solid var(--border-gold);
 
-    box-shadow: var(--shadow);
+box-shadow: var(--shadow);
+
+overflow: hidden;
+
 }
 
 .referral-link-box {
-    display: flex;
-    align-items: center;
+display: flex;
 
-    gap: 8px;
+align-items: center;
 
-    margin-top: 10px;
+gap: 8px;
+
+margin-top: 10px;
+
+direction: ltr;
+
 }
 
 #referralLink {
-    flex: 1;
+flex: 1;
 
-    min-width: 0;
+min-width: 0;
 
-    padding: 11px 12px;
+height: 40px;
 
-    border-radius: 12px;
+padding: 10px 12px;
 
-    color: var(--text-soft);
+border-radius: 12px;
 
-    background:
-        rgba(0, 0, 0, 0.22);
+color: var(--text-soft);
 
-    border: 1px solid var(--border);
+background:
+    rgba(0, 0, 0, 0.22);
 
-    font-size: 10px;
+border: 1px solid var(--border);
 
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+font-size: 10px;
+
+line-height: 20px;
+
+overflow: hidden;
+
+text-overflow: ellipsis;
+
+white-space: nowrap;
+
+direction: ltr;
+
 }
 
 #copyReferralBtn,
 #shareReferralBtn {
-    border: 0;
+flex: 0 0 auto;
 
-    padding: 10px 12px;
+min-height: 40px;
 
-    border-radius: 11px;
+border: 0;
 
-    color: #160c00;
+padding: 9px 12px;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--gold-light),
-            var(--gold)
-        );
+border-radius: 11px;
 
-    font-size: 11px;
-    font-weight: 900;
+color: #160c00;
+
+background:
+    linear-gradient(
+        135deg,
+        var(--gold-light),
+        var(--gold)
+    );
+
+font-size: 11px;
+
+font-weight: 900;
+
+line-height: 1.2;
+
+text-align: center;
+
+white-space: nowrap;
+
 }
 
 .referral-stats {
-    display: grid;
+display: grid;
 
-    grid-template-columns: repeat(3, 1fr);
+grid-template-columns: repeat(3, 1fr);
 
-    gap: 8px;
+gap: 8px;
 
-    margin-top: 12px;
+margin-top: 12px;
+
 }
 
 .referral-stat {
-    padding: 11px 7px;
+padding: 11px 7px;
 
-    text-align: center;
+text-align: center;
 
-    border-radius: 13px;
+border-radius: 13px;
 
-    background:
-        rgba(255, 255, 255, 0.035);
+background:
+    rgba(255, 255, 255, 0.035);
 
-    border: 1px solid var(--border);
+border: 1px solid var(--border);
+
+overflow: hidden;
+
 }
 
 .referral-stat strong {
-    display: block;
+display: block;
 
-    color: var(--gold-light);
+color: var(--gold-light);
 
-    font-size: 16px;
+font-size: 16px;
+
+line-height: 1.15;
+
+direction: ltr;
+
 }
 
 .referral-stat span {
-    display: block;
+display: block;
 
-    margin-top: 3px;
+margin-top: 3px;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 9px;
+font-size: 9px;
+
+line-height: 1.25;
+
 }
 
-
 /* =========================================================
-   13. STATISTICS
+18. STATISTICS
 ========================================================= */
 
 .stats-grid {
-    display: grid;
+display: grid;
 
-    grid-template-columns: repeat(3, 1fr);
+grid-template-columns: repeat(3, 1fr);
 
-    gap: 8px;
+gap: 8px;
+
 }
 
 .stat-card {
-    padding: 14px 9px;
+padding: 14px 9px;
 
-    border-radius: 16px;
+border-radius: 16px;
 
-    text-align: center;
+text-align: center;
 
-    background:
-        rgba(255, 255, 255, 0.035);
+background:
+    rgba(255, 255, 255, 0.035);
 
-    border: 1px solid var(--border);
+border: 1px solid var(--border);
+
+overflow: hidden;
+
 }
 
 .stat-card strong {
-    display: block;
+display: block;
 
-    color: var(--white);
+color: var(--white);
 
-    font-size: 18px;
-    font-weight: 900;
+font-size: 18px;
+font-weight: 900;
+
+line-height: 1.15;
+
+direction: ltr;
+
 }
 
 .stat-card span {
-    display: block;
+display: block;
 
-    margin-top: 5px;
+margin-top: 5px;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 9px;
+font-size: 9px;
+
+line-height: 1.3;
+
 }
 
-
 /* =========================================================
-   14. ECONOMIC ENGINE
+19. ECONOMIC ENGINE
 ========================================================= */
 
 .economic-card {
-    position: relative;
+position: relative;
 
-    padding: 17px;
+padding: 17px;
 
-    border-radius: var(--radius-xl);
+border-radius: var(--radius-xl);
 
-    background:
-        radial-gradient(
-            circle at 15% 0%,
-            rgba(91, 220, 255, 0.08),
-            transparent 34%
-        ),
-        radial-gradient(
-            circle at 100% 100%,
-            rgba(247, 147, 26, 0.10),
-            transparent 36%
-        ),
-        linear-gradient(
-            145deg,
-            rgba(15, 24, 35, 0.97),
-            rgba(5, 11, 18, 0.97)
-        );
+background:
+    radial-gradient(
+        circle at 15% 0%,
+        rgba(91, 220, 255, 0.08),
+        transparent 34%
+    ),
+    radial-gradient(
+        circle at 100% 100%,
+        rgba(247, 147, 26, 0.10),
+        transparent 36%
+    ),
+    linear-gradient(
+        145deg,
+        rgba(15, 24, 35, 0.97),
+        rgba(5, 11, 18, 0.97)
+    );
 
-    border: 1px solid rgba(91, 220, 255, 0.13);
+border: 1px solid rgba(91, 220, 255, 0.13);
 
-    box-shadow: var(--shadow);
+box-shadow: var(--shadow);
 
-    overflow: hidden;
+overflow: hidden;
+
 }
 
 .economic-grid {
-    display: grid;
+display: grid;
 
-    grid-template-columns: repeat(2, 1fr);
+grid-template-columns: repeat(2, 1fr);
 
-    gap: 8px;
+gap: 8px;
 
-    margin-top: 12px;
+margin-top: 12px;
+
 }
 
 .economic-item {
-    padding: 12px;
+min-width: 0;
 
-    border-radius: 14px;
+padding: 12px;
 
-    background:
-        rgba(255, 255, 255, 0.035);
+border-radius: 14px;
 
-    border: 1px solid var(--border);
+background:
+    rgba(255, 255, 255, 0.035);
+
+border: 1px solid var(--border);
+
+overflow: hidden;
+
 }
 
 .economic-item .label {
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 9px;
+font-size: 9px;
+
+line-height: 1.35;
+
 }
 
 .economic-item .value {
-    margin-top: 5px;
+margin-top: 5px;
 
-    color: var(--text);
+color: var(--text);
 
-    font-size: 15px;
-    font-weight: 900;
+font-size: 15px;
+font-weight: 900;
+
+line-height: 1.2;
+
+direction: ltr;
+
+overflow-wrap: anywhere;
+
 }
 
 .economic-item.gold .value {
-    color: var(--gold-light);
+color: var(--gold-light);
 }
 
 .economic-item.cyan .value {
-    color: var(--cyan);
+color: var(--cyan);
 }
 
 .economic-item.green .value {
-    color: var(--green-soft);
+color: var(--green-soft);
 }
 
 #economicDashboardBtn {
-    width: 100%;
+display: flex;
 
-    margin-top: 13px;
-    padding: 12px;
+align-items: center;
+justify-content: center;
 
-    border-radius: 13px;
+width: 100%;
 
-    color: var(--cyan);
+min-height: 44px;
 
-    background:
-        rgba(91, 220, 255, 0.06);
+margin-top: 13px;
 
-    border: 1px solid rgba(91, 220, 255, 0.18);
+padding: 11px 12px;
 
-    font-size: 11px;
-    font-weight: 900;
+border-radius: 13px;
+
+color: var(--cyan);
+
+background:
+    rgba(91, 220, 255, 0.06);
+
+border: 1px solid rgba(91, 220, 255, 0.18);
+
+font-size: 11px;
+
+font-weight: 900;
+
+line-height: 1.25;
+
+text-align: center;
+
+white-space: nowrap;
+
 }
 
-
 /* =========================================================
-   15. TASKS
+20. TASKS
 ========================================================= */
 
 #tasksSection {
-    scroll-margin-top: 70px;
+scroll-margin-top: 70px;
 }
 
 #tasksContainer {
-    display: flex;
-    flex-direction: column;
+display: flex;
 
-    gap: 9px;
+flex-direction: column;
+
+gap: 9px;
+
 }
 
 .task-card {
-    position: relative;
+position: relative;
 
-    display: flex;
-    align-items: center;
+display: flex;
 
-    gap: 12px;
+align-items: center;
 
-    padding: 13px;
+gap: 12px;
 
-    border-radius: 16px;
+padding: 13px;
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(16, 25, 36, 0.94),
-            rgba(7, 13, 21, 0.94)
-        );
+border-radius: 16px;
 
-    border: 1px solid var(--border);
+background:
+    linear-gradient(
+        145deg,
+        rgba(16, 25, 36, 0.94),
+        rgba(7, 13, 21, 0.94)
+    );
 
-    transition:
-        transform var(--transition),
-        border-color var(--transition);
+border: 1px solid var(--border);
+
+overflow: hidden;
+
+transition:
+    transform var(--transition),
+    border-color var(--transition);
+
 }
 
 .task-card:hover {
-    transform: translateY(-1px);
+transform: translateY(-1px);
 
-    border-color:
-        rgba(247, 147, 26, 0.24);
+border-color:
+    rgba(247, 147, 26, 0.24);
+
 }
 
 .task-icon {
-    width: 40px;
-    height: 40px;
+width: 40px;
+height: 40px;
 
-    flex: 0 0 40px;
+flex: 0 0 40px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+display: flex;
 
-    border-radius: 13px;
+align-items: center;
+justify-content: center;
 
-    background:
-        rgba(247, 147, 26, 0.09);
+border-radius: 13px;
 
-    border: 1px solid rgba(247, 147, 26, 0.15);
+background:
+    rgba(247, 147, 26, 0.09);
 
-    font-size: 18px;
+border: 1px solid rgba(247, 147, 26, 0.15);
+
+font-size: 18px;
+
 }
 
 .task-content {
-    flex: 1;
-    min-width: 0;
+flex: 1;
+
+min-width: 0;
+
+direction: rtl;
+
+text-align: right;
+
 }
 
 .task-title {
-    color: var(--text);
+color: var(--text);
 
-    font-size: 12px;
-    font-weight: 900;
+font-size: 12px;
+font-weight: 900;
+
+line-height: 1.3;
+
 }
 
 .task-description {
-    margin-top: 3px;
+margin-top: 3px;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 9px;
-    line-height: 1.4;
+font-size: 9px;
+
+line-height: 1.45;
+
 }
 
 .task-reward {
-    margin-top: 5px;
+margin-top: 5px;
 
-    color: var(--gold-light);
+color: var(--gold-light);
 
-    font-size: 10px;
-    font-weight: 900;
+font-size: 10px;
+font-weight: 900;
+
+direction: ltr;
+
 }
 
 .task-btn,
 .complete-task-btn {
-    padding: 9px 11px;
+flex: 0 0 auto;
 
-    border: 0;
-    border-radius: 11px;
+min-height: 36px;
 
-    color: #160c00;
+padding: 9px 11px;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--gold-light),
-            var(--gold)
-        );
+border: 0;
 
-    font-size: 9px;
-    font-weight: 900;
+border-radius: 11px;
+
+color: #160c00;
+
+background:
+    linear-gradient(
+        135deg,
+        var(--gold-light),
+        var(--gold)
+    );
+
+font-size: 9px;
+
+font-weight: 900;
+
+line-height: 1.2;
+
+text-align: center;
+
+white-space: nowrap;
+
 }
 
-
 /* =========================================================
-   16. MASTER SERVICES
+21. MASTER SERVICES
 ========================================================= */
 
 .master-services {
-    display: grid;
+display: grid;
 
-    grid-template-columns: repeat(2, 1fr);
+grid-template-columns: repeat(2, 1fr);
 
-    gap: 10px;
+gap: 10px;
+
 }
 
 .master-service {
-    position: relative;
+position: relative;
 
-    min-height: 135px;
+min-height: 135px;
 
-    padding: 16px;
+padding: 16px;
 
-    border-radius: 20px;
+border-radius: 20px;
 
-    overflow: hidden;
+overflow: hidden;
 
-    border: 1px solid var(--border);
+border: 1px solid var(--border);
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(18, 29, 43, 0.95),
-            rgba(6, 13, 21, 0.95)
-        );
+background:
+    linear-gradient(
+        145deg,
+        rgba(18, 29, 43, 0.95),
+        rgba(6, 13, 21, 0.95)
+    );
 
-    transition:
-        transform var(--transition),
-        border-color var(--transition);
+transition:
+    transform var(--transition),
+    border-color var(--transition);
+
 }
 
 .master-service:hover {
-    transform: translateY(-2px);
+transform: translateY(-2px);
 
-    border-color:
-        rgba(247, 147, 26, 0.28);
+border-color:
+    rgba(247, 147, 26, 0.28);
+
 }
 
 .master-service::after {
-    content: "";
+content: "";
 
-    position: absolute;
+position: absolute;
 
-    width: 90px;
-    height: 90px;
+width: 90px;
+height: 90px;
 
-    right: -25px;
-    bottom: -30px;
+right: -25px;
+bottom: -30px;
 
-    border-radius: 50%;
+border-radius: 50%;
 
-    background:
-        rgba(247, 147, 26, 0.07);
+background:
+    rgba(247, 147, 26, 0.07);
 
-    filter: blur(3px);
+filter: blur(3px);
+
+pointer-events: none;
+
 }
 
 .master-service .service-icon {
-    font-size: 29px;
+font-size: 29px;
+line-height: 1;
 }
 
 .master-service h3 {
-    margin-top: 10px;
+margin-top: 10px;
 
-    font-size: 14px;
-    font-weight: 900;
+font-size: 14px;
+font-weight: 900;
+
+line-height: 1.25;
+
 }
 
 .master-service p {
-    margin-top: 5px;
+margin-top: 5px;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 9px;
-    line-height: 1.45;
+font-size: 9px;
+
+line-height: 1.45;
+
 }
 
-
 /* =========================================================
-   17. AD GALAXY
+22. AD GALAXY
 ========================================================= */
 
 .ad-galaxy {
-    position: relative;
+position: relative;
 
-    padding: 18px;
+padding: 18px;
 
-    min-height: 150px;
+min-height: 150px;
 
-    border-radius: 22px;
+border-radius: 22px;
 
-    background:
-        radial-gradient(
-            circle at 20% 25%,
-            rgba(247, 147, 26, 0.18),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 80% 70%,
-            rgba(91, 220, 255, 0.10),
-            transparent 32%
-        ),
-        #07111d;
+background:
+    radial-gradient(
+        circle at 20% 25%,
+        rgba(247, 147, 26, 0.18),
+        transparent 30%
+    ),
+    radial-gradient(
+        circle at 80% 70%,
+        rgba(91, 220, 255, 0.10),
+        transparent 32%
+    ),
+    #07111d;
 
-    border: 1px solid rgba(247, 147, 26, 0.18);
+border: 1px solid rgba(247, 147, 26, 0.18);
 
-    overflow: hidden;
+overflow: hidden;
+
 }
 
 .ad-galaxy::before,
 .ad-galaxy::after {
-    content: "";
+content: "";
 
-    position: absolute;
+position: absolute;
 
-    border-radius: 50%;
+border-radius: 50%;
 
-    background: rgba(255, 255, 255, 0.7);
+background: rgba(255, 255, 255, 0.7);
 
-    box-shadow:
-        30px 12px rgba(255, 255, 255, 0.35),
-        70px 45px rgba(255, 255, 255, 0.25),
-        125px 20px rgba(255, 255, 255, 0.45),
-        180px 75px rgba(255, 255, 255, 0.2);
+box-shadow:
+    30px 12px rgba(255, 255, 255, 0.35),
+    70px 45px rgba(255, 255, 255, 0.25),
+    125px 20px rgba(255, 255, 255, 0.45),
+    180px 75px rgba(255, 255, 255, 0.2);
+
 }
 
 .ad-galaxy::before {
-    width: 2px;
-    height: 2px;
+width: 2px;
+height: 2px;
 
-    top: 20px;
-    left: 25px;
+top: 20px;
+left: 25px;
+
 }
 
 .ad-galaxy::after {
-    width: 3px;
-    height: 3px;
+width: 3px;
+height: 3px;
 
-    right: 35px;
-    top: 35px;
+right: 35px;
+top: 35px;
+
 }
 
 .ad-galaxy h3 {
-    position: relative;
-    z-index: 2;
+position: relative;
 
-    font-size: 19px;
-    font-weight: 900;
+z-index: 2;
 
-    color: var(--gold-light);
+font-size: 19px;
+font-weight: 900;
+
+color: var(--gold-light);
+
+line-height: 1.25;
+
 }
 
 .ad-galaxy p {
-    position: relative;
-    z-index: 2;
+position: relative;
 
-    margin-top: 7px;
+z-index: 2;
 
-    max-width: 80%;
+margin-top: 7px;
 
-    color: var(--text-soft);
+max-width: 80%;
 
-    font-size: 10px;
-    line-height: 1.5;
+color: var(--text-soft);
+
+font-size: 10px;
+
+line-height: 1.5;
+
 }
 
-
 /* =========================================================
-   18. AI SERVICE
+23. AI SERVICE
 ========================================================= */
 
 .ai-service {
-    position: relative;
+position: relative;
 
-    padding: 18px;
+padding: 18px;
 
-    border-radius: 22px;
+border-radius: 22px;
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(9, 25, 39, 0.97),
-            rgba(5, 12, 20, 0.97)
-        );
+background:
+    linear-gradient(
+        145deg,
+        rgba(9, 25, 39, 0.97),
+        rgba(5, 12, 20, 0.97)
+    );
 
-    border: 1px solid rgba(91, 220, 255, 0.16);
+border: 1px solid rgba(91, 220, 255, 0.16);
 
-    overflow: hidden;
+overflow: hidden;
+
 }
 
 .ai-service::before {
-    content: "";
+content: "";
 
-    position: absolute;
+position: absolute;
 
-    width: 160px;
-    height: 160px;
+width: 160px;
+height: 160px;
 
-    right: -65px;
-    top: -65px;
+right: -65px;
+top: -65px;
 
-    border-radius: 50%;
+border-radius: 50%;
 
-    border: 1px solid rgba(91, 220, 255, 0.12);
+border: 1px solid rgba(91, 220, 255, 0.12);
 
-    box-shadow:
-        0 0 0 18px rgba(91, 220, 255, 0.025),
-        0 0 0 38px rgba(91, 220, 255, 0.018);
+box-shadow:
+    0 0 0 18px rgba(91, 220, 255, 0.025),
+    0 0 0 38px rgba(91, 220, 255, 0.018);
+
 }
 
 .ai-service h3 {
-    font-size: 18px;
-    font-weight: 900;
+font-size: 18px;
+font-weight: 900;
 
-    color: var(--cyan);
+color: var(--cyan);
+
+line-height: 1.25;
+
 }
 
 .ai-service p {
-    margin-top: 7px;
+margin-top: 7px;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 10px;
-    line-height: 1.5;
+font-size: 10px;
+
+line-height: 1.5;
+
 }
 
-
 /* =========================================================
-   19. PROMOTION
+24. PROMOTION
 ========================================================= */
 
 .promotion {
-    position: relative;
+position: relative;
 
-    display: flex;
-    align-items: center;
+display: flex;
 
-    gap: 15px;
+align-items: center;
 
-    padding: 16px;
+gap: 15px;
 
-    border-radius: 21px;
+padding: 16px;
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(247, 147, 26, 0.12),
-            rgba(9, 18, 29, 0.95)
-        );
+border-radius: 21px;
 
-    border: 1px solid rgba(247, 147, 26, 0.16);
+background:
+    linear-gradient(
+        135deg,
+        rgba(247, 147, 26, 0.12),
+        rgba(9, 18, 29, 0.95)
+    );
 
-    overflow: hidden;
+border: 1px solid rgba(247, 147, 26, 0.16);
+
+overflow: hidden;
+
 }
 
 .promotion-coin {
-    position: relative;
+position: relative;
 
-    width: 66px;
-    height: 66px;
+width: 66px;
+height: 66px;
 
-    flex: 0 0 66px;
+flex: 0 0 66px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+display: flex;
 
-    border-radius: 50%;
+align-items: center;
+justify-content: center;
 
-    color: #301600;
+border-radius: 50%;
 
-    background:
-        radial-gradient(
-            circle at 30% 25%,
-            #fff0c9,
-            #ffb52e 34%,
-            #e67a00 70%,
-            #a84900
-        );
+color: #301600;
 
-    border: 3px solid #ffc95e;
+background:
+    radial-gradient(
+        circle at 30% 25%,
+        #fff0c9,
+        #ffb52e 34%,
+        #e67a00 70%,
+        #a84900
+    );
 
-    box-shadow:
-        inset 3px 3px 8px rgba(255, 255, 255, 0.45),
-        inset -4px -5px 9px rgba(75, 29, 0, 0.38),
-        0 7px 18px rgba(0, 0, 0, 0.35),
-        0 0 20px rgba(247, 147, 26, 0.18);
+border: 3px solid #ffc95e;
 
-    font-size: 20px;
-    font-weight: 900;
+box-shadow:
+    inset 3px 3px 8px rgba(255, 255, 255, 0.45),
+    inset -4px -5px 9px rgba(75, 29, 0, 0.38),
+    0 7px 18px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(247, 147, 26, 0.18);
+
+font-size: 20px;
+font-weight: 900;
+
+line-height: 1;
+
 }
 
 .promotion-coin::before {
-    content: "";
+content: "";
 
-    position: absolute;
-    inset: 6px;
+position: absolute;
 
-    border-radius: 50%;
+inset: 6px;
 
-    border: 1px solid rgba(255, 242, 205, 0.58);
+border-radius: 50%;
+
+border: 1px solid rgba(255, 242, 205, 0.58);
+
 }
 
 .promotion-content {
-    flex: 1;
+flex: 1;
+
+min-width: 0;
+
+direction: rtl;
+
+text-align: right;
+
 }
 
 .promotion-content h3 {
-    font-size: 15px;
-    font-weight: 900;
+font-size: 15px;
+font-weight: 900;
+
+line-height: 1.3;
+
 }
 
 .promotion-content p {
-    margin-top: 4px;
+margin-top: 4px;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 9px;
-    line-height: 1.45;
+font-size: 9px;
+
+line-height: 1.45;
+
 }
 
-
 /* =========================================================
-   20. ROADMAP
+25. ROADMAP
 ========================================================= */
 
 .roadmap {
-    display: flex;
-    flex-direction: column;
+display: flex;
 
-    gap: 8px;
+flex-direction: column;
+
+gap: 8px;
+
 }
 
 .roadmap-item {
-    position: relative;
+position: relative;
 
-    display: flex;
-    align-items: flex-start;
+display: flex;
 
-    gap: 11px;
+align-items: flex-start;
 
-    padding: 13px;
+gap: 11px;
 
-    border-radius: 15px;
+padding: 13px;
 
-    background:
-        rgba(255, 255, 255, 0.035);
+border-radius: 15px;
 
-    border: 1px solid var(--border);
+background:
+    rgba(255, 255, 255, 0.035);
+
+border: 1px solid var(--border);
+
 }
 
 .roadmap-dot {
-    width: 12px;
-    height: 12px;
+width: 12px;
+height: 12px;
 
-    flex: 0 0 12px;
+flex: 0 0 12px;
 
-    margin-top: 2px;
+margin-top: 2px;
 
-    border-radius: 50%;
+border-radius: 50%;
 
-    background:
-        var(--muted);
+background:
+    var(--muted);
 
-    box-shadow:
-        0 0 0 4px rgba(255, 255, 255, 0.035);
+box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.035);
+
 }
 
 .roadmap-item.active .roadmap-dot {
-    background: var(--gold);
+background: var(--gold);
 
-    box-shadow:
-        0 0 0 4px rgba(247, 147, 26, 0.09),
-        0 0 14px rgba(247, 147, 26, 0.45);
+box-shadow:
+    0 0 0 4px rgba(247, 147, 26, 0.09),
+    0 0 14px rgba(247, 147, 26, 0.45);
+
 }
 
 .roadmap-item.done .roadmap-dot {
-    background: var(--green);
+background: var(--green);
 
-    box-shadow:
-        0 0 0 4px rgba(37, 211, 102, 0.08),
-        0 0 14px rgba(37, 211, 102, 0.35);
+box-shadow:
+    0 0 0 4px rgba(37, 211, 102, 0.08),
+    0 0 14px rgba(37, 211, 102, 0.35);
+
 }
 
 .roadmap-content {
-    flex: 1;
+flex: 1;
+
+min-width: 0;
+
+direction: rtl;
+
+text-align: right;
+
 }
 
 .roadmap-content h4 {
-    font-size: 12px;
-    font-weight: 900;
+font-size: 12px;
+font-weight: 900;
+
+line-height: 1.3;
+
 }
 
 .roadmap-content p {
-    margin-top: 4px;
+margin-top: 4px;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 9px;
-    line-height: 1.4;
+font-size: 9px;
+
+line-height: 1.4;
+
 }
 
-
 /* =========================================================
-   21. WALLET
+26. WALLET
 ========================================================= */
 
 .wallet-card {
-    padding: 17px;
+padding: 17px;
 
-    border-radius: var(--radius-xl);
+border-radius: var(--radius-xl);
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(17, 28, 42, 0.96),
-            rgba(6, 12, 20, 0.96)
-        );
+background:
+    linear-gradient(
+        145deg,
+        rgba(17, 28, 42, 0.96),
+        rgba(6, 12, 20, 0.96)
+    );
 
-    border: 1px solid var(--border);
+border: 1px solid var(--border);
 
-    box-shadow: var(--shadow);
+box-shadow: var(--shadow);
+
+direction: rtl;
+
 }
 
 .wallet-balance {
-    font-size: 30px;
-    font-weight: 900;
+font-size: 30px;
+font-weight: 900;
 
-    color: var(--white);
+color: var(--white);
+
+line-height: 1.15;
+
+direction: ltr;
+
 }
 
 .wallet-unit {
-    color: var(--gold-light);
+color: var(--gold-light);
 
-    font-size: 13px;
+font-size: 13px;
+
 }
 
 .wallet-actions {
-    display: grid;
+display: grid;
 
-    grid-template-columns: repeat(2, 1fr);
+grid-template-columns: repeat(2, 1fr);
 
-    gap: 9px;
+gap: 9px;
 
-    margin-top: 14px;
+margin-top: 14px;
+
 }
 
 .wallet-action {
-    padding: 12px;
+min-height: 42px;
 
-    border-radius: 13px;
+padding: 11px 10px;
 
-    color: var(--text);
+border-radius: 13px;
 
-    background:
-        rgba(255, 255, 255, 0.04);
+color: var(--text);
 
-    border: 1px solid var(--border);
+background:
+    rgba(255, 255, 255, 0.04);
 
-    font-size: 10px;
-    font-weight: 800;
+border: 1px solid var(--border);
+
+font-size: 10px;
+
+font-weight: 800;
+
+line-height: 1.2;
+
 }
 
-
 /* =========================================================
-   22. TRANSACTIONS
+27. TRANSACTIONS
 ========================================================= */
 
 .transactions {
-    display: flex;
-    flex-direction: column;
+display: flex;
 
-    gap: 7px;
+flex-direction: column;
+
+gap: 7px;
+
 }
 
 .transaction {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+display: flex;
 
-    gap: 10px;
+align-items: center;
+justify-content: space-between;
 
-    padding: 11px 12px;
+gap: 10px;
 
-    border-radius: 13px;
+padding: 11px 12px;
 
-    background:
-        rgba(255, 255, 255, 0.03);
+border-radius: 13px;
 
-    border: 1px solid rgba(255, 255, 255, 0.055);
+background:
+    rgba(255, 255, 255, 0.03);
+
+border: 1px solid rgba(255, 255, 255, 0.055);
+
 }
 
 .transaction-info {
-    min-width: 0;
+min-width: 0;
+
+direction: rtl;
+
+text-align: right;
+
 }
 
 .transaction-title {
-    color: var(--text);
+color: var(--text);
 
-    font-size: 10px;
-    font-weight: 800;
+font-size: 10px;
+font-weight: 800;
+
+line-height: 1.3;
+
 }
 
 .transaction-date {
-    margin-top: 3px;
+margin-top: 3px;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 8px;
+font-size: 8px;
+
 }
 
 .transaction-amount {
-    white-space: nowrap;
+white-space: nowrap;
 
-    color: var(--gold-light);
+color: var(--gold-light);
 
-    font-size: 11px;
-    font-weight: 900;
+font-size: 11px;
+font-weight: 900;
+
+direction: ltr;
+
 }
 
-
 /* =========================================================
-   23. BUTTON SYSTEM
+28. BUTTON SYSTEM
 ========================================================= */
 
+.primary-btn,
+.secondary-btn,
+.icon-btn {
+position: relative;
+
+display: inline-flex;
+
+align-items: center;
+justify-content: center;
+
+line-height: 1.2;
+
+text-align: center;
+
+white-space: nowrap;
+
+overflow: hidden;
+
+}
+
 .primary-btn {
-    border: 0;
+min-height: 44px;
 
-    padding: 12px 17px;
+border: 0;
 
-    border-radius: 13px;
+padding: 11px 17px;
 
-    color: #160c00;
+border-radius: 13px;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--gold-light),
-            var(--gold)
-        );
+color: #160c00;
 
-    font-size: 11px;
-    font-weight: 900;
+background:
+    linear-gradient(
+        135deg,
+        var(--gold-light),
+        var(--gold)
+    );
 
-    box-shadow:
-        0 7px 18px rgba(247, 147, 26, 0.17);
+font-size: 11px;
+font-weight: 900;
+
+box-shadow:
+    0 7px 18px rgba(247, 147, 26, 0.17);
+
 }
 
 .secondary-btn {
-    padding: 11px 15px;
+min-height: 42px;
 
-    border-radius: 13px;
+padding: 10px 15px;
 
-    color: var(--text);
+border-radius: 13px;
 
-    background:
-        rgba(255, 255, 255, 0.045);
+color: var(--text);
 
-    border: 1px solid var(--border);
+background:
+    rgba(255, 255, 255, 0.045);
 
-    font-size: 10px;
-    font-weight: 800;
+border: 1px solid var(--border);
+
+font-size: 10px;
+font-weight: 800;
+
 }
 
 .icon-btn {
-    width: 40px;
-    height: 40px;
+width: 40px;
+height: 40px;
 
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+flex: 0 0 40px;
 
-    border-radius: 13px;
+border-radius: 13px;
 
-    color: var(--text);
+color: var(--text);
 
-    background:
-        rgba(255, 255, 255, 0.045);
+background:
+    rgba(255, 255, 255, 0.045);
 
-    border: 1px solid var(--border);
+border: 1px solid var(--border);
 
-    font-size: 17px;
+font-size: 17px;
+
 }
 
-
 /* =========================================================
-   24. MODALS
+29. MODALS
 ========================================================= */
 
 .modal {
-    position: fixed;
+position: fixed;
 
-    inset: 0;
+inset: 0;
 
-    z-index: 500;
+z-index: 500;
 
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
+display: none;
 
-    padding: 12px;
+align-items: flex-end;
+justify-content: center;
 
-    background:
-        rgba(0, 0, 0, 0.68);
+padding: 12px;
 
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+background:
+    rgba(0, 0, 0, 0.68);
+
+backdrop-filter: blur(8px);
+-webkit-backdrop-filter: blur(8px);
+
 }
 
 .modal.active,
 .modal.show {
-    display: flex;
+display: flex;
 }
 
 .modal-content {
-    width: 100%;
-    max-width: 560px;
+width: 100%;
+max-width: 560px;
 
-    max-height: 88vh;
+max-height: 88vh;
 
-    overflow-y: auto;
+overflow-y: auto;
 
-    padding: 19px;
+padding: 19px;
 
-    border-radius: 24px 24px 16px 16px;
+border-radius: 24px 24px 16px 16px;
 
-    background:
-        linear-gradient(
-            145deg,
-            #101b28,
-            #060c14
-        );
+background:
+    linear-gradient(
+        145deg,
+        #101b28,
+        #060c14
+    );
 
-    border: 1px solid var(--border);
+border: 1px solid var(--border);
 
-    box-shadow:
-        0 -15px 60px rgba(0, 0, 0, 0.45);
+box-shadow:
+    0 -15px 60px rgba(0, 0, 0, 0.45);
 
-    animation: modalUp 220ms ease-out;
+animation: modalUp 220ms ease-out;
+
 }
 
 @keyframes modalUp {
-    from {
-        transform: translateY(30px);
-        opacity: 0;
-    }
+from {
+transform: translateY(30px);
+opacity: 0;
+}
 
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+to {
+    transform: translateY(0);
+    opacity: 1;
+}
+
 }
 
 .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+display: flex;
 
-    gap: 10px;
+align-items: center;
+justify-content: space-between;
 
-    margin-bottom: 13px;
+gap: 10px;
+
+margin-bottom: 13px;
+
 }
 
 .modal-title {
-    font-size: 17px;
-    font-weight: 900;
+font-size: 17px;
+font-weight: 900;
+
+line-height: 1.3;
+
 }
 
 .modal-close {
-    width: 34px;
-    height: 34px;
+width: 34px;
+height: 34px;
 
-    border-radius: 10px;
+flex: 0 0 34px;
 
-    color: var(--text);
+display: inline-flex;
 
-    background:
-        rgba(255, 255, 255, 0.05);
+align-items: center;
+justify-content: center;
 
-    border: 1px solid var(--border);
+border-radius: 10px;
 
-    font-size: 17px;
+color: var(--text);
+
+background:
+    rgba(255, 255, 255, 0.05);
+
+border: 1px solid var(--border);
+
+font-size: 17px;
+
 }
 
-
 /* =========================================================
-   25. TOAST
+30. TOAST
 ========================================================= */
 
 #toast {
-    position: fixed;
+position: fixed;
 
-    left: 50%;
-    bottom: 83px;
+left: 50%;
+bottom: 83px;
 
-    z-index: 1000;
+z-index: 1000;
 
-    width: max-content;
-    max-width: calc(100vw - 32px);
+width: max-content;
 
-    padding: 11px 15px;
+max-width: calc(100vw - 32px);
 
-    transform:
-        translateX(-50%)
-        translateY(20px);
+padding: 11px 15px;
 
-    opacity: 0;
-    pointer-events: none;
+transform:
+    translateX(-50%)
+    translateY(20px);
 
-    border-radius: 13px;
+opacity: 0;
 
-    color: var(--white);
+pointer-events: none;
 
-    background:
-        rgba(13, 21, 31, 0.96);
+border-radius: 13px;
 
-    border: 1px solid rgba(247, 147, 26, 0.22);
+color: var(--white);
 
-    box-shadow:
-        0 12px 35px rgba(0, 0, 0, 0.4);
+background:
+    rgba(13, 21, 31, 0.96);
 
-    font-size: 11px;
-    font-weight: 700;
+border: 1px solid rgba(247, 147, 26, 0.22);
 
-    transition:
-        opacity 180ms ease,
-        transform 180ms ease;
+box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.4);
+
+font-size: 11px;
+font-weight: 700;
+
+line-height: 1.35;
+
+text-align: center;
+
+transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+
 }
 
 #toast.show {
-    opacity: 1;
+opacity: 1;
 
-    transform:
-        translateX(-50%)
-        translateY(0);
+transform:
+    translateX(-50%)
+    translateY(0);
+
 }
 
-
 /* =========================================================
-   26. BOTTOM NAVIGATION
+31. BOTTOM NAVIGATION
 ========================================================= */
 
 .bottom-nav {
-    position: fixed;
+position: fixed;
 
-    left: 50%;
-    bottom: 9px;
+left: 50%;
+bottom: 9px;
 
-    z-index: 200;
+z-index: 200;
 
-    width: min(
-        calc(100% - 18px),
-        700px
-    );
+width: min(
+    calc(100% - 18px),
+    700px
+);
 
-    transform: translateX(-50%);
+transform: translateX(-50%);
 
-    display: grid;
+display: grid;
 
-    grid-template-columns: repeat(5, 1fr);
+grid-template-columns: repeat(5, 1fr);
 
-    padding: 7px;
+padding: 7px;
 
-    border-radius: 21px;
+border-radius: 21px;
 
-    background:
-        rgba(8, 14, 22, 0.93);
+background:
+    rgba(8, 14, 22, 0.93);
 
-    border: 1px solid rgba(255, 255, 255, 0.08);
+border: 1px solid rgba(255, 255, 255, 0.08);
 
-    box-shadow:
-        0 14px 45px rgba(0, 0, 0, 0.52);
+box-shadow:
+    0 14px 45px rgba(0, 0, 0, 0.52);
 
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+
 }
 
 .bottom-nav button,
 .bottom-nav a {
-    min-height: 51px;
+min-height: 51px;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+display: flex;
 
-    gap: 3px;
+flex-direction: column;
 
-    border: 0;
-    border-radius: 15px;
+align-items: center;
+justify-content: center;
 
-    color: var(--muted);
+gap: 3px;
 
-    background: transparent;
+border: 0;
 
-    font-size: 9px;
-    font-weight: 800;
+border-radius: 15px;
 
-    transition:
-        color var(--transition),
-        background var(--transition);
+color: var(--muted);
+
+background: transparent;
+
+font-size: 9px;
+font-weight: 800;
+
+line-height: 1.1;
+
+text-align: center;
+
+white-space: nowrap;
+
+overflow: hidden;
+
+transition:
+    color var(--transition),
+    background var(--transition);
+
 }
 
 .bottom-nav button .nav-icon,
 .bottom-nav a .nav-icon {
-    font-size: 18px;
-    line-height: 1;
+font-size: 18px;
+line-height: 1;
 }
 
 .bottom-nav button.active,
 .bottom-nav a.active {
-    color: var(--gold-light);
+color: var(--gold-light);
 
-    background:
-        rgba(247, 147, 26, 0.08);
+background:
+    rgba(247, 147, 26, 0.08);
+
 }
 
 .bottom-nav button.active .nav-icon,
 .bottom-nav a.active .nav-icon {
-    filter:
-        drop-shadow(
-            0 0 7px
-            rgba(247, 147, 26, 0.45)
-        );
+filter:
+drop-shadow(
+0 0 7px
+rgba(247, 147, 26, 0.45)
+);
 }
 
-
 /* =========================================================
-   27. EMPTY / LOADING STATES
+32. STATES
 ========================================================= */
 
 .loading {
-    padding: 24px;
+padding: 24px;
 
-    text-align: center;
+text-align: center;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 11px;
+font-size: 11px;
+
 }
 
 .empty-state {
-    padding: 25px 15px;
+padding: 25px 15px;
 
-    text-align: center;
+text-align: center;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 11px;
+font-size: 11px;
+
 }
 
 .error-state {
-    padding: 15px;
+padding: 15px;
 
-    border-radius: 14px;
+border-radius: 14px;
 
-    color: #ffb1b1;
+color: #ffb1b1;
 
-    background:
-        rgba(255, 92, 92, 0.07);
+background:
+    rgba(255, 92, 92, 0.07);
 
-    border: 1px solid rgba(255, 92, 92, 0.16);
+border: 1px solid rgba(255, 92, 92, 0.16);
 
-    font-size: 10px;
+font-size: 10px;
+
+line-height: 1.5;
+
 }
 
-
 /* =========================================================
-   28. UTILITY CLASSES
+33. UTILITY CLASSES
 ========================================================= */
 
 .hidden {
-    display: none !important;
+display: none !important;
 }
 
 .text-gold {
-    color: var(--gold-light) !important;
+color: var(--gold-light) !important;
 }
 
 .text-cyan {
-    color: var(--cyan) !important;
+color: var(--cyan) !important;
 }
 
 .text-green {
-    color: var(--green-soft) !important;
+color: var(--green-soft) !important;
 }
 
 .text-muted {
-    color: var(--muted) !important;
+color: var(--muted) !important;
 }
 
 .text-center {
-    text-align: center !important;
+text-align: center !important;
 }
 
 .mt-1 {
-    margin-top: 6px;
+margin-top: 6px;
 }
 
 .mt-2 {
-    margin-top: 10px;
+margin-top: 10px;
 }
 
 .mt-3 {
-    margin-top: 15px;
+margin-top: 15px;
 }
 
 .mt-4 {
-    margin-top: 20px;
+margin-top: 20px;
 }
 
-
 /* =========================================================
-   29. FOOTER
+34. FOOTER
 ========================================================= */
 
 footer {
-    padding: 28px 8px 18px;
+padding: 28px 8px 18px;
 
-    text-align: center;
+text-align: center;
 
-    color: var(--muted);
+color: var(--muted);
 
-    font-size: 9px;
-    line-height: 1.6;
+font-size: 9px;
+
+line-height: 1.6;
+
 }
 
 footer strong {
-    color: var(--gold-light);
+color: var(--gold-light);
 }
 
-
 /* =========================================================
-   30. COIN / 3MIGO SMART IDENTITY
+35. 3MIGO SMART IDENTITY
 ========================================================= */
 
 .threemigo-brand {
-    color: var(--white);
-    font-weight: 900;
+color: var(--white);
+
+font-weight: 900;
+
+direction: ltr;
+
 }
 
 .threemigo-brand .migo {
-    color: var(--gold-light);
+color: var(--gold-light);
 }
 
 .threemigo-brand .smart {
-    color: var(--cyan);
+color: var(--cyan);
 }
 
 .coin-symbol-large {
-    color: var(--gold-light);
+color: var(--gold-light);
 
-    font-size: 32px;
-    font-weight: 900;
+font-size: 32px;
+font-weight: 900;
 
-    text-shadow:
-        0 0 18px rgba(247, 147, 26, 0.35);
+text-shadow:
+    0 0 18px rgba(247, 147, 26, 0.35);
+
+direction: ltr;
+
 }
 
-
 /* =========================================================
-   31. RESPONSIVE — TABLET
+36. RESPONSIVE — TABLET
 ========================================================= */
 
 @media (min-width: 600px) {
 
-    .app {
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-
-    .coin-stage {
-        width: 210px;
-        height: 210px;
-    }
-
-    .coin-ring {
-        width: 190px;
-        height: 190px;
-    }
-
-    .coin-logo,
-    .hero-logo {
-        width: 116px;
-        height: 116px;
-    }
-
-    .balance-value {
-        font-size: 43px;
-    }
-
-    .quick-actions {
-        gap: 10px;
-    }
-
-    .quick-action {
-        min-height: 82px;
-    }
+.app {
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
+.coin-stage {
+    width: 210px;
+    height: 210px;
+}
+
+.coin-ring {
+    width: 190px;
+    height: 190px;
+}
+
+.coin-logo,
+.hero-logo {
+    width: 116px;
+    height: 116px;
+
+    flex-basis: 116px;
+}
+
+.balance-value {
+    font-size: 43px;
+}
+
+.quick-actions {
+    gap: 10px;
+}
+
+.quick-action {
+    min-height: 82px;
+}
+
+}
 
 /* =========================================================
-   32. RESPONSIVE — SMALL PHONES
+37. RESPONSIVE — SMALL PHONES
 ========================================================= */
 
 @media (max-width: 520px) {
 
-    .app {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-
-    .hero {
-        padding-top: 13px;
-    }
-
-    .coin-stage {
-        width: 172px;
-        height: 172px;
-    }
-
-    .coin-ring {
-        width: 158px;
-        height: 158px;
-    }
-
-    .coin-logo,
-    .hero-logo {
-        width: 96px;
-        height: 96px;
-
-        border-width: 4px;
-    }
-
-    .brand-title {
-        font-size: 24px;
-    }
-
-    .brand-title .coin-symbol {
-        font-size: 25px;
-    }
-
-    .balance-value {
-        font-size: 34px;
-    }
-
-    .quick-actions {
-        gap: 6px;
-    }
-
-    .quick-action,
-    .action-card {
-        min-height: 70px;
-    }
-
-    .quick-action .icon,
-    .action-card .icon {
-        font-size: 19px;
-    }
-
-    .master-service {
-        min-height: 125px;
-    }
+.app {
+    padding-left: 12px;
+    padding-right: 12px;
 }
 
+.hero {
+    padding-top: 11px;
+}
+
+.coin-stage {
+    width: 168px;
+    height: 168px;
+}
+
+.coin-ring {
+    width: 156px;
+    height: 156px;
+}
+
+.coin-logo,
+.hero-logo {
+    width: 94px;
+    height: 94px;
+
+    flex-basis: 94px;
+
+    border-width: 4px;
+}
+
+.brand-title {
+    font-size: 24px;
+}
+
+.brand-title .coin-symbol {
+    font-size: 25px;
+}
+
+.brand-subtitle {
+    font-size: 10px;
+    letter-spacing: 1.2px;
+}
+
+.balance-card {
+    padding: 17px;
+}
+
+.balance-value {
+    font-size: 34px;
+}
+
+#mineBtn {
+    min-height: 52px;
+
+    padding-left: 14px;
+    padding-right: 14px;
+
+    font-size: 14px;
+}
+
+.quick-actions {
+    gap: 6px;
+}
+
+.quick-action,
+.action-card {
+    min-height: 70px;
+
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.quick-action .icon,
+.action-card .icon {
+    font-size: 19px;
+}
+
+.quick-action span,
+.action-card span {
+    font-size: 9px;
+}
+
+.master-service {
+    min-height: 125px;
+}
+
+.promotion {
+    gap: 11px;
+}
+
+.promotion-coin {
+    width: 60px;
+    height: 60px;
+
+    flex-basis: 60px;
+}
+
+}
 
 /* =========================================================
-   33. RESPONSIVE — VERY SMALL PHONES
+38. RESPONSIVE — VERY SMALL PHONES
 ========================================================= */
 
 @media (max-width: 380px) {
 
-    body {
-        padding-bottom: 90px;
-    }
-
-    .app {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    .topbar {
-        min-height: 53px;
-    }
-
-    .topbar-title {
-        font-size: 15px;
-    }
-
-    .coin-stage {
-        width: 152px;
-        height: 152px;
-    }
-
-    .coin-ring {
-        width: 140px;
-        height: 140px;
-    }
-
-    .coin-logo,
-    .hero-logo {
-        width: 86px;
-        height: 86px;
-    }
-
-    .brand-title {
-        font-size: 22px;
-    }
-
-    .balance-card {
-        padding: 16px;
-    }
-
-    .balance-value {
-        font-size: 31px;
-    }
-
-    .quick-action span,
-    .action-card span {
-        font-size: 9px;
-    }
-
-    .quick-action {
-        min-height: 66px;
-    }
-
-    .economic-grid {
-        gap: 6px;
-    }
-
-    .bottom-nav {
-        bottom: 6px;
-    }
-
-    .bottom-nav button,
-    .bottom-nav a {
-        min-height: 47px;
-    }
+body {
+    padding-bottom: 90px;
 }
 
+.app {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.topbar {
+    min-height: 53px;
+}
+
+.topbar-title {
+    font-size: 15px;
+}
+
+.coin-stage {
+    width: 150px;
+    height: 150px;
+}
+
+.coin-ring {
+    width: 138px;
+    height: 138px;
+}
+
+.coin-logo,
+.hero-logo {
+    width: 84px;
+    height: 84px;
+
+    flex-basis: 84px;
+}
+
+.brand-title {
+    font-size: 22px;
+}
+
+.balance-card {
+    padding: 15px;
+}
+
+.balance-value {
+    font-size: 31px;
+}
+
+#mineBtn {
+    min-height: 50px;
+
+    font-size: 13px;
+}
+
+.quick-action span,
+.action-card span {
+    font-size: 8px;
+}
+
+.quick-action {
+    min-height: 64px;
+}
+
+.economic-grid {
+    gap: 6px;
+}
+
+.economic-item {
+    padding: 10px 8px;
+}
+
+.economic-item .value {
+    font-size: 13px;
+}
+
+.bottom-nav {
+    bottom: 6px;
+}
+
+.bottom-nav button,
+.bottom-nav a {
+    min-height: 47px;
+
+    font-size: 8px;
+}
+
+.bottom-nav button .nav-icon,
+.bottom-nav a .nav-icon {
+    font-size: 17px;
+}
+
+}
 
 /* =========================================================
-   34. REDUCED MOTION
+39. RTL / LTR CONTROL
+========================================================= */
+
+/*
+Arabic content:
+direction: rtl
+
+Numeric / English / technical content:
+direction: ltr
+
+This prevents mixed Arabic-English strings from
+visually escaping their containers.
+*/
+
+[dir="rtl"] {
+text-align: right;
+}
+
+[dir="ltr"] {
+text-align: left;
+}
+
+#balance,
+#total,
+#today,
+#sessions,
+#economicTotalMined,
+#economicLocked,
+#economicUnlocked,
+#economicContribution,
+#economicTrust,
+#referralCount,
+#referralRewards,
+#v4ExperienceScore,
+#rate {
+direction: ltr;
+
+unicode-bidi: plaintext;
+
+}
+
+/* =========================================================
+40. REDUCED MOTION
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
-    }
+*,
+*::before,
+*::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
 }
 
+}
 
 /* =========================================================
-   35. TELEGRAM SAFE AREA
+41. TELEGRAM SAFE AREA
 ========================================================= */
 
 @supports (padding: max(0px)) {
 
-    body {
-        padding-bottom:
-            max(
-                96px,
-                calc(78px + env(safe-area-inset-bottom))
-            );
-    }
-
-    .bottom-nav {
-        bottom:
-            max(
-                8px,
-                env(safe-area-inset-bottom)
-            );
-    }
+body {
+    padding-bottom:
+        max(
+            96px,
+            calc(78px + env(safe-area-inset-bottom))
+        );
 }
 
+.bottom-nav {
+    bottom:
+        max(
+            8px,
+            env(safe-area-inset-bottom)
+        );
+}
+
+}
 
 /* =========================================================
-   36. FINAL VISUAL POLISH
+42. FINAL VISUAL POLISH
 ========================================================= */
 
 ::selection {
-    color: #1a0d00;
+color: #1a0d00;
 
-    background:
-        var(--gold-light);
+background:
+    var(--gold-light);
+
 }
 
 button:focus-visible,
 a:focus-visible {
-    outline: 2px solid var(--cyan);
+outline: 2px solid var(--cyan);
 
-    outline-offset: 2px;
+outline-offset: 2px;
+
 }
 
 .card,
@@ -2566,10 +3157,39 @@ a:focus-visible {
 .promotion,
 .ad-galaxy,
 .ai-service {
-    isolation: isolate;
+isolation: isolate;
 }
 
+/* =========================================================
+43. MOBILE TEXT PROTECTION
+========================================================= */
+
+@media (max-width: 520px) {
+
+.balance-label,
+.balance-meta,
+.rate,
+.experience-level,
+.experience-score,
+.section-title,
+.modal-title {
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+#mineBtn,
+#economicDashboardBtn,
+#copyReferralBtn,
+#shareReferralBtn,
+.primary-btn,
+.secondary-btn,
+.task-btn,
+.complete-task-btn {
+    writing-mode: horizontal-tb;
+}
+
+}
 
 /* =========================================================
-   END — 3Migo Coin STYLE V5.2
+END — 3Migo Coin STYLE V5.2.1
 ========================================================= */
