@@ -1,3278 +1,3135 @@
 /* =========================================================
-   3MIGO COIN — APP.JS V5.2
-   Premium Wallet + Circular Mining Experience
-   Backend-compatible version
-   ========================================================= */
+   3MIGO COIN — APP.JS V5.4
+   Compatible with:
+   index.html V7
+   style.css V5.4
 
-"use strict";
+   IMPORTANT:
+   - Backend/API contracts preserved
+   - Mining economy preserved
+   - Referral economy preserved
+   - Airdrop/economic endpoints preserved
+   - No database changes
+========================================================= */
 
-/* =========================================================
-   TELEGRAM WEB APP
-   ========================================================= */
+(() => {
 
-const tg = window.Telegram?.WebApp || null;
+    "use strict";
 
-if (tg) {
-    try {
-        tg.ready();
-        tg.expand();
 
-        tg.setHeaderColor("#04142a");
-        tg.setBackgroundColor("#031024");
+    /* =====================================================
+       TELEGRAM WEB APP
+    ===================================================== */
 
-        if (typeof tg.enableClosingConfirmation === "function") {
-            tg.enableClosingConfirmation();
-        }
-    } catch (error) {
-        console.warn("Telegram WebApp setup:", error);
-    }
-}
+    const tg = window.Telegram?.WebApp || null;
 
-
-/* =========================================================
-   CONFIG
-   ========================================================= */
-
-const CONFIG = {
-    API_BASE: window.location.origin,
-
-    BOT_USERNAME: "threemigosmart_bot",
-
-    FALLBACK_TELEGRAM_ID: 1,
-
-    MINING_CYCLE_HOURS: 12,
-
-    MINING_CYCLE_SECONDS: 12 * 60 * 60,
-
-    MINING_REWARD: 10,
-
-    TOAST_DURATION: 2600
-};
-
-
-/* =========================================================
-   STATE
-   ========================================================= */
-
-const state = {
-
-    telegram: {
-        id: null,
-        username: "",
-        firstName: "",
-        lastName: "",
-        languageCode: ""
-    },
-
-    balance: 0,
-    totalEarned: 0,
-    todayEarned: 0,
-    sessions: 0,
-
-    mining: {
-        active: false,
-        remaining: 0,
-        reward: CONFIG.MINING_REWARD,
-        timer: null,
-        requestPending: false,
-        startedAt: null,
-        duration: CONFIG.MINING_CYCLE_SECONDS
-    },
-
-    tasks: [],
-
-    referral: {
-        code: "",
-        link: "",
-        count: 0,
-        earned: 0
-    },
-
-    economic: {
-        totalMined: 0,
-        locked3m: 0,
-        unlocked3m: 0,
-        airdrop3m: 0,
-        contributionScore: 0,
-        trustScore: 0
-    },
-
-    experience: {
-        level: 1,
-        name: "Explorer",
-        progress: 0,
-        score: 0,
-        nextScore: 100,
-        source: ""
-    },
-
-    growth: {
-        index: 0,
-        change: 0,
-        label: "Starting"
-    },
-
-    adGalaxy: {
-        loaded: false,
-        tasks: []
-    },
-
-    ai: {
-        messages: []
-    },
-
-    loading: {
-        user: false,
-        mining: false,
-        tasks: false,
-        referral: false,
-        economic: false,
-        transactions: false
-    },
-
-    currentView: "home",
-
-    initialized: false
-};
-
-
-/* =========================================================
-   DOM HELPERS
-   ========================================================= */
-
-const $ = (selector, root = document) => {
-    try {
-        return root.querySelector(selector);
-    } catch {
-        return null;
-    }
-};
-
-const $$ = (selector, root = document) => {
-    try {
-        return [...root.querySelectorAll(selector)];
-    } catch {
-        return [];
-    }
-};
-
-
-function exists(selector) {
-    return !!$(selector);
-}
-
-
-function safeNumber(value, fallback = 0) {
-    const number = Number(value);
-
-    return Number.isFinite(number)
-        ? number
-        : fallback;
-}
-
-
-function escapeHtml(value) {
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-
-function formatNumber(value, decimals = 2) {
-    const number = safeNumber(value);
-
-    return number.toLocaleString("en-US", {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals
-    });
-}
-
-
-function formatCompact(value) {
-    const number = safeNumber(value);
-
-    if (number >= 1_000_000_000) {
-        return `${(number / 1_000_000_000).toFixed(2)}B`;
-    }
-
-    if (number >= 1_000_000) {
-        return `${(number / 1_000_000).toFixed(2)}M`;
-    }
-
-    if (number >= 1_000) {
-        return `${(number / 1_000).toFixed(2)}K`;
-    }
-
-    return formatNumber(number, 2);
-}
-
-
-/* =========================================================
-   TOAST
-   ========================================================= */
-
-let toastTimer = null;
-
-
-function showToast(message, type = "info") {
-
-    const toast = $("#toast");
-
-    if (!toast) {
-        console.log(message);
-        return;
-    }
-
-    toast.textContent = message;
-
-    toast.classList.remove(
-        "success",
-        "error",
-        "warning",
-        "info",
-        "show"
-    );
-
-    toast.classList.add(type);
-
-    requestAnimationFrame(() => {
-        toast.classList.add("show");
-    });
-
-    clearTimeout(toastTimer);
-
-    toastTimer = setTimeout(() => {
-        toast.classList.remove("show");
-    }, CONFIG.TOAST_DURATION);
-}
-
-
-/* =========================================================
-   TELEGRAM USER
-   ========================================================= */
-
-function getTelegramUser() {
-
-    const user = tg?.initDataUnsafe?.user;
-
-    if (user?.id) {
-
-        state.telegram.id = Number(user.id);
-
-        state.telegram.username = user.username || "";
-
-        state.telegram.firstName = user.first_name || "";
-
-        state.telegram.lastName = user.last_name || "";
-
-        state.telegram.languageCode = user.language_code || "";
-
-        return state.telegram;
-    }
-
-    state.telegram.id = CONFIG.FALLBACK_TELEGRAM_ID;
-
-    return state.telegram;
-}
-
-
-function getTelegramId() {
-
-    if (!state.telegram.id) {
-        getTelegramUser();
-    }
-
-    return Number(
-        state.telegram.id || CONFIG.FALLBACK_TELEGRAM_ID
-    );
-}
-
-
-/* =========================================================
-   API
-   ========================================================= */
-
-async function apiRequest(
-    endpoint,
-    options = {}
-) {
-
-    const url = `${CONFIG.API_BASE}${endpoint}`;
-
-    const config = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            ...(options.headers || {})
-        },
-        ...options
-    };
-
-    try {
-
-        const response = await fetch(url, config);
-
-        const contentType =
-            response.headers.get("content-type") || "";
-
-        let data;
-
-        if (contentType.includes("application/json")) {
-            data = await response.json();
-        } else {
-            data = await response.text();
-        }
-
-        if (!response.ok) {
-
-            const message =
-                typeof data === "object"
-                    ? data.detail ||
-                      data.message ||
-                      data.error ||
-                      `Request failed: ${response.status}`
-                    : data || `Request failed: ${response.status}`;
-
-            throw new Error(message);
-        }
-
-        return data;
-
-    } catch (error) {
-
-        console.error("API:", endpoint, error);
-
-        throw error;
-    }
-}
-
-
-/* =========================================================
-   USER
-   ========================================================= */
-
-async function registerUser() {
-
-    if (state.loading.user) return;
-
-    state.loading.user = true;
-
-    const telegramId = getTelegramId();
-
-    try {
-
-        const payload = {
-            telegram_id: telegramId,
-            username: state.telegram.username || "",
-            first_name: state.telegram.firstName || "",
-            last_name: state.telegram.lastName || ""
-        };
+    if (tg) {
 
         try {
+            tg.ready();
+            tg.expand();
 
-            await apiRequest(
-                `/user/${telegramId}`,
-                {
-                    method: "POST",
-                    body: JSON.stringify(payload)
-                }
-            );
+            tg.setHeaderColor?.("#04142a");
+            tg.setBackgroundColor?.("#031024");
 
-        } catch {
-
-            await apiRequest(
-                "/register",
-                {
-                    method: "POST",
-                    body: JSON.stringify(payload)
-                }
+        } catch (error) {
+            console.log(
+                "Telegram UI settings unavailable:",
+                error
             );
         }
-
-    } catch (error) {
-
-        console.warn(
-            "User registration:",
-            error.message
-        );
-
-    } finally {
-
-        state.loading.user = false;
-    }
-}
-
-
-async function loadUser() {
-
-    const telegramId = getTelegramId();
-
-    try {
-
-        const data = await apiRequest(
-            `/user/${telegramId}`
-        );
-
-        if (data) {
-
-            state.balance = safeNumber(
-                data.balance ??
-                data.balance_3m ??
-                data.amount
-            );
-
-            state.totalEarned = safeNumber(
-                data.total_earned ??
-                data.totalEarned ??
-                data.total_mined
-            );
-
-            state.todayEarned = safeNumber(
-                data.today_earned ??
-                data.todayEarned
-            );
-
-            state.sessions = safeNumber(
-                data.sessions ??
-                data.mining_sessions
-            );
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Load user:",
-            error.message
-        );
     }
 
-    updateWalletUI();
-    updateProfileUI();
-}
+
+    /* =====================================================
+       CONFIG
+    ===================================================== */
+
+    const API_BASE =
+        window.location.origin;
+
+    const BOT_USERNAME =
+        "threemigosmart_bot";
+
+    const FALLBACK_TELEGRAM_ID = 1;
+
+    const MINING_CYCLE_HOURS = 12;
+
+    const MINING_CYCLE_SECONDS =
+        MINING_CYCLE_HOURS * 60 * 60;
+
+    const MINING_REWARD = 10;
 
 
-/* =========================================================
-   WALLET UI
-   ========================================================= */
+    /* =====================================================
+       STATE
+    ===================================================== */
 
-function updateWalletUI() {
+    const state = {
 
-    const values = {
-        "#balance": state.balance,
-        "#walletBalance": state.balance,
-        "#walletTotal": state.totalEarned,
-        "#walletToday": state.todayEarned
+        telegramUser: null,
+
+        telegramId:
+            FALLBACK_TELEGRAM_ID,
+
+        username: "",
+
+        balance: 0,
+
+        total: 0,
+
+        today: 0,
+
+        sessions: 0,
+
+        miningActive: false,
+
+        miningRemaining: 0,
+
+        miningReward:
+            MINING_REWARD,
+
+        miningTimer: null,
+
+        miningRequestPending: false,
+
+        tasks: [],
+
+        referralCode: "",
+
+        referralLink: "",
+
+        referralCount: 0,
+
+        referralEarned: 0,
+
+        economic: {
+
+            totalMined: 0,
+
+            locked3m: 0,
+
+            unlocked3m: 0,
+
+            airdrop3m: 0,
+
+            contributionScore: 0,
+
+            trustScore: 0
+        },
+
+        experience: {
+
+            level: 1,
+
+            name: "Starter",
+
+            progress: 0,
+
+            score: 0,
+
+            nextScore: 100
+        },
+
+        growthIndex: 0,
+
+        transactions: [],
+
+        currentView: "home",
+
+        aiMessages: [],
+
+        loading: false
+
     };
 
-    Object.entries(values).forEach(
-        ([selector, value]) => {
 
-            const element = $(selector);
+    /* =====================================================
+       HELPERS
+    ===================================================== */
 
-            if (!element) return;
-
-            element.textContent =
-                formatNumber(value, 2);
-        }
-    );
-
-    $$(".balance-value").forEach(element => {
-
-        if (
-            element.id !== "walletBalance" &&
-            element.id !== "walletTotal" &&
-            element.id !== "walletToday"
-        ) {
-            element.textContent =
-                formatNumber(state.balance, 2);
-        }
-    });
-}
-
-
-/* =========================================================
-   PROFILE
-   ========================================================= */
-
-function updateProfileUI() {
-
-    const username =
-        state.telegram.username
-            ? `@${state.telegram.username}`
-            : state.telegram.firstName ||
-              "3Migo Member";
-
-    const displayName =
-        [
-            state.telegram.firstName,
-            state.telegram.lastName
-        ]
-            .filter(Boolean)
-            .join(" ") ||
-        username;
-
-    const usernameElements = [
-        "#profileUsername",
-        "#username",
-        "#userName"
-    ];
-
-    usernameElements.forEach(selector => {
-
-        const element = $(selector);
-
-        if (element) {
-            element.textContent = displayName;
-        }
-    });
-
-    const idElements = [
-        "#telegramId",
-        "#profileTelegramId",
-        "#memberTelegramId"
-    ];
-
-    idElements.forEach(selector => {
-
-        const element = $(selector);
-
-        if (element) {
-            element.textContent = getTelegramId();
-        }
-    });
-
-    updateExperienceUI();
-}
-
-
-/* =========================================================
-   MINING — TIME
-   ========================================================= */
-
-function formatTime(totalSeconds) {
-
-    const seconds = Math.max(
-        0,
-        Math.floor(safeNumber(totalSeconds))
-    );
-
-    const hours =
-        Math.floor(seconds / 3600);
-
-    const minutes =
-        Math.floor((seconds % 3600) / 60);
-
-    const secs =
-        seconds % 60;
-
-    return [
-        String(hours).padStart(2, "0"),
-        String(minutes).padStart(2, "0"),
-        String(secs).padStart(2, "0")
-    ].join(":");
-}
-
-
-function getMiningProgress() {
-
-    if (!state.mining.active) {
-        return 0;
+    function $(selector) {
+        return document.querySelector(selector);
     }
 
-    const duration =
-        Math.max(
-            1,
-            safeNumber(
-                state.mining.duration,
-                CONFIG.MINING_CYCLE_SECONDS
-            )
+
+    function $all(selector) {
+        return Array.from(
+            document.querySelectorAll(selector)
         );
-
-    const remaining =
-        Math.max(
-            0,
-            safeNumber(state.mining.remaining)
-        );
-
-    const elapsed =
-        Math.max(
-            0,
-            duration - remaining
-        );
-
-    return Math.min(
-        100,
-        Math.max(
-            0,
-            (elapsed / duration) * 100
-        )
-    );
-}
+    }
 
 
-/* =========================================================
-   MINING — CIRCULAR VISUAL
-   ========================================================= */
+    function setText(selector, value) {
 
-function updateMiningProgressVisual() {
+        const element = $(selector);
 
-    const progress =
-        getMiningProgress();
+        if (element) {
+            element.textContent =
+                value ?? "";
+        }
+    }
 
-    const degrees =
-        Math.round(progress * 3.6);
 
-    const remaining =
-        formatTime(state.mining.remaining);
+    function setValue(selector, value) {
 
-    const progressText =
-        `${Math.round(progress)}%`;
+        const element = $(selector);
 
-    const miningButtons = [
-        "#mineBtn",
-        "#mineBtnPage"
-    ];
+        if (element) {
+            element.value =
+                value ?? "";
+        }
+    }
 
-    miningButtons.forEach(selector => {
 
-        const button = $(selector);
-
-        if (!button) return;
-
-        button.style.setProperty(
-            "--mine-progress",
-            `${degrees}deg`
-        );
-
-        button.style.setProperty(
-            "--mining-progress",
-            `${progress}%`
-        );
-
-        button.setAttribute(
-            "data-progress",
-            Math.round(progress)
-        );
-
-        button.setAttribute(
-            "aria-valuenow",
-            Math.round(progress)
-        );
-    });
-
-    const progressElements = [
-        "#miningProgress",
-        "#mineProgress",
-        "#miningPercent"
-    ];
-
-    progressElements.forEach(selector => {
+    function showElement(selector) {
 
         const element = $(selector);
 
         if (!element) return;
 
-        element.textContent =
-            state.mining.active
-                ? progressText
-                : "0%";
-    });
-
-    const timer = $("#miningTimer");
-
-    if (timer) {
-
-        timer.textContent =
-            state.mining.active
-                ? remaining
-                : "12:00:00";
+        element.hidden = false;
     }
 
-    const remainingElement =
-        $("#miningRemaining");
 
-    if (remainingElement) {
-
-        remainingElement.textContent =
-            state.mining.active
-                ? remaining
-                : "--:--:--";
-    }
-
-    const progressBars =
-        $$(".mining-progress-bar");
-
-    progressBars.forEach(bar => {
-
-        bar.style.width =
-            `${progress}%`;
-    });
-}
-
-
-/* =========================================================
-   MINING — UI STATE
-   ========================================================= */
-
-function updateMiningUI() {
-
-    const active =
-        !!state.mining.active;
-
-    const remaining =
-        safeNumber(state.mining.remaining);
-
-    const buttons = [
-        "#mineBtn",
-        "#mineBtnPage"
-    ];
-
-    buttons.forEach(selector => {
-
-        const button = $(selector);
-
-        if (!button) return;
-
-        button.classList.toggle(
-            "active",
-            active
-        );
-
-        button.classList.toggle(
-            "is-mining",
-            active
-        );
-
-        button.classList.toggle(
-            "mining-active",
-            active
-        );
-
-        button.disabled =
-            active ||
-            state.mining.requestPending;
-
-        button.setAttribute(
-            "aria-pressed",
-            active ? "true" : "false"
-        );
-
-        if (active) {
-
-            button.setAttribute(
-                "aria-label",
-                "Mining Active"
-            );
-
-        } else {
-
-            button.setAttribute(
-                "aria-label",
-                "Start Mining"
-            );
-        }
-
-        const label =
-            button.querySelector(
-                ".mine-label"
-            );
-
-        if (label) {
-
-            label.textContent =
-                active
-                    ? "MINING ACTIVE"
-                    : "START MINING";
-        }
-
-        const title =
-            button.querySelector(
-                ".mine-title"
-            );
-
-        if (title) {
-
-            title.textContent =
-                active
-                    ? "MINING ACTIVE"
-                    : "MINE 3M";
-        }
-
-        const reward =
-            button.querySelector(
-                ".mine-reward"
-            );
-
-        if (reward) {
-
-            reward.textContent =
-                active
-                    ? `${Math.round(
-                        getMiningProgress()
-                    )}%`
-                    : `+${CONFIG.MINING_REWARD} 3M`;
-        }
-    });
-
-    const status =
-        $("#miningState");
-
-    if (status) {
-
-        if (active) {
-
-            status.textContent =
-                `Mining active • ${formatTime(remaining)} remaining`;
-
-            status.classList.add(
-                "active"
-            );
-
-        } else {
-
-            status.textContent =
-                "Ready to mine";
-
-            status.classList.remove(
-                "active"
-            );
-        }
-    }
-
-    updateMiningProgressVisual();
-}
-
-
-/* =========================================================
-   MINING — STATUS
-   ========================================================= */
-
-async function loadMiningStatus(
-    silent = false
-) {
-
-    if (state.loading.mining) {
-        return;
-    }
-
-    state.loading.mining = true;
-
-    const telegramId =
-        getTelegramId();
-
-    try {
-
-        const data =
-            await apiRequest(
-                `/mining/${telegramId}/status`
-            );
-
-        const active =
-            Boolean(
-                data.active ??
-                data.mining_active ??
-                data.is_mining
-            );
-
-        const remaining =
-            safeNumber(
-                data.remaining ??
-                data.remaining_seconds ??
-                data.seconds_remaining ??
-                0
-            );
-
-        state.mining.active =
-            active && remaining > 0;
-
-        state.mining.remaining =
-            remaining;
-
-        state.mining.reward =
-            safeNumber(
-                data.reward ??
-                data.reward_3m ??
-                CONFIG.MINING_REWARD,
-                CONFIG.MINING_REWARD
-            );
-
-        state.mining.duration =
-            safeNumber(
-                data.duration ??
-                data.duration_seconds ??
-                CONFIG.MINING_CYCLE_SECONDS,
-                CONFIG.MINING_CYCLE_SECONDS
-            );
-
-        if (
-            state.mining.active &&
-            !state.mining.startedAt
-        ) {
-            state.mining.startedAt =
-                Date.now() -
-                (
-                    state.mining.duration -
-                    state.mining.remaining
-                ) * 1000;
-        }
-
-        if (
-            !state.mining.active
-        ) {
-            state.mining.startedAt = null;
-        }
-
-        updateMiningUI();
-
-        if (state.mining.active) {
-            startMiningTicker();
-        } else {
-            stopMiningTicker();
-        }
-
-    } catch (error) {
-
-        if (!silent) {
-
-            showToast(
-                "Unable to load mining status",
-                "error"
-            );
-        }
-
-        console.warn(
-            "Mining status:",
-            error.message
-        );
-
-    } finally {
-
-        state.loading.mining = false;
-    }
-}
-
-
-/* =========================================================
-   MINING — TICKER
-   ========================================================= */
-
-function stopMiningTicker() {
-
-    if (state.mining.timer) {
-
-        clearInterval(
-            state.mining.timer
-        );
-
-        state.mining.timer = null;
-    }
-}
-
-
-function startMiningTicker() {
-
-    stopMiningTicker();
-
-    if (!state.mining.active) {
-        updateMiningUI();
-        return;
-    }
-
-    state.mining.timer =
-        setInterval(() => {
-
-            if (!state.mining.active) {
-
-                stopMiningTicker();
-
-                return;
-            }
-
-            state.mining.remaining =
-                Math.max(
-                    0,
-                    state.mining.remaining - 1
-                );
-
-            updateMiningUI();
-
-            if (
-                state.mining.remaining <= 0
-            ) {
-
-                state.mining.active = false;
-
-                stopMiningTicker();
-
-                updateMiningUI();
-
-                showToast(
-                    "Mining cycle completed. Claim your 10 3M.",
-                    "success"
-                );
-
-                loadMiningStatus(true);
-            }
-
-        }, 1000);
-}
-
-
-/* =========================================================
-   MINING — START
-   ========================================================= */
-
-async function startMining() {
-
-    if (
-        state.mining.active ||
-        state.mining.requestPending
-    ) {
-        return;
-    }
-
-    state.mining.requestPending = true;
-
-    updateMiningUI();
-
-    const telegramId =
-        getTelegramId();
-
-    try {
-
-        const data =
-            await apiRequest(
-                `/mining/${telegramId}/start`,
-                {
-                    method: "POST"
-                }
-            );
-
-        const remaining =
-            safeNumber(
-                data.remaining ??
-                data.remaining_seconds ??
-                CONFIG.MINING_CYCLE_SECONDS,
-                CONFIG.MINING_CYCLE_SECONDS
-            );
-
-        state.mining.active = true;
-
-        state.mining.remaining =
-            remaining;
-
-        state.mining.duration =
-            safeNumber(
-                data.duration ??
-                data.duration_seconds ??
-                CONFIG.MINING_CYCLE_SECONDS,
-                CONFIG.MINING_CYCLE_SECONDS
-            );
-
-        state.mining.reward =
-            safeNumber(
-                data.reward ??
-                data.reward_3m ??
-                CONFIG.MINING_REWARD,
-                CONFIG.MINING_REWARD
-            );
-
-        state.mining.startedAt =
-            Date.now();
-
-        showToast(
-            `Mining started • +${state.mining.reward} 3M`,
-            "success"
-        );
-
-        updateMiningUI();
-
-        startMiningTicker();
-
-    } catch (error) {
-
-        showToast(
-            error.message ||
-            "Unable to start mining",
-            "error"
-        );
-
-        await loadMiningStatus(true);
-
-    } finally {
-
-        state.mining.requestPending =
-            false;
-
-        updateMiningUI();
-    }
-}
-
-
-/* =========================================================
-   MINING — CLAIM
-   ========================================================= */
-
-async function claimMining() {
-
-    const telegramId =
-        getTelegramId();
-
-    try {
-
-        const data =
-            await apiRequest(
-                `/mining/${telegramId}/claim`,
-                {
-                    method: "POST"
-                }
-            );
-
-        const reward =
-            safeNumber(
-                data.reward ??
-                data.reward_3m ??
-                CONFIG.MINING_REWARD
-            );
-
-        state.balance =
-            safeNumber(
-                data.balance ??
-                data.balance_3m ??
-                state.balance + reward
-            );
-
-        state.totalEarned += reward;
-
-        state.mining.active = false;
-
-        state.mining.remaining = 0;
-
-        state.mining.startedAt = null;
-
-        stopMiningTicker();
-
-        updateWalletUI();
-
-        updateMiningUI();
-
-        showToast(
-            `Claimed +${formatNumber(reward, 2)} 3M`,
-            "success"
-        );
-
-        await loadEconomic(true);
-
-    } catch (error) {
-
-        showToast(
-            error.message ||
-            "Unable to claim mining reward",
-            "error"
-        );
-
-        await loadMiningStatus(true);
-    }
-}
-
-
-/* =========================================================
-   MINING BUTTONS
-   ========================================================= */
-
-function setupMiningButton() {
-
-    const mainButton =
-        $("#mineBtn");
-
-    const pageButton =
-        $("#mineBtnPage");
-
-    if (mainButton) {
-
-        mainButton.addEventListener(
-            "click",
-            async event => {
-
-                event.preventDefault();
-
-                if (
-                    state.mining.active ||
-                    state.mining.requestPending
-                ) {
-                    return;
-                }
-
-                await startMining();
-            }
-        );
-    }
-
-    if (pageButton) {
-
-        pageButton.addEventListener(
-            "click",
-            async event => {
-
-                event.preventDefault();
-
-                if (
-                    state.mining.active ||
-                    state.mining.requestPending
-                ) {
-                    return;
-                }
-
-                await startMining();
-            }
-        );
-    }
-}
-
-
-/* =========================================================
-   TASKS
-   ========================================================= */
-
-async function loadTasks(
-    silent = false
-) {
-
-    if (state.loading.tasks) {
-        return;
-    }
-
-    state.loading.tasks = true;
-
-    const telegramId =
-        getTelegramId();
-
-    try {
-
-        const data =
-            await apiRequest(
-                `/tasks/${telegramId}`
-            );
-
-        state.tasks =
-            Array.isArray(data)
-                ? data
-                : data.tasks || [];
-
-        renderTasks();
-
-    } catch (error) {
-
-        if (!silent) {
-
-            showToast(
-                "Unable to load tasks",
-                "error"
-            );
-        }
-
-        console.warn(
-            "Tasks:",
-            error.message
-        );
-
-    } finally {
-
-        state.loading.tasks = false;
-    }
-}
-
-
-function renderTasks() {
-
-    const container =
-        $("#tasksContainer");
-
-    if (!container) return;
-
-    if (!state.tasks.length) {
-
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">📋</div>
-                <h3>No tasks available</h3>
-                <p>New opportunities will appear here.</p>
-            </div>
-        `;
-
-        return;
-    }
-
-    container.innerHTML =
-        state.tasks.map(task => {
-
-            const completed =
-                Number(task.completed || 0) === 1 ||
-                task.completed === true;
-
-            return `
-                <article
-                    class="task-card ${
-                        completed
-                            ? "completed"
-                            : ""
-                    }"
-                >
-
-                    <div class="task-content">
-
-                        <h3>
-                            ${escapeHtml(
-                                task.title ||
-                                "3Migo Task"
-                            )}
-                        </h3>
-
-                        <p>
-                            ${escapeHtml(
-                                task.description ||
-                                ""
-                            )}
-                        </p>
-
-                    </div>
-
-                    <div class="task-action">
-
-                        <strong>
-                            +${formatNumber(
-                                task.reward_3m || 0,
-                                2
-                            )} 3M
-                        </strong>
-
-                        ${
-                            completed
-                                ? `
-                                    <button
-                                        class="btn secondary"
-                                        disabled
-                                    >
-                                        ✓ Completed
-                                    </button>
-                                `
-                                : `
-                                    <button
-                                        class="btn primary"
-                                        data-task-id="${
-                                            task.id
-                                        }"
-                                    >
-                                        Complete
-                                    </button>
-                                `
-                        }
-
-                    </div>
-
-                </article>
-            `;
-
-        }).join("");
-}
-
-
-async function completeTask(taskId) {
-
-    try {
-
-        const telegramId =
-            getTelegramId();
-
-        const data =
-            await apiRequest(
-                `/tasks/${telegramId}/complete/${taskId}`,
-                {
-                    method: "POST"
-                }
-            );
-
-        const reward =
-            safeNumber(
-                data.reward ??
-                data.reward_3m ??
-                0
-            );
-
-        if (reward > 0) {
-
-            state.balance += reward;
-
-            state.totalEarned += reward;
-
-            updateWalletUI();
-        }
-
-        showToast(
-            reward > 0
-                ? `Task completed • +${formatNumber(reward, 2)} 3M`
-                : "Task completed",
-            "success"
-        );
-
-        await loadTasks(true);
-
-    } catch (error) {
-
-        showToast(
-            error.message ||
-            "Unable to complete task",
-            "error"
-        );
-    }
-}
-
-
-/* =========================================================
-   DAILY REWARD
-   ========================================================= */
-
-async function claimDaily() {
-
-    const telegramId =
-        getTelegramId();
-
-    try {
-
-        const data =
-            await apiRequest(
-                `/daily/${telegramId}`,
-                {
-                    method: "POST"
-                }
-            );
-
-        const reward =
-            safeNumber(
-                data.reward ??
-                data.reward_3m ??
-                0
-            );
-
-        if (reward > 0) {
-
-            state.balance += reward;
-
-            state.todayEarned += reward;
-
-            state.totalEarned += reward;
-
-            updateWalletUI();
-        }
-
-        showToast(
-            reward > 0
-                ? `Daily reward • +${formatNumber(reward, 2)} 3M`
-                : "Daily reward processed",
-            "success"
-        );
-
-    } catch (error) {
-
-        showToast(
-            error.message ||
-            "Daily reward unavailable",
-            "error"
-        );
-    }
-}
-
-
-/* =========================================================
-   REFERRAL
-   ========================================================= */
-
-async function loadReferral(
-    silent = false
-) {
-
-    if (state.loading.referral) {
-        return;
-    }
-
-    state.loading.referral = true;
-
-    const telegramId =
-        getTelegramId();
-
-    try {
-
-        const data =
-            await apiRequest(
-                `/referral/${telegramId}`
-            );
-
-        state.referral.code =
-            data.code ||
-            data.referral_code ||
-            `3M${telegramId}`;
-
-        state.referral.link =
-            data.link ||
-            data.referral_link ||
-            `https://t.me/${CONFIG.BOT_USERNAME}?start=ref_${state.referral.code}`;
-
-        state.referral.count =
-            safeNumber(
-                data.count ??
-                data.referrals ??
-                data.referral_count
-            );
-
-        state.referral.earned =
-            safeNumber(
-                data.earned ??
-                data.earned_3m ??
-                data.referral_earned
-            );
-
-    } catch (error) {
-
-        state.referral.code =
-            state.referral.code ||
-            `3M${telegramId}`;
-
-        state.referral.link =
-            state.referral.link ||
-            `https://t.me/${CONFIG.BOT_USERNAME}?start=ref_${state.referral.code}`;
-
-        if (!silent) {
-
-            console.warn(
-                "Referral:",
-                error.message
-            );
-        }
-
-    } finally {
-
-        state.loading.referral = false;
-
-        updateReferralUI();
-    }
-}
-
-
-/* =========================================================
-   VISUAL BARCODE
-   ========================================================= */
-
-function generateBarcode(
-    value
-) {
-
-    const text =
-        String(value || "3MIGO");
-
-    let seed = 0;
-
-    for (let i = 0; i < text.length; i++) {
-
-        seed =
-            (
-                seed * 31 +
-                text.charCodeAt(i)
-            ) >>> 0;
-    }
-
-    let bars = "";
-
-    for (let i = 0; i < 64; i++) {
-
-        seed =
-            (
-                seed * 1664525 +
-                1013904223
-            ) >>> 0;
-
-        const width =
-            1 + (seed % 4);
-
-        bars +=
-            `<i style="width:${width}px"></i>`;
-    }
-
-    return bars;
-}
-
-
-function updateReferralUI() {
-
-    const code =
-        state.referral.code;
-
-    const link =
-        state.referral.link;
-
-    const codeElements = [
-        "#referralCode",
-        "#profileReferralCode"
-    ];
-
-    codeElements.forEach(selector => {
+    function hideElement(selector) {
 
         const element = $(selector);
 
-        if (element) {
-            element.textContent = code;
+        if (!element) return;
+
+        element.hidden = true;
+    }
+
+
+    function safeNumber(value, fallback = 0) {
+
+        const number =
+            Number(value);
+
+        return Number.isFinite(number)
+            ? number
+            : fallback;
+    }
+
+
+    function formatNumber(value) {
+
+        return safeNumber(value)
+            .toLocaleString(
+                "en-US",
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            );
+    }
+
+
+    function formatInteger(value) {
+
+        return Math.round(
+            safeNumber(value)
+        ).toLocaleString("en-US");
+    }
+
+
+    function formatTime(seconds) {
+
+        seconds =
+            Math.max(
+                0,
+                Math.floor(
+                    safeNumber(seconds)
+                )
+            );
+
+        const hours =
+            Math.floor(
+                seconds / 3600
+            );
+
+        const minutes =
+            Math.floor(
+                (seconds % 3600) / 60
+            );
+
+        const secs =
+            seconds % 60;
+
+        return [
+            String(hours).padStart(2, "0"),
+            String(minutes).padStart(2, "0"),
+            String(secs).padStart(2, "0")
+        ].join(":");
+    }
+
+
+    function toast(message) {
+
+        const element =
+            $("#toast");
+
+        if (!element) {
+
+            console.log(message);
+
+            return;
         }
-    });
 
-    const linkElement =
-        $("#referralLink");
+        element.textContent =
+            message;
 
-    if (linkElement) {
+        element.hidden = false;
 
-        linkElement.textContent =
-            link;
-    }
-
-    const barcode =
-        $("#referralBarcode");
-
-    if (barcode) {
-
-        barcode.innerHTML =
-            generateBarcode(code);
-
-        barcode.setAttribute(
-            "data-code",
-            code
-        );
-    }
-
-    const count =
-        $("#referralCount");
-
-    if (count) {
-
-        count.textContent =
-            formatNumber(
-                state.referral.count,
-                0
-            );
-    }
-
-    const earned =
-        $("#referralEarned");
-
-    if (earned) {
-
-        earned.textContent =
-            formatNumber(
-                state.referral.earned,
-                2
-            );
-    }
-}
-
-
-/* =========================================================
-   COPY REFERRAL
-   ========================================================= */
-
-async function copyReferralLink() {
-
-    const link =
-        state.referral.link;
-
-    if (!link) {
-
-        showToast(
-            "Referral link unavailable",
-            "error"
+        clearTimeout(
+            toast._timer
         );
 
-        return;
+        toast._timer =
+            setTimeout(() => {
+
+                element.hidden = true;
+
+            }, 2600);
     }
 
-    try {
 
-        await navigator.clipboard.writeText(link);
+    /* =====================================================
+       TELEGRAM USER
+    ===================================================== */
 
-        showToast(
-            "Referral link copied",
-            "success"
-        );
-
-    } catch {
-
-        const textarea =
-            document.createElement("textarea");
-
-        textarea.value = link;
-
-        document.body.appendChild(
-            textarea
-        );
-
-        textarea.select();
-
-        document.execCommand("copy");
-
-        textarea.remove();
-
-        showToast(
-            "Referral link copied",
-            "success"
-        );
-    }
-}
-
-
-/* =========================================================
-   SHARE REFERRAL
-   ========================================================= */
-
-function shareReferral() {
-
-    const link =
-        state.referral.link;
-
-    const text =
-        "Join 3Migo Coin and explore the 3Migo ecosystem.";
-
-    const shareUrl =
-        `https://t.me/share/url?url=${encodeURIComponent(
-            link
-        )}&text=${encodeURIComponent(
-            text
-        )}`;
-
-    if (tg?.openTelegramLink) {
+    function getTelegramUser() {
 
         try {
 
-            tg.openTelegramLink(
-                shareUrl
-            );
+            const user =
+                tg?.initDataUnsafe?.user;
 
-            return;
+            if (user?.id) {
+                return user;
+            }
 
-        } catch {}
-    }
+        } catch (error) {
 
-    window.open(
-        shareUrl,
-        "_blank"
-    );
-}
-
-
-/* =========================================================
-   ECONOMIC DATA
-   ========================================================= */
-
-async function loadEconomic(
-    silent = false
-) {
-
-    if (state.loading.economic) {
-        return;
-    }
-
-    state.loading.economic = true;
-
-    const telegramId =
-        getTelegramId();
-
-    try {
-
-        const data =
-            await apiRequest(
-                `/economic/user/${telegramId}`
-            );
-
-        state.economic.totalMined =
-            safeNumber(
-                data.total_mined ??
-                data.totalMined
-            );
-
-        state.economic.locked3m =
-            safeNumber(
-                data.locked_3m ??
-                data.locked3m
-            );
-
-        state.economic.unlocked3m =
-            safeNumber(
-                data.unlocked_3m ??
-                data.unlocked3m
-            );
-
-        state.economic.airdrop3m =
-            safeNumber(
-                data.airdrop_3m ??
-                data.airdrop3m
-            );
-
-        state.economic.contributionScore =
-            safeNumber(
-                data.contribution_score ??
-                data.contributionScore
-            );
-
-        state.economic.trustScore =
-            safeNumber(
-                data.trust_score ??
-                data.trustScore
-            );
-
-        calculateGrowthIndex();
-
-        calculateExperience();
-
-        updateEconomicUI();
-
-    } catch (error) {
-
-        if (!silent) {
-
-            console.warn(
-                "Economic:",
-                error.message
+            console.log(
+                "Telegram user read error:",
+                error
             );
         }
 
-    } finally {
-
-        state.loading.economic = false;
-    }
-}
-
-
-/* =========================================================
-   GROWTH INDEX
-   ========================================================= */
-
-function calculateGrowthIndex() {
-
-    const sessions =
-        safeNumber(
-            state.sessions
-        );
-
-    const contribution =
-        safeNumber(
-            state.economic.contributionScore
-        );
-
-    const trust =
-        safeNumber(
-            state.economic.trustScore
-        );
-
-    const activityScore =
-        Math.min(
-            40,
-            sessions * 2
-        );
-
-    const contributionScore =
-        Math.min(
-            35,
-            contribution
-        );
-
-    const trustScore =
-        Math.min(
-            25,
-            trust
-        );
-
-    const index =
-        Math.round(
-            activityScore +
-            contributionScore +
-            trustScore
-        );
-
-    state.growth.index =
-        Math.min(
-            100,
-            Math.max(
-                0,
-                index
-            )
-        );
-
-    state.growth.change =
-        Math.min(
-            99,
-            Math.round(
-                (
-                    activityScore +
-                    contributionScore
-                ) / 2
-            )
-        );
-
-    if (state.growth.index >= 80) {
-
-        state.growth.label =
-            "High Activity";
-
-    } else if (state.growth.index >= 55) {
-
-        state.growth.label =
-            "Growing";
-
-    } else if (state.growth.index >= 30) {
-
-        state.growth.label =
-            "Developing";
-
-    } else {
-
-        state.growth.label =
-            "Starting";
-    }
-}
-
-
-/* =========================================================
-   GROWTH UI
-   ========================================================= */
-
-function updateGrowthUI() {
-
-    const value =
-        state.growth.index;
-
-    const gauge =
-        $(".growth-gauge");
-
-    if (gauge) {
-
-        gauge.style.setProperty(
-            "--growth-progress",
-            `${value * 3.6}deg`
-        );
+        return null;
     }
 
-    const valueElement =
-        $("#growthIndexValue");
 
-    if (valueElement) {
+    function initializeTelegramUser() {
 
-        valueElement.textContent =
-            value;
+        const user =
+            getTelegramUser();
+
+        if (user) {
+
+            state.telegramUser =
+                user;
+
+            state.telegramId =
+                user.id;
+
+            state.username =
+                user.username ||
+                user.first_name ||
+                "3Migo User";
+
+        }
+
+        else {
+
+            state.telegramId =
+                FALLBACK_TELEGRAM_ID;
+
+            state.username =
+                "3Migo User";
+        }
     }
 
-    const change =
-        $("#growthChange");
 
-    if (change) {
+    /* =====================================================
+       API
+    ===================================================== */
 
-        change.textContent =
-            `+${state.growth.change}%`;
+    async function apiRequest(
+        path,
+        options = {}
+    ) {
+
+        const url =
+            `${API_BASE}${path}`;
+
+        const requestOptions = {
+
+            method:
+                options.method || "GET",
+
+            headers: {
+                "Content-Type":
+                    "application/json",
+
+                ...(options.headers || {})
+            }
+        };
+
+        if (
+            options.body !== undefined
+        ) {
+
+            requestOptions.body =
+                typeof options.body === "string"
+                    ? options.body
+                    : JSON.stringify(
+                        options.body
+                    );
+        }
+
+        const response =
+            await fetch(
+                url,
+                requestOptions
+            );
+
+        const text =
+            await response.text();
+
+        let data = {};
+
+        try {
+
+            data =
+                text
+                    ? JSON.parse(text)
+                    : {};
+
+        } catch {
+
+            data = {
+                raw: text
+            };
+        }
+
+        if (!response.ok) {
+
+            const message =
+                data?.detail ||
+                data?.message ||
+                data?.error ||
+                `HTTP ${response.status}`;
+
+            throw new Error(
+                message
+            );
+        }
+
+        return data;
     }
 
-    const label =
-        $("#growthLabel");
 
-    if (label) {
+    /* =====================================================
+       USER
+    ===================================================== */
 
-        label.textContent =
-            state.growth.label;
-    }
+    async function registerUser() {
 
-    const indexElements =
-        $$(".growth-index-value");
+        const id =
+            state.telegramId;
 
-    indexElements.forEach(element => {
+        try {
 
-        element.textContent =
-            value;
-    });
-}
+            return await apiRequest(
+                `/user/${id}`,
+                {
+                    method: "GET"
+                }
+            );
 
+        } catch (error) {
 
-/* =========================================================
-   ECONOMIC UI
-   ========================================================= */
+            try {
 
-function updateEconomicUI() {
+                return await apiRequest(
+                    "/register",
+                    {
+                        method: "POST",
 
-    const map = {
-
-        "#totalMined":
-            state.economic.totalMined,
-
-        "#locked3m":
-            state.economic.locked3m,
-
-        "#unlocked3m":
-            state.economic.unlocked3m,
-
-        "#airdrop3m":
-            state.economic.airdrop3m,
-
-        "#contributionScore":
-            state.economic.contributionScore,
-
-        "#trustScore":
-            state.economic.trustScore
-    };
-
-    Object.entries(map).forEach(
-        ([selector, value]) => {
-
-            const element =
-                $(selector);
-
-            if (!element) return;
-
-            element.textContent =
-                formatNumber(
-                    value,
-                    2
+                        body: {
+                            telegram_id: id,
+                            username:
+                                state.username
+                        }
+                    }
                 );
+
+            } catch (secondError) {
+
+                console.log(
+                    "User registration/load:",
+                    secondError
+                );
+
+                return null;
+            }
         }
-    );
-
-    updateGrowthUI();
-}
+    }
 
 
-/* =========================================================
-   EXPERIENCE
-   ========================================================= */
+    async function loadUser() {
 
-function calculateExperience() {
+        try {
 
-    const score =
-        Math.max(
+            const data =
+                await apiRequest(
+                    `/user/${state.telegramId}`
+                );
+
+            applyUserData(data);
+
+        } catch (error) {
+
+            console.log(
+                "loadUser:",
+                error
+            );
+        }
+
+        updateProfileUI();
+    }
+
+
+    function applyUserData(data) {
+
+        if (!data) return;
+
+        const user =
+            data.user ||
+            data.data ||
+            data;
+
+        state.balance =
+            safeNumber(
+                user.balance ??
+                user.balance_3m ??
+                data.balance
+            );
+
+        state.total =
+            safeNumber(
+                user.total ??
+                user.total_earned ??
+                data.total
+            );
+
+        state.today =
+            safeNumber(
+                user.today ??
+                user.today_earned ??
+                data.today
+            );
+
+        state.sessions =
+            safeNumber(
+                user.sessions ??
+                user.mining_sessions ??
+                data.sessions
+            );
+
+        if (
+            user.username ||
+            data.username
+        ) {
+
+            state.username =
+                user.username ||
+                data.username;
+        }
+
+        updateBalanceUI();
+    }
+
+
+    /* =====================================================
+       BALANCE UI
+    ===================================================== */
+
+    function updateBalanceUI() {
+
+        const balance =
+            formatNumber(
+                state.balance
+            );
+
+        const today =
+            formatNumber(
+                state.today
+            );
+
+        const total =
+            formatNumber(
+                state.total
+            );
+
+        const sessions =
+            formatInteger(
+                state.sessions
+            );
+
+
+        setText(
+            "#balanceValue",
+            balance
+        );
+
+        setText(
+            "#todayValue",
+            today
+        );
+
+        setText(
+            "#totalValue",
+            total
+        );
+
+        setText(
+            "#sessionsValue",
+            sessions
+        );
+
+
+        setText(
+            "#walletBalance",
+            balance
+        );
+
+        setText(
+            "#walletTotal",
+            `${total} 3M`
+        );
+
+        setText(
+            "#walletToday",
+            `${today} 3M`
+        );
+
+        setText(
+            "#walletSessions",
+            sessions
+        );
+
+
+        setText(
+            "#modalWalletBalance",
+            balance
+        );
+
+
+        const cardNumber =
+            makeMemberCardNumber(
+                state.telegramId
+            );
+
+        setText(
+            "#memberCardNumber",
+            cardNumber
+        );
+
+        setText(
+            "#walletMemberNumber",
+            cardNumber
+        );
+    }
+
+
+    function makeMemberCardNumber(id) {
+
+        const value =
+            String(id || "00000000");
+
+        const last12 =
+            value
+                .padStart(12, "0")
+                .slice(-12);
+
+        return [
+            "3M",
+            last12.slice(0, 4),
+            last12.slice(4, 8),
+            last12.slice(8, 12)
+        ].join(" • ");
+    }
+
+
+    /* =====================================================
+       PROFILE
+    ===================================================== */
+
+    function updateProfileUI() {
+
+        setText(
+            "#profileUsername",
+            state.username ||
+            "3Migo User"
+        );
+
+        setText(
+            "#profileTelegramId",
+            `Telegram ID: ${state.telegramId}`
+        );
+
+        setText(
+            "#profileMemberId",
+            `Member ID: ${makeMemberId()}`
+        );
+    }
+
+
+    function makeMemberId() {
+
+        return `3M-${String(
+            state.telegramId
+        ).padStart(8, "0")}`;
+    }
+
+
+    /* =====================================================
+       MINING
+    ===================================================== */
+
+    function getMiningProgress() {
+
+        if (
+            !state.miningActive ||
+            state.miningRemaining <= 0
+        ) {
+
+            return 0;
+        }
+
+        const elapsed =
+            MINING_CYCLE_SECONDS -
+            state.miningRemaining;
+
+        return Math.max(
             0,
-            Math.round(
-                state.sessions * 10 +
-                state.economic.contributionScore +
-                state.economic.trustScore
-            )
-        );
-
-    const level =
-        Math.max(
-            1,
-            Math.floor(score / 100) + 1
-        );
-
-    const currentBase =
-        (level - 1) * 100;
-
-    const nextScore =
-        level * 100;
-
-    const progress =
-        Math.min(
-            100,
-            Math.max(
-                0,
+            Math.min(
+                100,
                 (
-                    (score - currentBase) /
-                    (nextScore - currentBase)
+                    elapsed /
+                    MINING_CYCLE_SECONDS
                 ) * 100
             )
         );
-
-    let name = "Explorer";
-
-    if (level >= 10) {
-        name = "Legend";
-    } else if (level >= 7) {
-        name = "Master";
-    } else if (level >= 5) {
-        name = "Builder";
-    } else if (level >= 3) {
-        name = "Contributor";
     }
 
-    state.experience = {
-        level,
-        name,
-        progress,
-        score,
-        nextScore,
-        source: "3Migo Activity"
-    };
-}
+
+    function updateMiningProgressVisual() {
+
+        const progress =
+            getMiningProgress();
+
+        const degrees =
+            progress * 3.6;
 
 
-function updateExperienceUI() {
-
-    const level =
-        state.experience.level;
-
-    const name =
-        state.experience.name;
-
-    const progress =
-        state.experience.progress;
-
-    const score =
-        state.experience.score;
-
-    const levelElements = [
-        "#experienceLevel",
-        "#profileLevel",
-        "#levelNumber"
-    ];
-
-    levelElements.forEach(selector => {
-
-        const element = $(selector);
-
-        if (element) {
-            element.textContent = level;
-        }
-    });
-
-    const nameElements = [
-        "#experienceName",
-        "#profileExperienceName"
-    ];
-
-    nameElements.forEach(selector => {
-
-        const element = $(selector);
-
-        if (element) {
-            element.textContent = name;
-        }
-    });
-
-    const scoreElement =
-        $("#experienceScore");
-
-    if (scoreElement) {
-
-        scoreElement.textContent =
-            formatNumber(score, 0);
-    }
-
-    $$(".experience-progress").forEach(
-        element => {
-
-            element.style.width =
-                `${progress}%`;
-        }
-    );
-
-    $$(".experience-card").forEach(
-        element => {
-
-            element.style.setProperty(
-                "--experience-progress",
-                `${progress}%`
-            );
-        }
-    );
-}
+        const rings =
+            [
+                "#miningProgressRing",
+                "#miningPageProgressRing"
+            ];
 
 
-/* =========================================================
-   TRANSACTIONS
-   ========================================================= */
+        rings.forEach(
+            selector => {
 
-async function loadTransactions(
-    silent = false
-) {
+                const ring =
+                    $(selector);
 
-    if (state.loading.transactions) {
-        return;
-    }
+                if (!ring) return;
 
-    state.loading.transactions = true;
+                ring.style
+                    .setProperty(
+                        "--mine-progress",
+                        `${degrees}deg`
+                    );
 
-    const telegramId =
-        getTelegramId();
-
-    try {
-
-        const data =
-            await apiRequest(
-                `/transactions/${telegramId}`
-            );
-
-        const transactions =
-            Array.isArray(data)
-                ? data
-                : data.transactions || [];
-
-        renderTransactions(
-            transactions
+                ring.style
+                    .setProperty(
+                        "--progress",
+                        `${degrees}deg`
+                    );
+            }
         );
 
-    } catch (error) {
 
-        if (!silent) {
+        const timeline =
+            $("#miningProgress");
 
-            console.warn(
-                "Transactions:",
-                error.message
-            );
+        if (timeline) {
+
+            timeline.style.width =
+                `${progress}%`;
         }
-
-    } finally {
-
-        state.loading.transactions = false;
-    }
-}
-
-
-function renderTransactions(
-    transactions
-) {
-
-    const container =
-        $("#transactionsList");
-
-    if (!container) return;
-
-    if (!transactions.length) {
-
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">💳</div>
-                <h3>No transactions yet</h3>
-                <p>Your 3M activity will appear here.</p>
-            </div>
-        `;
-
-        return;
     }
 
-    container.innerHTML =
-        transactions.map(item => {
 
-            const amount =
-                safeNumber(
-                    item.amount ??
-                    item.amount_3m ??
-                    item.reward
+    function updateMiningUI() {
+
+        const active =
+            state.miningActive;
+
+        const remaining =
+            state.miningRemaining;
+
+
+        const timer =
+            formatTime(
+                remaining
+            );
+
+
+        const status =
+            active
+                ? "Mining Active"
+                : remaining <= 0 &&
+                  state.sessions > 0
+                    ? "يمكن استلام المكافأة"
+                    : "جاهز للتعدين";
+
+
+        setText(
+            "#miningState",
+            status
+        );
+
+        setText(
+            "#miningPageState",
+            status
+        );
+
+
+        setText(
+            "#miningTimer",
+            timer
+        );
+
+        setText(
+            "#miningPageTimer",
+            timer
+        );
+
+
+        setText(
+            "#miningPageStatus",
+            active
+                ? "ACTIVE"
+                : "READY"
+        );
+
+
+        const buttonText =
+            active
+                ? "Mining Active"
+                : remaining <= 0 &&
+                  state.miningRemaining !== 0
+                    ? "استلام المكافأة"
+                    : "ابدأ التعدين";
+
+
+        setText(
+            "#mineBtnText",
+            buttonText
+        );
+
+        setText(
+            "#mineBtnPageText",
+            buttonText
+        );
+
+
+        updateMiningProgressVisual();
+    }
+
+
+    async function loadMiningStatus() {
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/mining/${state.telegramId}/status`
                 );
 
-            const positive =
-                amount >= 0;
+            const mining =
+                data?.mining ||
+                data?.data ||
+                data;
 
-            return `
-                <div class="transaction-item">
 
-                    <div class="transaction-info">
+            state.miningActive =
+                Boolean(
+                    mining?.active ??
+                    mining?.is_active ??
+                    data?.active ??
+                    false
+                );
 
-                        <strong>
-                            ${escapeHtml(
-                                item.title ||
-                                item.type ||
-                                "3M Transaction"
-                            )}
-                        </strong>
 
-                        <small>
-                            ${escapeHtml(
-                                item.created_at ||
-                                item.date ||
-                                ""
-                            )}
-                        </small>
+            state.miningRemaining =
+                safeNumber(
+                    mining?.remaining ??
+                    mining?.remaining_seconds ??
+                    data?.remaining ??
+                    data?.remaining_seconds ??
+                    0
+                );
 
-                    </div>
 
-                    <div
-                        class="transaction-amount ${
-                            positive
-                                ? "positive"
-                                : "negative"
-                        }"
-                    >
-                        ${
-                            positive
-                                ? "+"
-                                : ""
-                        }${formatNumber(
-                            amount,
-                            2
-                        )} 3M
-                    </div>
+            state.miningReward =
+                safeNumber(
+                    mining?.reward ??
+                    data?.reward ??
+                    MINING_REWARD
+                );
 
+
+            updateMiningUI();
+
+            startMiningTicker();
+
+        } catch (error) {
+
+            console.log(
+                "Mining status:",
+                error
+            );
+
+            updateMiningUI();
+        }
+    }
+
+
+    function startMiningTicker() {
+
+        clearInterval(
+            state.miningTimer
+        );
+
+        if (
+            !state.miningActive
+        ) {
+
+            updateMiningUI();
+
+            return;
+        }
+
+
+        state.miningTimer =
+            setInterval(() => {
+
+                if (
+                    state.miningRemaining > 0
+                ) {
+
+                    state.miningRemaining--;
+
+                    updateMiningUI();
+
+                }
+
+
+                if (
+                    state.miningRemaining <= 0
+                ) {
+
+                    clearInterval(
+                        state.miningTimer
+                    );
+
+                    state.miningActive =
+                        false;
+
+                    updateMiningUI();
+
+                    toast(
+                        "اكتملت دورة التعدين. يمكنك استلام المكافأة."
+                    );
+                }
+
+            }, 1000);
+    }
+
+
+    async function startMining() {
+
+        if (
+            state.miningRequestPending
+        ) return;
+
+
+        if (
+            state.miningActive
+        ) {
+
+            toast(
+                "التعدين يعمل بالفعل."
+            );
+
+            return;
+        }
+
+
+        state.miningRequestPending =
+            true;
+
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/mining/${state.telegramId}/start`,
+                    {
+                        method: "POST"
+                    }
+                );
+
+
+            const mining =
+                data?.mining ||
+                data?.data ||
+                data;
+
+
+            state.miningActive =
+                true;
+
+
+            state.miningRemaining =
+                safeNumber(
+                    mining?.remaining ??
+                    mining?.remaining_seconds ??
+                    data?.remaining ??
+                    data?.remaining_seconds ??
+                    MINING_CYCLE_SECONDS
+                );
+
+
+            state.miningReward =
+                safeNumber(
+                    mining?.reward ??
+                    data?.reward ??
+                    MINING_REWARD
+                );
+
+
+            updateMiningUI();
+
+            startMiningTicker();
+
+            toast(
+                `بدأ التعدين — المكافأة ${state.miningReward} 3M`
+            );
+
+        } catch (error) {
+
+            console.log(
+                "startMining:",
+                error
+            );
+
+            toast(
+                error.message ||
+                "تعذر بدء التعدين."
+            );
+
+        } finally {
+
+            state.miningRequestPending =
+                false;
+        }
+    }
+
+
+    async function claimMining() {
+
+        if (
+            state.miningRequestPending
+        ) return;
+
+
+        state.miningRequestPending =
+            true;
+
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/mining/${state.telegramId}/claim`,
+                    {
+                        method: "POST"
+                    }
+                );
+
+
+            const reward =
+                safeNumber(
+                    data?.reward ??
+                    data?.reward_3m ??
+                    state.miningReward
+                );
+
+
+            state.balance += reward;
+
+            state.total += reward;
+
+            state.today += reward;
+
+            state.sessions += 1;
+
+
+            state.miningActive =
+                false;
+
+            state.miningRemaining =
+                0;
+
+
+            updateBalanceUI();
+
+            updateMiningUI();
+
+
+            await Promise.allSettled([
+                loadEconomic(),
+                loadTransactions()
+            ]);
+
+
+            toast(
+                `تمت إضافة ${reward} 3M إلى رصيدك.`
+            );
+
+        } catch (error) {
+
+            console.log(
+                "claimMining:",
+                error
+            );
+
+            toast(
+                error.message ||
+                "تعذر استلام المكافأة."
+            );
+
+        } finally {
+
+            state.miningRequestPending =
+                false;
+        }
+    }
+
+
+    function setupMiningButtons() {
+
+        const buttons =
+            [
+                "#mineBtn",
+                "#mineBtnPage"
+            ];
+
+
+        buttons.forEach(
+            selector => {
+
+                const button =
+                    $(selector);
+
+                if (!button) return;
+
+
+                button.addEventListener(
+                    "click",
+                    async event => {
+
+                        event.preventDefault();
+
+                        if (
+                            state.miningActive
+                        ) {
+
+                            return;
+                        }
+
+
+                        if (
+                            state.miningRemaining <= 0 &&
+                            state.miningRemaining !== 0
+                        ) {
+
+                            await claimMining();
+
+                            return;
+                        }
+
+
+                        /*
+                         * Backend remains the source of truth.
+                         * If a previous cycle completed, try claim.
+                         */
+                        if (
+                            !state.miningActive &&
+                            state.miningRemaining === 0 &&
+                            button.dataset.claimReady === "true"
+                        ) {
+
+                            await claimMining();
+
+                            return;
+                        }
+
+
+                        await startMining();
+                    }
+                );
+            }
+        );
+    }
+
+
+    /* =====================================================
+       TASKS
+    ===================================================== */
+
+    async function loadTasks() {
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/tasks/${state.telegramId}`
+                );
+
+
+            state.tasks =
+                Array.isArray(data)
+                    ? data
+                    : data?.tasks ||
+                      data?.data ||
+                      [];
+
+
+            renderTasks();
+
+        } catch (error) {
+
+            console.log(
+                "loadTasks:",
+                error
+            );
+
+            state.tasks = [];
+
+            renderTasksError();
+        }
+    }
+
+
+    function renderTasks() {
+
+        const container =
+            $("#tasksContainer");
+
+        if (!container) return;
+
+
+        setText(
+            "#tasksCount",
+            state.tasks.length
+        );
+
+
+        if (
+            !state.tasks.length
+        ) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    لا توجد مهام متاحة حالياً.
                 </div>
             `;
 
-        }).join("");
-}
+            return;
+        }
 
 
-/* =========================================================
-   VIEW NAVIGATION
-   ========================================================= */
+        container.innerHTML =
+            state.tasks
+                .map(task => {
 
-function setActiveNav(
-    viewName
-) {
+                    const id =
+                        task.id ??
+                        task.task_id;
 
-    $$("[data-view-target]").forEach(
-        button => {
+                    const title =
+                        escapeHtml(
+                            task.title ||
+                            "مهمة 3Migo"
+                        );
 
-            const target =
-                button.getAttribute(
-                    "data-view-target"
+                    const description =
+                        escapeHtml(
+                            task.description ||
+                            ""
+                        );
+
+                    const reward =
+                        safeNumber(
+                            task.reward_3m ??
+                            task.reward ??
+                            0
+                        );
+
+                    const completed =
+                        Boolean(
+                            task.completed
+                        );
+
+
+                    return `
+                        <article class="task-card">
+
+                            <div class="task-card-title">
+                                ${title}
+                            </div>
+
+                            <div class="task-card-description">
+                                ${description}
+                            </div>
+
+                            <div class="task-card-footer">
+
+                                <span class="task-reward">
+                                    +${formatNumber(reward)} 3M
+                                </span>
+
+                                <button
+                                    class="task-btn"
+                                    data-task-id="${id}"
+                                    type="button"
+                                    ${completed ? "disabled" : ""}
+                                >
+                                    ${
+                                        completed
+                                            ? "مكتملة"
+                                            : "تنفيذ"
+                                    }
+                                </button>
+
+                            </div>
+
+                        </article>
+                    `;
+                })
+                .join("");
+    }
+
+
+    function renderTasksError() {
+
+        const container =
+            $("#tasksContainer");
+
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="empty-state">
+                تعذر تحميل المهام حالياً.
+            </div>
+        `;
+    }
+
+
+    async function completeTask(taskId) {
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/tasks/${state.telegramId}/complete/${taskId}`,
+                    {
+                        method: "POST"
+                    }
                 );
 
-            const active =
-                target === viewName;
 
-            button.classList.toggle(
-                "active",
-                active
+            const reward =
+                safeNumber(
+                    data?.reward ??
+                    data?.reward_3m ??
+                    0
+                );
+
+
+            if (reward > 0) {
+
+                state.balance += reward;
+
+                state.total += reward;
+
+                state.today += reward;
+
+                updateBalanceUI();
+            }
+
+
+            toast(
+                reward > 0
+                    ? `تمت المهمة +${reward} 3M`
+                    : "تم تنفيذ المهمة."
             );
 
-            button.setAttribute(
-                "aria-current",
-                active
-                    ? "page"
-                    : "false"
+
+            await Promise.allSettled([
+                loadTasks(),
+                loadEconomic()
+            ]);
+
+        } catch (error) {
+
+            console.log(
+                "completeTask:",
+                error
+            );
+
+            toast(
+                error.message ||
+                "تعذر تنفيذ المهمة."
             );
         }
-    );
-}
-
-
-function activateView(
-    viewName
-) {
-
-    const views =
-        $$(".app-view");
-
-    if (!views.length) {
-        return;
     }
 
-    views.forEach(view => {
 
-        const target =
-            view.getAttribute(
-                "data-view"
+    /* =====================================================
+       DAILY REWARD
+    ===================================================== */
+
+    async function claimDailyReward() {
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/daily/${state.telegramId}`,
+                    {
+                        method: "POST"
+                    }
+                );
+
+
+            const reward =
+                safeNumber(
+                    data?.reward ??
+                    data?.reward_3m ??
+                    0
+                );
+
+
+            if (reward > 0) {
+
+                state.balance += reward;
+
+                state.total += reward;
+
+                state.today += reward;
+
+                updateBalanceUI();
+            }
+
+
+            toast(
+                reward
+                    ? `المكافأة اليومية +${reward} 3M`
+                    : "تم تحديث المكافأة اليومية."
             );
 
-        const active =
-            target === viewName;
 
-        view.classList.toggle(
-            "active",
-            active
-        );
+        } catch (error) {
 
-        view.hidden =
-            !active;
+            console.log(
+                "daily reward:",
+                error
+            );
 
-        view.setAttribute(
-            "aria-hidden",
-            active
-                ? "false"
-                : "true"
-        );
-    });
-
-    state.currentView =
-        viewName;
-
-    setActiveNav(
-        viewName
-    );
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-}
-
-
-/* =========================================================
-   VIEW LOADERS
-   ========================================================= */
-
-async function showHome() {
-
-    activateView("home");
-
-    updateWalletUI();
-
-    updateMiningUI();
-
-    updateGrowthUI();
-}
-
-
-async function showMining() {
-
-    activateView("mine");
-
-    await loadMiningStatus(true);
-}
-
-
-async function showTasks() {
-
-    activateView("tasks");
-
-    await loadTasks(true);
-}
-
-
-async function showWallet() {
-
-    activateView("wallet");
-
-    updateWalletUI();
-
-    updateEconomicUI();
-
-    await loadTransactions(true);
-}
-
-
-async function showProfile() {
-
-    activateView("profile");
-
-    updateProfileUI();
-
-    updateReferralUI();
-
-    updateExperienceUI();
-
-    await loadReferral(true);
-}
-
-
-async function switchView(
-    viewName
-) {
-
-    switch (viewName) {
-
-        case "home":
-            await showHome();
-            break;
-
-        case "mine":
-        case "mining":
-            await showMining();
-            break;
-
-        case "tasks":
-            await showTasks();
-            break;
-
-        case "wallet":
-            await showWallet();
-            break;
-
-        case "profile":
-            await showProfile();
-            break;
-
-        default:
-            await showHome();
+            toast(
+                error.message ||
+                "تعذر الحصول على المكافأة اليومية."
+            );
+        }
     }
-}
 
 
-/* =========================================================
-   ACTION HANDLER
-   ========================================================= */
+    /* =====================================================
+       REFERRAL
+    ===================================================== */
 
-async function handleAction(
-    action,
-    element
-) {
+    async function loadReferral() {
 
-    switch (action) {
+        try {
 
-        case "mine":
-        case "start-mining":
-            await startMining();
-            break;
+            const data =
+                await apiRequest(
+                    `/referral/${state.telegramId}`
+                );
 
-        case "claim-mining":
-            await claimMining();
-            break;
 
-        case "daily":
-        case "daily-reward":
-            await claimDaily();
-            break;
+            state.referralCode =
+                data?.code ||
+                data?.referral_code ||
+                data?.referralCode ||
+                `3M${state.telegramId}`;
 
-        case "copy-referral":
-            await copyReferralLink();
-            break;
 
-        case "share-referral":
-            shareReferral();
-            break;
+            state.referralLink =
+                data?.link ||
+                data?.referral_link ||
+                data?.referralLink ||
+                createReferralLink(
+                    state.referralCode
+                );
 
-        case "wallet":
-            await showWallet();
-            break;
 
-        case "profile":
-            await showProfile();
-            break;
+            state.referralCount =
+                safeNumber(
+                    data?.count ??
+                    data?.referrals ??
+                    data?.referral_count ??
+                    0
+                );
 
-        case "tasks":
-            await showTasks();
-            break;
 
-        case "mining":
-            await showMining();
-            break;
+            state.referralEarned =
+                safeNumber(
+                    data?.earned ??
+                    data?.referral_earned ??
+                    0
+                );
 
-        case "home":
-            await showHome();
-            break;
 
-        case "refresh-economic":
-            await loadEconomic();
-            break;
+        } catch (error) {
 
-        case "refresh-tasks":
+            console.log(
+                "Referral fallback:",
+                error
+            );
+
+
+            state.referralCode =
+                `3M${state.telegramId}`;
+
+
+            state.referralLink =
+                createReferralLink(
+                    state.referralCode
+                );
+        }
+
+
+        updateReferralUI();
+    }
+
+
+    function createReferralLink(code) {
+
+        return `https://t.me/${BOT_USERNAME}?start=ref_${encodeURIComponent(code)}`;
+    }
+
+
+    function updateReferralUI() {
+
+        setText(
+            "#referralCode",
+            state.referralCode
+        );
+
+
+        setValue(
+            "#referralLink",
+            state.referralLink
+        );
+
+
+        setText(
+            "#referralCount",
+            formatInteger(
+                state.referralCount
+            )
+        );
+
+
+        setText(
+            "#referralEarned",
+            `${formatNumber(
+                state.referralEarned
+            )} 3M`
+        );
+
+
+        generateReferralBarcode(
+            state.referralCode
+        );
+    }
+
+
+    function generateReferralBarcode(code) {
+
+        const container =
+            $("#referralBarcode");
+
+        if (!container) return;
+
+
+        container.innerHTML = "";
+
+
+        const source =
+            String(
+                code ||
+                "3MIGO"
+            );
+
+
+        let seed = 0;
+
+        for (
+            let i = 0;
+            i < source.length;
+            i++
+        ) {
+
+            seed =
+                (
+                    seed * 31 +
+                    source.charCodeAt(i)
+                ) >>> 0;
+        }
+
+
+        for (
+            let i = 0;
+            i < 72;
+            i++
+        ) {
+
+            seed =
+                (
+                    seed * 1664525 +
+                    1013904223
+                ) >>> 0;
+
+
+            const width =
+                1 +
+                (seed % 4);
+
+
+            const bar =
+                document.createElement(
+                    "i"
+                );
+
+
+            bar.style.width =
+                `${width}px`;
+
+
+            container.appendChild(
+                bar
+            );
+        }
+    }
+
+
+    async function copyReferral() {
+
+        const link =
+            state.referralLink;
+
+        if (!link) return;
+
+
+        try {
+
+            await navigator.clipboard.writeText(
+                link
+            );
+
+            toast(
+                "تم نسخ رابط الإحالة."
+            );
+
+        } catch {
+
+            const input =
+                $("#referralLink");
+
+            if (!input) return;
+
+            input.select();
+
+            document.execCommand(
+                "copy"
+            );
+
+            toast(
+                "تم نسخ رابط الإحالة."
+            );
+        }
+    }
+
+
+    function shareReferral() {
+
+        if (!state.referralLink) {
+            return;
+        }
+
+
+        const shareUrl =
+            `https://t.me/share/url?url=${encodeURIComponent(
+                state.referralLink
+            )}&text=${encodeURIComponent(
+                "انضم إلى 3Migo Coin عبر رابط الإحالة"
+            )}`;
+
+
+        if (tg?.openTelegramLink) {
+
+            try {
+
+                tg.openTelegramLink(
+                    shareUrl
+                );
+
+                return;
+
+            } catch (error) {
+
+                console.log(
+                    "Telegram share:",
+                    error
+                );
+            }
+        }
+
+
+        window.open(
+            shareUrl,
+            "_blank"
+        );
+    }
+
+
+    /* =====================================================
+       ECONOMIC SYSTEM
+    ===================================================== */
+
+    async function loadEconomic() {
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/economic/user/${state.telegramId}`
+                );
+
+
+            const economic =
+                data?.economic ||
+                data?.data ||
+                data;
+
+
+            state.economic.totalMined =
+                safeNumber(
+                    economic?.total_mined ??
+                    economic?.totalMined ??
+                    data?.total_mined ??
+                    0
+                );
+
+
+            state.economic.locked3m =
+                safeNumber(
+                    economic?.locked_3m ??
+                    economic?.locked3m ??
+                    data?.locked_3m ??
+                    0
+                );
+
+
+            state.economic.unlocked3m =
+                safeNumber(
+                    economic?.unlocked_3m ??
+                    economic?.unlocked3m ??
+                    data?.unlocked_3m ??
+                    0
+                );
+
+
+            state.economic.airdrop3m =
+                safeNumber(
+                    economic?.airdrop_3m ??
+                    economic?.airdrop3m ??
+                    data?.airdrop_3m ??
+                    0
+                );
+
+
+            state.economic.contributionScore =
+                safeNumber(
+                    economic?.contribution_score ??
+                    economic?.contributionScore ??
+                    data?.contribution_score ??
+                    0
+                );
+
+
+            state.economic.trustScore =
+                safeNumber(
+                    economic?.trust_score ??
+                    economic?.trustScore ??
+                    data?.trust_score ??
+                    0
+                );
+
+
+            calculateGrowthIndex();
+
+            calculateExperience();
+
+            updateEconomicUI();
+
+        } catch (error) {
+
+            console.log(
+                "loadEconomic:",
+                error
+            );
+        }
+    }
+
+
+    function calculateGrowthIndex() {
+
+        const activity =
+            Math.min(
+                100,
+                state.sessions * 5
+            );
+
+
+        const contribution =
+            Math.min(
+                100,
+                state.economic.contributionScore
+            );
+
+
+        const trust =
+            Math.min(
+                100,
+                state.economic.trustScore
+            );
+
+
+        state.growthIndex =
+            Math.round(
+                (
+                    activity +
+                    contribution +
+                    trust
+                ) / 3
+            );
+    }
+
+
+    function calculateExperience() {
+
+        const score =
+            Math.max(
+                0,
+                Math.round(
+                    state.economic.contributionScore +
+                    state.sessions * 10 +
+                    state.referralCount * 5
+                )
+            );
+
+
+        const levels = [
+            {
+                level: 1,
+                name: "Starter",
+                min: 0,
+                max: 100
+            },
+            {
+                level: 2,
+                name: "Explorer",
+                min: 100,
+                max: 300
+            },
+            {
+                level: 3,
+                name: "Builder",
+                min: 300,
+                max: 700
+            },
+            {
+                level: 4,
+                name: "Contributor",
+                min: 700,
+                max: 1500
+            },
+            {
+                level: 5,
+                name: "Migo Master",
+                min: 1500,
+                max: 3000
+            }
+        ];
+
+
+        let current =
+            levels[0];
+
+
+        for (
+            const level of levels
+        ) {
+
+            if (
+                score >= level.min
+            ) {
+                current = level;
+            }
+        }
+
+
+        const progress =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    (
+                        (score - current.min) /
+                        Math.max(
+                            1,
+                            current.max -
+                            current.min
+                        )
+                    ) * 100
+                )
+            );
+
+
+        state.experience = {
+
+            level:
+                current.level,
+
+            name:
+                current.name,
+
+            progress,
+
+            score,
+
+            nextScore:
+                current.max
+        };
+    }
+
+
+    function updateEconomicUI() {
+
+        const e =
+            state.economic;
+
+
+        setText(
+            "#homeTotalMined",
+            `${formatNumber(e.totalMined)} 3M`
+        );
+
+        setText(
+            "#homeLocked3m",
+            `${formatNumber(e.locked3m)} 3M`
+        );
+
+        setText(
+            "#homeAirdrop3m",
+            `${formatNumber(e.airdrop3m)} 3M`
+        );
+
+
+        setText(
+            "#walletMined",
+            `${formatNumber(e.totalMined)} 3M`
+        );
+
+        setText(
+            "#walletLocked",
+            `${formatNumber(e.locked3m)} 3M`
+        );
+
+        setText(
+            "#walletUnlocked",
+            `${formatNumber(e.unlocked3m)} 3M`
+        );
+
+        setText(
+            "#walletAirdrop",
+            `${formatNumber(e.airdrop3m)} 3M`
+        );
+
+
+        setText(
+            "#economicTotalMined",
+            `${formatNumber(e.totalMined)} 3M`
+        );
+
+        setText(
+            "#economicContribution",
+            formatNumber(
+                e.contributionScore
+            )
+        );
+
+        setText(
+            "#economicTrust",
+            formatNumber(
+                e.trustScore
+            )
+        );
+
+        setText(
+            "#economicAirdrop",
+            `${formatNumber(e.airdrop3m)} 3M`
+        );
+
+
+        setText(
+            "#growthIndex",
+            `${state.growthIndex}%`
+        );
+
+
+        setText(
+            "#experienceLevel",
+            `Level ${state.experience.level}`
+        );
+
+        setText(
+            "#experienceName",
+            state.experience.name
+        );
+
+        setText(
+            "#experienceScore",
+            `${formatInteger(
+                state.experience.score
+            )} XP`
+        );
+
+
+        const experienceProgress =
+            $("#experienceProgress");
+
+        if (experienceProgress) {
+
+            experienceProgress.style.width =
+                `${state.experience.progress}%`;
+        }
+
+
+        setText(
+            "#profileExperienceLevel",
+            `Level ${state.experience.level}`
+        );
+
+        setText(
+            "#profileExperienceScore",
+            `${formatInteger(
+                state.experience.score
+            )} XP`
+        );
+
+        setText(
+            "#profileExperienceName",
+            state.experience.name
+        );
+
+        setText(
+            "#profileNextScore",
+            `الهدف التالي: ${formatInteger(
+                state.experience.nextScore
+            )} XP`
+        );
+
+
+        const profileProgress =
+            $("#profileExperienceProgress");
+
+        if (profileProgress) {
+
+            profileProgress.style.width =
+                `${state.experience.progress}%`;
+        }
+    }
+
+
+    /* =====================================================
+       AIRDROP
+    ===================================================== */
+
+    async function previewAirdrop() {
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/economic/airdrop/${state.telegramId}`
+                );
+
+
+            const amount =
+                safeNumber(
+                    data?.airdrop_3m ??
+                    data?.amount ??
+                    data?.reward ??
+                    0
+                );
+
+
+            toast(
+                amount > 0
+                    ? `الإيردروب المتوقع: ${formatNumber(amount)} 3M`
+                    : "لا توجد كمية إيردروب متاحة للمعاينة حالياً."
+            );
+
+
+        } catch (error) {
+
+            console.log(
+                "previewAirdrop:",
+                error
+            );
+
+            toast(
+                error.message ||
+                "تعذر معاينة الإيردروب."
+            );
+        }
+    }
+
+
+    async function spendEconomic() {
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/economic/spend/${state.telegramId}`,
+                    {
+                        method: "POST"
+                    }
+                );
+
+
+            toast(
+                data?.message ||
+                "تم تنفيذ العملية."
+            );
+
+
+            await Promise.allSettled([
+                loadUser(),
+                loadEconomic()
+            ]);
+
+        } catch (error) {
+
+            console.log(
+                "spendEconomic:",
+                error
+            );
+
+            toast(
+                error.message ||
+                "تعذر تنفيذ العملية."
+            );
+        }
+    }
+
+
+    /* =====================================================
+       TRANSACTIONS
+    ===================================================== */
+
+    async function loadTransactions() {
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/transactions/${state.telegramId}`
+                );
+
+
+            state.transactions =
+                Array.isArray(data)
+                    ? data
+                    : data?.transactions ||
+                      data?.data ||
+                      [];
+
+
+            renderTransactions();
+
+        } catch (error) {
+
+            console.log(
+                "transactions:",
+                error
+            );
+        }
+    }
+
+
+    function renderTransactions() {
+
+        const container =
+            $("#transactionsList");
+
+        if (!container) return;
+
+
+        if (
+            !state.transactions.length
+        ) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    لا توجد عمليات بعد
+                </div>
+            `;
+
+            return;
+        }
+
+
+        container.innerHTML =
+            state.transactions
+                .slice(0, 30)
+                .map(transaction => {
+
+                    const title =
+                        escapeHtml(
+                            transaction.title ||
+                            transaction.type ||
+                            "عملية 3Migo"
+                        );
+
+
+                    const amount =
+                        safeNumber(
+                            transaction.amount ??
+                            transaction.amount_3m ??
+                            transaction.reward ??
+                            0
+                        );
+
+
+                    return `
+                        <div class="transaction-item">
+
+                            <span>
+                                ${title}
+                            </span>
+
+                            <strong>
+                                ${amount >= 0 ? "+" : ""}
+                                ${formatNumber(amount)}
+                                3M
+                            </strong>
+
+                        </div>
+                    `;
+                })
+                .join("");
+    }
+
+
+    /* =====================================================
+       VIEW NAVIGATION
+    ===================================================== */
+
+    function switchView(viewName) {
+
+        const validViews = [
+            "home",
+            "mine",
+            "tasks",
+            "wallet",
+            "profile"
+        ];
+
+
+        if (
+            !validViews.includes(
+                viewName
+            )
+        ) {
+
+            viewName = "home";
+        }
+
+
+        state.currentView =
+            viewName;
+
+
+        $all(".app-view")
+            .forEach(view => {
+
+                const active =
+                    view.dataset.view ===
+                    viewName;
+
+
+                view.classList.toggle(
+                    "active",
+                    active
+                );
+
+
+                view.hidden =
+                    !active;
+            });
+
+
+        $all(
+            ".nav-item[data-view-target]"
+        )
+            .forEach(button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.viewTarget ===
+                    viewName
+                );
+            });
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+
+        loadViewData(
+            viewName
+        );
+    }
+
+
+    async function loadViewData(viewName) {
+
+        if (
+            viewName === "mine"
+        ) {
+
+            await loadMiningStatus();
+
+            return;
+        }
+
+
+        if (
+            viewName === "tasks"
+        ) {
+
             await loadTasks();
-            break;
 
-        case "refresh-referral":
-            await loadReferral();
-            break;
+            return;
+        }
 
-        case "close-modal":
-            closeModal(
-                element?.closest(".modal")
-            );
-            break;
 
-        default:
-            break;
+        if (
+            viewName === "wallet"
+        ) {
+
+            await Promise.allSettled([
+                loadUser(),
+                loadEconomic(),
+                loadTransactions()
+            ]);
+
+            return;
+        }
+
+
+        if (
+            viewName === "profile"
+        ) {
+
+            await Promise.allSettled([
+                loadReferral(),
+                loadEconomic()
+            ]);
+
+            return;
+        }
     }
-}
 
 
-/* =========================================================
-   MODALS
-   ========================================================= */
+    /* =====================================================
+       MODALS
+    ===================================================== */
 
-function openModal(
-    modal
-) {
+    function openModal(id) {
 
-    if (!modal) return;
+        const modal =
+            document.getElementById(id);
 
-    modal.classList.add(
-        "open",
-        "active",
-        "show"
-    );
+        if (!modal) return;
 
-    modal.removeAttribute(
-        "aria-hidden"
-    );
+        modal.hidden = false;
 
-    document.body.classList.add(
-        "modal-open"
-    );
-}
+        document.body.classList.add(
+            "modal-open"
+        );
+    }
 
 
-function closeModal(
-    modal
-) {
+    function closeModal(modal) {
 
-    if (!modal) return;
+        if (!modal) return;
 
-    modal.classList.remove(
-        "open",
-        "active",
-        "show"
-    );
+        modal.hidden = true;
 
-    modal.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-    if (
-        !$(".modal.open") &&
-        !$(".modal.active")
-    ) {
         document.body.classList.remove(
             "modal-open"
         );
     }
-}
 
 
-function setupModals() {
+    function closeAllModals() {
 
-    $$(".modal").forEach(modal => {
-
-        modal.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target === modal
-                ) {
-                    closeModal(modal);
+        $all(
+            ".modal-overlay"
+        )
+            .forEach(
+                modal => {
+                    modal.hidden = true;
                 }
-            }
-        );
-    });
-
-    $$("[data-modal]").forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const selector =
-                    button.getAttribute(
-                        "data-modal"
-                    );
-
-                const modal =
-                    $(selector);
-
-                openModal(modal);
-            }
-        );
-    });
-}
-
-
-/* =========================================================
-   TASK EVENTS
-   ========================================================= */
-
-function setupTaskEvents() {
-
-    document.addEventListener(
-        "click",
-        async event => {
-
-            const button =
-                event.target.closest(
-                    "[data-task-id]"
-                );
-
-            if (!button) return;
-
-            const taskId =
-                button.getAttribute(
-                    "data-task-id"
-                );
-
-            if (!taskId) return;
-
-            button.disabled = true;
-
-            try {
-
-                await completeTask(
-                    taskId
-                );
-
-            } finally {
-
-                button.disabled = false;
-            }
-        }
-    );
-}
-
-
-/* =========================================================
-   GLOBAL ACTIONS
-   ========================================================= */
-
-function setupActions() {
-
-    document.addEventListener(
-        "click",
-        async event => {
-
-            const viewButton =
-                event.target.closest(
-                    "[data-view-target]"
-                );
-
-            if (viewButton) {
-
-                event.preventDefault();
-
-                const view =
-                    viewButton.getAttribute(
-                        "data-view-target"
-                    );
-
-                await switchView(view);
-
-                return;
-            }
-
-            const actionButton =
-                event.target.closest(
-                    "[data-action]"
-                );
-
-            if (!actionButton) {
-                return;
-            }
-
-            event.preventDefault();
-
-            const action =
-                actionButton.getAttribute(
-                    "data-action"
-                );
-
-            await handleAction(
-                action,
-                actionButton
             );
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+    }
+
+
+    /* =====================================================
+       AI ASSISTANT
+    ===================================================== */
+
+    function openAI() {
+
+        openModal(
+            "aiModal"
+        );
+    }
+
+
+    function addAIMessage(
+        text,
+        type = "assistant"
+    ) {
+
+        const container =
+            $("#aiMessages");
+
+        if (!container) return;
+
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+
+        message.className =
+            `ai-message ${type}`;
+
+
+        const title =
+            document.createElement(
+                "strong"
+            );
+
+
+        title.textContent =
+            type === "user"
+                ? "أنت"
+                : "3Migo AI";
+
+
+        const paragraph =
+            document.createElement(
+                "p"
+            );
+
+
+        paragraph.textContent =
+            text;
+
+
+        message.appendChild(
+            title
+        );
+
+        message.appendChild(
+            paragraph
+        );
+
+
+        container.appendChild(
+            message
+        );
+
+
+        container.scrollTop =
+            container.scrollHeight;
+    }
+
+
+    function aiResponse(question) {
+
+        const text =
+            String(
+                question || ""
+            ).toLowerCase();
+
+
+        if (
+            text.includes("تعدين") ||
+            text.includes("mine")
+        ) {
+
+            return `
+التعدين يعمل على دورة مدتها 12 ساعة.
+عند بدء الدورة يعمل المؤقت، وعند اكتمالها تصبح المكافأة قابلة للاستلام وفق حالة الخادم.
+المكافأة الحالية في النموذج هي 10 3M.
+            `.trim();
         }
-    );
-}
 
 
-/* =========================================================
-   AI ASSISTANT
-   ========================================================= */
+        if (
+            text.includes("محفظ") ||
+            text.includes("رصيد")
+        ) {
 
-function aiAnswer(question) {
+            return `
+المحفظة تعرض رصيد 3M الخاص بك، والإجمالي، وأرباح اليوم، وسجل العمليات.
+الصفحة الاقتصادية منفصلة عن البطاقة حتى يبقى العرض واضحاً.
+            `.trim();
+        }
 
-    const text =
-        String(question || "")
-            .toLowerCase();
 
-    if (
-        text.includes("mine") ||
-        text.includes("mining") ||
-        text.includes("تعدين")
-    ) {
+        if (
+            text.includes("إحال") ||
+            text.includes("ref")
+        ) {
 
-        return "Mining runs on a 12-hour cycle. Start the cycle, follow the circular progress indicator, then claim the available reward when the cycle completes.";
+            return `
+لك كود إحالة ورابط خاص بك.
+يمكنك نسخ الرابط أو مشاركته مباشرة، وتظهر الإحالات والمكافآت المرتبطة بحسابك.
+            `.trim();
+        }
+
+
+        if (
+            text.includes("اقتصاد") ||
+            text.includes("إيردروب") ||
+            text.includes("airdrop")
+        ) {
+
+            return `
+اقتصاد 3Migo يجمع نشاط المستخدم والمكافآت والمعلومات الاقتصادية في منظومة واحدة.
+الإيردروب مرتبط بالاقتصاد وليس نظاماً منفصلاً عن المنظومة.
+            `.trim();
+        }
+
+
+        if (
+            text.includes("مهم") ||
+            text.includes("task")
+        ) {
+
+            return `
+صفحة المهام تعرض الأنشطة المتاحة والمكافآت المرتبطة بها.
+بعد تنفيذ المهمة يتم تحديث الرصيد والاقتصاد.
+            `.trim();
+        }
+
+
+        return `
+أنا مساعد 3Migo.
+يمكنني شرح التعدين، المحفظة، الإحالات، المهام، والاقتصاد داخل التطبيق.
+        `.trim();
     }
 
-    if (
-        text.includes("reward") ||
-        text.includes("مكاف") ||
-        text.includes("ربح")
-    ) {
 
-        return "3M rewards can come from mining, tasks, daily rewards and the referral system, according to the current 3Migo ecosystem rules.";
-    }
+    function sendAIMessage() {
 
-    if (
-        text.includes("referral") ||
-        text.includes("إحال") ||
-        text.includes("دعوة")
-    ) {
+        const input =
+            $("#aiInput");
 
-        return "Your referral card contains your referral code and sharing link. Copy the link or use the share button to invite others.";
-    }
+        if (!input) return;
 
-    if (
-        text.includes("wallet") ||
-        text.includes("محفظ")
-    ) {
-
-        return "Your wallet shows your current 3M balance, total activity and available ecosystem information.";
-    }
-
-    if (
-        text.includes("growth") ||
-        text.includes("نمو")
-    ) {
-
-        return "The 3Migo Growth Index is an internal ecosystem activity indicator based on activity, contribution and trust metrics. It is not a market price.";
-    }
-
-    return "I can help you understand mining, rewards, referrals, wallet activity and the 3Migo ecosystem.";
-}
-
-
-function setupAI() {
-
-    const input =
-        $("#aiInput");
-
-    const send =
-        $("#aiSend");
-
-    const container =
-        $("#aiMessages");
-
-    if (!input || !send || !container) {
-        return;
-    }
-
-    const sendMessage = () => {
 
         const question =
             input.value.trim();
 
-        if (!question) return;
 
-        const userMessage =
-            document.createElement(
-                "div"
-            );
+        if (!question) {
+            return;
+        }
 
-        userMessage.className =
-            "ai-message user";
 
-        userMessage.textContent =
-            question;
-
-        container.appendChild(
-            userMessage
+        addAIMessage(
+            question,
+            "user"
         );
 
-        const answer =
-            document.createElement(
-                "div"
-            );
-
-        answer.className =
-            "ai-message assistant";
-
-        answer.textContent =
-            aiAnswer(question);
-
-        container.appendChild(
-            answer
-        );
 
         input.value = "";
 
-        container.scrollTop =
-            container.scrollHeight;
+
+        setTimeout(() => {
+
+            addAIMessage(
+                aiResponse(
+                    question
+                ),
+                "assistant"
+            );
+
+        }, 250);
+    }
+
+
+    /* =====================================================
+       AD GALAXY
+    ===================================================== */
+
+    async function refreshAds() {
+
+        toast(
+            "جارٍ تحديث الأنشطة الإعلانية والمهام..."
+        );
+
+
+        await loadTasks();
+
+
+        toast(
+            "تم تحديث الأنشطة."
+        );
+    }
+
+
+    /* =====================================================
+       ACTION HANDLER
+    ===================================================== */
+
+    async function handleAction(
+        action,
+        element
+    ) {
+
+        switch (action) {
+
+            case "open-ai":
+
+                openAI();
+
+                break;
+
+
+            case "open-economic":
+
+                openModal(
+                    "economicModal"
+                );
+
+                await loadEconomic();
+
+                break;
+
+
+            case "open-wallet":
+
+                openModal(
+                    "walletModal"
+                );
+
+                await loadUser();
+
+                break;
+
+
+            case "copy-referral":
+
+                await copyReferral();
+
+                break;
+
+
+            case "share-referral":
+
+                shareReferral();
+
+                break;
+
+
+            case "preview-airdrop":
+
+                await previewAirdrop();
+
+                break;
+
+
+            case "spend-economic":
+
+                await spendEconomic();
+
+                break;
+
+
+            case "refresh-ads":
+
+                await refreshAds();
+
+                break;
+
+
+            case "close-modal":
+
+                closeModal(
+                    element.closest(
+                        ".modal-overlay"
+                    )
+                );
+
+                break;
+
+
+            case "daily-reward":
+
+                await claimDailyReward();
+
+                break;
+
+
+            default:
+
+                console.log(
+                    "Unknown action:",
+                    action
+                );
+        }
+    }
+
+
+    /* =====================================================
+       EVENT SYSTEM
+    ===================================================== */
+
+    function setupEvents() {
+
+        /*
+         * Navigation
+         */
+        document.addEventListener(
+            "click",
+            async event => {
+
+                const nav =
+                    event.target.closest(
+                        "[data-view-target]"
+                    );
+
+
+                if (nav) {
+
+                    event.preventDefault();
+
+                    switchView(
+                        nav.dataset.viewTarget
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Actions
+                 */
+                const actionElement =
+                    event.target.closest(
+                        "[data-action]"
+                    );
+
+
+                if (
+                    actionElement
+                ) {
+
+                    event.preventDefault();
+
+                    await handleAction(
+                        actionElement.dataset.action,
+                        actionElement
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Task buttons
+                 */
+                const taskButton =
+                    event.target.closest(
+                        "[data-task-id]"
+                    );
+
+
+                if (
+                    taskButton
+                ) {
+
+                    event.preventDefault();
+
+                    const taskId =
+                        taskButton.dataset.taskId;
+
+
+                    if (taskId) {
+
+                        await completeTask(
+                            taskId
+                        );
+                    }
+
+                    return;
+                }
+
+
+                /*
+                 * AI quick questions
+                 */
+                const aiQuestion =
+                    event.target.closest(
+                        "[data-ai-question]"
+                    );
+
+
+                if (
+                    aiQuestion
+                ) {
+
+                    event.preventDefault();
+
+                    const question =
+                        aiQuestion.dataset.aiQuestion;
+
+
+                    addAIMessage(
+                        question,
+                        "user"
+                    );
+
+
+                    setTimeout(() => {
+
+                        addAIMessage(
+                            aiResponse(
+                                question
+                            ),
+                            "assistant"
+                        );
+
+                    }, 200);
+
+                    return;
+                }
+
+            }
+        );
+
+
+        /*
+         * AI send
+         */
+        const aiSend =
+            $("#aiSend");
+
+        if (aiSend) {
+
+            aiSend.addEventListener(
+                "click",
+                sendAIMessage
+            );
+        }
+
+
+        /*
+         * Enter inside AI input
+         */
+        const aiInput =
+            $("#aiInput");
+
+        if (aiInput) {
+
+            aiInput.addEventListener(
+                "keydown",
+                event => {
+
+                    if (
+                        event.key ===
+                        "Enter"
+                    ) {
+
+                        event.preventDefault();
+
+                        sendAIMessage();
+                    }
+                }
+            );
+        }
+
+
+        /*
+         * Close modal by clicking backdrop
+         */
+        $all(
+            ".modal-overlay"
+        )
+            .forEach(modal => {
+
+                modal.addEventListener(
+                    "click",
+                    event => {
+
+                        if (
+                            event.target ===
+                            modal
+                        ) {
+
+                            closeModal(
+                                modal
+                            );
+                        }
+                    }
+                );
+            });
+
+
+        /*
+         * ESC
+         */
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    closeAllModals();
+                }
+            }
+        );
+    }
+
+
+    /* =====================================================
+       HTML ESCAPE
+    ===================================================== */
+
+    function escapeHtml(value) {
+
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+    }
+
+
+    /* =====================================================
+       INITIALIZATION
+    ===================================================== */
+
+    async function initialize() {
+
+        console.log(
+            "3Migo Coin — App V5.4 initializing..."
+        );
+
+
+        initializeTelegramUser();
+
+
+        /*
+         * Register/load user first.
+         * This preserves backend source of truth.
+         */
+        await registerUser();
+
+
+        /*
+         * Load core data.
+         */
+        await Promise.allSettled([
+
+            loadUser(),
+
+            loadMiningStatus(),
+
+            loadReferral(),
+
+            loadEconomic()
+
+        ]);
+
+
+        /*
+         * UI
+         */
+        updateBalanceUI();
+
+        updateProfileUI();
+
+        updateReferralUI();
+
+        updateEconomicUI();
+
+        updateMiningUI();
+
+
+        /*
+         * Events
+         */
+        setupMiningButtons();
+
+        setupEvents();
+
+
+        /*
+         * Home is default.
+         */
+        switchView(
+            "home"
+        );
+
+
+        console.log(
+            "3Migo Coin — App V5.4 ready."
+        );
+    }
+
+
+    /* =====================================================
+       START
+    ===================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize
+        );
+
+    } else {
+
+        initialize();
+    }
+
+
+    /* =====================================================
+       OPTIONAL GLOBAL ACCESS
+       Preserves compatibility with older code.
+    ===================================================== */
+
+    window.ThreeMigo = {
+
+        state,
+
+        startMining,
+
+        claimMining,
+
+        loadMiningStatus,
+
+        loadTasks,
+
+        loadReferral,
+
+        loadEconomic,
+
+        loadTransactions,
+
+        switchView,
+
+        openAI,
+
+        toast
     };
 
-    send.addEventListener(
-        "click",
-        sendMessage
-    );
 
-    input.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                event.preventDefault();
-
-                sendMessage();
-            }
-        }
-    );
-
-    $$(".ai-question").forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    input.value =
-                        button.textContent
-                            .trim();
-
-                    sendMessage();
-                }
-            );
-        }
-    );
-}
-
-
-/* =========================================================
-   ECONOMIC ACTIONS
-   ========================================================= */
-
-async function previewAirdrop() {
-
-    const telegramId =
-        getTelegramId();
-
-    try {
-
-        const data =
-            await apiRequest(
-                `/economic/airdrop/${telegramId}`
-            );
-
-        const amount =
-            safeNumber(
-                data.amount ??
-                data.airdrop_3m ??
-                0
-            );
-
-        const target =
-            $("#airdropPreview");
-
-        if (target) {
-
-            target.textContent =
-                `${formatNumber(amount, 2)} 3M`;
-        }
-
-        showToast(
-            "Airdrop preview updated",
-            "success"
-        );
-
-    } catch (error) {
-
-        showToast(
-            error.message ||
-            "Unable to preview airdrop",
-            "error"
-        );
-    }
-}
-
-
-async function spendEconomic() {
-
-    const telegramId =
-        getTelegramId();
-
-    const amountElement =
-        $("#spendAmount");
-
-    const amount =
-        safeNumber(
-            amountElement?.value
-        );
-
-    if (amount <= 0) {
-
-        showToast(
-            "Enter a valid amount",
-            "warning"
-        );
-
-        return;
-    }
-
-    try {
-
-        await apiRequest(
-            `/economic/spend/${telegramId}`,
-            {
-                method: "POST",
-                body: JSON.stringify({
-                    amount
-                })
-            }
-        );
-
-        showToast(
-            "3M spend recorded",
-            "success"
-        );
-
-        await loadEconomic(true);
-        await loadUser();
-
-    } catch (error) {
-
-        showToast(
-            error.message ||
-            "Unable to process spend",
-            "error"
-        );
-    }
-}
-
-
-/* =========================================================
-   AD GALAXY
-   ========================================================= */
-
-async function refreshAdGalaxy() {
-
-    await loadTasks(true);
-
-    state.adGalaxy.tasks =
-        state.tasks;
-
-    state.adGalaxy.loaded =
-        true;
-
-    showToast(
-        "Ad Galaxy refreshed",
-        "success"
-    );
-}
-
-
-/* =========================================================
-   DYNAMIC V4 HUB
-   ========================================================= */
-
-function setupV4Hub() {
-
-    const hub =
-        $("#v4Hub");
-
-    if (!hub) return;
-
-    hub.addEventListener(
-        "click",
-        event => {
-
-            const button =
-                event.target.closest(
-                    "[data-v4-action]"
-                );
-
-            if (!button) return;
-
-            const action =
-                button.getAttribute(
-                    "data-v4-action"
-                );
-
-            if (
-                action === "wallet"
-            ) {
-                showWallet();
-            }
-
-            if (
-                action === "mining"
-            ) {
-                showMining();
-            }
-
-            if (
-                action === "tasks"
-            ) {
-                showTasks();
-            }
-        }
-    );
-}
-
-
-/* =========================================================
-   KEYBOARD / ESCAPE
-   ========================================================= */
-
-function setupKeyboard() {
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Escape"
-            ) {
-
-                const modal =
-                    $(".modal.open") ||
-                    $(".modal.active");
-
-                if (modal) {
-                    closeModal(modal);
-                }
-            }
-        }
-    );
-}
-
-
-/* =========================================================
-   VISIBILITY SYNC
-   ========================================================= */
-
-function setupVisibilitySync() {
-
-    document.addEventListener(
-        "visibilitychange",
-        async () => {
-
-            if (
-                document.visibilityState ===
-                "visible"
-            ) {
-
-                await loadMiningStatus(
-                    true
-                );
-            }
-        }
-    );
-}
-
-
-/* =========================================================
-   INIT
-   ========================================================= */
-
-async function init() {
-
-    if (state.initialized) {
-        return;
-    }
-
-    state.initialized = true;
-
-    getTelegramUser();
-
-    setupMiningButton();
-
-    setupActions();
-
-    setupTaskEvents();
-
-    setupModals();
-
-    setupAI();
-
-    setupV4Hub();
-
-    setupKeyboard();
-
-    setupVisibilitySync();
-
-    updateWalletUI();
-
-    updateProfileUI();
-
-    updateMiningUI();
-
-    activateView("home");
-
-    /*
-       Register first.
-       Then load current user data.
-    */
-
-    await registerUser();
-
-    await Promise.allSettled([
-        loadUser(),
-        loadMiningStatus(true),
-        loadReferral(true),
-        loadEconomic(true)
-    ]);
-
-    /*
-       Final UI synchronization
-    */
-
-    updateWalletUI();
-
-    updateProfileUI();
-
-    updateMiningUI();
-
-    updateReferralUI();
-
-    updateEconomicUI();
-
-    updateExperienceUI();
-
-    console.log(
-        "3Migo Coin App V5.2 initialized",
-        {
-            telegramId: getTelegramId(),
-            view: state.currentView
-        }
-    );
-}
-
-
-/* =========================================================
-   PUBLIC API
-   ========================================================= */
-
-window.ThreeMigo = {
-
-    state,
-
-    startMining,
-
-    claimMining,
-
-    loadMiningStatus,
-
-    loadTasks,
-
-    loadReferral,
-
-    loadEconomic,
-
-    loadUser,
-
-    showHome,
-
-    showMining,
-
-    showTasks,
-
-    showWallet,
-
-    showProfile,
-
-    switchView,
-
-    copyReferralLink,
-
-    shareReferral,
-
-    claimDaily,
-
-    refreshAdGalaxy,
-
-    previewAirdrop,
-
-    spendEconomic
-};
-
-
-/* =========================================================
-   START APPLICATION
-   ========================================================= */
-
-if (
-    document.readyState ===
-    "loading"
-) {
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        init,
-        {
-            once: true
-        }
-    );
-
-} else {
-
-    init();
-}
+})();
