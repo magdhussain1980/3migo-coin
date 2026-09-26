@@ -1,6 +1,6 @@
 # =========================================================
-# 3MIGO TELEGRAM REVENUE DIAGNOSTIC V2
-# OWNER SESSION / READ-ONLY
+# 3MIGO TELEGRAM REVENUE DIAGNOSTIC V3
+# OWNER STRING SESSION / READ-ONLY
 # NO WITHDRAWAL
 # NO ECONOMY CHANGES
 # =========================================================
@@ -10,28 +10,67 @@ import asyncio
 import json
 
 from telethon import TelegramClient, functions
+from telethon.sessions import StringSession
 
+
+# =========================================================
+# ENVIRONMENT VARIABLES
+# =========================================================
 
 API_ID = os.getenv("TELEGRAM_API_ID")
 API_HASH = os.getenv("TELEGRAM_API_HASH")
+STRING_SESSION = os.getenv("TELEGRAM_STRING_SESSION")
 
-# Username of the 3Migo bot
 BOT_USERNAME = os.getenv(
     "THREEMIGO_BOT_USERNAME",
     "threemigosmart_bot"
 )
 
 
+# =========================================================
+# HELPERS
+# =========================================================
+
+def print_header(title):
+    print("\n" + "=" * 70)
+    print(title)
+    print("=" * 70)
+
+
+def to_ton(value):
+    """
+    Telegram monetary values are returned in nanograms.
+    1 TON = 1,000,000,000 nanograms.
+    """
+
+    if value is None:
+        return None
+
+    try:
+        return float(value) / 1_000_000_000
+    except (TypeError, ValueError):
+        return None
+
+
+# =========================================================
+# MAIN REVENUE CHECK
+# =========================================================
+
 async def check_revenue():
 
-    print("=" * 70)
-    print("3MIGO TELEGRAM REVENUE DIAGNOSTIC V2")
-    print("READ-ONLY / NO WITHDRAWAL")
-    print("=" * 70)
+    print_header(
+        "3MIGO TELEGRAM REVENUE DIAGNOSTIC V3"
+    )
 
-    # -----------------------------------------------------
-    # Environment validation
-    # -----------------------------------------------------
+    print("READ-ONLY / NO WITHDRAWAL")
+    print("OWNER STRING SESSION")
+    print("NO ECONOMY CHANGES")
+
+    # =====================================================
+    # 1. ENVIRONMENT VALIDATION
+    # =====================================================
+
+    print("\n[1] Validating environment variables...")
 
     if not API_ID:
         print("ERROR: TELEGRAM_API_ID is missing")
@@ -41,44 +80,101 @@ async def check_revenue():
         print("ERROR: TELEGRAM_API_HASH is missing")
         return
 
-    try:
-        api_id = int(API_ID)
-    except ValueError:
-        print("ERROR: TELEGRAM_API_ID must be numeric")
+    if not STRING_SESSION:
+        print("ERROR: TELEGRAM_STRING_SESSION is missing")
         return
 
-    # -----------------------------------------------------
-    # Owner session
-    # -----------------------------------------------------
+    try:
+
+        api_id = int(API_ID)
+
+    except ValueError:
+
+        print(
+            "ERROR: TELEGRAM_API_ID must be numeric"
+        )
+
+        return
+
+    print("OK: TELEGRAM_API_ID found")
+    print("OK: TELEGRAM_API_HASH found")
+    print("OK: TELEGRAM_STRING_SESSION found")
+
+    # =====================================================
+    # 2. CONNECT USING STRING SESSION
+    # =====================================================
 
     client = TelegramClient(
-        "3migo_owner_revenue",
+        StringSession(STRING_SESSION),
         api_id,
         API_HASH
     )
 
     try:
 
-        print("\n[1] Connecting with Telegram owner session...")
+        print(
+            "\n[2] Connecting using Telegram owner session..."
+        )
 
-        await client.start()
+        await client.connect()
 
-        print("OK: Owner session connected")
+        if not await client.is_user_authorized():
 
-        # -------------------------------------------------
-        # Owner information
-        # -------------------------------------------------
+            print(
+                "ERROR: Telegram String Session is not authorized."
+            )
+
+            print(
+                "Create a new String Session locally and update "
+                "TELEGRAM_STRING_SESSION in Render."
+            )
+
+            return
+
+        print(
+            "OK: Owner session connected"
+        )
+
+        # =================================================
+        # 3. OWNER INFORMATION
+        # =================================================
+
+        print(
+            "\n[3] Reading owner account..."
+        )
 
         owner = await client.get_me()
 
         owner_info = {
-            "id": getattr(owner, "id", None),
-            "username": getattr(owner, "username", None),
-            "first_name": getattr(owner, "first_name", None),
-            "last_name": getattr(owner, "last_name", None)
-        }
 
-        print("\n[2] Owner account")
+            "id":
+                getattr(
+                    owner,
+                    "id",
+                    None
+                ),
+
+            "username":
+                getattr(
+                    owner,
+                    "username",
+                    None
+                ),
+
+            "first_name":
+                getattr(
+                    owner,
+                    "first_name",
+                    None
+                ),
+
+            "last_name":
+                getattr(
+                    owner,
+                    "last_name",
+                    None
+                )
+        }
 
         print(
             json.dumps(
@@ -88,21 +184,47 @@ async def check_revenue():
             )
         )
 
-        # -------------------------------------------------
-        # Resolve 3Migo bot
-        # -------------------------------------------------
+        # =================================================
+        # 4. RESOLVE 3MIGO BOT
+        # =================================================
 
-        print("\n[3] Resolving 3Migo bot...")
+        print(
+            "\n[4] Resolving 3Migo bot..."
+        )
 
         bot = await client.get_entity(
             BOT_USERNAME
         )
 
         bot_info = {
-            "id": getattr(bot, "id", None),
-            "username": getattr(bot, "username", None),
-            "first_name": getattr(bot, "first_name", None),
-            "is_bot": getattr(bot, "bot", None)
+
+            "id":
+                getattr(
+                    bot,
+                    "id",
+                    None
+                ),
+
+            "username":
+                getattr(
+                    bot,
+                    "username",
+                    None
+                ),
+
+            "first_name":
+                getattr(
+                    bot,
+                    "first_name",
+                    None
+                ),
+
+            "is_bot":
+                getattr(
+                    bot,
+                    "bot",
+                    None
+                )
         }
 
         print(
@@ -121,22 +243,28 @@ async def check_revenue():
 
             return
 
-        # -------------------------------------------------
-        # Input peer
-        # -------------------------------------------------
+        # =================================================
+        # 5. PREPARE INPUT PEER
+        # =================================================
 
-        print("\n[4] Preparing revenue peer...")
+        print(
+            "\n[5] Preparing Telegram revenue peer..."
+        )
 
         peer = await client.get_input_entity(
             bot
         )
 
-        # -------------------------------------------------
-        # Telegram Revenue API
-        # -------------------------------------------------
+        print(
+            "OK: Revenue peer prepared"
+        )
+
+        # =================================================
+        # 6. TELEGRAM REVENUE API
+        # =================================================
 
         print(
-            "\n[5] Requesting Telegram ad revenue statistics..."
+            "\n[6] Requesting Telegram revenue statistics..."
         )
 
         result = await client(
@@ -148,12 +276,12 @@ async def check_revenue():
         )
 
         print(
-            "\n[6] Telegram revenue response received"
+            "OK: Telegram revenue response received"
         )
 
-        # -------------------------------------------------
-        # Revenue status
-        # -------------------------------------------------
+        # =================================================
+        # 7. REVENUE STATUS
+        # =================================================
 
         status = getattr(
             result,
@@ -167,7 +295,9 @@ async def check_revenue():
                 "\nWARNING: Telegram returned no revenue status."
             )
 
-            print("\nRAW RESPONSE:")
+            print(
+                "\nRAW RESPONSE:"
+            )
 
             print(
                 result.stringify()
@@ -175,9 +305,9 @@ async def check_revenue():
 
             return
 
-        # -------------------------------------------------
-        # Extract values
-        # -----------------------------------------------------
+        # =================================================
+        # 8. EXTRACT REVENUE VALUES
+        # =================================================
 
         current_balance = getattr(
             status,
@@ -209,20 +339,9 @@ async def check_revenue():
             None
         )
 
-        # -------------------------------------------------
-        # TON values
-        # Telegram returns nanograms
-        # 1 TON = 1,000,000,000 nanograms
-        # -------------------------------------------------
-
-        TON_NANOGRAMS = 1_000_000_000
-
-        def to_ton(value):
-
-            if value is None:
-                return None
-
-            return float(value) / TON_NANOGRAMS
+        # =================================================
+        # 9. BUILD REVENUE OBJECT
+        # =================================================
 
         revenue = {
 
@@ -236,13 +355,19 @@ async def check_revenue():
                 overall_revenue,
 
             "current_balance_ton":
-                to_ton(current_balance),
+                to_ton(
+                    current_balance
+                ),
 
             "available_balance_ton":
-                to_ton(available_balance),
+                to_ton(
+                    available_balance
+                ),
 
             "overall_revenue_ton":
-                to_ton(overall_revenue),
+                to_ton(
+                    overall_revenue
+                ),
 
             "withdrawal_enabled":
                 withdrawal_enabled,
@@ -251,26 +376,37 @@ async def check_revenue():
                 next_withdrawal_at
         }
 
-        # -------------------------------------------------
-        # Final result
-        # -------------------------------------------------
+        # =================================================
+        # 10. FINAL JSON RESULT
+        # =================================================
 
         output = {
 
-            "status": "ok",
+            "status":
+                "ok",
 
-            "owner": owner_info,
+            "diagnostic_version":
+                "3.0",
 
-            "bot": bot_info,
+            "read_only":
+                True,
 
-            "telegram_ad_revenue": revenue
+            "withdrawal_attempted":
+                False,
 
+            "owner":
+                owner_info,
+
+            "bot":
+                bot_info,
+
+            "telegram_ad_revenue":
+                revenue
         }
 
-        print("\n")
-        print("=" * 70)
-        print("3MIGO TELEGRAM REVENUE RESULT")
-        print("=" * 70)
+        print_header(
+            "3MIGO TELEGRAM REVENUE RESULT"
+        )
 
         print(
             json.dumps(
@@ -280,24 +416,34 @@ async def check_revenue():
             )
         )
 
-        # -------------------------------------------------
-        # Human-readable result
-        # -------------------------------------------------
+        # =================================================
+        # 11. HUMAN-READABLE RESULT
+        # =================================================
 
-        print("\n" + "-" * 70)
+        print(
+            "\n" + "-" * 70
+        )
 
         if overall_revenue is not None:
 
-            if overall_revenue > 0:
+            try:
+
+                if float(overall_revenue) > 0:
+
+                    print(
+                        "REVENUE: DETECTED"
+                    )
+
+                else:
+
+                    print(
+                        "REVENUE: ZERO"
+                    )
+
+            except (TypeError, ValueError):
 
                 print(
-                    "REVENUE: DETECTED"
-                )
-
-            else:
-
-                print(
-                    "REVENUE: ZERO"
+                    "REVENUE: UNKNOWN"
                 )
 
         else:
@@ -318,18 +464,31 @@ async def check_revenue():
                 "WITHDRAWAL: NOT ENABLED"
             )
 
-        print("-" * 70)
+        print(
+            "-" * 70
+        )
 
         print(
-            "\nIMPORTANT: No withdrawal was attempted."
+            "\nIMPORTANT:"
         )
+
+        print(
+            "No withdrawal was attempted."
+        )
+
+        print(
+            "No 3Migo economy data was changed."
+        )
+
+    # =====================================================
+    # ERROR HANDLING
+    # =====================================================
 
     except Exception as error:
 
-        print("\n")
-        print("=" * 70)
-        print("3MIGO TELEGRAM REVENUE ERROR")
-        print("=" * 70)
+        print_header(
+            "3MIGO TELEGRAM REVENUE ERROR"
+        )
 
         print(
             "ERROR TYPE:"
@@ -351,6 +510,10 @@ async def check_revenue():
             "\nNo withdrawal was attempted."
         )
 
+    # =====================================================
+    # DISCONNECT
+    # =====================================================
+
     finally:
 
         await client.disconnect()
@@ -359,6 +522,10 @@ async def check_revenue():
             "\nTelegram connection closed."
         )
 
+
+# =========================================================
+# ENTRY POINT
+# =========================================================
 
 if __name__ == "__main__":
 
