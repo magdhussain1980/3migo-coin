@@ -1,7 +1,8 @@
 # =========================================================
-# 3MIGO TELEGRAM REVENUE DIAGNOSTIC
-# READ-ONLY
+# 3MIGO TELEGRAM REVENUE DIAGNOSTIC V2
+# OWNER SESSION / READ-ONLY
 # NO WITHDRAWAL
+# NO ECONOMY CHANGES
 # =========================================================
 
 import os
@@ -13,14 +14,20 @@ from telethon import TelegramClient, functions
 
 API_ID = os.getenv("TELEGRAM_API_ID")
 API_HASH = os.getenv("TELEGRAM_API_HASH")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# Username of the 3Migo bot
+BOT_USERNAME = os.getenv(
+    "THREEMIGO_BOT_USERNAME",
+    "threemigosmart_bot"
+)
 
 
 async def check_revenue():
 
-    print("=" * 60)
-    print("3MIGO TELEGRAM REVENUE DIAGNOSTIC")
-    print("=" * 60)
+    print("=" * 70)
+    print("3MIGO TELEGRAM REVENUE DIAGNOSTIC V2")
+    print("READ-ONLY / NO WITHDRAWAL")
+    print("=" * 70)
 
     # -----------------------------------------------------
     # Environment validation
@@ -34,10 +41,6 @@ async def check_revenue():
         print("ERROR: TELEGRAM_API_HASH is missing")
         return
 
-    if not BOT_TOKEN:
-        print("ERROR: BOT_TOKEN is missing")
-        return
-
     try:
         api_id = int(API_ID)
     except ValueError:
@@ -45,117 +48,181 @@ async def check_revenue():
         return
 
     # -----------------------------------------------------
-    # Telegram connection
+    # Owner session
     # -----------------------------------------------------
 
     client = TelegramClient(
-        "3migo_revenue_diagnostic",
+        "3migo_owner_revenue",
         api_id,
         API_HASH
     )
 
     try:
 
-        print("\n[1] Connecting to Telegram...")
+        print("\n[1] Connecting with Telegram owner session...")
 
-        await client.start(
-            bot_token=BOT_TOKEN
-        )
+        await client.start()
 
-        print("OK: Telegram connection established")
+        print("OK: Owner session connected")
 
         # -------------------------------------------------
-        # Bot information
+        # Owner information
         # -------------------------------------------------
 
-        me = await client.get_me()
+        owner = await client.get_me()
 
-        print("\n[2] Bot information")
-
-        bot_info = {
-            "id": getattr(me, "id", None),
-            "username": getattr(me, "username", None),
-            "first_name": getattr(me, "first_name", None),
-            "is_bot": getattr(me, "bot", None)
+        owner_info = {
+            "id": getattr(owner, "id", None),
+            "username": getattr(owner, "username", None),
+            "first_name": getattr(owner, "first_name", None),
+            "last_name": getattr(owner, "last_name", None)
         }
 
-        print(json.dumps(
-            bot_info,
-            ensure_ascii=False,
-            indent=2
-        ))
+        print("\n[2] Owner account")
 
-        # -------------------------------------------------
-        # Revenue peer
-        # -------------------------------------------------
-
-        print("\n[3] Preparing revenue request...")
-
-        peer = await client.get_input_entity(me)
-
-        # -------------------------------------------------
-        # READ-ONLY Telegram Revenue API
-        # -------------------------------------------------
-
-        print("[4] Requesting revenue statistics...")
-
-        result = await client(
-            functions.stats.GetBroadcastRevenueStatsRequest(
-                peer=peer,
-                dark=False
+        print(
+            json.dumps(
+                owner_info,
+                ensure_ascii=False,
+                indent=2
             )
         )
 
-        print("\n[5] Telegram response received")
-
         # -------------------------------------------------
-        # Extract balances
+        # Resolve 3Migo bot
         # -------------------------------------------------
 
-        balances = getattr(
-            result,
-            "balances",
-            None
+        print("\n[3] Resolving 3Migo bot...")
+
+        bot = await client.get_entity(
+            BOT_USERNAME
         )
 
-        if balances is None:
+        bot_info = {
+            "id": getattr(bot, "id", None),
+            "username": getattr(bot, "username", None),
+            "first_name": getattr(bot, "first_name", None),
+            "is_bot": getattr(bot, "bot", None)
+        }
 
-            print("\nWARNING: No revenue balances returned.")
+        print(
+            json.dumps(
+                bot_info,
+                ensure_ascii=False,
+                indent=2
+            )
+        )
 
-            print("\nRAW TELEGRAM RESPONSE:")
-            print(result.stringify())
+        if not getattr(bot, "bot", False):
+
+            print(
+                "\nWARNING: Resolved account is not marked as a bot."
+            )
 
             return
 
+        # -------------------------------------------------
+        # Input peer
+        # -------------------------------------------------
+
+        print("\n[4] Preparing revenue peer...")
+
+        peer = await client.get_input_entity(
+            bot
+        )
+
+        # -------------------------------------------------
+        # Telegram Revenue API
+        # -------------------------------------------------
+
+        print(
+            "\n[5] Requesting Telegram ad revenue statistics..."
+        )
+
+        result = await client(
+            functions.payments.GetStarsRevenueStatsRequest(
+                dark=False,
+                ton=True,
+                peer=peer
+            )
+        )
+
+        print(
+            "\n[6] Telegram revenue response received"
+        )
+
+        # -------------------------------------------------
+        # Revenue status
+        # -------------------------------------------------
+
+        status = getattr(
+            result,
+            "status",
+            None
+        )
+
+        if status is None:
+
+            print(
+                "\nWARNING: Telegram returned no revenue status."
+            )
+
+            print("\nRAW RESPONSE:")
+
+            print(
+                result.stringify()
+            )
+
+            return
+
+        # -------------------------------------------------
+        # Extract values
+        # -----------------------------------------------------
+
         current_balance = getattr(
-            balances,
+            status,
             "current_balance",
-            0
+            None
         )
 
         available_balance = getattr(
-            balances,
+            status,
             "available_balance",
-            0
+            None
         )
 
         overall_revenue = getattr(
-            balances,
+            status,
             "overall_revenue",
-            0
+            None
         )
 
         withdrawal_enabled = getattr(
-            balances,
+            status,
             "withdrawal_enabled",
             False
         )
 
+        next_withdrawal_at = getattr(
+            status,
+            "next_withdrawal_at",
+            None
+        )
+
         # -------------------------------------------------
-        # TON conversion
+        # TON values
+        # Telegram returns nanograms
+        # 1 TON = 1,000,000,000 nanograms
         # -------------------------------------------------
 
         TON_NANOGRAMS = 1_000_000_000
+
+        def to_ton(value):
+
+            if value is None:
+                return None
+
+            return float(value) / TON_NANOGRAMS
 
         revenue = {
 
@@ -169,16 +236,19 @@ async def check_revenue():
                 overall_revenue,
 
             "current_balance_ton":
-                current_balance / TON_NANOGRAMS,
+                to_ton(current_balance),
 
             "available_balance_ton":
-                available_balance / TON_NANOGRAMS,
+                to_ton(available_balance),
 
             "overall_revenue_ton":
-                overall_revenue / TON_NANOGRAMS,
+                to_ton(overall_revenue),
 
             "withdrawal_enabled":
-                withdrawal_enabled
+                withdrawal_enabled,
+
+            "next_withdrawal_at":
+                next_withdrawal_at
         }
 
         # -------------------------------------------------
@@ -189,15 +259,18 @@ async def check_revenue():
 
             "status": "ok",
 
+            "owner": owner_info,
+
             "bot": bot_info,
 
-            "telegram_revenue": revenue
+            "telegram_ad_revenue": revenue
+
         }
 
         print("\n")
-        print("=" * 60)
+        print("=" * 70)
         print("3MIGO TELEGRAM REVENUE RESULT")
-        print("=" * 60)
+        print("=" * 70)
 
         print(
             json.dumps(
@@ -208,45 +281,83 @@ async def check_revenue():
         )
 
         # -------------------------------------------------
-        # Human readable status
+        # Human-readable result
         # -------------------------------------------------
 
-        print("\n" + "-" * 60)
+        print("\n" + "-" * 70)
 
-        if overall_revenue > 0:
-            print("REVENUE: DETECTED")
+        if overall_revenue is not None:
+
+            if overall_revenue > 0:
+
+                print(
+                    "REVENUE: DETECTED"
+                )
+
+            else:
+
+                print(
+                    "REVENUE: ZERO"
+                )
+
         else:
-            print("REVENUE: ZERO")
+
+            print(
+                "REVENUE: UNKNOWN"
+            )
 
         if withdrawal_enabled:
-            print("WITHDRAWAL: ENABLED")
-        else:
-            print("WITHDRAWAL: NOT ENABLED")
 
-        print("-" * 60)
+            print(
+                "WITHDRAWAL: ENABLED"
+            )
+
+        else:
+
+            print(
+                "WITHDRAWAL: NOT ENABLED"
+            )
+
+        print("-" * 70)
+
+        print(
+            "\nIMPORTANT: No withdrawal was attempted."
+        )
 
     except Exception as error:
 
         print("\n")
-        print("=" * 60)
+        print("=" * 70)
         print("3MIGO TELEGRAM REVENUE ERROR")
-        print("=" * 60)
+        print("=" * 70)
+
+        print(
+            "ERROR TYPE:"
+        )
 
         print(
             type(error).__name__
         )
 
         print(
+            "\nERROR:"
+        )
+
+        print(
             str(error)
         )
 
-        print("\nNo withdrawal was attempted.")
+        print(
+            "\nNo withdrawal was attempted."
+        )
 
     finally:
 
         await client.disconnect()
 
-        print("\nTelegram connection closed.")
+        print(
+            "\nTelegram connection closed."
+        )
 
 
 if __name__ == "__main__":
