@@ -1,5 +1,5 @@
 # =========================================================
-# 3MIGO TELEGRAM REVENUE DIAGNOSTIC V3
+# 3MIGO TELEGRAM REVENUE DIAGNOSTIC V4
 # OWNER STRING SESSION / READ-ONLY
 # NO WITHDRAWAL
 # NO ECONOMY CHANGES
@@ -37,19 +37,236 @@ def print_header(title):
     print("=" * 70)
 
 
-def to_ton(value):
+def serialize_value(value):
     """
-    Telegram monetary values are returned in nanograms.
-    1 TON = 1,000,000,000 nanograms.
+    Convert Telethon objects such as StarsTonAmount
+    into JSON-safe Python values.
+
+    This function is READ-ONLY.
+    It does not modify Telegram objects.
     """
 
     if value is None:
         return None
 
+    if isinstance(
+        value,
+        (str, int, float, bool)
+    ):
+        return value
+
+    if isinstance(value, bytes):
+        return value.hex()
+
+    if isinstance(value, dict):
+        return {
+            str(key): serialize_value(val)
+            for key, val in value.items()
+        }
+
+    if isinstance(
+        value,
+        (list, tuple, set)
+    ):
+        return [
+            serialize_value(item)
+            for item in value
+        ]
+
+    # -----------------------------------------------------
+    # Telethon TLObject
+    # -----------------------------------------------------
+
     try:
-        return float(value) / 1_000_000_000
-    except (TypeError, ValueError):
+
+        if hasattr(value, "to_dict"):
+
+            data = value.to_dict()
+
+            return serialize_value(data)
+
+    except Exception:
+        pass
+
+    # -----------------------------------------------------
+    # Fallback for object attributes
+    # -----------------------------------------------------
+
+    try:
+
+        attributes = {}
+
+        for key, val in vars(value).items():
+
+            if key.startswith("_"):
+                continue
+
+            if callable(val):
+                continue
+
+            attributes[key] = serialize_value(val)
+
+        if attributes:
+            return attributes
+
+    except Exception:
+        pass
+
+    # -----------------------------------------------------
+    # Final fallback
+    # -----------------------------------------------------
+
+    return str(value)
+
+
+def extract_nanotons(value):
+    """
+    Extract a numeric TON amount represented by
+    Telegram's StarsTonAmount structure.
+
+    Expected structure normally contains:
+        amount
+        nanos
+
+    Returns:
+        integer nanoton amount
+        or None if unavailable.
+    """
+
+    if value is None:
         return None
+
+    # -----------------------------------------------------
+    # Already numeric
+    # -----------------------------------------------------
+
+    if isinstance(value, int):
+
+        return value
+
+    if isinstance(value, float):
+
+        return int(value)
+
+    # -----------------------------------------------------
+    # Object attributes
+    # -----------------------------------------------------
+
+    amount = getattr(
+        value,
+        "amount",
+        None
+    )
+
+    nanos = getattr(
+        value,
+        "nanos",
+        0
+    )
+
+    # -----------------------------------------------------
+    # Dictionary fallback
+    # -----------------------------------------------------
+
+    if amount is None:
+
+        try:
+
+            data = value.to_dict()
+
+            amount = data.get(
+                "amount"
+            )
+
+            nanos = data.get(
+                "nanos",
+                0
+            )
+
+        except Exception:
+
+            return None
+
+    try:
+
+        amount = int(amount)
+
+        nanos = int(nanos or 0)
+
+        return (
+            amount * 1_000_000_000
+        ) + nanos
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return None
+
+
+def to_ton(value):
+    """
+    Convert Telegram TON monetary values
+    into TON.
+
+    Supports both:
+    - numeric nanoton values
+    - StarsTonAmount objects
+    """
+
+    nanotons = extract_nanotons(
+        value
+    )
+
+    if nanotons is None:
+        return None
+
+    try:
+
+        return (
+            float(nanotons)
+            / 1_000_000_000
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return None
+
+
+def amount_details(value):
+    """
+    Return a JSON-safe representation of
+    a Telegram monetary amount.
+    """
+
+    nanotons = extract_nanotons(
+        value
+    )
+
+    ton = to_ton(
+        value
+    )
+
+    return {
+
+        "raw":
+
+            serialize_value(
+                value
+            ),
+
+        "nanotons":
+
+            nanotons,
+
+        "ton":
+
+            ton
+    }
 
 
 # =========================================================
@@ -59,34 +276,58 @@ def to_ton(value):
 async def check_revenue():
 
     print_header(
-        "3MIGO TELEGRAM REVENUE DIAGNOSTIC V3"
+        "3MIGO TELEGRAM REVENUE DIAGNOSTIC V4"
     )
 
-    print("READ-ONLY / NO WITHDRAWAL")
-    print("OWNER STRING SESSION")
-    print("NO ECONOMY CHANGES")
+    print(
+        "READ-ONLY / NO WITHDRAWAL"
+    )
+
+    print(
+        "OWNER STRING SESSION"
+    )
+
+    print(
+        "NO ECONOMY CHANGES"
+    )
 
     # =====================================================
     # 1. ENVIRONMENT VALIDATION
     # =====================================================
 
-    print("\n[1] Validating environment variables...")
+    print(
+        "\n[1] Validating environment variables..."
+    )
 
     if not API_ID:
-        print("ERROR: TELEGRAM_API_ID is missing")
+
+        print(
+            "ERROR: TELEGRAM_API_ID is missing"
+        )
+
         return
 
     if not API_HASH:
-        print("ERROR: TELEGRAM_API_HASH is missing")
+
+        print(
+            "ERROR: TELEGRAM_API_HASH is missing"
+        )
+
         return
 
     if not STRING_SESSION:
-        print("ERROR: TELEGRAM_STRING_SESSION is missing")
+
+        print(
+            "ERROR: TELEGRAM_STRING_SESSION is missing"
+        )
+
         return
 
     try:
 
-        api_id = int(API_ID)
+        api_id = int(
+            API_ID
+        )
 
     except ValueError:
 
@@ -96,16 +337,26 @@ async def check_revenue():
 
         return
 
-    print("OK: TELEGRAM_API_ID found")
-    print("OK: TELEGRAM_API_HASH found")
-    print("OK: TELEGRAM_STRING_SESSION found")
+    print(
+        "OK: TELEGRAM_API_ID found"
+    )
+
+    print(
+        "OK: TELEGRAM_API_HASH found"
+    )
+
+    print(
+        "OK: TELEGRAM_STRING_SESSION found"
+    )
 
     # =====================================================
     # 2. CONNECT USING STRING SESSION
     # =====================================================
 
     client = TelegramClient(
-        StringSession(STRING_SESSION),
+        StringSession(
+            STRING_SESSION
+        ),
         api_id,
         API_HASH
     )
@@ -125,8 +376,8 @@ async def check_revenue():
             )
 
             print(
-                "Create a new String Session locally and update "
-                "TELEGRAM_STRING_SESSION in Render."
+                "Create a new String Session locally and "
+                "update TELEGRAM_STRING_SESSION in Render."
             )
 
             return
@@ -173,6 +424,13 @@ async def check_revenue():
                     owner,
                     "last_name",
                     None
+                ),
+
+            "is_bot":
+                getattr(
+                    owner,
+                    "bot",
+                    False
                 )
         }
 
@@ -235,7 +493,11 @@ async def check_revenue():
             )
         )
 
-        if not getattr(bot, "bot", False):
+        if not getattr(
+            bot,
+            "bot",
+            False
+        ):
 
             print(
                 "\nWARNING: Resolved account is not marked as a bot."
@@ -296,12 +558,22 @@ async def check_revenue():
             )
 
             print(
-                "\nRAW RESPONSE:"
+                "\nRAW TELEGRAM RESPONSE:"
             )
 
-            print(
-                result.stringify()
-            )
+            try:
+
+                print(
+                    result.stringify()
+                )
+
+            except Exception:
+
+                print(
+                    serialize_value(
+                        result
+                    )
+                )
 
             return
 
@@ -340,37 +612,30 @@ async def check_revenue():
         )
 
         # =================================================
-        # 9. BUILD REVENUE OBJECT
+        # 9. SAFE REVENUE OBJECT
         # =================================================
 
         revenue = {
 
-            "current_balance_nanotons":
-                current_balance,
-
-            "available_balance_nanotons":
-                available_balance,
-
-            "overall_revenue_nanotons":
-                overall_revenue,
-
-            "current_balance_ton":
-                to_ton(
+            "current_balance":
+                amount_details(
                     current_balance
                 ),
 
-            "available_balance_ton":
-                to_ton(
+            "available_balance":
+                amount_details(
                     available_balance
                 ),
 
-            "overall_revenue_ton":
-                to_ton(
+            "overall_revenue":
+                amount_details(
                     overall_revenue
                 ),
 
             "withdrawal_enabled":
-                withdrawal_enabled,
+                bool(
+                    withdrawal_enabled
+                ),
 
             "next_withdrawal_at":
                 next_withdrawal_at
@@ -386,7 +651,7 @@ async def check_revenue():
                 "ok",
 
             "diagnostic_version":
-                "3.0",
+                "4.0",
 
             "read_only":
                 True,
@@ -424,32 +689,64 @@ async def check_revenue():
             "\n" + "-" * 70
         )
 
-        if overall_revenue is not None:
+        overall_ton = to_ton(
+            overall_revenue
+        )
 
-            try:
+        available_ton = to_ton(
+            available_balance
+        )
 
-                if float(overall_revenue) > 0:
+        current_ton = to_ton(
+            current_balance
+        )
 
-                    print(
-                        "REVENUE: DETECTED"
-                    )
+        if overall_ton is not None:
 
-                else:
-
-                    print(
-                        "REVENUE: ZERO"
-                    )
-
-            except (TypeError, ValueError):
+            if overall_ton > 0:
 
                 print(
-                    "REVENUE: UNKNOWN"
+                    "REVENUE: DETECTED"
                 )
+
+            else:
+
+                print(
+                    "REVENUE: ZERO"
+                )
+
+            print(
+                f"OVERALL REVENUE: {overall_ton:.9f} TON"
+            )
 
         else:
 
             print(
                 "REVENUE: UNKNOWN"
+            )
+
+        if current_ton is not None:
+
+            print(
+                f"CURRENT BALANCE: {current_ton:.9f} TON"
+            )
+
+        else:
+
+            print(
+                "CURRENT BALANCE: UNKNOWN"
+            )
+
+        if available_ton is not None:
+
+            print(
+                f"AVAILABLE BALANCE: {available_ton:.9f} TON"
+            )
+
+        else:
+
+            print(
+                "AVAILABLE BALANCE: UNKNOWN"
             )
 
         if withdrawal_enabled:
@@ -508,6 +805,10 @@ async def check_revenue():
 
         print(
             "\nNo withdrawal was attempted."
+        )
+
+        print(
+            "No 3Migo economy data was changed."
         )
 
     # =====================================================
