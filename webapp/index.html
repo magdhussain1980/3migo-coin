@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -8,10 +10,26 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     >
 
-    <meta name="theme-color" content="#031024">
-    <meta name="color-scheme" content="dark">
+    <meta
+        name="theme-color"
+        content="#031024"
+    >
+
+    <meta
+        name="color-scheme"
+        content="dark"
+    >
+
+    <meta
+        name="description"
+        content="3Migo Coin — 3MIGO SMART"
+    >
 
     <title>3Migo Coin</title>
+
+    <!-- =====================================================
+         3MIGO COIN STYLE
+    ====================================================== -->
 
     <link
         rel="stylesheet"
@@ -19,11 +37,20 @@
     >
 
     <!-- =====================================================
+         TELEGRAM WEB APP
+    ====================================================== -->
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- =====================================================
          ADSGRAM SDK
          Reward / Interstitial Ads
     ====================================================== -->
+
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
 </head>
+
 
 <body>
 
@@ -32,36 +59,49 @@
     <!-- =====================================================
          TOP BAR
     ====================================================== -->
-    <header class="top-bar">
 
-        <div class="brand-area">
-            <div class="brand-mark">
+    <header class="topbar">
+
+        <div class="brand">
+
+            <div class="coin-symbol">
                 3M
             </div>
 
-            <div class="brand-text">
-                <strong>3Migo Coin</strong>
-                <span>3MIGO SMART</span>
+            <div>
+
+                <div class="brand-title">
+                    3Migo Coin
+                </div>
+
+                <div class="brand-subtitle">
+                    3MIGO SMART
+                </div>
+
             </div>
+
         </div>
 
-        <div class="top-status">
+
+        <div class="topbar-status">
+
             <span class="status-dot"></span>
-            <span>Mini App</span>
+
+            <span>
+                MINI APP
+            </span>
+
         </div>
 
     </header>
 
 
     <!-- =====================================================
-         MAIN CONTENT
+         HOME VIEW
     ====================================================== -->
-    <main class="app-content">
 
+    <main>
 
-        <!-- =================================================
-             HOME VIEW
-        ================================================== -->
         <section
             id="homeView"
             class="app-view active"
@@ -69,95 +109,136 @@
         >
 
             <!-- HERO -->
-            <div class="hero-section">
 
-                <div class="hero-brand">
+            <div class="hero">
 
-                    <div class="hero-logo">
+                <div class="hero-logo">
+
+                    <div class="coin-logo">
                         3M
                     </div>
 
-                    <div>
-                        <h1>
-                            3Migo
-                            <span>Coin</span>
-                        </h1>
-
-                        <p>
-                            شارك • اكسب • ابنِ القيمة
-                        </p>
-                    </div>
-
                 </div>
 
+                <h1>
+                    3Migo Coin
+                </h1>
 
-                <div class="hero-badges">
+                <p>
+                    شارك • اكسب • ابنِ القيمة
+                </p>
 
-                    <span class="badge badge-blue">
-                        TESTNET
-                    </span>
-
-                    <span class="badge badge-gold">
-                        BETA
-                    </span>
-
-                </div>
+                <span class="beta-badge">
+                    TESTNET • BETA
+                </span>
 
             </div>
 
 
             <!-- =================================================
-                 WALLET / BALANCE CARD
+                 PREMIUM WALLET CARD
             ================================================== -->
-            <div class="premium-wallet-card">
 
-                <div class="wallet-card-header">
+            <div class="wallet-card-wrap">
 
-                    <div>
+                <div class="balance-card premium-wallet-card">
 
-                        <span class="eyebrow">
-                            رصيدك من 3M
-                        </span>
+                    <div class="wallet-card-glow"></div>
 
-                        <div class="wallet-balance">
 
-                            <span id="balanceValue">
-                                0
+                    <div class="wallet-card-top">
+
+                        <div>
+
+                            <span class="balance-label">
+                                رصيدك من 3M
                             </span>
 
-                            <small>3M</small>
+                            <div class="wallet-card-status">
+
+                                <span class="status-dot"></span>
+
+                                <span>
+                                    3MIGO WALLET
+                                </span>
+
+                            </div>
 
                         </div>
 
-                        <span class="wallet-value">
-                            ≈ 0.00 USD
-                            <em>(تجريبي)</em>
+
+                        <div class="wallet-chip">
+
+                            <span></span>
+                            <span></span>
+                            <span></span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="balance-value">
+
+                        <span id="balanceValue">
+                            0
                         </span>
 
                     </div>
 
-                    <div class="wallet-coin">
-                        <span>3M</span>
+
+                    <div class="balance-token">
+                        3M
                     </div>
 
-                </div>
+
+                    <div
+                        id="memberCardNumber"
+                        class="wallet-card-number"
+                    >
+                        3MIGO • MEMBER
+                    </div>
 
 
-                <div class="wallet-mining-rate">
+                    <div class="balance-meta">
 
-                    <span class="rate-icon">
-                        ⚡
-                    </span>
+                        <div class="balance-meta-item">
 
-                    <div>
+                            <span>
+                                اليوم
+                            </span>
 
-                        <small>
-                            معدل التعدين
-                        </small>
+                            <strong id="todayValue">
+                                0
+                            </strong>
 
-                        <strong>
-                            +10 3M / دورة
-                        </strong>
+                        </div>
+
+
+                        <div class="balance-meta-item">
+
+                            <span>
+                                الإجمالي
+                            </span>
+
+                            <strong id="totalValue">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="balance-meta-item">
+
+                            <span>
+                                الجلسات
+                            </span>
+
+                            <strong id="sessionsValue">
+                                0
+                            </strong>
+
+                        </div>
 
                     </div>
 
@@ -167,89 +248,55 @@
 
 
             <!-- =================================================
-                 HOME MINING PANEL
+                 MINING PANEL
             ================================================== -->
+
             <div class="mining-panel">
 
-                <div class="section-heading">
+                <div class="section-title">
 
-                    <div>
+                    <span>
+                        ⛏
+                    </span>
 
-                        <span class="eyebrow">
-                            3Migo Mining
-                        </span>
-
-                        <h2>
-                            التعدين
-                        </h2>
-
-                    </div>
-
-                    <span class="cycle-badge">
-                        12 ساعة
+                    <span>
+                        3Migo Mining
                     </span>
 
                 </div>
 
 
-                <div class="mining-control">
+                <div class="mining-orb-wrap">
 
-                    <button
-                        id="mineBtn"
-                        class="mining-button"
-                        type="button"
+                    <div
+                        id="miningProgressRing"
+                        class="mining-progress-ring"
                     >
 
-                        <span class="mining-button-icon">
-                            ⛏
-                        </span>
+                        <div class="mining-orb">
 
-                        <strong id="mineBtnText">
-                            ابدأ التعدين
-                        </strong>
+                            <button
+                                id="mineBtn"
+                                class="circular-mine-btn"
+                                type="button"
+                            >
 
-                        <small id="mineBtnSubtext">
-                            اضغط للبدء
-                        </small>
+                                <span class="mine-icon">
+                                    ⛏
+                                </span>
 
-                    </button>
+                                <span
+                                    id="mineBtnText"
+                                    class="mine-btn-text"
+                                >
+                                    ابدأ التعدين
+                                </span>
 
+                                <span class="mine-reward">
+                                    +10 3M
+                                </span>
 
-                    <div class="mining-progress">
-
-                        <div class="progress-header">
-
-                            <span>
-                                التقدم
-                            </span>
-
-                            <strong id="miningPercent">
-                                0%
-                            </strong>
-
-                        </div>
-
-
-                        <div class="progress-track">
-
-                            <div
-                                id="miningProgress"
-                                class="progress-fill"
-                                style="width:0%"
-                            ></div>
-
-                        </div>
-
-
-                        <div class="mining-time">
-
-                            <span>
-                                الوقت المتبقي
-                            </span>
-
-                            <strong id="miningTimer">
-                                جاهز
-                            </strong>
+                            </button>
 
                         </div>
 
@@ -260,10 +307,60 @@
 
                 <div
                     id="miningState"
-                    class="mining-state"
-                    aria-live="polite"
+                    class="mining-status"
                 >
-                    جاهز لبدء دورة التعدين
+                    جاهز لبدء التعدين
+                </div>
+
+
+                <div class="mining-timeline">
+
+                    <div class="timeline-label">
+
+                        <span>
+                            تقدم الدورة
+                        </span>
+
+                        <strong id="miningTimer">
+                            جاهز
+                        </strong>
+
+                    </div>
+
+
+                    <div class="timeline-track">
+
+                        <div
+                            id="miningProgress"
+                            class="timeline-progress"
+                            style="width:0%"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="timeline-footer">
+
+                        <span>
+                            البداية
+                        </span>
+
+                        <span>
+                            12 ساعة
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mining-rate">
+
+                    معدل التعدين:
+                    <strong>
+                        +10 3M / 12h
+                    </strong>
+
                 </div>
 
             </div>
@@ -272,121 +369,147 @@
             <!-- =================================================
                  QUICK ACTIONS
             ================================================== -->
-            <div class="section-block">
 
-                <div class="section-heading">
+            <div class="quick-actions">
 
-                    <div>
+                <button
+                    class="quick-action"
+                    data-view-target="tasks"
+                    type="button"
+                >
 
-                        <span class="eyebrow">
-                            Quick Access
-                        </span>
+                    <span>
+                        ✓
+                    </span>
 
-                        <h2>
-                            الوصول السريع
-                        </h2>
+                    <small>
+                        المهام
+                    </small>
 
-                    </div>
-
-                </div>
-
-
-                <div class="quick-actions">
-
-                    <button
-                        class="quick-action"
-                        data-view-target="tasks"
-                        type="button"
-                    >
-                        <span>✓</span>
-                        <strong>المهام</strong>
-                        <small>اكسب من النشاط</small>
-                    </button>
+                </button>
 
 
-                    <button
-                        class="quick-action"
-                        data-action="open-ad-galaxy"
-                        type="button"
-                    >
-                        <span>📺</span>
-                        <strong>Ad Galaxy</strong>
-                        <small>شاهد الإعلانات</small>
-                    </button>
+                <button
+                    class="quick-action"
+                    data-action="open-ad-galaxy"
+                    type="button"
+                >
+
+                    <span>
+                        📺
+                    </span>
+
+                    <small>
+                        Ad Galaxy
+                    </small>
+
+                </button>
 
 
-                    <button
-                        class="quick-action"
-                        data-view-target="wallet"
-                        type="button"
-                    >
-                        <span>💳</span>
-                        <strong>المحفظة</strong>
-                        <small>إدارة رصيدك</small>
-                    </button>
+                <button
+                    class="quick-action"
+                    data-view-target="wallet"
+                    type="button"
+                >
+
+                    <span>
+                        💳
+                    </span>
+
+                    <small>
+                        المحفظة
+                    </small>
+
+                </button>
 
 
-                    <button
-                        class="quick-action"
-                        data-view-target="profile"
-                        type="button"
-                    >
-                        <span>👤</span>
-                        <strong>ملفي</strong>
-                        <small>الإحالات والحساب</small>
-                    </button>
+                <button
+                    class="quick-action"
+                    data-view-target="profile"
+                    type="button"
+                >
 
-                </div>
+                    <span>
+                        👤
+                    </span>
+
+                    <small>
+                        الملف
+                    </small>
+
+                </button>
 
             </div>
 
 
             <!-- =================================================
-                 GROWTH INDEX
+                 EXPERIENCE / GROWTH
             ================================================== -->
-            <div class="growth-card">
 
-                <div class="growth-header">
+            <div class="section">
 
-                    <div>
+                <div class="section-title">
 
-                        <span class="eyebrow">
+                    <span>
+                        ◈
+                    </span>
+
+                    <span>
+                        Growth Index
+                    </span>
+
+                </div>
+
+
+                <div class="experience-card">
+
+                    <div class="experience-top">
+
+                        <div>
+
+                            <strong id="experienceName">
+                                Explorer
+                            </strong>
+
+                            <span
+                                id="experienceLevel"
+                                class="experience-level"
+                            >
+                                Explorer
+                            </span>
+
+                        </div>
+
+
+                        <strong id="experienceScore">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress-bar">
+
+                        <div
+                            id="experienceProgress"
+                            class="progress-fill"
+                            style="width:0%"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="experience-footer">
+
+                        <span>
                             Growth Index
                         </span>
 
-                        <h3>
-                            مؤشر النمو
-                        </h3>
+                        <span id="growthIndex">
+                            0
+                        </span>
 
                     </div>
-
-                    <strong id="growthIndex">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div class="progress-track">
-
-                    <div
-                        id="growthProgress"
-                        class="progress-fill"
-                        style="width:0%"
-                    ></div>
-
-                </div>
-
-
-                <div class="growth-footer">
-
-                    <span>
-                        مساهمتك في المنظومة
-                    </span>
-
-                    <span id="growthLevel">
-                        Explorer
-                    </span>
 
                 </div>
 
@@ -394,30 +517,27 @@
 
 
             <!-- =================================================
-                 ECONOMY SUMMARY
+                 ECONOMY PREVIEW
             ================================================== -->
-            <div class="economy-summary">
 
-                <div class="section-heading">
+            <div class="section">
 
-                    <div>
+                <div class="section-title">
 
-                        <span class="eyebrow">
-                            3Migo Economy
-                        </span>
+                    <span>
+                        ◈
+                    </span>
 
-                        <h2>
-                            الاقتصاد الرقمي
-                        </h2>
-
-                    </div>
+                    <span>
+                        3Migo Economy
+                    </span>
 
                 </div>
 
 
-                <div class="economy-grid">
+                <div class="economy-preview">
 
-                    <div class="economy-card">
+                    <div class="economy-preview-card">
 
                         <span>
                             إجمالي التعدين
@@ -427,14 +547,10 @@
                             0
                         </strong>
 
-                        <small>
-                            3M
-                        </small>
-
                     </div>
 
 
-                    <div class="economy-card">
+                    <div class="economy-preview-card">
 
                         <span>
                             مقفل
@@ -444,14 +560,10 @@
                             0
                         </strong>
 
-                        <small>
-                            3M
-                        </small>
-
                     </div>
 
 
-                    <div class="economy-card">
+                    <div class="economy-preview-card">
 
                         <span>
                             Airdrop
@@ -461,52 +573,27 @@
                             0
                         </strong>
 
-                        <small>
-                            3M
-                        </small>
-
                     </div>
 
                 </div>
 
 
-                <button
-                    class="economy-info-card"
-                    data-action="open-economic"
-                    type="button"
-                >
+                <div class="economy-preview-footer">
 
-                    <span class="economy-icon">
-                        ◈
-                    </span>
+                    نشاطك داخل المنظومة يساهم في بناء تجربة
+                    3Migo الاقتصادية.
 
-                    <div>
-
-                        <strong>
-                            اقتصاد 3Migo
-                        </strong>
-
-                        <small>
-                            كل نشاطك يساهم في نمو المنصة والاقتصاد الرقمي.
-                        </small>
-
-                    </div>
-
-                    <span class="arrow">
-                        ←
-                    </span>
-
-                </button>
+                </div>
 
             </div>
 
         </section>
 
 
-
-        <!-- =================================================
+        <!-- =====================================================
              MINING VIEW
-        ================================================== -->
+        ====================================================== -->
+
         <section
             id="miningView"
             class="app-view"
@@ -516,15 +603,15 @@
 
             <div class="page-header">
 
+                <div class="page-icon">
+                    ⛏
+                </div>
+
                 <div>
 
-                    <span class="eyebrow">
-                        3Migo Mining
-                    </span>
-
-                    <h1>
+                    <h2>
                         المناجم
-                    </h1>
+                    </h2>
 
                     <p>
                         دورة التعدين الحالية
@@ -537,97 +624,111 @@
 
             <div class="mining-page-card">
 
-                <div class="mining-cycle-info">
+                <div class="section-title">
 
                     <span>
-                        المكافأة
+                        ⛏
                     </span>
 
-                    <strong>
-                        +10 3M
-                    </strong>
-
-                    <small>
-                        كل 12 ساعة
-                    </small>
+                    <span>
+                        3Migo Mining
+                    </span>
 
                 </div>
 
 
-                <button
-                    id="mineBtnPage"
-                    class="mining-button large"
-                    type="button"
-                >
+                <div class="mining-page-orb">
 
-                    <span class="mining-button-icon">
-                        ⛏
+                    <div
+                        id="miningPageProgressRing"
+                        class="mining-progress-ring"
+                    >
+
+                        <div class="mining-orb">
+
+                            <button
+                                id="mineBtnPage"
+                                class="circular-mine-btn"
+                                type="button"
+                            >
+
+                                <span class="mine-icon">
+                                    ⛏
+                                </span>
+
+                                <span
+                                    id="mineBtnPageText"
+                                    class="mine-btn-text"
+                                >
+                                    ابدأ التعدين
+                                </span>
+
+                                <span class="mine-reward">
+                                    +10 3M
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="miningPageState"
+                    class="mining-status"
+                >
+                    جاهز لبدء التعدين
+                </div>
+
+
+                <div class="mining-timer-large">
+
+                    <span>
+                        الوقت المتبقي
                     </span>
 
-                    <strong id="mineBtnPageText">
-                        ابدأ التعدين
+                    <strong id="miningPageTimer">
+                        جاهز
                     </strong>
 
-                    <small id="mineBtnPageSubtext">
-                        اضغط للبدء
-                    </small>
-
-                </button>
+                </div>
 
 
-                <div class="mining-progress large-progress">
+                <div
+                    id="miningPageStatus"
+                    class="muted"
+                    style="text-align:center;"
+                >
+                    دورة التعدين: 12 ساعة
+                </div>
 
-                    <div class="progress-header">
+
+                <div class="mining-timeline">
+
+                    <div class="timeline-label">
 
                         <span>
                             تقدم الدورة
                         </span>
 
-                        <strong id="miningPagePercent">
-                            0%
+                        <strong>
+                            12 ساعة
                         </strong>
 
                     </div>
 
 
-                    <div class="progress-track">
+                    <div class="timeline-track">
 
                         <div
                             id="miningPageProgress"
-                            class="progress-fill"
+                            class="timeline-progress"
                             style="width:0%"
                         ></div>
 
-                    </div>
-
-
-                    <div class="mining-time">
-
-                        <span>
-                            المتبقي
-                        </span>
-
-                        <strong id="miningPageTimer">
-                            جاهز
-                        </strong>
-
-                    </div>
-
-
-                    <div
-                        id="miningPageState"
-                        class="mining-state"
-                        aria-live="polite"
-                    >
-                        جاهز لبدء دورة التعدين
-                    </div>
-
-
-                    <div
-                        id="miningPageStatus"
-                        class="mining-status"
-                        aria-live="polite"
-                    >
                     </div>
 
                 </div>
@@ -635,55 +736,52 @@
             </div>
 
 
-            <div class="stats-grid">
+            <div class="section">
 
-                <div class="stat-card">
-
-                    <span>
-                        إجمالي التعدين
-                    </span>
-
-                    <strong id="totalMined">
-                        0
-                    </strong>
-
-                    <small>
-                        3M
-                    </small>
-
+                <div class="section-title">
+                    إحصاءات التعدين
                 </div>
 
 
-                <div class="stat-card">
+                <div class="mining-page-stats">
 
-                    <span>
-                        جلسات التعدين
-                    </span>
+                    <div>
 
-                    <strong id="miningSessions">
-                        0
-                    </strong>
+                        <span>
+                            إجمالي التعدين
+                        </span>
 
-                    <small>
-                        جلسة
-                    </small>
+                        <strong id="miningPageTotal">
+                            0
+                        </strong>
 
-                </div>
+                    </div>
 
 
-                <div class="stat-card">
+                    <div>
 
-                    <span>
-                        المكافأة الحالية
-                    </span>
+                        <span>
+                            الجلسات
+                        </span>
 
-                    <strong>
-                        10
-                    </strong>
+                        <strong id="miningPageSessions">
+                            0
+                        </strong>
 
-                    <small>
-                        3M
-                    </small>
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            المكافأة
+                        </span>
+
+                        <strong>
+                            10 3M
+                        </strong>
+
+                    </div>
 
                 </div>
 
@@ -692,10 +790,10 @@
         </section>
 
 
-
-        <!-- =================================================
+        <!-- =====================================================
              TASKS VIEW
-        ================================================== -->
+        ====================================================== -->
+
         <section
             id="tasksView"
             class="app-view"
@@ -705,18 +803,18 @@
 
             <div class="page-header">
 
+                <div class="page-icon">
+                    ✓
+                </div>
+
                 <div>
 
-                    <span class="eyebrow">
-                        Tasks & Rewards
-                    </span>
-
-                    <h1>
+                    <h2>
                         المهام
-                    </h1>
+                    </h2>
 
                     <p>
-                        أنشطة إضافية داخل منظومة 3Migo
+                        أنشطة ومكافآت 3Migo
                     </p>
 
                 </div>
@@ -724,67 +822,91 @@
             </div>
 
 
-            <div class="daily-reward-card">
+            <div class="tasks-summary">
 
                 <div>
 
-                    <span>🎁</span>
+                    <span>
+                        المهام المتاحة
+                    </span>
 
-                    <strong>
-                        المكافأة اليومية
+                    <strong id="tasksCount">
+                        0
                     </strong>
-
-                    <small>
-                        احصل على مكافأتك اليومية
-                    </small>
 
                 </div>
 
 
-                <button
-                    class="primary-btn"
-                    data-action="daily-reward"
-                    type="button"
-                >
-                    استلام
-                </button>
+                <div>
+
+                    <span>
+                        المكافآت
+                    </span>
+
+                    <strong>
+                        3M
+                    </strong>
+
+                </div>
 
             </div>
 
 
-            <div class="tasks-header">
+            <div class="section">
 
-                <div>
+                <div class="promotion-card">
 
-                    <h2>
-                        المهام المتاحة
-                    </h2>
+                    <h3>
+                        🎁 المكافأة اليومية
+                    </h3>
 
-                    <small>
-                        <span id="tasksCount">0</span>
-                        مهمة متاحة
-                    </small>
+                    <p>
+                        احصل على مكافأتك اليومية وفق قواعد النظام.
+                    </p>
+
+                    <button
+                        class="primary-btn"
+                        data-action="daily-reward"
+                        type="button"
+                    >
+                        استلام المكافأة اليومية
+                    </button>
 
                 </div>
 
+            </div>
 
-                <button
-                    class="secondary-btn"
-                    data-action="refresh-ads"
-                    type="button"
+
+            <div class="section">
+
+                <div
+                    class="section-title"
+                    style="justify-content:space-between;"
                 >
-                    تحديث
-                </button>
+
+                    <span>
+                        المهام المتاحة
+                    </span>
+
+                    <button
+                        class="secondary-btn"
+                        data-action="refresh-ads"
+                        type="button"
+                    >
+                        تحديث
+                    </button>
+
+                </div>
 
             </div>
 
 
             <div
                 id="tasksContainer"
-                class="tasks-list"
+                class="tasks-container"
             >
 
-                <div class="empty-state">
+                <div class="loading-state">
                     جارٍ تحميل المهام...
                 </div>
 
@@ -793,10 +915,10 @@
         </section>
 
 
-
-        <!-- =================================================
+        <!-- =====================================================
              WALLET VIEW
-        ================================================== -->
+        ====================================================== -->
+
         <section
             id="walletView"
             class="app-view"
@@ -806,18 +928,18 @@
 
             <div class="page-header">
 
+                <div class="page-icon">
+                    💳
+                </div>
+
                 <div>
 
-                    <span class="eyebrow">
-                        3Migo Wallet
-                    </span>
-
-                    <h1>
+                    <h2>
                         المحفظة
-                    </h1>
+                    </h2>
 
                     <p>
-                        نظرة على حركة اقتصادك
+                        مركز أصول 3Migo
                     </p>
 
                 </div>
@@ -825,142 +947,179 @@
             </div>
 
 
-            <div class="wallet-page-card">
+            <div class="wallet-main">
 
-                <span>
-                    الرصيد المتاح
-                </span>
+                <div class="balance-card premium-wallet-card">
 
-                <strong id="walletBalance">
-                    0
-                </strong>
+                    <div class="wallet-card-top">
 
-                <small>
-                    3M
-                </small>
+                        <div>
 
-            </div>
+                            <span class="balance-label">
+                                الرصيد المتاح
+                            </span>
 
+                            <div class="wallet-card-status">
 
-            <div class="wallet-breakdown">
+                                <span class="status-dot"></span>
 
-                <div>
+                                <span>
+                                    WALLET AVAILABLE
+                                </span>
 
-                    <span>
-                        إجمالي الرصيد
-                    </span>
+                            </div>
 
-                    <strong id="walletTotal">
-                        0
-                    </strong>
+                        </div>
 
-                </div>
+                        <div class="wallet-chip">
 
+                            <span></span>
+                            <span></span>
+                            <span></span>
 
-                <div>
-
-                    <span>
-                        اليوم
-                    </span>
-
-                    <strong id="walletToday">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        الجلسات
-                    </span>
-
-                    <strong id="walletSessions">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="wallet-breakdown">
-
-                <div>
-
-                    <span>
-                        إجمالي التعدين
-                    </span>
-
-                    <strong id="walletMined">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        المتاح
-                    </span>
-
-                    <strong id="walletUnlocked">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        المقفل
-                    </span>
-
-                    <strong id="walletLocked">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="wallet-breakdown">
-
-                <div>
-
-                    <span>
-                        Airdrop
-                    </span>
-
-                    <strong id="walletAirdrop">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="transactions-section">
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <span class="eyebrow">
-                            Activity
-                        </span>
-
-                        <h2>
-                            آخر العمليات
-                        </h2>
+                        </div>
 
                     </div>
 
+
+                    <div class="balance-value">
+
+                        <span id="walletBalance">
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div class="balance-token">
+                        3M
+                    </div>
+
+
+                    <div
+                        id="walletMemberNumber"
+                        class="wallet-card-number"
+                    >
+                        3MIGO • MEMBER
+                    </div>
+
+
+                    <div class="balance-meta">
+
+                        <div class="balance-meta-item">
+
+                            <span>
+                                اليوم
+                            </span>
+
+                            <strong id="walletToday">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="balance-meta-item">
+
+                            <span>
+                                الإجمالي
+                            </span>
+
+                            <strong id="walletTotal">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="balance-meta-item">
+
+                            <span>
+                                الجلسات
+                            </span>
+
+                            <strong id="walletSessions">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="wallet-economic">
+
+                <div class="section-title">
+                    الاقتصاد
+                </div>
+
+
+                <div class="economic-grid">
+
+                    <div class="economic-card">
+
+                        <span>
+                            إجمالي التعدين
+                        </span>
+
+                        <strong id="walletMined">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="economic-card">
+
+                        <span>
+                            مقفل
+                        </span>
+
+                        <strong id="walletLocked">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="economic-card">
+
+                        <span>
+                            متاح
+                        </span>
+
+                        <strong id="walletUnlocked">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="economic-card">
+
+                        <span>
+                            Airdrop
+                        </span>
+
+                        <strong id="walletAirdrop">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="section">
+
+                <div class="section-title">
+                    آخر العمليات
                 </div>
 
 
@@ -980,10 +1139,10 @@
         </section>
 
 
-
-        <!-- =================================================
+        <!-- =====================================================
              PROFILE VIEW
-        ================================================== -->
+        ====================================================== -->
+
         <section
             id="profileView"
             class="app-view"
@@ -993,18 +1152,18 @@
 
             <div class="page-header">
 
+                <div class="page-icon">
+                    👤
+                </div>
+
                 <div>
 
-                    <span class="eyebrow">
-                        3Migo Profile
-                    </span>
-
-                    <h1>
+                    <h2>
                         الملف الشخصي
-                    </h1>
+                    </h2>
 
                     <p>
-                        هويتك ونمو إحالاتك
+                        هويتك ونمو حسابك
                     </p>
 
                 </div>
@@ -1015,171 +1174,131 @@
             <div class="profile-card">
 
                 <div class="profile-avatar">
-                    👤
+                    3M
                 </div>
 
 
                 <div class="profile-info">
 
-                    <strong id="profileName">
+                    <strong id="profileUsername">
                         3Migo User
                     </strong>
 
-                    <span id="profileUsername">
-                        @3migo
+                    <span id="profileTelegramId">
+                        Telegram ID: -
                     </span>
 
-                    <small>
-                        Telegram ID:
-                        <span id="profileTelegramId">
-                            -
-                        </span>
-                    </small>
-
-                    <small>
-                        Member ID:
-                        <span id="profileMemberId">
-                            -
-                        </span>
-                    </small>
-
-                    <small>
-                        بطاقة العضوية:
-                        <span id="memberCardNumber">
-                            3M-000000
-                        </span>
-                    </small>
+                    <span id="profileMemberId">
+                        Member ID: -
+                    </span>
 
                 </div>
 
             </div>
 
 
-            <!-- =================================================
-                 EXPERIENCE
-            ================================================== -->
-            <div class="growth-card">
+            <!-- EXPERIENCE -->
 
-                <div class="growth-header">
+            <div class="section">
 
-                    <div>
+                <div class="section-title">
+                    مستوى التجربة
+                </div>
 
-                        <span class="eyebrow">
-                            Experience
-                        </span>
 
-                        <h3 id="experienceName">
-                            Explorer
-                        </h3>
+                <div class="experience-card">
+
+                    <div class="experience-top">
+
+                        <div>
+
+                            <strong id="profileExperienceName">
+                                Explorer
+                            </strong>
+
+                            <span
+                                id="profileExperienceLevel"
+                                class="experience-level"
+                            >
+                                Explorer
+                            </span>
+
+                        </div>
+
+
+                        <strong id="profileExperienceScore">
+                            0
+                        </strong>
 
                     </div>
 
-                    <strong id="experienceScore">
-                        0
-                    </strong>
+
+                    <div class="progress-bar">
+
+                        <div
+                            id="profileExperienceProgress"
+                            class="progress-fill"
+                            style="width:0%"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="experience-footer">
+
+                        <span>
+                            المستوى التالي
+                        </span>
+
+                        <span id="profileNextScore">
+                            100
+                        </span>
+
+                    </div>
 
                 </div>
-
-
-                <div class="progress-track">
-
-                    <div
-                        id="experienceProgress"
-                        class="progress-fill"
-                        style="width:0%"
-                    ></div>
-
-                </div>
-
-
-                <div class="growth-footer">
-
-                    <span>
-                        المستوى
-                    </span>
-
-                    <span id="experienceLevel">
-                        Explorer
-                    </span>
-
-                </div>
-
-
-                <div class="growth-footer">
-
-                    <span>
-                        المستوى التالي
-                    </span>
-
-                    <span id="profileNextScore">
-                        -
-                    </span>
-
-                </div>
-
-
-                <!-- JS V5.6 compatibility -->
-                <span
-                    id="profileExperienceLevel"
-                    hidden
-                >
-                    Explorer
-                </span>
-
-                <span
-                    id="profileExperienceScore"
-                    hidden
-                >
-                    0
-                </span>
-
-                <span
-                    id="profileExperienceName"
-                    hidden
-                >
-                    Explorer
-                </span>
-
-                <span
-                    id="profileExperienceProgress"
-                    hidden
-                >
-                    0
-                </span>
 
             </div>
 
 
-            <!-- =================================================
-                 REFERRAL SYSTEM
-            ================================================== -->
-            <div class="referral-card">
+            <!-- REFERRAL -->
+
+            <div class="premium-referral-card">
 
                 <div class="referral-header">
 
                     <div>
 
-                        <span class="eyebrow">
+                        <span class="muted">
                             Referral System
                         </span>
 
-                        <h2>
+                        <h3>
                             الإحالات
-                        </h2>
+                        </h3>
 
                     </div>
 
-                    <span class="referral-icon">
+
+                    <div class="referral-icon">
                         👥
-                    </span>
+                    </div>
 
                 </div>
+
+
+                <p class="referral-description">
+
+                    شارك رابطك مع الآخرين وساهم في نمو
+                    منظومة 3Migo.
+
+                </p>
 
 
                 <div class="referral-code-box">
 
                     <span>
-                        كود الإحالة
+                        رمز الإحالة
                     </span>
 
                     <strong id="referralCode">
@@ -1189,28 +1308,30 @@
                 </div>
 
 
-                <div class="referral-code-box">
+                <div class="referral-barcode-wrap">
+
+                    <div
+                        id="referralBarcode"
+                        class="referral-barcode"
+                    ></div>
 
                     <span>
-                        رابط الإحالة
+                        3MIGO REFERRAL
                     </span>
-
-                    <input
-                        id="referralLink"
-                        type="text"
-                        value=""
-                        readonly
-                        autocomplete="off"
-                    >
 
                 </div>
 
 
-                <div
-                    id="referralBarcode"
-                    class="referral-barcode"
-                    aria-hidden="true"
-                >
+                <div class="referral-link-box">
+
+                    <input
+                        id="referralLink"
+                        type="text"
+                        readonly
+                        value=""
+                        aria-label="رابط الإحالة"
+                    >
+
                 </div>
 
 
@@ -1221,9 +1342,8 @@
                         data-action="copy-referral"
                         type="button"
                     >
-                        نسخ الرابط
+                        نسخ رابط الإحالة
                     </button>
-
 
                     <button
                         class="secondary-btn"
@@ -1270,32 +1390,24 @@
         </section>
 
 
+        <!-- =====================================================
+             SYSTEM SERVICES
+        ====================================================== -->
 
-        <!-- =================================================
-             SYSTEM / ECONOMY SECTION
-        ================================================== -->
         <section
             id="economicSection"
             class="system-section"
         >
 
-            <div class="section-heading">
+            <div class="section-title">
 
-                <div>
+                <span>
+                    ◈
+                </span>
 
-                    <span class="eyebrow">
-                        3Migo System
-                    </span>
-
-                    <h2>
-                        خدمات المنظومة
-                    </h2>
-
-                    <p>
-                        أدوات وخدمات 3Migo الذكية
-                    </p>
-
-                </div>
+                <span>
+                    خدمات منظومة 3Migo
+                </span>
 
             </div>
 
@@ -1303,13 +1415,14 @@
             <div class="master-services">
 
                 <!-- ECONOMY -->
+
                 <button
                     class="master-service-card"
                     data-action="open-economic"
                     type="button"
                 >
 
-                    <span class="service-icon">
+                    <span>
                         ◈
                     </span>
 
@@ -1325,21 +1438,18 @@
 
                     </div>
 
-                    <span class="service-arrow">
-                        ←
-                    </span>
-
                 </button>
 
 
                 <!-- AI -->
+
                 <button
                     class="master-service-card"
                     data-action="open-ai"
                     type="button"
                 >
 
-                    <span class="service-icon">
+                    <span>
                         ✦
                     </span>
 
@@ -1355,21 +1465,18 @@
 
                     </div>
 
-                    <span class="service-arrow">
-                        ←
-                    </span>
-
                 </button>
 
 
-                <!-- ADSGRAM / AD GALAXY -->
+                <!-- AD GALAXY -->
+
                 <button
                     class="master-service-card"
                     data-action="open-ad-galaxy"
                     type="button"
                 >
 
-                    <span class="service-icon">
+                    <span>
                         📺
                     </span>
 
@@ -1380,14 +1487,10 @@
                         </strong>
 
                         <small>
-                            شاهد الإعلانات واحصل على مكافآت
+                            إعلانات ومكافآت المنظومة
                         </small>
 
                     </div>
-
-                    <span class="service-arrow">
-                        ←
-                    </span>
 
                 </button>
 
@@ -1398,10 +1501,10 @@
     </main>
 
 
-
     <!-- =====================================================
          ECONOMIC MODAL
     ====================================================== -->
+
     <div
         id="economicModal"
         class="modal-overlay"
@@ -1414,10 +1517,12 @@
 
                 <div>
 
-                    <span>◈</span>
+                    <span>
+                        ◈
+                    </span>
 
                     <strong>
-                        Economy
+                        3Migo Economy
                     </strong>
 
                 </div>
@@ -1436,112 +1541,92 @@
 
             <div class="economic-modal-content">
 
-                <div class="economic-main-stat">
+                <div class="economic-card">
 
                     <span>
-                        مساهمتك في المنظومة
+                        Contribution Score
                     </span>
 
                     <strong id="economicContribution">
                         0
                     </strong>
 
-                    <small>
-                        Contribution Score
-                    </small>
+                </div>
+
+
+                <div class="economic-card">
+
+                    <span>
+                        إجمالي التعدين
+                    </span>
+
+                    <strong id="economicTotalMined">
+                        0
+                    </strong>
 
                 </div>
 
 
-                <div class="economic-stats">
+                <div class="economic-card">
 
-                    <div>
+                    <span>
+                        Locked
+                    </span>
 
-                        <span>
-                            إجمالي التعدين
-                        </span>
-
-                        <strong id="economicTotalMined">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            Locked
-                        </span>
-
-                        <strong id="economicLocked">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            Unlocked
-                        </span>
-
-                        <strong id="economicUnlocked">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            Airdrop
-                        </span>
-
-                        <strong id="economicAirdrop">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            Trust Score
-                        </span>
-
-                        <strong id="economicTrust">
-                            0
-                        </strong>
-
-                    </div>
+                    <strong id="economicLocked">
+                        0
+                    </strong>
 
                 </div>
 
 
-                <div class="economic-actions">
+                <div class="economic-card">
 
-                    <button
-                        class="primary-btn"
-                        data-action="preview-airdrop"
-                        type="button"
-                    >
-                        معاينة Airdrop
-                    </button>
+                    <span>
+                        Unlocked
+                    </span>
 
-
-                    <button
-                        class="secondary-btn"
-                        data-action="spend-economic"
-                        type="button"
-                    >
-                        استخدام اقتصادي
-                    </button>
+                    <strong id="economicUnlocked">
+                        0
+                    </strong>
 
                 </div>
+
+
+                <div class="economic-card">
+
+                    <span>
+                        Airdrop
+                    </span>
+
+                    <strong id="economicAirdrop">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    class="primary-btn"
+                    data-action="preview-airdrop"
+                    type="button"
+                >
+                    معاينة Airdrop
+                </button>
+
+
+                <button
+                    class="secondary-btn"
+                    data-action="spend-economic"
+                    type="button"
+                    style="margin-top:9px;width:100%;"
+                >
+                    استخدام اقتصادي
+                </button>
 
             </div>
 
@@ -1550,10 +1635,10 @@
     </div>
 
 
-
     <!-- =====================================================
          AI MODAL
     ====================================================== -->
+
     <div
         id="aiModal"
         class="modal-overlay"
@@ -1566,7 +1651,9 @@
 
                 <div>
 
-                    <span>✦</span>
+                    <span>
+                        ✦
+                    </span>
 
                     <strong>
                         مساعد 3Migo الذكي
@@ -1591,7 +1678,7 @@
                 class="ai-messages"
             >
 
-                <div class="ai-message">
+                <div class="ai-message assistant">
 
                     <strong>
                         مساعد 3Migo
@@ -1610,7 +1697,6 @@
             <div class="ai-quick-actions">
 
                 <button
-                    class="secondary-btn"
                     data-ai-question="كيف يعمل التعدين؟"
                     type="button"
                 >
@@ -1619,7 +1705,6 @@
 
 
                 <button
-                    class="secondary-btn"
                     data-ai-question="كيف تعمل الإحالات؟"
                     type="button"
                 >
@@ -1628,11 +1713,18 @@
 
 
                 <button
-                    class="secondary-btn"
                     data-ai-question="ما هو اقتصاد 3Migo؟"
                     type="button"
                 >
                     الاقتصاد
+                </button>
+
+
+                <button
+                    data-ai-question="كيف أشاهد الإعلان؟"
+                    type="button"
+                >
+                    الإعلانات
                 </button>
 
             </div>
@@ -1650,7 +1742,6 @@
 
                 <button
                     id="aiSend"
-                    class="primary-btn"
                     type="button"
                 >
                     إرسال
@@ -1658,15 +1749,20 @@
 
             </div>
 
+
+            <div class="ai-note">
+                مساعد معلوماتي داخل تجربة 3Migo
+            </div>
+
         </div>
 
     </div>
 
 
-
     <!-- =====================================================
          WALLET MODAL
     ====================================================== -->
+
     <div
         id="walletModal"
         class="modal-overlay"
@@ -1679,7 +1775,9 @@
 
                 <div>
 
-                    <span>💳</span>
+                    <span>
+                        💳
+                    </span>
 
                     <strong>
                         3Migo Wallet
@@ -1699,19 +1797,24 @@
             </div>
 
 
-            <div class="wallet-modal-content">
+            <div class="balance-card">
 
-                <span>
+                <span class="balance-label">
                     الرصيد المتاح
                 </span>
 
-                <strong id="modalWalletBalance">
-                    0
-                </strong>
 
-                <small>
+                <div
+                    id="modalWalletBalance"
+                    class="balance-value"
+                >
+                    0
+                </div>
+
+
+                <div class="balance-token">
                     3M
-                </small>
+                </div>
 
             </div>
 
@@ -1720,24 +1823,25 @@
     </div>
 
 
-
     <!-- =====================================================
-         AD GALAXY MODAL
-         ADSGRAM REWARD AD
+         AD GALAXY / ADSGRAM MODAL
     ====================================================== -->
+
     <div
         id="adGalaxyModal"
         class="modal-overlay"
         hidden
     >
 
-        <div class="modal-card ad-galaxy-modal">
+        <div class="modal-card">
 
             <div class="modal-header">
 
                 <div>
 
-                    <span>📢</span>
+                    <span>
+                        📺
+                    </span>
 
                     <strong>
                         Ad Galaxy
@@ -1757,63 +1861,65 @@
             </div>
 
 
-            <!-- AD GALAXY INTRO -->
             <div class="promotion-card">
-
-                <div class="ad-galaxy-icon">
-                    📺
-                </div>
 
                 <h3>
                     شاهد الإعلان واكسب
                 </h3>
 
                 <p>
-                    شاهد الإعلان حتى النهاية لتفعيل نتيجة المشاهدة.
-                    المكافآت الاقتصادية الفعلية تُعالج من خلال النظام الخلفي.
+                    شاهد الإعلان حتى النهاية.
+                    نتيجة المشاهدة تُرسل إلى النظام
+                    الخلفي عند اكتمال الربط الاقتصادي.
                 </p>
 
             </div>
 
 
-            <!-- ADSGRAM REWARD -->
-            <div class="ad-reward-card">
+            <div
+                class="promotion-card"
+                style="margin-top:10px;"
+            >
 
-                <div class="ad-reward-header">
+                <div class="section-title">
 
-                    <div>
+                    <span>
+                        📺
+                    </span>
 
-                        <span class="eyebrow">
-                            AdsGram Reward
-                        </span>
-
-                        <h3>
-                            إعلان مكافأة
-                        </h3>
-
-                    </div>
-
-                    <span class="ad-status-dot">
-                        ●
+                    <span>
+                        AdsGram Reward
                     </span>
 
                 </div>
 
 
+                <p>
+                    إعلان مكافأة من AdsGram.
+                    لا تتم إضافة أي رصيد محليًا قبل
+                    تأكيد النظام الخلفي.
+                </p>
+
+
                 <button
                     id="watchRewardAdButton"
-                    class="primary-btn ad-reward-button"
+                    class="primary-btn"
                     data-action="watch-reward-ad"
                     type="button"
                 >
-                    📺 مشاهدة الإعلان والحصول على المكافأة
+                    📺 مشاهدة الإعلان
                 </button>
 
 
                 <div
                     id="adRewardStatus"
-                    class="ad-reward-status"
+                    class="muted"
                     aria-live="polite"
+                    style="
+                        text-align:center;
+                        margin-top:10px;
+                        line-height:1.7;
+                    "
                 >
                     شاهد الإعلان حتى النهاية لتفعيل نتيجة المشاهدة.
                 </div>
@@ -1821,16 +1927,20 @@
             </div>
 
 
-            <!-- REFRESH TASKS -->
-            <div class="promotion-card compact">
+            <div
+                class="promotion-card"
+                style="margin-top:10px;"
+            >
 
                 <h3>
                     إعلانات ومهام المنظومة
                 </h3>
 
                 <p>
-                    يمكن أن تظهر مهام إضافية مرتبطة بأنشطة المنظومة.
+                    يمكن أن تظهر مهام إضافية مرتبطة
+                    بأنشطة المنظومة.
                 </p>
+
 
                 <button
                     class="secondary-btn"
@@ -1847,10 +1957,10 @@
     </div>
 
 
-
     <!-- =====================================================
          SPEND MODAL
     ====================================================== -->
+
     <div
         id="spendModal"
         class="modal-overlay"
@@ -1863,7 +1973,9 @@
 
                 <div>
 
-                    <span>⚡</span>
+                    <span>
+                        ⚡
+                    </span>
 
                     <strong>
                         استخدام اقتصادي
@@ -1883,12 +1995,15 @@
             </div>
 
 
-            <div class="spend-content">
+            <div class="modal-description">
 
-                <p>
-                    هذه العملية تستخدم الرصيد المتاح وفق قواعد الاقتصاد الحالية.
-                </p>
+                هذه العملية تستخدم الرصيد المتاح
+                وفق قواعد الاقتصاد الحالية.
 
+            </div>
+
+
+            <div class="modal-actions">
 
                 <input
                     id="spendAmount"
@@ -1896,13 +2011,23 @@
                     min="0"
                     step="1"
                     placeholder="أدخل الكمية"
+                    style="
+                        width:100%;
+                        height:43px;
+                        padding:0 12px;
+                        border:1px solid rgba(255,255,255,.08);
+                        border-radius:11px;
+                        background:#071019;
+                        color:#fff;
+                        margin-bottom:9px;
+                    "
                 >
 
 
                 <button
+                    id="spendConfirmButton"
                     class="primary-btn"
                     type="button"
-                    id="spendConfirmButton"
                 >
                     تأكيد الاستخدام
                 </button>
@@ -1914,24 +2039,27 @@
     </div>
 
 
-
     <!-- =====================================================
          TOAST
     ====================================================== -->
+
     <div
         id="toast"
         class="toast"
+        hidden
         role="status"
         aria-live="polite"
     >
-        <span id="toastMessage"></span>
-    </div>
 
+        <span id="toastMessage"></span>
+
+    </div>
 
 
     <!-- =====================================================
          BOTTOM NAVIGATION
     ====================================================== -->
+
     <nav class="bottom-nav">
 
         <button
@@ -1940,7 +2068,9 @@
             type="button"
         >
 
-            <span>⌂</span>
+            <span>
+                ⌂
+            </span>
 
             <small>
                 الرئيسية
@@ -1955,7 +2085,9 @@
             type="button"
         >
 
-            <span>✓</span>
+            <span>
+                ✓
+            </span>
 
             <small>
                 المهام
@@ -1965,12 +2097,14 @@
 
 
         <button
-            class="nav-item nav-mining"
+            class="nav-item"
             data-view-target="mine"
             type="button"
         >
 
-            <span>⛏</span>
+            <span>
+                ⛏
+            </span>
 
             <small>
                 المناجم
@@ -1981,14 +2115,16 @@
 
         <button
             class="nav-item"
-            data-view-target="profile"
+            data-view-target="wallet"
             type="button"
         >
 
-            <span>👥</span>
+            <span>
+                💳
+            </span>
 
             <small>
-                الإحالات
+                المحفظة
             </small>
 
         </button>
@@ -2000,10 +2136,12 @@
             type="button"
         >
 
-            <span>👤</span>
+            <span>
+                👤
+            </span>
 
             <small>
-                الملف الشخصي
+                الملف
             </small>
 
         </button>
@@ -2013,10 +2151,10 @@
 </div>
 
 
-<!-- =========================================================
-     APPLICATION JAVASCRIPT
-     app.js V5.6
-========================================================= -->
+<!-- =====================================================
+     3MIGO APP JS
+====================================================== -->
+
 <script src="/webapp/app.js"></script>
 
 </body>
