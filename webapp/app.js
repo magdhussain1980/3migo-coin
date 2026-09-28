@@ -1,6 +1,6 @@
 /* =========================================================
-   3MIGO COIN — APP.JS V5.5
-   MINING SYNC FIX
+   3MIGO COIN — APP.JS V5.6
+   ADSGRAM REWARD INTEGRATION
 
    IMPORTANT:
    - Backend/API contracts preserved
@@ -8,14 +8,13 @@
    - Referral economy preserved
    - Airdrop/economic endpoints preserved
    - No database changes
-   - Home Mining Button + Mining Page Button
-     use ONE shared mining state
+   - Home Mining Button + Mining Page Button use ONE shared state
+   - AdsGram Reward integration added
+   - Ads do NOT directly modify balance
 ========================================================= */
 
 (() => {
-
     "use strict";
-
 
     /* =====================================================
        TELEGRAM WEB APP
@@ -24,17 +23,13 @@
     const tg = window.Telegram?.WebApp || null;
 
     if (tg) {
-
         try {
-
             tg.ready();
             tg.expand();
 
             tg.setHeaderColor?.("#04142a");
             tg.setBackgroundColor?.("#031024");
-
         } catch (error) {
-
             console.log(
                 "Telegram UI settings unavailable:",
                 error
@@ -42,16 +37,13 @@
         }
     }
 
-
     /* =====================================================
        CONFIG
     ===================================================== */
 
-    const API_BASE =
-        window.location.origin;
+    const API_BASE = window.location.origin;
 
-    const BOT_USERNAME =
-        "threemigosmart_bot";
+    const BOT_USERNAME = "threemigosmart_bot";
 
     const FALLBACK_TELEGRAM_ID = 1;
 
@@ -62,6 +54,15 @@
 
     const MINING_REWARD = 10;
 
+    /* =====================================================
+       ADSGRAM
+    ===================================================== */
+
+    const ADSGRAM_BLOCK_ID = "50727";
+
+    let adsgramController = null;
+
+    let adsgramLoading = false;
 
     /* =====================================================
        STATE
@@ -84,7 +85,6 @@
 
         sessions: 0,
 
-
         /* ===============================
            ONE SHARED MINING STATE
         =============================== */
@@ -102,8 +102,15 @@
 
         miningRequestPending: false,
 
+        /* ===============================
+           TASKS
+        =============================== */
 
         tasks: [],
+
+        /* ===============================
+           REFERRAL
+        =============================== */
 
         referralCode: "",
 
@@ -113,6 +120,9 @@
 
         referralEarned: 0,
 
+        /* ===============================
+           ECONOMIC
+        =============================== */
 
         economic: {
 
@@ -129,6 +139,9 @@
             trustScore: 0
         },
 
+        /* ===============================
+           EXPERIENCE
+        =============================== */
 
         experience: {
 
@@ -143,7 +156,6 @@
             nextScore: 100
         },
 
-
         growthIndex: 0,
 
         transactions: [],
@@ -153,55 +165,46 @@
         aiMessages: [],
 
         loading: false
-
     };
-
 
     /* =====================================================
        HELPERS
     ===================================================== */
 
     function $(selector) {
-
         return document.querySelector(selector);
     }
 
-
     function $all(selector) {
-
         return Array.from(
             document.querySelectorAll(selector)
         );
     }
 
-
     function setText(selector, value) {
 
-        const element =
-            $(selector);
+        const element = $(selector);
 
         if (element) {
-
             element.textContent =
                 value ?? "";
         }
     }
 
-
     function setValue(selector, value) {
 
-        const element =
-            $(selector);
+        const element = $(selector);
 
         if (element) {
-
             element.value =
                 value ?? "";
         }
     }
 
-
-    function safeNumber(value, fallback = 0) {
+    function safeNumber(
+        value,
+        fallback = 0
+    ) {
 
         const number =
             Number(value);
@@ -210,7 +213,6 @@
             ? number
             : fallback;
     }
-
 
     function formatNumber(value) {
 
@@ -224,14 +226,12 @@
             );
     }
 
-
     function formatInteger(value) {
 
         return Math.round(
             safeNumber(value)
         ).toLocaleString("en-US");
     }
-
 
     function formatTime(seconds) {
 
@@ -270,7 +270,6 @@
         ].join(":");
     }
 
-
     function toast(message) {
 
         const element =
@@ -295,11 +294,11 @@
         toast._timer =
             setTimeout(() => {
 
-                element.hidden = true;
+                element.hidden =
+                    true;
 
             }, 2600);
     }
-
 
     /* =====================================================
        TELEGRAM USER
@@ -313,7 +312,6 @@
                 tg?.initDataUnsafe?.user;
 
             if (user?.id) {
-
                 return user;
             }
 
@@ -327,7 +325,6 @@
 
         return null;
     }
-
 
     function initializeTelegramUser() {
 
@@ -357,7 +354,6 @@
         }
     }
 
-
     /* =====================================================
        API
     ===================================================== */
@@ -373,7 +369,8 @@
         const requestOptions = {
 
             method:
-                options.method || "GET",
+                options.method ||
+                "GET",
 
             headers: {
 
@@ -389,8 +386,11 @@
         ) {
 
             requestOptions.body =
-                typeof options.body === "string"
+                typeof options.body ===
+                "string"
+
                     ? options.body
+
                     : JSON.stringify(
                         options.body
                     );
@@ -436,7 +436,6 @@
 
         return data;
     }
-
 
     /* =====================================================
        USER
@@ -488,7 +487,6 @@
         }
     }
 
-
     async function loadUser() {
 
         try {
@@ -511,7 +509,6 @@
         updateProfileUI();
     }
 
-
     function applyUserData(data) {
 
         if (!data) return;
@@ -521,14 +518,12 @@
             data.data ||
             data;
 
-
         state.balance =
             safeNumber(
                 user.balance ??
                 user.balance_3m ??
                 data.balance
             );
-
 
         state.total =
             safeNumber(
@@ -537,7 +532,6 @@
                 data.total
             );
 
-
         state.today =
             safeNumber(
                 user.today ??
@@ -545,14 +539,12 @@
                 data.today
             );
 
-
         state.sessions =
             safeNumber(
                 user.sessions ??
                 user.mining_sessions ??
                 data.sessions
             );
-
 
         if (
             user.username ||
@@ -564,10 +556,8 @@
                 data.username;
         }
 
-
         updateBalanceUI();
     }
-
 
     /* =====================================================
        BALANCE UI
@@ -595,7 +585,6 @@
                 state.sessions
             );
 
-
         setText(
             "#balanceValue",
             balance
@@ -615,7 +604,6 @@
             "#sessionsValue",
             sessions
         );
-
 
         setText(
             "#walletBalance",
@@ -637,18 +625,15 @@
             sessions
         );
 
-
         setText(
             "#modalWalletBalance",
             balance
         );
 
-
         const cardNumber =
             makeMemberCardNumber(
                 state.telegramId
             );
-
 
         setText(
             "#memberCardNumber",
@@ -661,11 +646,13 @@
         );
     }
 
-
     function makeMemberCardNumber(id) {
 
         const value =
-            String(id || "00000000");
+            String(
+                id ||
+                "00000000"
+            );
 
         const last12 =
             value
@@ -684,7 +671,6 @@
 
         ].join(" • ");
     }
-
 
     /* =====================================================
        PROFILE
@@ -709,14 +695,12 @@
         );
     }
 
-
     function makeMemberId() {
 
         return `3M-${String(
             state.telegramId
         ).padStart(8, "0")}`;
     }
-
 
     /* =====================================================
        MINING
@@ -734,11 +718,9 @@
                 : 0;
         }
 
-
         const elapsed =
             MINING_CYCLE_SECONDS -
             state.miningRemaining;
-
 
         return Math.max(
             0,
@@ -752,7 +734,6 @@
         );
     }
 
-
     function updateMiningProgressVisual() {
 
         const progress =
@@ -761,15 +742,12 @@
         const degrees =
             progress * 3.6;
 
-
         const rings = [
 
             "#miningProgressRing",
 
             "#miningPageProgressRing"
-
         ];
-
 
         rings.forEach(
             selector => {
@@ -779,12 +757,10 @@
 
                 if (!ring) return;
 
-
                 ring.style.setProperty(
                     "--mine-progress",
                     `${degrees}deg`
                 );
-
 
                 ring.style.setProperty(
                     "--progress",
@@ -792,7 +768,6 @@
                 );
             }
         );
-
 
         const timeline =
             $("#miningProgress");
@@ -804,7 +779,6 @@
         }
     }
 
-
     function updateMiningButton(
         buttonSelector,
         textSelector
@@ -815,13 +789,10 @@
 
         if (!button) return;
 
-
         const text =
             $(textSelector);
 
-
         let label;
-
 
         if (
             state.miningActive
@@ -830,7 +801,6 @@
             label =
                 "Mining Active";
 
-
             button.classList.add(
                 "mining-active"
             );
@@ -841,7 +811,6 @@
 
             button.disabled =
                 false;
-
 
         } else if (
             state.miningCompleted
@@ -850,7 +819,6 @@
             label =
                 "استلام المكافأة";
 
-
             button.classList.remove(
                 "mining-active"
             );
@@ -862,12 +830,10 @@
             button.disabled =
                 false;
 
-
         } else {
 
             label =
                 "ابدأ التعدين";
-
 
             button.classList.remove(
                 "mining-active"
@@ -881,20 +847,17 @@
                 false;
         }
 
-
         if (text) {
 
             text.textContent =
                 label;
         }
 
-
         button.setAttribute(
             "aria-label",
             label
         );
     }
-
 
     function updateMiningUI() {
 
@@ -907,15 +870,12 @@
         const remaining =
             state.miningRemaining;
 
-
         const timer =
             formatTime(
                 remaining
             );
 
-
         let status;
-
 
         if (active) {
 
@@ -933,11 +893,6 @@
                 "جاهز للتعدين";
         }
 
-
-        /* ===============================
-           HOME
-        =============================== */
-
         setText(
             "#miningState",
             status
@@ -947,11 +902,6 @@
             "#miningTimer",
             timer
         );
-
-
-        /* ===============================
-           MINING PAGE
-        =============================== */
 
         setText(
             "#miningPageState",
@@ -963,7 +913,6 @@
             timer
         );
 
-
         setText(
             "#miningPageStatus",
             active
@@ -973,31 +922,18 @@
                     : "READY"
         );
 
-
-        /* ===============================
-           BOTH BUTTONS
-           SAME STATE
-        =============================== */
-
         updateMiningButton(
             "#mineBtn",
             "#mineBtnText"
         );
-
 
         updateMiningButton(
             "#mineBtnPage",
             "#mineBtnPageText"
         );
 
-
-        /* ===============================
-           PROGRESS
-        =============================== */
-
         updateMiningProgressVisual();
     }
-
 
     /* =====================================================
        LOAD MINING STATUS
@@ -1012,12 +948,10 @@
                     `/mining/${state.telegramId}/status`
                 );
 
-
             const mining =
                 data?.mining ||
                 data?.data ||
                 data;
-
 
             state.miningActive =
                 Boolean(
@@ -1026,7 +960,6 @@
                     data?.active ??
                     false
                 );
-
 
             state.miningRemaining =
                 safeNumber(
@@ -1037,7 +970,6 @@
                     0
                 );
 
-
             state.miningReward =
                 safeNumber(
                     mining?.reward ??
@@ -1045,11 +977,6 @@
                     MINING_REWARD
                 );
 
-
-            /*
-             * If backend says active,
-             * cycle is obviously not completed.
-             */
             if (
                 state.miningActive
             ) {
@@ -1058,30 +985,19 @@
                     false;
             }
 
-
-            /*
-             * If the timer reached zero,
-             * the local state becomes claim-ready.
-             */
             if (
                 !state.miningActive &&
                 state.miningRemaining <= 0 &&
                 state.sessions > 0
             ) {
 
-                /*
-                 * Do not automatically claim.
-                 * User must press the button.
-                 */
                 state.miningCompleted =
                     true;
             }
 
-
             updateMiningUI();
 
             startMiningTicker();
-
 
         } catch (error) {
 
@@ -1094,7 +1010,6 @@
         }
     }
 
-
     /* =====================================================
        MINING TIMER
     ===================================================== */
@@ -1105,7 +1020,6 @@
             state.miningTimer
         );
 
-
         if (
             !state.miningActive
         ) {
@@ -1115,10 +1029,8 @@
             return;
         }
 
-
         state.miningTimer =
             setInterval(() => {
-
 
                 if (
                     state.miningRemaining > 0
@@ -1129,7 +1041,6 @@
                     updateMiningUI();
                 }
 
-
                 if (
                     state.miningRemaining <= 0
                 ) {
@@ -1138,35 +1049,27 @@
                         state.miningTimer
                     );
 
-
                     state.miningTimer =
                         null;
-
 
                     state.miningRemaining =
                         0;
 
-
                     state.miningActive =
                         false;
-
 
                     state.miningCompleted =
                         true;
 
-
                     updateMiningUI();
-
 
                     toast(
                         "اكتملت دورة التعدين. يمكنك استلام المكافأة."
                     );
                 }
 
-
             }, 1000);
     }
-
 
     /* =====================================================
        START MINING
@@ -1177,10 +1080,8 @@
         if (
             state.miningRequestPending
         ) {
-
             return;
         }
-
 
         if (
             state.miningActive
@@ -1193,12 +1094,6 @@
             return;
         }
 
-
-        /*
-         * If completed, this click is a CLAIM.
-         * It is important that both buttons
-         * follow the same rule.
-         */
         if (
             state.miningCompleted
         ) {
@@ -1208,10 +1103,8 @@
             return;
         }
 
-
         state.miningRequestPending =
             true;
-
 
         try {
 
@@ -1223,20 +1116,16 @@
                     }
                 );
 
-
             const mining =
                 data?.mining ||
                 data?.data ||
                 data;
 
-
             state.miningActive =
                 true;
 
-
             state.miningCompleted =
                 false;
-
 
             state.miningRemaining =
                 safeNumber(
@@ -1247,7 +1136,6 @@
                     MINING_CYCLE_SECONDS
                 );
 
-
             state.miningReward =
                 safeNumber(
                     mining?.reward ??
@@ -1255,16 +1143,13 @@
                     MINING_REWARD
                 );
 
-
             updateMiningUI();
 
             startMiningTicker();
 
-
             toast(
                 `بدأ التعدين — المكافأة ${state.miningReward} 3M`
             );
-
 
         } catch (error) {
 
@@ -1273,12 +1158,10 @@
                 error
             );
 
-
             toast(
                 error.message ||
                 "تعذر بدء التعدين."
             );
-
 
         } finally {
 
@@ -1286,7 +1169,6 @@
                 false;
         }
     }
-
 
     /* =====================================================
        CLAIM MINING
@@ -1297,15 +1179,9 @@
         if (
             state.miningRequestPending
         ) {
-
             return;
         }
 
-
-        /*
-         * Prevent accidental claim
-         * while cycle is still running.
-         */
         if (
             state.miningActive ||
             state.miningRemaining > 0
@@ -1318,10 +1194,8 @@
             return;
         }
 
-
         state.miningRequestPending =
             true;
-
 
         try {
 
@@ -1333,7 +1207,6 @@
                     }
                 );
 
-
             const reward =
                 safeNumber(
                     data?.reward ??
@@ -1341,10 +1214,6 @@
                     state.miningReward
                 );
 
-
-            /*
-             * Update local balance immediately.
-             */
             state.balance += reward;
 
             state.total += reward;
@@ -1353,11 +1222,6 @@
 
             state.sessions += 1;
 
-
-            /*
-             * RESET THE SAME SHARED STATE
-             * FOR BOTH MINING BUTTONS.
-             */
             state.miningActive =
                 false;
 
@@ -1367,32 +1231,20 @@
             state.miningCompleted =
                 false;
 
-
             updateBalanceUI();
 
             updateMiningUI();
 
-
             await Promise.allSettled([
-
                 loadEconomic(),
-
                 loadTransactions()
-
             ]);
 
-
-            /*
-             * Refresh backend mining status
-             * after successful claim.
-             */
             await loadMiningStatus();
-
 
             toast(
                 `تمت إضافة ${reward} 3M إلى رصيدك.`
             );
-
 
         } catch (error) {
 
@@ -1401,12 +1253,10 @@
                 error
             );
 
-
             toast(
                 error.message ||
                 "تعذر استلام المكافأة."
             );
-
 
         } finally {
 
@@ -1415,7 +1265,6 @@
         }
     }
 
-
     /* =====================================================
        MINING BUTTONS
        BOTH BUTTONS CALL THE SAME FUNCTION
@@ -1423,17 +1272,11 @@
 
     function handleMiningButtonClick() {
 
-        /*
-         * One function controls both buttons.
-         */
-
         if (
             state.miningRequestPending
         ) {
-
             return;
         }
-
 
         if (
             state.miningActive
@@ -1446,7 +1289,6 @@
             return;
         }
 
-
         if (
             state.miningCompleted
         ) {
@@ -1456,10 +1298,8 @@
             return;
         }
 
-
         startMining();
     }
-
 
     function setupMiningButtons() {
 
@@ -1468,9 +1308,7 @@
             "#mineBtn",
 
             "#mineBtnPage"
-
         ];
-
 
         buttons.forEach(
             selector => {
@@ -1479,12 +1317,6 @@
                     $(selector);
 
                 if (!button) return;
-
-
-                /*
-                 * Remove any previous
-                 * claim-ready assumptions.
-                 */
 
                 button.addEventListener(
                     "click",
@@ -1495,13 +1327,11 @@
                         event.stopPropagation();
 
                         handleMiningButtonClick();
-
                     }
                 );
             }
         );
     }
-
 
     /* =====================================================
        TASKS
@@ -1516,7 +1346,6 @@
                     `/tasks/${state.telegramId}`
                 );
 
-
             state.tasks =
                 Array.isArray(data)
                     ? data
@@ -1524,9 +1353,7 @@
                       data?.data ||
                       [];
 
-
             renderTasks();
-
 
         } catch (error) {
 
@@ -1535,13 +1362,11 @@
                 error
             );
 
-
             state.tasks = [];
 
             renderTasksError();
         }
     }
-
 
     function renderTasks() {
 
@@ -1550,12 +1375,10 @@
 
         if (!container) return;
 
-
         setText(
             "#tasksCount",
             state.tasks.length
         );
-
 
         if (
             !state.tasks.length
@@ -1569,7 +1392,6 @@
 
             return;
         }
-
 
         container.innerHTML =
             state.tasks
@@ -1603,45 +1425,37 @@
                             task.completed
                         );
 
-
                     return `
-                        <article class="task-card">
+                        <div class="task-card">
+                            <div class="task-info">
+                                <h3>${title}</h3>
 
-                            <div class="task-card-title">
-                                ${title}
+                                <p>
+                                    ${description}
+                                </p>
                             </div>
 
-                            <div class="task-card-description">
-                                ${description}
+                            <div class="task-reward">
+                                +${formatNumber(reward)} 3M
                             </div>
 
-                            <div class="task-card-footer">
-
-                                <span class="task-reward">
-                                    +${formatNumber(reward)} 3M
-                                </span>
-
-                                <button
-                                    class="task-btn"
-                                    data-task-id="${id}"
-                                    type="button"
-                                    ${completed ? "disabled" : ""}
-                                >
-                                    ${
-                                        completed
-                                            ? "مكتملة"
-                                            : "تنفيذ"
-                                    }
-                                </button>
-
-                            </div>
-
-                        </article>
+                            <button
+                                class="task-btn"
+                                data-task-id="${id}"
+                                type="button"
+                                ${completed ? "disabled" : ""}
+                            >
+                                ${
+                                    completed
+                                        ? "مكتملة"
+                                        : "تنفيذ"
+                                }
+                            </button>
+                        </div>
                     `;
                 })
                 .join("");
     }
-
 
     function renderTasksError() {
 
@@ -1650,14 +1464,12 @@
 
         if (!container) return;
 
-
         container.innerHTML = `
             <div class="empty-state">
                 تعذر تحميل المهام حالياً.
             </div>
         `;
     }
-
 
     async function completeTask(taskId) {
 
@@ -1671,7 +1483,6 @@
                     }
                 );
 
-
             const reward =
                 safeNumber(
                     data?.reward ??
@@ -1679,20 +1490,21 @@
                     0
                 );
 
-
             if (
                 reward > 0
             ) {
 
-                state.balance += reward;
+                state.balance +=
+                    reward;
 
-                state.total += reward;
+                state.total +=
+                    reward;
 
-                state.today += reward;
+                state.today +=
+                    reward;
 
                 updateBalanceUI();
             }
-
 
             toast(
                 reward > 0
@@ -1700,15 +1512,10 @@
                     : "تم تنفيذ المهمة."
             );
 
-
             await Promise.allSettled([
-
                 loadTasks(),
-
                 loadEconomic()
-
             ]);
-
 
         } catch (error) {
 
@@ -1717,14 +1524,12 @@
                 error
             );
 
-
             toast(
                 error.message ||
                 "تعذر تنفيذ المهمة."
             );
         }
     }
-
 
     /* =====================================================
        DAILY REWARD
@@ -1742,7 +1547,6 @@
                     }
                 );
 
-
             const reward =
                 safeNumber(
                     data?.reward ??
@@ -1750,27 +1554,27 @@
                     0
                 );
 
-
             if (
                 reward > 0
             ) {
 
-                state.balance += reward;
+                state.balance +=
+                    reward;
 
-                state.total += reward;
+                state.total +=
+                    reward;
 
-                state.today += reward;
+                state.today +=
+                    reward;
 
                 updateBalanceUI();
             }
-
 
             toast(
                 reward
                     ? `المكافأة اليومية +${reward} 3M`
                     : "تم تحديث المكافأة اليومية."
             );
-
 
         } catch (error) {
 
@@ -1779,14 +1583,12 @@
                 error
             );
 
-
             toast(
                 error.message ||
                 "تعذر الحصول على المكافأة اليومية."
             );
         }
     }
-
 
     /* =====================================================
        REFERRAL
@@ -1801,13 +1603,11 @@
                     `/referral/${state.telegramId}`
                 );
 
-
             state.referralCode =
                 data?.code ||
                 data?.referral_code ||
                 data?.referralCode ||
                 `3M${state.telegramId}`;
-
 
             state.referralLink =
                 data?.link ||
@@ -1817,7 +1617,6 @@
                     state.referralCode
                 );
 
-
             state.referralCount =
                 safeNumber(
                     data?.count ??
@@ -1826,14 +1625,12 @@
                     0
                 );
 
-
             state.referralEarned =
                 safeNumber(
                     data?.earned ??
                     data?.referral_earned ??
                     0
                 );
-
 
         } catch (error) {
 
@@ -1842,10 +1639,8 @@
                 error
             );
 
-
             state.referralCode =
                 `3M${state.telegramId}`;
-
 
             state.referralLink =
                 createReferralLink(
@@ -1853,16 +1648,13 @@
                 );
         }
 
-
         updateReferralUI();
     }
-
 
     function createReferralLink(code) {
 
         return `https://t.me/${BOT_USERNAME}?start=ref_${encodeURIComponent(code)}`;
     }
-
 
     function updateReferralUI() {
 
@@ -1870,7 +1662,6 @@
             "#referralCode",
             state.referralCode
         );
-
 
         const referralInput =
             $("#referralLink");
@@ -1881,14 +1672,12 @@
                 state.referralLink;
         }
 
-
         setText(
             "#referralCount",
             formatInteger(
                 state.referralCount
             )
         );
-
 
         setText(
             "#referralEarned",
@@ -1897,12 +1686,10 @@
             )} 3M`
         );
 
-
         generateReferralBarcode(
             state.referralCode
         );
     }
-
 
     function generateReferralBarcode(code) {
 
@@ -1911,9 +1698,7 @@
 
         if (!container) return;
 
-
         container.innerHTML = "";
-
 
         const source =
             String(
@@ -1921,9 +1706,7 @@
                 "3MIGO"
             );
 
-
         let seed = 0;
-
 
         for (
             let i = 0;
@@ -1938,7 +1721,6 @@
                 ) >>> 0;
         }
 
-
         for (
             let i = 0;
             i < 72;
@@ -1951,28 +1733,23 @@
                     1013904223
                 ) >>> 0;
 
-
             const width =
                 1 +
                 (seed % 4);
-
 
             const bar =
                 document.createElement(
                     "i"
                 );
 
-
             bar.style.width =
                 `${width}px`;
-
 
             container.appendChild(
                 bar
             );
         }
     }
-
 
     async function copyReferral() {
 
@@ -1981,18 +1758,15 @@
 
         if (!link) return;
 
-
         try {
 
             await navigator.clipboard.writeText(
                 link
             );
 
-
             toast(
                 "تم نسخ رابط الإحالة."
             );
-
 
         } catch {
 
@@ -2001,13 +1775,11 @@
 
             if (!input) return;
 
-
             input.select();
 
             document.execCommand(
                 "copy"
             );
-
 
             toast(
                 "تم نسخ رابط الإحالة."
@@ -2015,16 +1787,13 @@
         }
     }
 
-
     function shareReferral() {
 
         if (
             !state.referralLink
         ) {
-
             return;
         }
-
 
         const shareUrl =
             `https://t.me/share/url?url=${encodeURIComponent(
@@ -2032,7 +1801,6 @@
             )}&text=${encodeURIComponent(
                 "انضم إلى 3Migo Coin عبر رابط الإحالة"
             )}`;
-
 
         if (
             tg?.openTelegramLink
@@ -2055,13 +1823,11 @@
             }
         }
 
-
         window.open(
             shareUrl,
             "_blank"
         );
     }
-
 
     /* =====================================================
        ECONOMIC SYSTEM
@@ -2076,12 +1842,10 @@
                     `/economic/user/${state.telegramId}`
                 );
 
-
             const economic =
                 data?.economic ||
                 data?.data ||
                 data;
-
 
             state.economic.totalMined =
                 safeNumber(
@@ -2091,7 +1855,6 @@
                     0
                 );
 
-
             state.economic.locked3m =
                 safeNumber(
                     economic?.locked_3m ??
@@ -2099,7 +1862,6 @@
                     data?.locked_3m ??
                     0
                 );
-
 
             state.economic.unlocked3m =
                 safeNumber(
@@ -2109,7 +1871,6 @@
                     0
                 );
 
-
             state.economic.airdrop3m =
                 safeNumber(
                     economic?.airdrop_3m ??
@@ -2117,7 +1878,6 @@
                     data?.airdrop_3m ??
                     0
                 );
-
 
             state.economic.contributionScore =
                 safeNumber(
@@ -2127,7 +1887,6 @@
                     0
                 );
 
-
             state.economic.trustScore =
                 safeNumber(
                     economic?.trust_score ??
@@ -2136,13 +1895,11 @@
                     0
                 );
 
-
             calculateGrowthIndex();
 
             calculateExperience();
 
             updateEconomicUI();
-
 
         } catch (error) {
 
@@ -2153,7 +1910,6 @@
         }
     }
 
-
     function calculateGrowthIndex() {
 
         const activity =
@@ -2162,20 +1918,17 @@
                 state.sessions * 5
             );
 
-
         const contribution =
             Math.min(
                 100,
                 state.economic.contributionScore
             );
 
-
         const trust =
             Math.min(
                 100,
                 state.economic.trustScore
             );
-
 
         state.growthIndex =
             Math.round(
@@ -2186,7 +1939,6 @@
                 ) / 3
             );
     }
-
 
     function calculateExperience() {
 
@@ -2199,7 +1951,6 @@
                     state.referralCount * 5
                 )
             );
-
 
         const levels = [
 
@@ -2237,13 +1988,10 @@
                 min: 1500,
                 max: 3000
             }
-
         ];
-
 
         let current =
             levels[0];
-
 
         for (
             const level of levels
@@ -2257,7 +2005,6 @@
                     level;
             }
         }
-
 
         const progress =
             Math.max(
@@ -2274,7 +2021,6 @@
                     ) * 100
                 )
             );
-
 
         state.experience = {
 
@@ -2293,60 +2039,50 @@
         };
     }
 
-
     function updateEconomicUI() {
 
         const e =
             state.economic;
-
 
         setText(
             "#homeTotalMined",
             `${formatNumber(e.totalMined)} 3M`
         );
 
-
         setText(
             "#homeLocked3m",
             `${formatNumber(e.locked3m)} 3M`
         );
-
 
         setText(
             "#homeAirdrop3m",
             `${formatNumber(e.airdrop3m)} 3M`
         );
 
-
         setText(
             "#walletMined",
             `${formatNumber(e.totalMined)} 3M`
         );
-
 
         setText(
             "#walletLocked",
             `${formatNumber(e.locked3m)} 3M`
         );
 
-
         setText(
             "#walletUnlocked",
             `${formatNumber(e.unlocked3m)} 3M`
         );
-
 
         setText(
             "#walletAirdrop",
             `${formatNumber(e.airdrop3m)} 3M`
         );
 
-
         setText(
             "#economicTotalMined",
             `${formatNumber(e.totalMined)} 3M`
         );
-
 
         setText(
             "#economicContribution",
@@ -2355,7 +2091,6 @@
             )
         );
 
-
         setText(
             "#economicTrust",
             formatNumber(
@@ -2363,30 +2098,25 @@
             )
         );
 
-
         setText(
             "#economicAirdrop",
             `${formatNumber(e.airdrop3m)} 3M`
         );
-
 
         setText(
             "#growthIndex",
             `${state.growthIndex}%`
         );
 
-
         setText(
             "#experienceLevel",
             `Level ${state.experience.level}`
         );
 
-
         setText(
             "#experienceName",
             state.experience.name
         );
-
 
         setText(
             "#experienceScore",
@@ -2395,10 +2125,8 @@
             )} XP`
         );
 
-
         const experienceProgress =
             $("#experienceProgress");
-
 
         if (
             experienceProgress
@@ -2408,12 +2136,10 @@
                 `${state.experience.progress}%`;
         }
 
-
         setText(
             "#profileExperienceLevel",
             `Level ${state.experience.level}`
         );
-
 
         setText(
             "#profileExperienceScore",
@@ -2422,12 +2148,10 @@
             )} XP`
         );
 
-
         setText(
             "#profileExperienceName",
             state.experience.name
         );
-
 
         setText(
             "#profileNextScore",
@@ -2436,10 +2160,8 @@
             )} XP`
         );
 
-
         const profileProgress =
             $("#profileExperienceProgress");
-
 
         if (
             profileProgress
@@ -2449,7 +2171,6 @@
                 `${state.experience.progress}%`;
         }
     }
-
 
     /* =====================================================
        AIRDROP
@@ -2464,7 +2185,6 @@
                     `/economic/airdrop/${state.telegramId}`
                 );
 
-
             const amount =
                 safeNumber(
                     data?.airdrop_3m ??
@@ -2473,13 +2193,11 @@
                     0
                 );
 
-
             toast(
                 amount > 0
                     ? `الإيردروب المتوقع: ${formatNumber(amount)} 3M`
                     : "لا توجد كمية إيردروب متاحة للمعاينة حالياً."
             );
-
 
         } catch (error) {
 
@@ -2488,14 +2206,12 @@
                 error
             );
 
-
             toast(
                 error.message ||
                 "تعذر معاينة الإيردروب."
             );
         }
     }
-
 
     async function spendEconomic() {
 
@@ -2509,21 +2225,15 @@
                     }
                 );
 
-
             toast(
                 data?.message ||
                 "تم تنفيذ العملية."
             );
 
-
             await Promise.allSettled([
-
                 loadUser(),
-
                 loadEconomic()
-
             ]);
-
 
         } catch (error) {
 
@@ -2532,14 +2242,12 @@
                 error
             );
 
-
             toast(
                 error.message ||
                 "تعذر تنفيذ العملية."
             );
         }
     }
-
 
     /* =====================================================
        TRANSACTIONS
@@ -2554,7 +2262,6 @@
                     `/transactions/${state.telegramId}`
                 );
 
-
             state.transactions =
                 Array.isArray(data)
                     ? data
@@ -2562,9 +2269,7 @@
                       data?.data ||
                       [];
 
-
             renderTransactions();
-
 
         } catch (error) {
 
@@ -2575,14 +2280,12 @@
         }
     }
 
-
     function renderTransactions() {
 
         const container =
             $("#transactionsList");
 
         if (!container) return;
-
 
         if (
             !state.transactions.length
@@ -2597,7 +2300,6 @@
             return;
         }
 
-
         container.innerHTML =
             state.transactions
                 .slice(0, 30)
@@ -2610,7 +2312,6 @@
                             "عملية 3Migo"
                         );
 
-
                     const amount =
                         safeNumber(
                             transaction.amount ??
@@ -2619,10 +2320,8 @@
                             0
                         );
 
-
                     return `
                         <div class="transaction-item">
-
                             <span>
                                 ${title}
                             </span>
@@ -2632,13 +2331,11 @@
                                 ${formatNumber(amount)}
                                 3M
                             </strong>
-
                         </div>
                     `;
                 })
                 .join("");
     }
-
 
     /* =====================================================
        VIEW NAVIGATION
@@ -2657,9 +2354,7 @@
             "wallet",
 
             "profile"
-
         ];
-
 
         if (
             !validViews.includes(
@@ -2671,10 +2366,8 @@
                 "home";
         }
 
-
         state.currentView =
             viewName;
-
 
         $all(".app-view")
             .forEach(view => {
@@ -2683,17 +2376,14 @@
                     view.dataset.view ===
                     viewName;
 
-
                 view.classList.toggle(
                     "active",
                     active
                 );
 
-
                 view.hidden =
                     !active;
             });
-
 
         $all(
             ".nav-item[data-view-target]"
@@ -2707,39 +2397,28 @@
                 );
             });
 
-
         window.scrollTo({
-
             top: 0,
-
             behavior: "smooth"
-
         });
-
 
         loadViewData(
             viewName
         );
     }
 
-
-    async function loadViewData(viewName) {
+    async function loadViewData(
+        viewName
+    ) {
 
         if (
             viewName === "mine"
         ) {
 
-            /*
-             * IMPORTANT:
-             * Reloading the mining page does NOT create
-             * another mining state.
-             * It only synchronizes the SAME state.
-             */
             await loadMiningStatus();
 
             return;
         }
-
 
         if (
             viewName === "tasks"
@@ -2749,7 +2428,6 @@
 
             return;
         }
-
 
         if (
             viewName === "wallet"
@@ -2762,12 +2440,10 @@
                 loadEconomic(),
 
                 loadTransactions()
-
             ]);
 
             return;
         }
-
 
         if (
             viewName === "profile"
@@ -2778,13 +2454,11 @@
                 loadReferral(),
 
                 loadEconomic()
-
             ]);
 
             return;
         }
     }
-
 
     /* =====================================================
        MODALS
@@ -2797,31 +2471,25 @@
 
         if (!modal) return;
 
-
         modal.hidden =
             false;
-
 
         document.body.classList.add(
             "modal-open"
         );
     }
 
-
     function closeModal(modal) {
 
         if (!modal) return;
 
-
         modal.hidden =
             true;
-
 
         document.body.classList.remove(
             "modal-open"
         );
     }
-
 
     function closeAllModals() {
 
@@ -2836,12 +2504,10 @@
                 }
             );
 
-
         document.body.classList.remove(
             "modal-open"
         );
     }
-
 
     /* =====================================================
        AI ASSISTANT
@@ -2854,7 +2520,6 @@
         );
     }
 
-
     function addAIMessage(
         text,
         type = "assistant"
@@ -2865,58 +2530,47 @@
 
         if (!container) return;
 
-
         const message =
             document.createElement(
                 "div"
             );
 
-
         message.className =
             `ai-message ${type}`;
-
 
         const title =
             document.createElement(
                 "strong"
             );
 
-
         title.textContent =
             type === "user"
                 ? "أنت"
                 : "3Migo AI";
-
 
         const paragraph =
             document.createElement(
                 "p"
             );
 
-
         paragraph.textContent =
             text;
-
 
         message.appendChild(
             title
         );
 
-
         message.appendChild(
             paragraph
         );
-
 
         container.appendChild(
             message
         );
 
-
         container.scrollTop =
             container.scrollHeight;
     }
-
 
     function aiResponse(question) {
 
@@ -2925,19 +2579,15 @@
                 question || ""
             ).toLowerCase();
 
-
         if (
             text.includes("تعدين") ||
             text.includes("mine")
         ) {
 
             return `
-التعدين يعمل على دورة مدتها 12 ساعة.
-عند بدء الدورة يعمل المؤقت، وعند اكتمالها تصبح المكافأة قابلة للاستلام وفق حالة الخادم.
-المكافأة الحالية في النموذج هي 10 3M.
+التعدين يعمل على دورة مدتها 12 ساعة. عند بدء الدورة يعمل المؤقت، وعند اكتمالها تصبح المكافأة قابلة للاستلام وفق حالة الخادم. المكافأة الحالية في النموذج هي 10 3M.
             `.trim();
         }
-
 
         if (
             text.includes("محفظ") ||
@@ -2945,11 +2595,9 @@
         ) {
 
             return `
-المحفظة تعرض رصيد 3M الخاص بك، والإجمالي، وأرباح اليوم، وسجل العمليات.
-الصفحة الاقتصادية منفصلة عن البطاقة حتى يبقى العرض واضحاً.
+المحفظة تعرض رصيد 3M الخاص بك، والإجمالي، وأرباح اليوم، وسجل العمليات. الصفحة الاقتصادية منفصلة عن البطاقة حتى يبقى العرض واضحاً.
             `.trim();
         }
-
 
         if (
             text.includes("إحال") ||
@@ -2957,11 +2605,9 @@
         ) {
 
             return `
-لك كود إحالة ورابط خاص بك.
-يمكنك نسخ الرابط أو مشاركته مباشرة، وتظهر الإحالات والمكافآت المرتبطة بحسابك.
+لك كود إحالة ورابط خاص بك. يمكنك نسخ الرابط أو مشاركته مباشرة، وتظهر الإحالات والمكافآت المرتبطة بحسابك.
             `.trim();
         }
-
 
         if (
             text.includes("اقتصاد") ||
@@ -2970,11 +2616,9 @@
         ) {
 
             return `
-اقتصاد 3Migo يجمع نشاط المستخدم والمكافآت والمعلومات الاقتصادية في منظومة واحدة.
-الإيردروب مرتبط بالاقتصاد وليس نظاماً منفصلاً عن المنظومة.
+اقتصاد 3Migo يجمع نشاط المستخدم والمكافآت والمعلومات الاقتصادية في منظومة واحدة. الإيردروب مرتبط بالاقتصاد وليس نظاماً منفصلاً عن المنظومة.
             `.trim();
         }
-
 
         if (
             text.includes("مهم") ||
@@ -2982,18 +2626,14 @@
         ) {
 
             return `
-صفحة المهام تعرض الأنشطة المتاحة والمكافآت المرتبطة بها.
-بعد تنفيذ المهمة يتم تحديث الرصيد والاقتصاد.
+صفحة المهام تعرض الأنشطة المتاحة والمكافآت المرتبطة بها. بعد تنفيذ المهمة يتم تحديث الرصيد والاقتصاد.
             `.trim();
         }
 
-
         return `
-أنا مساعد 3Migo.
-يمكنني شرح التعدين، المحفظة، الإحالات، المهام، والاقتصاد داخل التطبيق.
+أنا مساعد 3Migo. يمكنني شرح التعدين، المحفظة، الإحالات، المهام، والإعلانات والاقتصاد داخل التطبيق.
         `.trim();
     }
-
 
     function sendAIMessage() {
 
@@ -3002,26 +2642,20 @@
 
         if (!input) return;
 
-
         const question =
             input.value.trim();
 
-
         if (!question) {
-
             return;
         }
-
 
         addAIMessage(
             question,
             "user"
         );
 
-
         input.value =
             "";
-
 
         setTimeout(() => {
 
@@ -3035,6 +2669,213 @@
         }, 250);
     }
 
+    /* =====================================================
+       ADSGRAM INITIALIZATION
+    ===================================================== */
+
+    function initializeAdsGram() {
+
+        try {
+
+            if (
+                !window.Adsgram
+            ) {
+
+                console.log(
+                    "AdsGram SDK is not loaded."
+                );
+
+                return false;
+            }
+
+            adsgramController =
+                window.Adsgram.init({
+                    blockId:
+                        ADSGRAM_BLOCK_ID
+                });
+
+            console.log(
+                "AdsGram initialized — Block ID:",
+                ADSGRAM_BLOCK_ID
+            );
+
+            return true;
+
+        } catch (error) {
+
+            console.log(
+                "AdsGram initialization error:",
+                error
+            );
+
+            adsgramController =
+                null;
+
+            return false;
+        }
+    }
+
+    /* =====================================================
+       ADSGRAM REWARD AD
+    ===================================================== */
+
+    async function showRewardAd() {
+
+        if (
+            adsgramLoading
+        ) {
+
+            toast(
+                "الإعلان قيد التحميل..."
+            );
+
+            return;
+        }
+
+        if (
+            !window.Adsgram
+        ) {
+
+            toast(
+                "خدمة الإعلانات غير متاحة حالياً."
+            );
+
+            return;
+        }
+
+        if (
+            !adsgramController
+        ) {
+
+            const initialized =
+                initializeAdsGram();
+
+            if (!initialized) {
+
+                toast(
+                    "تعذر تشغيل خدمة الإعلانات."
+                );
+
+                return;
+            }
+        }
+
+        const button =
+            $(
+                '[data-action="watch-reward-ad"]'
+            );
+
+        const status =
+            $("#adRewardStatus");
+
+        adsgramLoading =
+            true;
+
+        if (button) {
+
+            button.disabled =
+                true;
+
+            button.classList.add(
+                "loading"
+            );
+        }
+
+        if (status) {
+
+            status.textContent =
+                "جارٍ تجهيز الإعلان...";
+        }
+
+        try {
+
+            if (status) {
+
+                status.textContent =
+                    "شاهد الإعلان حتى النهاية لتفعيل المشاهدة.";
+            }
+
+            const result =
+                await adsgramController.show();
+
+            console.log(
+                "AdsGram reward result:",
+                result
+            );
+
+            /*
+             * AdsGram Rewarded Promise resolves
+             * when the user completes the ad.
+             *
+             * IMPORTANT:
+             * We DO NOT modify the 3M balance here.
+             *
+             * A secure backend reward endpoint will
+             * be added later so rewards cannot be forged
+             * from the browser.
+             */
+
+            if (
+                result &&
+                result.done === false
+            ) {
+
+                if (status) {
+
+                    status.textContent =
+                        "لم تكتمل مشاهدة الإعلان.";
+                }
+
+                toast(
+                    "لم تكتمل مشاهدة الإعلان."
+                );
+
+                return;
+            }
+
+            if (status) {
+
+                status.textContent =
+                    "تمت مشاهدة الإعلان بنجاح. سيتم ربط المكافأة بالخادم لاحقاً.";
+            }
+
+            toast(
+                "تمت مشاهدة الإعلان بنجاح."
+            );
+
+        } catch (error) {
+
+            console.log(
+                "AdsGram show error:",
+                error
+            );
+
+            if (status) {
+
+                status.textContent =
+                    "تعذر تشغيل الإعلان أو لم تكتمل المشاهدة.";
+            }
+
+            toast(
+                "تعذر تشغيل الإعلان حالياً."
+            );
+
+        } finally {
+
+            adsgramLoading =
+                false;
+
+            if (button) {
+
+                button.disabled =
+                    false;
+
+                button.classList.remove(
+                    "loading"
+                );
+            }
+        }
+    }
 
     /* =====================================================
        AD GALAXY
@@ -3046,15 +2887,12 @@
             "جارٍ تحديث الأنشطة الإعلانية والمهام..."
         );
 
-
         await loadTasks();
-
 
         toast(
             "تم تحديث الأنشطة."
         );
     }
-
 
     /* =====================================================
        ACTION HANDLER
@@ -3067,13 +2905,11 @@
 
         switch (action) {
 
-
             case "open-ai":
 
                 openAI();
 
                 break;
-
 
             case "open-economic":
 
@@ -3085,7 +2921,6 @@
 
                 break;
 
-
             case "open-wallet":
 
                 openModal(
@@ -3096,6 +2931,19 @@
 
                 break;
 
+            case "open-ad-galaxy":
+
+                openModal(
+                    "adGalaxyModal"
+                );
+
+                break;
+
+            case "watch-reward-ad":
+
+                await showRewardAd();
+
+                break;
 
             case "copy-referral":
 
@@ -3103,13 +2951,11 @@
 
                 break;
 
-
             case "share-referral":
 
                 shareReferral();
 
                 break;
-
 
             case "preview-airdrop":
 
@@ -3117,20 +2963,17 @@
 
                 break;
 
-
             case "spend-economic":
 
                 await spendEconomic();
 
                 break;
 
-
             case "refresh-ads":
 
                 await refreshAds();
 
                 break;
-
 
             case "close-modal":
 
@@ -3142,13 +2985,11 @@
 
                 break;
 
-
             case "daily-reward":
 
                 await claimDailyReward();
 
                 break;
-
 
             default:
 
@@ -3158,7 +2999,6 @@
                 );
         }
     }
-
 
     /* =====================================================
        EVENT SYSTEM
@@ -3170,7 +3010,6 @@
             "click",
             async event => {
 
-
                 /*
                  * Navigation
                  */
@@ -3179,7 +3018,6 @@
                     event.target.closest(
                         "[data-view-target]"
                     );
-
 
                 if (nav) {
 
@@ -3192,7 +3030,6 @@
                     return;
                 }
 
-
                 /*
                  * Actions
                  */
@@ -3201,7 +3038,6 @@
                     event.target.closest(
                         "[data-action]"
                     );
-
 
                 if (
                     actionElement
@@ -3217,7 +3053,6 @@
                     return;
                 }
 
-
                 /*
                  * Task buttons
                  */
@@ -3227,17 +3062,14 @@
                         "[data-task-id]"
                     );
 
-
                 if (
                     taskButton
                 ) {
 
                     event.preventDefault();
 
-
                     const taskId =
                         taskButton.dataset.taskId;
-
 
                     if (
                         taskId
@@ -3251,7 +3083,6 @@
                     return;
                 }
 
-
                 /*
                  * AI quick questions
                  */
@@ -3261,23 +3092,19 @@
                         "[data-ai-question]"
                     );
 
-
                 if (
                     aiQuestion
                 ) {
 
                     event.preventDefault();
 
-
                     const question =
                         aiQuestion.dataset.aiQuestion;
-
 
                     addAIMessage(
                         question,
                         "user"
                     );
-
 
                     setTimeout(() => {
 
@@ -3290,13 +3117,10 @@
 
                     }, 200);
 
-
                     return;
                 }
-
             }
         );
-
 
         /*
          * AI send
@@ -3304,7 +3128,6 @@
 
         const aiSend =
             $("#aiSend");
-
 
         if (
             aiSend
@@ -3316,14 +3139,12 @@
             );
         }
 
-
         /*
          * Enter inside AI input
          */
 
         const aiInput =
             $("#aiInput");
-
 
         if (
             aiInput
@@ -3345,7 +3166,6 @@
                 }
             );
         }
-
 
         /*
          * Close modal by backdrop
@@ -3373,7 +3193,6 @@
                 );
             });
 
-
         /*
          * ESC
          */
@@ -3392,7 +3211,6 @@
             }
         );
     }
-
 
     /* =====================================================
        HTML ESCAPE
@@ -3425,7 +3243,6 @@
             );
     }
 
-
     /* =====================================================
        INITIALIZATION
     ===================================================== */
@@ -3433,19 +3250,26 @@
     async function initialize() {
 
         console.log(
-            "3Migo Coin — App V5.5 initializing..."
+            "3Migo Coin — App V5.6 initializing..."
         );
 
+        /*
+         * Telegram
+         */
 
         initializeTelegramUser();
 
+        /*
+         * AdsGram
+         */
+
+        initializeAdsGram();
 
         /*
          * Register/load user first.
          */
 
         await registerUser();
-
 
         /*
          * Load core data.
@@ -3460,9 +3284,7 @@
             loadReferral(),
 
             loadEconomic()
-
         ]);
-
 
         /*
          * UI
@@ -3478,7 +3300,6 @@
 
         updateMiningUI();
 
-
         /*
          * Events
          */
@@ -3486,7 +3307,6 @@
         setupMiningButtons();
 
         setupEvents();
-
 
         /*
          * Home is default.
@@ -3496,12 +3316,10 @@
             "home"
         );
 
-
         console.log(
-            "3Migo Coin — App V5.5 ready."
+            "3Migo Coin — App V5.6 ready."
         );
     }
-
 
     /* =====================================================
        START
@@ -3521,7 +3339,6 @@
 
         initialize();
     }
-
 
     /* =====================================================
        GLOBAL ACCESS
@@ -3549,8 +3366,11 @@
 
         openAI,
 
+        showRewardAd,
+
+        initializeAdsGram,
+
         toast
     };
-
 
 })();
