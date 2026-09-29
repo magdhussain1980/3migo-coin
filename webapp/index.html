@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
@@ -109,7 +108,9 @@
             data-view="home"
         >
 
-            <!-- HERO -->
+            <!-- =================================================
+                 HERO
+            ================================================== -->
 
             <div class="hero">
 
@@ -392,16 +393,16 @@
 
                 <button
                     class="quick-action"
-                    data-action="open-ad-galaxy"
+                    data-action="open-rewards-hub"
                     type="button"
                 >
 
                     <span>
-                        📺
+                        🎁
                     </span>
 
                     <small>
-                        Ad Galaxy
+                        Rewards
                     </small>
 
                 </button>
@@ -441,6 +442,391 @@
                 </button>
 
             </div>
+
+
+            <!-- =================================================
+                 3MIGO REWARDS HUB
+            ================================================== -->
+
+            <section
+                id="rewardsHubSection"
+                class="rewards-hub"
+            >
+
+                <div class="rewards-hub-glow"></div>
+
+
+                <!-- HEADER -->
+
+                <div class="rewards-hub-header">
+
+                    <div class="rewards-hub-title-wrap">
+
+                        <div class="rewards-hub-icon">
+                            🎁
+                        </div>
+
+                        <div>
+
+                            <span class="rewards-hub-kicker">
+                                3MIGO SMART
+                            </span>
+
+                            <h2>
+                                Rewards Hub
+                            </h2>
+
+                            <p>
+                                العب • شاهد • شارك • اكسب
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="rewards-hub-badge">
+                        REWARDS
+                    </div>
+
+                </div>
+
+
+                <!-- REWARD SUMMARY -->
+
+                <div class="rewards-summary">
+
+                    <div class="reward-summary-card">
+
+                        <span>
+                            اللفات المتاحة
+                        </span>
+
+                        <strong id="rewardSpinsValue">
+                            0
+                        </strong>
+
+                        <small>
+                            SPINS
+                        </small>
+
+                    </div>
+
+
+                    <div class="reward-summary-card">
+
+                        <span>
+                            مكافآت المركز
+                        </span>
+
+                        <strong id="rewardEarnedValue">
+                            0
+                        </strong>
+
+                        <small>
+                            3M
+                        </small>
+
+                    </div>
+
+
+                    <div class="reward-summary-card">
+
+                        <span>
+                            نشاط اليوم
+                        </span>
+
+                        <strong id="rewardDailyValue">
+                            0
+                        </strong>
+
+                        <small>
+                            TASKS
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FEATURED WHEEL -->
+
+                <div
+                    class="reward-wheel-card"
+                    id="rewardWheelCard"
+                >
+
+                    <div class="reward-wheel-top">
+
+                        <div>
+
+                            <span class="reward-wheel-label">
+                                REWARD WHEEL
+                            </span>
+
+                            <h3>
+                                عجلة المكافآت
+                            </h3>
+
+                            <p>
+                                استخدم اللفات التي تكسبها من نشاطك
+                                داخل منظومة 3Migo.
+                            </p>
+
+                        </div>
+
+
+                        <div class="reward-wheel-status">
+
+                            <span class="status-dot"></span>
+
+                            <span>
+                                FREE SPINS
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="reward-wheel-stage">
+
+                        <div class="reward-wheel-ring">
+
+                            <div
+                                id="rewardWheel"
+                                class="reward-wheel"
+                            >
+
+                                <div class="wheel-segment segment-1">
+                                    <span>
+                                        +3M
+                                    </span>
+                                </div>
+
+                                <div class="wheel-segment segment-2">
+                                    <span>
+                                        +5M
+                                    </span>
+                                </div>
+
+                                <div class="wheel-segment segment-3">
+                                    <span>
+                                        +10M
+                                    </span>
+                                </div>
+
+                                <div class="wheel-segment segment-4">
+                                    <span>
+                                        +3M
+                                    </span>
+                                </div>
+
+                                <div class="wheel-segment segment-5">
+                                    <span>
+                                        +5M
+                                    </span>
+                                </div>
+
+                                <div class="wheel-segment segment-6">
+                                    <span>
+                                        BONUS
+                                    </span>
+                                </div>
+
+                                <div class="wheel-center">
+
+                                    <span>
+                                        3M
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="reward-wheel-pointer">
+                        ▼
+                    </div>
+
+
+                    <div class="reward-wheel-info">
+
+                        <span>
+                            اللفات المتاحة
+                        </span>
+
+                        <strong id="wheelSpins">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <button
+                        id="spinRewardWheelButton"
+                        class="reward-main-btn"
+                        data-action="spin-reward-wheel"
+                        type="button"
+                    >
+                        🎡 استخدم لفة مجانية
+                    </button>
+
+
+                    <div
+                        id="rewardWheelStatus"
+                        class="reward-status"
+                        aria-live="polite"
+                    >
+                        أكمل أنشطة 3Migo للحصول على لفات مجانية.
+                    </div>
+
+                </div>
+
+
+                <!-- REWARD ACTIONS -->
+
+                <div class="reward-actions-grid">
+
+                    <!-- WATCH -->
+
+                    <button
+                        class="reward-action-card"
+                        data-action="reward-watch-ad"
+                        type="button"
+                    >
+
+                        <span class="reward-action-icon">
+                            📺
+                        </span>
+
+                        <span class="reward-action-title">
+                            Watch & Earn
+                        </span>
+
+                        <span class="reward-action-description">
+                            شاهد إعلان مكافأة اختياريًا
+                            واحصل على مكافأة عند تأكيد النظام.
+                        </span>
+
+                        <span class="reward-action-footer">
+                            مشاهدة
+                            <b>›</b>
+                        </span>
+
+                    </button>
+
+
+                    <!-- JOIN -->
+
+                    <button
+                        class="reward-action-card"
+                        data-action="reward-join"
+                        type="button"
+                    >
+
+                        <span class="reward-action-icon">
+                            📢
+                        </span>
+
+                        <span class="reward-action-title">
+                            Join & Earn
+                        </span>
+
+                        <span class="reward-action-description">
+                            أنشطة المجتمع والقنوات
+                            المؤهلة للمكافآت.
+                        </span>
+
+                        <span class="reward-action-footer">
+                            استكشاف
+                            <b>›</b>
+                        </span>
+
+                    </button>
+
+
+                    <!-- INVITE -->
+
+                    <button
+                        class="reward-action-card"
+                        data-action="reward-invite"
+                        type="button"
+                    >
+
+                        <span class="reward-action-icon">
+                            👥
+                        </span>
+
+                        <span class="reward-action-title">
+                            Invite & Earn
+                        </span>
+
+                        <span class="reward-action-description">
+                            ادعُ مستخدمين جدد وساهم
+                            في نمو منظومة 3Migo.
+                        </span>
+
+                        <span class="reward-action-footer">
+                            دعوة
+                            <b>›</b>
+                        </span>
+
+                    </button>
+
+
+                    <!-- DAILY -->
+
+                    <button
+                        class="reward-action-card"
+                        data-action="reward-daily"
+                        type="button"
+                    >
+
+                        <span class="reward-action-icon">
+                            🎯
+                        </span>
+
+                        <span class="reward-action-title">
+                            Daily Missions
+                        </span>
+
+                        <span class="reward-action-description">
+                            مهام يومية بسيطة تساعدك
+                            على زيادة نشاطك.
+                        </span>
+
+                        <span class="reward-action-footer">
+                            المهام
+                            <b>›</b>
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <!-- REWARD SAFETY NOTE -->
+
+                <div class="rewards-hub-note">
+
+                    <span>
+                        ◈
+                    </span>
+
+                    <p>
+                        المكافآت داخل المركز مرتبطة بالنشاط
+                        الفعلي وقواعد النظام. لا تحتاج الوظائف
+                        الأساسية إلى مشاهدة الإعلانات.
+                    </p>
+
+                </div>
+
+            </section>
 
 
             <!-- =================================================
@@ -1469,6 +1855,33 @@
                 </button>
 
 
+                <!-- REWARDS -->
+
+                <button
+                    class="master-service-card"
+                    data-action="open-rewards-hub"
+                    type="button"
+                >
+
+                    <span>
+                        🎁
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Rewards Hub
+                        </strong>
+
+                        <small>
+                            العب • شاهد • شارك • اكسب
+                        </small>
+
+                    </div>
+
+                </button>
+
+
                 <!-- AD GALAXY -->
 
                 <button
@@ -1818,6 +2231,141 @@
                 </div>
 
             </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         REWARDS HUB MODAL
+    ====================================================== -->
+
+    <div
+        id="rewardsHubModal"
+        class="modal-overlay"
+        hidden
+    >
+
+        <div class="modal-card rewards-modal-card">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <span>
+                        🎁
+                    </span>
+
+                    <strong>
+                        3Migo Rewards Hub
+                    </strong>
+
+                </div>
+
+
+                <button
+                    class="modal-close"
+                    data-action="close-modal"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="promotion-card">
+
+                <h3>
+                    العب • شاهد • شارك • اكسب
+                </h3>
+
+                <p>
+                    مركز موحد للأنشطة والمكافآت داخل
+                    منظومة 3Migo.
+                </p>
+
+            </div>
+
+
+            <div class="rewards-modal-summary">
+
+                <div>
+
+                    <span>
+                        Spins
+                    </span>
+
+                    <strong id="modalRewardSpins">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Rewards
+                    </span>
+
+                    <strong id="modalRewardEarned">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="primary-btn"
+                data-action="scroll-rewards-wheel"
+                type="button"
+            >
+                🎡 الانتقال إلى عجلة المكافآت
+            </button>
+
+
+            <button
+                class="secondary-btn"
+                data-action="reward-watch-ad"
+                type="button"
+                style="margin-top:9px;width:100%;"
+            >
+                📺 Watch & Earn
+            </button>
+
+
+            <button
+                class="secondary-btn"
+                data-action="reward-join"
+                type="button"
+                style="margin-top:9px;width:100%;"
+            >
+                📢 Join & Earn
+            </button>
+
+
+            <button
+                class="secondary-btn"
+                data-action="reward-invite"
+                type="button"
+                style="margin-top:9px;width:100%;"
+            >
+                👥 Invite & Earn
+            </button>
+
+
+            <button
+                class="secondary-btn"
+                data-action="reward-daily"
+                type="button"
+                style="margin-top:9px;width:100%;"
+            >
+                🎯 Daily Missions
+            </button>
 
         </div>
 
