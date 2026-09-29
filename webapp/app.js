@@ -1,6 +1,6 @@
 /* =========================================================
    3MIGO COIN — APP.JS V5.6
-   ADSGRAM REWARD INTEGRATION
+   ADSGRAM REWARD INTEGRATION — DEBUG TEST
 
    IMPORTANT:
    - Backend/API contracts preserved
@@ -9,8 +9,9 @@
    - Airdrop/economic endpoints preserved
    - No database changes
    - Home Mining Button + Mining Page Button use ONE shared state
-   - AdsGram Reward integration added
+   - AdsGram Reward integration preserved
    - Ads do NOT directly modify balance
+   - AdsGram DEBUG MODE enabled temporarily for testing
 ========================================================= */
 
 (() => {
@@ -2671,6 +2672,7 @@
 
     /* =====================================================
        ADSGRAM INITIALIZATION
+       TEMPORARY DEBUG MODE
     ===================================================== */
 
     function initializeAdsGram() {
@@ -2691,11 +2693,26 @@
             adsgramController =
                 window.Adsgram.init({
                     blockId:
-                        ADSGRAM_BLOCK_ID
+                        ADSGRAM_BLOCK_ID,
+
+                    /*
+                     * TEMPORARY TEST ONLY
+                     *
+                     * This asks AdsGram for a
+                     * RewardedVideo debug ad.
+                     *
+                     * It does NOT represent
+                     * production inventory.
+                     */
+
+                    debug: true,
+
+                    debugBannerType:
+                        "RewardedVideo"
                 });
 
             console.log(
-                "AdsGram initialized — Block ID:",
+                "AdsGram initialized — DEBUG MODE — Block ID:",
                 ADSGRAM_BLOCK_ID
             );
 
@@ -2804,15 +2821,15 @@
             );
 
             /*
-             * AdsGram Rewarded Promise resolves
-             * when the user completes the ad.
+             * DEBUG MODE:
              *
-             * IMPORTANT:
+             * The test/debug ad is only used
+             * to verify SDK integration.
+             *
              * We DO NOT modify the 3M balance here.
              *
-             * A secure backend reward endpoint will
-             * be added later so rewards cannot be forged
-             * from the browser.
+             * Production rewards continue to be
+             * handled by the backend Reward URL.
              */
 
             if (
@@ -2836,11 +2853,11 @@
             if (status) {
 
                 status.textContent =
-                    "تمت مشاهدة الإعلان بنجاح. سيتم ربط المكافأة بالخادم لاحقاً.";
+                    "تم اختبار عرض الإعلان بنجاح.";
             }
 
             toast(
-                "تمت مشاهدة الإعلان بنجاح."
+                "تم عرض إعلان الاختبار بنجاح."
             );
 
         } catch (error) {
@@ -2853,7 +2870,7 @@
             if (status) {
 
                 status.textContent =
-                    "تعذر تشغيل الإعلان أو لم تكتمل المشاهدة.";
+                    "تعذر تشغيل الإعلان أو لم تتوفر مادة إعلانية للاختبار.";
             }
 
             toast(
