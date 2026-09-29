@@ -1,97 +1,482 @@
 /* =========================================================
-   3MIGO COIN — STYLE V5.5
-   PREMIUM REWARDS HUB
-   ---------------------------------------------------------
-   New:
-   - Rewards Hub
-   - Reward Wheel
-   - Watch & Earn
-   - Join & Earn
-   - Invite & Earn
-   - Daily Missions
-   - Spin Counter
-   - Reward Cards
-   ---------------------------------------------------------
-   IMPORTANT:
-   Frontend styling only.
-   Existing API contracts remain unchanged.
+   3MIGO COIN — STYLE V5.4
+   Premium Crypto / Digital Finance UI
+   Dark Navy + Charcoal + Gold + Orange
+   Frontend only — API contracts preserved
 ========================================================= */
-
 
 /* =========================================================
-   REWARDS HUB
+   ROOT
 ========================================================= */
 
-.rewards-hub {
+:root {
+    --bg: #03070d;
+    --bg-soft: #071019;
+    --bg-card: #0a111b;
+    --bg-card-2: #0e1722;
 
-    position: relative;
-    overflow: hidden;
+    --gold: #f7931a;
+    --gold-light: #ffb84d;
+    --gold-soft: #ffcc70;
+    --orange: #ff8a00;
 
-    margin:
-        0
-        14px
-        22px;
+    --cyan: #5bdcff;
+    --green: #25d366;
+    --red: #ff5c5c;
 
-    padding:
-        20px
-        16px
-        18px;
+    --white: #ffffff;
+    --text: #eaf0f7;
+    --muted: #8290a3;
 
-    border-radius: 25px;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-gold: rgba(247, 147, 26, 0.30);
 
-    border:
-        1px solid rgba(247, 147, 26, 0.16);
+    --shadow:
+        0 18px 50px rgba(0, 0, 0, 0.42);
+
+    --shadow-gold:
+        0 15px 45px rgba(247, 147, 26, 0.16);
+
+    --radius-sm: 12px;
+    --radius-md: 18px;
+    --radius-lg: 24px;
+    --radius-xl: 30px;
+
+    --nav-height: 76px;
+
+    --mine-progress: 0deg;
+
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family:
+        Arial,
+        Tahoma,
+        sans-serif;
 
     background:
         radial-gradient(
             circle at 50% -10%,
-            rgba(247, 147, 26, 0.13),
-            transparent 38%
+            rgba(247, 147, 26, 0.11),
+            transparent 34%
         ),
         radial-gradient(
-            circle at 100% 100%,
+            circle at 100% 35%,
             rgba(91, 220, 255, 0.035),
-            transparent 32%
+            transparent 30%
         ),
         linear-gradient(
             180deg,
-            #0d1824,
-            #050b12
+            #03070d 0%,
+            #040a12 50%,
+            #02060b 100%
+        );
+
+    color: var(--text);
+    min-height: 100vh;
+
+    padding-bottom: calc(
+        var(--nav-height) + 24px
+    );
+
+    overflow-x: hidden;
+}
+
+button,
+input {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+input {
+    outline: none;
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+#app {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* =========================================================
+   VIEW SYSTEM
+========================================================= */
+
+.app-view {
+    display: none;
+    width: 100%;
+    animation: viewIn 0.24s ease;
+}
+
+.app-view.active {
+    display: block;
+}
+
+.app-view[hidden] {
+    display: none !important;
+}
+
+.system-section {
+    width: calc(100% - 28px);
+    max-width: 692px;
+    margin: 24px auto;
+}
+
+@keyframes viewIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+
+    height: 66px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 18px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(3, 7, 13, 0.96),
+            rgba(3, 7, 13, 0.82)
+        );
+
+    backdrop-filter: blur(18px);
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.06);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.coin-symbol {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+    font-weight: 900;
+
+    color: #111;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffd47a,
+            var(--gold),
+            #d56d00
         );
 
     box-shadow:
-        0 18px 50px rgba(0, 0, 0, 0.34),
-        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+        0 0 22px rgba(247, 147, 26, 0.22);
 }
 
+.brand-title {
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+}
 
-.rewards-hub::before {
+.brand-subtitle {
+    margin-top: 2px;
 
+    color: var(--muted);
+
+    font-size: 9px;
+    letter-spacing: 1.4px;
+}
+
+.topbar-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #91a0b2;
+
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--green);
+
+    box-shadow:
+        0 0 10px rgba(37, 211, 102, 0.55);
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+    text-align: center;
+
+    padding:
+        30px
+        18px
+        22px;
+}
+
+.hero-logo {
+    display: flex;
+    justify-content: center;
+
+    margin-bottom: 14px;
+}
+
+.coin-logo {
+    width: 78px;
+    height: 78px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #101010;
+
+    font-size: 21px;
+    font-weight: 950;
+
+    background:
+        radial-gradient(
+            circle at 35% 25%,
+            #ffe2a2,
+            var(--gold-light) 28%,
+            var(--gold) 60%,
+            #bc5e00 100%
+        );
+
+    border:
+        3px solid rgba(255, 204, 112, 0.35);
+
+    box-shadow:
+        0 0 0 10px rgba(247, 147, 26, 0.045),
+        0 0 0 20px rgba(247, 147, 26, 0.018),
+        0 18px 55px rgba(247, 147, 26, 0.20);
+}
+
+.hero h1 {
+    margin: 0;
+
+    font-size: 28px;
+    font-weight: 950;
+
+    letter-spacing: -0.7px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #fff,
+            var(--gold-soft)
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.hero p {
+    margin:
+        8px
+        0
+        10px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+.beta-badge {
+    display: inline-flex;
+
+    padding:
+        5px
+        10px;
+
+    border:
+        1px solid var(--border-gold);
+
+    border-radius: 999px;
+
+    color: var(--gold-light);
+
+    background:
+        rgba(247, 147, 26, 0.055);
+
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+}
+
+/* =========================================================
+   PREMIUM WALLET CARD
+========================================================= */
+
+.wallet-card-wrap {
+    padding:
+        0
+        14px
+        8px;
+}
+
+.balance-card {
+    position: relative;
+    overflow: hidden;
+
+    min-height: 238px;
+
+    padding: 22px;
+
+    border-radius: var(--radius-xl);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.11);
+
+    background:
+        linear-gradient(
+            135deg,
+            #111a25 0%,
+            #09121d 42%,
+            #050b12 100%
+        );
+
+    box-shadow:
+        var(--shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.premium-wallet-card::before {
     content: "";
 
+    position: absolute;
+
+    width: 230px;
+    height: 230px;
+
+    right: -90px;
+    top: -120px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(247, 147, 26, 0.18);
+
+    box-shadow:
+        0 0 0 24px rgba(247, 147, 26, 0.025),
+        0 0 0 48px rgba(247, 147, 26, 0.018);
+
+    pointer-events: none;
+}
+
+.premium-wallet-card::after {
+    content: "";
+
+    position: absolute;
+
+    width: 160px;
+    height: 160px;
+
+    left: -90px;
+    bottom: -100px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(91, 220, 255, 0.08);
+
+    pointer-events: none;
+}
+
+.wallet-card-glow {
     position: absolute;
 
     width: 220px;
     height: 220px;
 
-    right: -130px;
-    top: -130px;
+    right: -120px;
+    bottom: -130px;
 
     border-radius: 50%;
 
-    border:
-        1px solid rgba(247, 147, 26, 0.11);
+    background:
+        radial-gradient(
+            circle,
+            rgba(247, 147, 26, 0.18),
+            transparent 68%
+        );
 
-    box-shadow:
-        0 0 0 24px rgba(247, 147, 26, 0.018),
-        0 0 0 48px rgba(247, 147, 26, 0.012);
+    filter: blur(8px);
 
     pointer-events: none;
 }
 
-
-.rewards-hub-header {
-
+.wallet-card-top {
     position: relative;
     z-index: 2;
 
@@ -99,226 +484,301 @@
     align-items: flex-start;
     justify-content: space-between;
 
-    gap: 12px;
-
-    margin-bottom: 17px;
+    margin-bottom: 28px;
 }
 
+.balance-label {
+    display: block;
 
-.rewards-hub-title {
+    color: #8997a9;
 
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 1.1px;
+}
+
+.wallet-card-status {
     display: flex;
     align-items: center;
+    gap: 6px;
 
-    gap: 10px;
+    margin-top: 6px;
+
+    color: #78879a;
+
+    font-size: 8px;
+    font-weight: 700;
 }
 
+.wallet-chip {
+    width: 39px;
+    height: 30px;
 
-.rewards-hub-icon {
+    position: relative;
 
-    width: 43px;
-    height: 43px;
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8d28a,
+            #b87a23
+        );
+
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+.wallet-chip::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 7px;
+
+    border:
+        1px solid rgba(50, 30, 5, 0.45);
+
+    border-radius: 4px;
+}
+
+.wallet-chip span {
+    position: absolute;
+
+    background:
+        rgba(50, 30, 5, 0.45);
+}
+
+.wallet-chip span:nth-child(1) {
+    width: 1px;
+    height: 100%;
+
+    left: 50%;
+}
+
+.wallet-chip span:nth-child(2) {
+    width: 100%;
+    height: 1px;
+
+    top: 50%;
+}
+
+.wallet-chip span:nth-child(3) {
+    width: 1px;
+    height: 100%;
+
+    left: 25%;
+}
+
+.balance-value {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+
+    margin-top: 7px;
+
+    font-size: 42px;
+    line-height: 1;
+
+    font-weight: 950;
+
+    letter-spacing: -2px;
+
+    color: #fff;
+
+    text-shadow:
+        0 5px 25px rgba(0, 0, 0, 0.45);
+}
+
+.balance-token {
+    position: relative;
+    z-index: 2;
+
+    margin-top: 6px;
+
+    color: var(--gold-light);
+
+    font-size: 12px;
+    font-weight: 900;
+
+    letter-spacing: 2px;
+}
+
+.wallet-card-number {
+    position: relative;
+    z-index: 2;
+
+    margin-top: 24px;
+
+    color: #8290a1;
+
+    font-size: 11px;
+
+    letter-spacing: 2.5px;
+
+    font-family:
+        "Courier New",
+        monospace;
+}
+
+.balance-meta {
+    position: relative;
+    z-index: 2;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-top: 17px;
+    padding-top: 13px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, 0.07);
+}
+
+.balance-meta-item {
+    min-width: 0;
+}
+
+.balance-meta-item span {
+    display: block;
+
+    color: #69788b;
+
+    font-size: 8px;
+}
+
+.balance-meta-item strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #dfe7ef;
+
+    font-size: 10px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   MINING PANEL
+========================================================= */
+
+.mining-panel {
+    margin:
+        18px
+        14px
+        10px;
+
+    padding:
+        20px
+        14px
+        18px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.065);
+
+    border-radius: var(--radius-lg);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(12, 21, 31, 0.92),
+            rgba(5, 10, 16, 0.94)
+        );
+
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.26);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 14px;
+
+    color: #e9eef5;
+
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.section-title span {
+    font-size: 15px;
+}
+
+/* =========================================================
+   CIRCULAR MINING CONTROL
+========================================================= */
+
+.mining-orb-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding:
+        18px
+        0
+        14px;
+}
+
+.mining-progress-ring {
+    --progress: var(--mine-progress);
+
+    width: 218px;
+    height: 218px;
+
+    padding: 7px;
+
+    border-radius: 50%;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    flex-shrink: 0;
-
-    border-radius: 14px;
-
-    color: var(--gold-light);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(247, 147, 26, 0.18),
-            rgba(247, 147, 26, 0.045)
-        );
-
-    border:
-        1px solid rgba(247, 147, 26, 0.22);
-
-    font-size: 20px;
-
-    box-shadow:
-        0 8px 24px rgba(247, 147, 26, 0.10);
-}
-
-
-.rewards-hub-title h3 {
-
-    margin: 0;
-
-    color: #fff;
-
-    font-size: 16px;
-    font-weight: 950;
-}
-
-
-.rewards-hub-title p {
-
-    margin:
-        5px
-        0
-        0;
-
-    color: #718094;
-
-    font-size: 8px;
-
-    line-height: 1.5;
-}
-
-
-.rewards-spin-badge {
-
-    position: relative;
-    z-index: 2;
-
-    min-width: 72px;
-
-    padding:
-        7px
-        9px;
-
-    text-align: center;
-
-    border-radius: 12px;
-
-    background:
-        rgba(247, 147, 26, 0.075);
-
-    border:
-        1px solid rgba(247, 147, 26, 0.18);
-}
-
-
-.rewards-spin-badge span {
-
-    display: block;
-
-    color: #687789;
-
-    font-size: 7px;
-}
-
-
-.rewards-spin-badge strong {
-
-    display: block;
-
-    margin-top: 4px;
-
-    color: var(--gold-light);
-
-    font-size: 14px;
-    font-weight: 950;
-}
-
-
-/* =========================================================
-   REWARD WHEEL
-========================================================= */
-
-.reward-wheel-section {
-
-    position: relative;
-    z-index: 2;
-
-    padding:
-        7px
-        0
-        18px;
-
-    text-align: center;
-}
-
-
-.reward-wheel {
-
-    position: relative;
-
-    width: 218px;
-    height: 218px;
-
-    margin: 0 auto;
-
-    border-radius: 50%;
-
-    padding: 9px;
-
     background:
         conic-gradient(
-            from -15deg,
-            #f7931a 0deg 45deg,
-            #111d2a 45deg 90deg,
-            #ffb84d 90deg 135deg,
-            #0b1520 135deg 180deg,
-            #f7931a 180deg 225deg,
-            #111d2a 225deg 270deg,
-            #ffb84d 270deg 315deg,
-            #0b1520 315deg 360deg
+            from -90deg,
+            var(--gold) 0deg,
+            var(--orange) var(--progress),
+            rgba(255, 255, 255, 0.075) var(--progress),
+            rgba(255, 255, 255, 0.075) 360deg
         );
 
     box-shadow:
-        0 0 0 1px rgba(255, 204, 112, 0.15),
-        0 0 35px rgba(247, 147, 26, 0.16),
-        0 18px 45px rgba(0, 0, 0, 0.32);
+        0 0 0 1px rgba(247, 147, 26, 0.06),
+        0 0 35px rgba(247, 147, 26, 0.12);
 
     transition:
-        transform 1.4s cubic-bezier(0.12, 0.72, 0.18, 1),
-        filter 0.25s ease;
+        background 0.45s ease,
+        box-shadow 0.45s ease;
 }
 
-
-.reward-wheel::before {
-
+.mining-progress-ring::before {
     content: "";
 
     position: absolute;
 
-    inset: 8px;
+    width: 190px;
+    height: 190px;
 
     border-radius: 50%;
 
     border:
-        1px solid rgba(255, 255, 255, 0.20);
+        1px dashed rgba(255, 204, 112, 0.16);
 
     pointer-events: none;
 }
 
-
-.reward-wheel::after {
-
-    content: "";
-
-    position: absolute;
-
-    inset: 22px;
-
-    border-radius: 50%;
-
-    border:
-        1px dashed rgba(255, 255, 255, 0.12);
-
-    pointer-events: none;
-}
-
-
-.reward-wheel.spinning {
-
-    filter:
-        brightness(1.15)
-        drop-shadow(
-            0 0 18px rgba(247, 147, 26, 0.35)
-        );
-}
-
-
-.reward-wheel-face {
-
+.mining-orb {
     width: 100%;
     height: 100%;
 
@@ -330,281 +790,263 @@
 
     background:
         radial-gradient(
-            circle,
-            #162434 0%,
-            #09121b 63%,
+            circle at 40% 30%,
+            #162434,
+            #080f18 62%,
             #04080d 100%
         );
 
     box-shadow:
-        inset 0 0 35px rgba(0, 0, 0, 0.75);
+        inset 0 0 35px rgba(0, 0, 0, 0.72),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-
-.reward-wheel-center {
-
+.circular-mine-btn {
     position: relative;
-    z-index: 4;
 
-    width: 78px;
-    height: 78px;
+    width: 166px;
+    height: 166px;
+
+    padding: 20px;
+
+    border:
+        1px solid rgba(247, 147, 26, 0.25);
+
+    border-radius: 50%;
 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 
-    gap: 3px;
+    gap: 7px;
 
-    border-radius: 50%;
-
-    color: #160e05;
+    color: #121212;
 
     background:
         radial-gradient(
             circle at 35% 22%,
-            #ffe4a8,
-            var(--gold-light) 32%,
-            var(--gold) 68%,
-            #c76500
+            #ffe2a0,
+            var(--gold-light) 25%,
+            var(--gold) 57%,
+            #c76500 100%
         );
-
-    border:
-        2px solid rgba(255, 224, 160, 0.45);
 
     box-shadow:
-        0 10px 30px rgba(247, 147, 26, 0.28),
-        inset 0 2px 2px rgba(255, 255, 255, 0.42);
-}
-
-
-.reward-wheel-center span {
-
-    font-size: 22px;
-
-    line-height: 1;
-}
-
-
-.reward-wheel-center small {
-
-    font-size: 7px;
-    font-weight: 950;
-
-    letter-spacing: 0.5px;
-}
-
-
-.reward-wheel-pointer {
-
-    position: absolute;
-
-    top: -7px;
-    left: 50%;
-
-    z-index: 10;
-
-    width: 0;
-    height: 0;
-
-    transform:
-        translateX(-50%);
-
-    border-left:
-        10px solid transparent;
-
-    border-right:
-        10px solid transparent;
-
-    border-top:
-        22px solid var(--gold-light);
-
-    filter:
-        drop-shadow(
-            0 4px 6px rgba(0, 0, 0, 0.45)
-        );
-}
-
-
-.reward-wheel-labels {
-
-    position: absolute;
-
-    inset: 0;
-
-    pointer-events: none;
-}
-
-
-.reward-wheel-label {
-
-    position: absolute;
-
-    width: 50px;
-
-    color: #fff;
-
-    font-size: 8px;
-    font-weight: 950;
-
-    text-align: center;
-
-    text-shadow:
-        0 2px 5px rgba(0, 0, 0, 0.75);
-}
-
-
-.reward-wheel-label:nth-child(1) {
-    top: 31px;
-    left: 84px;
-}
-
-.reward-wheel-label:nth-child(2) {
-    top: 82px;
-    right: 24px;
-}
-
-.reward-wheel-label:nth-child(3) {
-    bottom: 31px;
-    right: 83px;
-}
-
-.reward-wheel-label:nth-child(4) {
-    bottom: 31px;
-    left: 83px;
-}
-
-.reward-wheel-label:nth-child(5) {
-    top: 82px;
-    left: 24px;
-}
-
-
-.reward-wheel-status {
-
-    margin-top: 13px;
-
-    color: var(--gold-light);
-
-    font-size: 9px;
-    font-weight: 800;
-}
-
-
-.reward-wheel-note {
-
-    margin-top: 5px;
-
-    color: #59697b;
-
-    font-size: 7px;
-}
-
-
-/* =========================================================
-   SPIN BUTTON
-========================================================= */
-
-.reward-spin-button {
-
-    width: 100%;
-
-    min-height: 46px;
-
-    margin-top: 13px;
-
-    border:
-        1px solid rgba(255, 204, 112, 0.22);
-
-    border-radius: 13px;
-
-    color: #160e05;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffd47a,
-            var(--gold)
-        );
-
-    font-size: 10px;
-    font-weight: 950;
-
-    box-shadow:
-        0 10px 28px rgba(247, 147, 26, 0.16);
+        0 12px 38px rgba(247, 147, 26, 0.25),
+        inset 0 2px 2px rgba(255, 255, 255, 0.42),
+        inset 0 -10px 20px rgba(113, 49, 0, 0.20);
 
     transition:
         transform 0.18s ease,
         box-shadow 0.18s ease;
 }
 
+.circular-mine-btn::before {
+    content: "";
 
-.reward-spin-button:active {
+    position: absolute;
 
-    transform:
-        scale(0.985);
+    inset: 8px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.28);
+
+    border-radius: 50%;
+
+    pointer-events: none;
+}
+
+.circular-mine-btn:active {
+    transform: scale(0.95);
 
     box-shadow:
-        0 6px 18px rgba(247, 147, 26, 0.12);
+        0 7px 22px rgba(247, 147, 26, 0.20),
+        inset 0 3px 8px rgba(100, 40, 0, 0.30);
 }
 
+.mine-icon {
+    position: relative;
+    z-index: 2;
 
-.reward-spin-button:disabled {
+    font-size: 29px;
 
-    color: #7b6b58;
+    filter:
+        drop-shadow(
+            0 2px 2px rgba(0, 0, 0, 0.20)
+        );
+}
+
+.mine-btn-text {
+    position: relative;
+    z-index: 2;
+
+    font-size: 12px;
+    font-weight: 950;
+}
+
+.mine-reward {
+    position: relative;
+    z-index: 2;
+
+    padding:
+        4px
+        8px;
+
+    border-radius: 999px;
+
+    color: #fff4df;
 
     background:
-        linear-gradient(
-            135deg,
-            #393127,
-            #27221c
-        );
+        rgba(45, 22, 2, 0.35);
 
-    border-color:
-        rgba(255, 255, 255, 0.06);
+    font-size: 9px;
+    font-weight: 900;
 
-    box-shadow: none;
+    letter-spacing: 0.5px;
 }
 
+.mining-status {
+    text-align: center;
+
+    margin-top: 5px;
+
+    color: var(--gold-light);
+
+    font-size: 11px;
+    font-weight: 800;
+}
 
 /* =========================================================
-   REWARD ACTION GRID
+   MINING TIMELINE
 ========================================================= */
 
-.reward-actions {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, 1fr);
-
-    gap: 9px;
-
-    margin-top: 15px;
+.mining-timeline {
+    margin:
+        18px
+        3px
+        0;
 }
 
+.timeline-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-.reward-action-card {
+    color: #78879a;
 
+    font-size: 9px;
+}
+
+.timeline-label strong {
+    color: var(--gold-light);
+
+    font-size: 11px;
+
+    font-family:
+        "Courier New",
+        monospace;
+}
+
+.timeline-track {
     position: relative;
 
-    min-height: 108px;
+    height: 7px;
 
-    padding: 13px;
+    margin-top: 8px;
 
     overflow: hidden;
 
-    border-radius: 17px;
+    border-radius: 999px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+}
+
+.timeline-progress {
+    width: 0%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #b85c00,
+            var(--gold-light)
+        );
+
+    box-shadow:
+        0 0 14px rgba(247, 147, 26, 0.38);
+
+    transition:
+        width 0.6s linear;
+}
+
+.timeline-footer {
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 6px;
+
+    color: #566477;
+
+    font-size: 8px;
+}
+
+.mining-rate {
+    margin-top: 13px;
+
+    text-align: center;
+
+    color: var(--muted);
+
+    font-size: 9px;
+}
+
+.mining-rate strong {
+    color: var(--gold-light);
+}
+
+/* =========================================================
+   QUICK ACTIONS
+========================================================= */
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 9px;
+
+    padding:
+        10px
+        14px
+        6px;
+}
+
+.quick-action {
+    min-height: 73px;
 
     border:
         1px solid rgba(255, 255, 255, 0.065);
 
+    border-radius: 17px;
+
+    color: var(--text);
+
     background:
         linear-gradient(
-            145deg,
-            #0d1824,
-            #071019
+            180deg,
+            #0c1621,
+            #080f17
         );
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
 
     box-shadow:
         0 9px 25px rgba(0, 0, 0, 0.18);
@@ -614,184 +1056,835 @@
         border-color 0.18s ease;
 }
 
-
-.reward-action-card:active {
-
-    transform:
-        scale(0.985);
+.quick-action:active {
+    transform: translateY(1px) scale(0.98);
 
     border-color:
-        rgba(247, 147, 26, 0.28);
+        rgba(247, 147, 26, 0.25);
 }
 
-
-.reward-action-card::after {
-
-    content: "";
-
-    position: absolute;
-
-    width: 75px;
-    height: 75px;
-
-    right: -35px;
-    bottom: -35px;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(247, 147, 26, 0.12),
-            transparent 70%
-        );
-
-    pointer-events: none;
+.quick-action span {
+    font-size: 21px;
 }
 
+.quick-action small {
+    color: #8996a8;
 
-.reward-action-icon {
+    font-size: 9px;
+    font-weight: 800;
+}
 
-    width: 35px;
-    height: 35px;
+/* =========================================================
+   SECTIONS
+========================================================= */
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.section {
+    margin:
+        22px
+        14px;
+}
 
-    border-radius: 11px;
+.muted {
+    color: var(--muted);
+    font-size: 9px;
+}
 
-    color: var(--gold-light);
+/* =========================================================
+   EXPERIENCE
+========================================================= */
 
-    background:
-        rgba(247, 147, 26, 0.075);
+.experience-card {
+    padding: 17px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.14);
+        1px solid rgba(255, 255, 255, 0.07);
 
-    font-size: 17px;
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0d1824,
+            #071019
+        );
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.22);
 }
 
+.experience-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
 
-.reward-action-card strong {
-
-    display: block;
-
-    margin-top: 10px;
-
-    color: #eaf0f7;
-
-    font-size: 10px;
-    font-weight: 900;
+    gap: 20px;
 }
 
+.experience-top > div {
+    display: flex;
+    flex-direction: column;
 
-.reward-action-card small {
-
-    display: block;
-
-    margin-top: 5px;
-
-    color: #647387;
-
-    font-size: 7px;
-
-    line-height: 1.5;
+    gap: 5px;
 }
 
+.experience-top strong {
+    color: #fff;
 
-.reward-action-reward {
+    font-size: 16px;
+}
 
-    position: absolute;
-
-    top: 11px;
-    right: 11px;
-
+.experience-level {
     padding:
-        4px
-        6px;
+        5px
+        9px;
 
     border-radius: 999px;
 
     color: var(--gold-light);
 
     background:
-        rgba(247, 147, 26, 0.075);
+        rgba(247, 147, 26, 0.08);
 
     border:
-        1px solid rgba(247, 147, 26, 0.12);
+        1px solid rgba(247, 147, 26, 0.17);
 
-    font-size: 7px;
-    font-weight: 950;
+    font-size: 9px;
+    font-weight: 900;
 }
 
+.progress-bar {
+    width: 100%;
+    height: 7px;
 
-/* =========================================================
-   WATCH & EARN
-========================================================= */
+    margin-top: 16px;
 
-.watch-earn-card {
+    overflow: hidden;
 
-    position: relative;
+    border-radius: 999px;
 
-    margin-top: 10px;
+    background:
+        rgba(255, 255, 255, 0.07);
+}
 
-    padding: 15px;
+.progress-fill {
+    width: 0%;
+    height: 100%;
 
-    border-radius: 17px;
+    border-radius: inherit;
 
     background:
         linear-gradient(
-            135deg,
-            rgba(247, 147, 26, 0.10),
-            rgba(255, 255, 255, 0.025)
+            90deg,
+            #b95c00,
+            var(--gold-light)
         );
 
-    border:
-        1px solid rgba(247, 147, 26, 0.14);
+    box-shadow:
+        0 0 14px rgba(247, 147, 26, 0.30);
+
+    transition:
+        width 0.5s ease;
 }
 
-
-.watch-earn-top {
-
+.experience-footer {
     display: flex;
-
-    align-items: center;
     justify-content: space-between;
 
-    gap: 10px;
+    margin-top: 9px;
+
+    color: #687789;
+
+    font-size: 8px;
 }
 
+/* =========================================================
+   ECONOMY PREVIEW
+========================================================= */
 
-.watch-earn-info {
+.economy-preview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 9px;
+}
+
+.economy-preview-card {
+    min-height: 85px;
+
+    padding: 13px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.065);
+
+    border-radius: 16px;
+
+    background:
+        #09121b;
 
     display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    min-width: 0;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
+.economy-preview-card span {
+    color: #687789;
 
-.watch-earn-icon {
+    font-size: 8px;
+}
 
-    width: 38px;
-    height: 38px;
+.economy-preview-card strong {
+    color: var(--gold-light);
 
-    flex-shrink: 0;
+    font-size: 12px;
+}
+
+.economy-preview-footer {
+    margin-top: 10px;
+
+    color: #59697b;
+
+    font-size: 8px;
+
+    line-height: 1.7;
+}
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.page-header {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    margin:
+        25px
+        16px
+        18px;
+}
+
+.page-icon {
+    width: 46px;
+    height: 46px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-radius: 12px;
+    border-radius: 15px;
 
     color: var(--gold-light);
 
     background:
-        rgba(247, 147, 26, 0.10);
+        linear-gradient(
+            145deg,
+            rgba(247, 147, 26, 0.15),
+            rgba(247, 147, 26, 0.035)
+        );
+
+    border:
+        1px solid rgba(247, 147, 26, 0.18);
+
+    font-size: 21px;
+}
+
+.page-header h2 {
+    margin: 0;
+
+    color: #fff;
+
+    font-size: 21px;
+}
+
+.page-header p {
+    margin: 5px 0 0;
+
+    color: var(--muted);
+
+    font-size: 9px;
+}
+
+/* =========================================================
+   MINING PAGE
+========================================================= */
+
+.mining-page-card {
+    margin:
+        0
+        14px;
+
+    padding:
+        24px
+        16px;
+
+    border:
+        1px solid rgba(247, 147, 26, 0.12);
+
+    border-radius: 25px;
+
+    background:
+        radial-gradient(
+            circle at 50% 20%,
+            rgba(247, 147, 26, 0.06),
+            transparent 34%
+        ),
+        linear-gradient(
+            180deg,
+            #0b1520,
+            #050b12
+        );
+
+    box-shadow:
+        var(--shadow);
+}
+
+.mining-page-orb {
+    display: flex;
+    justify-content: center;
+
+    margin:
+        8px
+        0
+        16px;
+}
+
+.mining-timer-large {
+    margin:
+        20px
+        0;
+
+    padding: 14px;
+
+    text-align: center;
+
+    border-radius: 15px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mining-timer-large span {
+    display: block;
+
+    color: #69788b;
+
+    font-size: 9px;
+}
+
+.mining-timer-large strong {
+    display: block;
+
+    margin-top: 6px;
+
+    color: var(--gold-light);
+
+    font-size: 24px;
+
+    font-family:
+        "Courier New",
+        monospace;
+}
+
+.mining-page-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+}
+
+.mining-page-stats > div {
+    padding: 12px 8px;
+
+    text-align: center;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.03);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.055);
+}
+
+.mining-page-stats span {
+    display: block;
+
+    color: #667587;
+
+    font-size: 8px;
+}
+
+.mining-page-stats strong {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #e7edf4;
+
+    font-size: 10px;
+}
+
+/* =========================================================
+   TASKS
+========================================================= */
+
+.tasks-summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 10px;
+
+    margin:
+        0
+        14px
+        18px;
+}
+
+.tasks-summary > div {
+    padding: 15px;
+
+    border-radius: 17px;
+
+    background:
+        #09131e;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tasks-summary span {
+    display: block;
+
+    color: #687789;
+
+    font-size: 8px;
+}
+
+.tasks-summary strong {
+    display: block;
+
+    margin-top: 7px;
+
+    color: var(--gold-light);
+
+    font-size: 16px;
+}
+
+.tasks-container {
+    padding:
+        0
+        14px;
+}
+
+.task-card {
+    padding: 16px;
+
+    margin-bottom: 10px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.065);
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0c1621,
+            #071019
+        );
+
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+.task-card-title {
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.task-card-description {
+    margin-top: 7px;
+
+    color: #718094;
+
+    font-size: 9px;
+
+    line-height: 1.6;
+}
+
+.task-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 13px;
+}
+
+.task-reward {
+    color: var(--gold-light);
+
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.task-btn {
+    padding:
+        8px
+        12px;
+
+    border:
+        1px solid rgba(247, 147, 26, 0.20);
+
+    border-radius: 10px;
+
+    color: #16100a;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold-light),
+            var(--gold)
+        );
+
+    font-size: 9px;
+    font-weight: 900;
+}
+
+/* =========================================================
+   WALLET PAGE
+========================================================= */
+
+#walletView {
+    padding-bottom: 10px;
+}
+
+.wallet-main {
+    margin:
+        0
+        14px
+        14px;
+
+    min-height: 240px;
+}
+
+.wallet-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin:
+        0
+        14px
+        22px;
+}
+
+.wallet-metric {
+    min-height: 76px;
+
+    padding: 12px;
+
+    border-radius: 15px;
+
+    background:
+        #09121b;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wallet-metric span {
+    display: block;
+
+    color: #667587;
+
+    font-size: 8px;
+}
+
+.wallet-metric strong {
+    display: block;
+
+    margin-top: 8px;
+
+    color: #e7edf4;
+
+    font-size: 10px;
+
+    line-height: 1.35;
+}
+
+.wallet-economic {
+    margin:
+        0
+        14px
+        22px;
+}
+
+.economic-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 9px;
+}
+
+.economic-card {
+    min-height: 82px;
+
+    padding: 14px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0c1722,
+            #071019
+        );
+
+    border:
+        1px solid rgba(255, 255, 255, 0.06);
+}
+
+.economic-card span {
+    display: block;
+
+    color: #687789;
+
+    font-size: 8px;
+}
+
+.economic-card strong {
+    display: block;
+
+    margin-top: 8px;
+
+    color: var(--gold-light);
+
+    font-size: 13px;
+}
+
+.transactions-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 13px;
+
+    border-radius: 14px;
+
+    background:
+        #09121b;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.055);
+}
+
+.transaction-item span {
+    color: #8290a3;
+
+    font-size: 9px;
+}
+
+.transaction-item strong {
+    color: var(--gold-light);
+
+    font-size: 10px;
+}
+
+.empty-state,
+.loading-state {
+    padding: 30px 15px;
+
+    text-align: center;
+
+    color: #5e6d80;
+
+    font-size: 10px;
+}
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+.profile-card {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    margin:
+        0
+        14px
+        22px;
+
+    padding: 18px;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0d1824,
+            #071019
+        );
+
+    border:
+        1px solid rgba(255, 255, 255, 0.07);
+}
+
+.profile-avatar {
+    width: 56px;
+    height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 18px;
+
+    color: #171008;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffe0a0,
+            var(--gold)
+        );
+
+    font-size: 16px;
+    font-weight: 950;
+
+    box-shadow:
+        0 10px 25px rgba(247, 147, 26, 0.18);
+}
+
+.profile-info {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.profile-info strong {
+    color: #fff;
+
+    font-size: 13px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-info span {
+    color: #687789;
+
+    font-size: 8px;
+}
+
+/* =========================================================
+   PREMIUM REFERRAL CARD
+========================================================= */
+
+.premium-referral-card {
+    position: relative;
+    overflow: hidden;
+
+    margin:
+        0
+        14px
+        24px;
+
+    padding: 19px;
+
+    border:
+        1px solid rgba(247, 147, 26, 0.16);
+
+    border-radius: 23px;
+
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(247, 147, 26, 0.09),
+            transparent 30%
+        ),
+        linear-gradient(
+            145deg,
+            #101a25,
+            #071019
+        );
+
+    box-shadow:
+        var(--shadow-gold);
+}
+
+.premium-referral-card::before {
+    content: "";
+
+    position: absolute;
+
+    width: 150px;
+    height: 150px;
+
+    left: -90px;
+    top: -90px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(247, 147, 26, 0.10);
+}
+
+.referral-header {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.referral-header h3 {
+    margin:
+        5px
+        0
+        0;
+
+    color: #fff;
+
+    font-size: 16px;
+}
+
+.referral-icon {
+    width: 39px;
+    height: 39px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    color: var(--gold-light);
+
+    background:
+        rgba(247, 147, 26, 0.09);
 
     border:
         1px solid rgba(247, 147, 26, 0.17);
@@ -799,47 +1892,609 @@
     font-size: 17px;
 }
 
+.referral-description {
+    position: relative;
+    z-index: 2;
 
-.watch-earn-info strong {
+    margin:
+        13px
+        0
+        15px;
 
+    color: #738195;
+
+    font-size: 9px;
+
+    line-height: 1.7;
+}
+
+.referral-code-box {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding:
+        12px
+        13px;
+
+    border-radius: 13px;
+
+    background:
+        rgba(0, 0, 0, 0.24);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.065);
+}
+
+.referral-code-box span {
+    color: #69788b;
+
+    font-size: 8px;
+}
+
+.referral-code-box strong {
+    color: var(--gold-light);
+
+    font-size: 13px;
+
+    letter-spacing: 1.6px;
+
+    font-family:
+        "Courier New",
+        monospace;
+}
+
+/* =========================================================
+   VISUAL REFERRAL BARCODE
+========================================================= */
+
+.referral-barcode-wrap {
+    position: relative;
+    z-index: 2;
+
+    margin-top: 12px;
+
+    padding:
+        13px
+        12px
+        10px;
+
+    border-radius: 13px;
+
+    background: #f4f1e8;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.12);
+}
+
+.referral-barcode {
+    height: 45px;
+
+    display: flex;
+    align-items: stretch;
+
+    gap: 2px;
+
+    overflow: hidden;
+}
+
+.referral-barcode i {
     display: block;
 
-    color: #fff;
+    width: 2px;
+    height: 100%;
+
+    background: #101010;
+
+    flex: 0 0 auto;
+}
+
+.referral-barcode i:nth-child(3n) {
+    width: 4px;
+}
+
+.referral-barcode i:nth-child(5n) {
+    width: 1px;
+}
+
+.referral-barcode-wrap > span {
+    display: block;
+
+    margin-top: 7px;
+
+    color: #666;
+
+    text-align: center;
+
+    font-size: 7px;
+
+    letter-spacing: 2px;
+}
+
+.referral-link-box {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+
+    gap: 7px;
+
+    margin-top: 11px;
+}
+
+.referral-link-box input {
+    min-width: 0;
+    flex: 1;
+
+    height: 39px;
+
+    padding:
+        0
+        11px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    border-radius: 10px;
+
+    color: #9aa7b7;
+
+    background:
+        rgba(0, 0, 0, 0.25);
+
+    font-size: 8px;
+
+    direction: ltr;
+    text-align: left;
+}
+
+.referral-actions {
+    position: relative;
+    z-index: 2;
+
+    margin-top: 10px;
+}
+
+.referral-stats {
+    position: relative;
+    z-index: 2;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 8px;
+
+    margin-top: 12px;
+}
+
+.referral-stats > div {
+    padding:
+        11px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.05);
+}
+
+.referral-stats span {
+    display: block;
+
+    color: #687789;
+
+    font-size: 8px;
+}
+
+.referral-stats strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--gold-light);
 
     font-size: 11px;
 }
 
+/* =========================================================
+   BUTTONS
+========================================================= */
 
-.watch-earn-info span {
+.primary-btn {
+    width: 100%;
 
-    display: block;
+    min-height: 43px;
 
-    margin-top: 4px;
+    padding:
+        10px
+        14px;
 
-    color: #6c7a8c;
+    border:
+        1px solid rgba(255, 204, 112, 0.18);
 
-    font-size: 7px;
+    border-radius: 12px;
+
+    color: #160e05;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffd27a,
+            var(--gold)
+        );
+
+    font-size: 10px;
+    font-weight: 950;
+
+    box-shadow:
+        0 10px 25px rgba(247, 147, 26, 0.13);
 }
 
+.primary-btn:active {
+    transform: translateY(1px);
+}
 
-.watch-earn-reward {
+.secondary-btn {
+    min-height: 39px;
+
+    padding:
+        0
+        13px;
+
+    border:
+        1px solid rgba(247, 147, 26, 0.18);
+
+    border-radius: 10px;
 
     color: var(--gold-light);
 
-    font-size: 12px;
-    font-weight: 950;
+    background:
+        rgba(247, 147, 26, 0.06);
+
+    font-size: 9px;
+    font-weight: 900;
 
     white-space: nowrap;
 }
 
+/* =========================================================
+   MASTER SERVICES
+========================================================= */
 
-.watch-earn-button {
+.master-services {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
 
+    gap: 9px;
+}
+
+.master-service-card {
+    min-height: 80px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 13px;
+
+    text-align: right;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.065);
+
+    border-radius: 16px;
+
+    color: var(--text);
+
+    background:
+        #09131e;
+}
+
+.master-service-card > span {
+    font-size: 21px;
+}
+
+.master-service-card div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.master-service-card strong {
+    color: #eaf0f7;
+
+    font-size: 10px;
+}
+
+.master-service-card small {
+    color: #627185;
+
+    font-size: 7px;
+}
+
+/* =========================================================
+   MODALS
+========================================================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    z-index: 200;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    padding:
+        15px;
+
+    background:
+        rgba(0, 0, 0, 0.72);
+
+    backdrop-filter: blur(9px);
+
+    animation:
+        modalFade 0.2s ease;
+}
+
+.modal-overlay[hidden] {
+    display: none !important;
+}
+
+@keyframes modalFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-card {
     width: 100%;
+    max-width: 690px;
 
-    min-height: 40px;
+    max-height: 88vh;
 
-    margin-top: 12px;
+    overflow-y: auto;
+
+    padding: 18px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.09);
+
+    border-radius:
+        24px
+        24px
+        16px
+        16px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #0d1824,
+            #050b12
+        );
+
+    box-shadow:
+        0 -15px 70px rgba(0, 0, 0, 0.48);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 18px;
+}
+
+.modal-header > div {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+}
+
+.modal-header strong {
+    color: #fff;
+
+    font-size: 14px;
+}
+
+.modal-close {
+    width: 34px;
+    height: 34px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    border-radius: 10px;
+
+    color: #9ba8b7;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    font-size: 20px;
+}
+
+.modal-description {
+    color: #718094;
+
+    font-size: 10px;
+
+    line-height: 1.7;
+}
+
+.modal-actions {
+    margin-top: 16px;
+}
+
+.economic-modal-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 9px;
+}
+
+/* =========================================================
+   AI ASSISTANT
+========================================================= */
+
+.ai-modal-card {
+    min-height: 70vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-messages {
+    flex: 1;
+
+    min-height: 270px;
+
+    max-height: 48vh;
+
+    overflow-y: auto;
+
+    padding:
+        3px
+        2px
+        12px;
+}
+
+.ai-message {
+    max-width: 88%;
+
+    margin-bottom: 10px;
+
+    padding:
+        12px
+        13px;
+
+    border-radius: 15px;
+
+    font-size: 10px;
+
+    line-height: 1.65;
+}
+
+.ai-message strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: var(--gold-light);
+
+    font-size: 9px;
+}
+
+.ai-message p {
+    margin: 0;
+}
+
+.ai-message.assistant {
+    margin-left: auto;
+
+    color: #d8e0e9;
+
+    background:
+        #0b1722;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.06);
+
+    border-top-right-radius: 5px;
+}
+
+.ai-message.user {
+    margin-right: auto;
+
+    color: #1a1006;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffd27a,
+            var(--gold)
+        );
+
+    border-top-left-radius: 5px;
+}
+
+.ai-message.user strong {
+    color: #5e3508;
+}
+
+.ai-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 6px;
+
+    margin-bottom: 9px;
+}
+
+.ai-quick-actions button {
+    min-height: 35px;
+
+    border:
+        1px solid rgba(247, 147, 26, 0.13);
+
+    border-radius: 9px;
+
+    color: #b9c4d0;
+
+    background:
+        rgba(247, 147, 26, 0.045);
+
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.ai-input-row {
+    display: flex;
+
+    gap: 7px;
+}
+
+.ai-input-row input {
+    flex: 1;
+
+    min-width: 0;
+
+    height: 43px;
+
+    padding:
+        0
+        12px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.08);
+
+    border-radius: 11px;
+
+    color: #fff;
+
+    background:
+        #071019;
+
+    font-size: 10px;
+
+    direction: rtl;
+}
+
+.ai-input-row button {
+    width: 68px;
 
     border:
         1px solid rgba(247, 147, 26, 0.18);
@@ -856,501 +2511,52 @@
         );
 
     font-size: 9px;
-    font-weight: 950;
+    font-weight: 900;
 }
 
+.ai-note {
+    margin-top: 9px;
 
-/* =========================================================
-   JOIN & EARN
-========================================================= */
-
-.join-earn-list {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 8px;
-
-    margin-top: 10px;
-}
-
-
-.join-earn-item {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    min-height: 57px;
-
-    padding:
-        9px
-        10px;
-
-    border-radius: 13px;
-
-    background:
-        #09131e;
-
-    border:
-        1px solid rgba(255, 255, 255, 0.055);
-}
-
-
-.join-earn-item-icon {
-
-    width: 34px;
-    height: 34px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border-radius: 10px;
-
-    color: var(--cyan);
-
-    background:
-        rgba(91, 220, 255, 0.055);
-
-    border:
-        1px solid rgba(91, 220, 255, 0.10);
-
-    font-size: 15px;
-}
-
-
-.join-earn-item-info {
-
-    min-width: 0;
-
-    flex: 1;
-}
-
-
-.join-earn-item-info strong {
-
-    display: block;
-
-    color: #dfe7ef;
-
-    font-size: 9px;
-}
-
-
-.join-earn-item-info span {
-
-    display: block;
-
-    margin-top: 4px;
-
-    color: #627185;
-
-    font-size: 7px;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-}
-
-
-.join-earn-reward {
-
-    color: var(--gold-light);
-
-    font-size: 9px;
-    font-weight: 950;
-
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   DAILY MISSIONS
-========================================================= */
-
-.daily-missions {
-
-    margin-top: 15px;
-}
-
-
-.daily-missions-header {
-
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 9px;
-}
-
-
-.daily-missions-header strong {
-
-    color: #eaf0f7;
-
-    font-size: 11px;
-}
-
-
-.daily-missions-header span {
-
-    color: #667587;
-
-    font-size: 7px;
-}
-
-
-.daily-mission {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    min-height: 60px;
-
-    margin-bottom: 8px;
-
-    padding:
-        10px
-        11px;
-
-    border-radius: 14px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #0b1621,
-            #071019
-        );
-
-    border:
-        1px solid rgba(255, 255, 255, 0.055);
-}
-
-
-.daily-mission.completed {
-
-    border-color:
-        rgba(37, 211, 102, 0.16);
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(37, 211, 102, 0.055),
-            #071019
-        );
-}
-
-
-.daily-mission-icon {
-
-    width: 35px;
-    height: 35px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border-radius: 10px;
-
-    color: var(--gold-light);
-
-    background:
-        rgba(247, 147, 26, 0.065);
-
-    font-size: 15px;
-}
-
-
-.daily-mission-info {
-
-    flex: 1;
-
-    min-width: 0;
-}
-
-
-.daily-mission-info strong {
-
-    display: block;
-
-    color: #e8eef5;
-
-    font-size: 9px;
-}
-
-
-.daily-mission-info span {
-
-    display: block;
-
-    margin-top: 4px;
-
-    color: #617084;
-
-    font-size: 7px;
-}
-
-
-.daily-mission-reward {
-
-    color: var(--gold-light);
-
-    font-size: 9px;
-    font-weight: 950;
-
-    white-space: nowrap;
-}
-
-
-.daily-mission.completed
-.daily-mission-reward {
-
-    color: var(--green);
-}
-
-
-/* =========================================================
-   REWARD STATUS / STATES
-========================================================= */
-
-.reward-status {
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    gap: 6px;
-
-    margin-top: 11px;
-
-    color: #647387;
-
-    font-size: 8px;
-}
-
-
-.reward-status-dot {
-
-    width: 6px;
-    height: 6px;
-
-    border-radius: 50%;
-
-    background: var(--green);
-
-    box-shadow:
-        0 0 8px rgba(37, 211, 102, 0.45);
-}
-
-
-.reward-status.locked
-.reward-status-dot {
-
-    background: #687789;
-
-    box-shadow: none;
-}
-
-
-.reward-locked {
-
-    opacity: 0.58;
-
-    filter: saturate(0.65);
-}
-
-
-.reward-completed {
-
-    border-color:
-        rgba(37, 211, 102, 0.16);
-}
-
-
-.reward-completed .reward-action-reward {
-
-    color: var(--green);
-
-    border-color:
-        rgba(37, 211, 102, 0.15);
-
-    background:
-        rgba(37, 211, 102, 0.055);
-}
-
-
-/* =========================================================
-   REWARD RESULT MODAL
-========================================================= */
-
-.reward-result {
+    color: #536275;
 
     text-align: center;
 
-    padding:
-        8px
-        0
-        4px;
+    font-size: 7px;
 }
-
-
-.reward-result-icon {
-
-    width: 82px;
-    height: 82px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin: 0 auto 14px;
-
-    border-radius: 50%;
-
-    color: #160e05;
-
-    background:
-        radial-gradient(
-            circle at 35% 22%,
-            #ffe2a0,
-            var(--gold-light) 30%,
-            var(--gold) 65%,
-            #c76500
-        );
-
-    box-shadow:
-        0 0 0 9px rgba(247, 147, 26, 0.045),
-        0 15px 35px rgba(247, 147, 26, 0.22);
-
-    font-size: 30px;
-}
-
-
-.reward-result h3 {
-
-    margin: 0;
-
-    color: #fff;
-
-    font-size: 18px;
-}
-
-
-.reward-result-amount {
-
-    margin-top: 9px;
-
-    color: var(--gold-light);
-
-    font-size: 27px;
-    font-weight: 950;
-}
-
-
-.reward-result-note {
-
-    margin-top: 8px;
-
-    color: #718094;
-
-    font-size: 8px;
-
-    line-height: 1.7;
-}
-
 
 /* =========================================================
-   REWARD HUB SERVICE TILE
+   PROMOTION
 ========================================================= */
 
-.master-service-card.rewards-service {
+.promotion-card {
+    padding: 18px;
 
-    border-color:
-        rgba(247, 147, 26, 0.16);
+    border-radius: 18px;
 
     background:
         linear-gradient(
             135deg,
             rgba(247, 147, 26, 0.09),
-            #09131e
+            rgba(255, 255, 255, 0.025)
         );
-}
-
-
-.master-service-card.rewards-service > span {
-
-    filter:
-        drop-shadow(
-            0 0 7px rgba(247, 147, 26, 0.30)
-        );
-}
-
-
-/* =========================================================
-   REWARDS PAGE HEADER
-========================================================= */
-
-.rewards-page-hero {
-
-    margin:
-        0
-        14px
-        18px;
-
-    padding:
-        19px
-        17px;
-
-    border-radius: 20px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.14);
-
-    background:
-        radial-gradient(
-            circle at 100% 0%,
-            rgba(247, 147, 26, 0.10),
-            transparent 36%
-        ),
-        linear-gradient(
-            135deg,
-            #0d1824,
-            #071019
-        );
+        1px solid rgba(247, 147, 26, 0.13);
 }
 
-
-.rewards-page-hero h3 {
-
+.promotion-card h3 {
     margin: 0;
 
     color: #fff;
 
-    font-size: 18px;
+    font-size: 14px;
 }
 
-
-.rewards-page-hero p {
-
+.promotion-card p {
     margin:
-        7px
+        8px
         0
-        0;
+        15px;
 
     color: #718094;
 
@@ -1359,153 +2565,282 @@
     line-height: 1.7;
 }
 
+/* =========================================================
+   TOAST
+========================================================= */
 
-.rewards-rule {
+.toast {
+    position: fixed;
 
-    display: flex;
+    left: 50%;
 
-    align-items: center;
+    bottom:
+        calc(
+            var(--nav-height) + 18px
+        );
 
-    gap: 7px;
+    z-index: 500;
 
-    margin-top: 12px;
+    transform:
+        translateX(-50%);
 
-    color: #69788b;
+    max-width: calc(100% - 34px);
 
-    font-size: 7px;
+    padding:
+        11px
+        16px;
+
+    border:
+        1px solid rgba(247, 147, 26, 0.20);
+
+    border-radius: 999px;
+
+    color: #f5f8fb;
+
+    background:
+        rgba(8, 15, 23, 0.94);
+
+    box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.35);
+
+    backdrop-filter: blur(10px);
+
+    text-align: center;
+
+    font-size: 9px;
+
+    animation:
+        toastIn 0.2s ease;
 }
 
+.toast[hidden] {
+    display: none !important;
+}
 
-.rewards-rule::before {
+@keyframes toastIn {
+    from {
+        opacity: 0;
 
-    content: "✓";
+        transform:
+            translate(-50%, 8px);
+    }
 
-    width: 17px;
-    height: 17px;
+    to {
+        opacity: 1;
+
+        transform:
+            translate(-50%, 0);
+    }
+}
+
+/* =========================================================
+   BOTTOM NAVIGATION
+========================================================= */
+
+.bottom-nav {
+    position: fixed;
+
+    left: 50%;
+    bottom: 0;
+
+    transform:
+        translateX(-50%);
+
+    z-index: 100;
+
+    width: 100%;
+    max-width: 720px;
+
+    height: var(--nav-height);
+
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+
+    padding:
+        8px
+        8px
+        calc(
+            8px + env(safe-area-inset-bottom)
+        );
+
+    background:
+        rgba(4, 9, 15, 0.94);
+
+    backdrop-filter: blur(18px);
+
+    border-top:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    box-shadow:
+        0 -12px 35px rgba(0, 0, 0, 0.30);
+}
+
+.nav-item {
+    border: 0;
+
+    color: #637184;
+
+    background: transparent;
 
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 
-    flex-shrink: 0;
+    gap: 4px;
 
-    border-radius: 50%;
+    border-radius: 13px;
 
-    color: var(--green);
-
-    background:
-        rgba(37, 211, 102, 0.07);
-
-    border:
-        1px solid rgba(37, 211, 102, 0.12);
+    transition:
+        color 0.18s ease,
+        background 0.18s ease;
 }
 
+.nav-item span {
+    font-size: 19px;
+    line-height: 1;
+}
+
+.nav-item small {
+    font-size: 7px;
+    font-weight: 800;
+}
+
+.nav-item.active {
+    color: var(--gold-light);
+
+    background:
+        rgba(247, 147, 26, 0.065);
+}
+
+.nav-item.active span {
+    filter:
+        drop-shadow(
+            0 0 8px rgba(247, 147, 26, 0.40)
+        );
+}
 
 /* =========================================================
-   REWARDS RESPONSIVE
+   RESPONSIVE
 ========================================================= */
 
 @media (min-width: 600px) {
-
-    .rewards-hub {
-
-        padding:
-            24px
-            20px
-            21px;
+    .hero {
+        padding-top: 38px;
     }
 
-    .reward-wheel {
+    .coin-logo {
+        width: 88px;
+        height: 88px;
 
-        width: 245px;
-        height: 245px;
+        font-size: 24px;
     }
 
-    .reward-wheel-center {
+    .balance-card {
+        min-height: 270px;
 
-        width: 86px;
-        height: 86px;
+        padding: 27px;
     }
 
-    .reward-actions {
-
-        grid-template-columns:
-            repeat(4, 1fr);
+    .balance-value {
+        font-size: 48px;
     }
 
-    .reward-action-card {
-
-        min-height: 125px;
+    .mining-panel {
+        padding-top: 25px;
     }
 
+    .mining-progress-ring {
+        width: 238px;
+        height: 238px;
+    }
+
+    .circular-mine-btn {
+        width: 180px;
+        height: 180px;
+    }
 }
-
 
 /* =========================================================
    SMALL PHONES
 ========================================================= */
 
 @media (max-width: 370px) {
-
-    .rewards-hub {
-
-        margin-left: 10px;
-        margin-right: 10px;
-
-        padding:
-            16px
-            12px
-            15px;
+    .topbar {
+        padding: 0 13px;
     }
 
-    .reward-wheel {
-
-        width: 192px;
-        height: 192px;
+    .brand-title {
+        font-size: 13px;
     }
 
-    .reward-wheel-center {
-
-        width: 70px;
-        height: 70px;
+    .hero h1 {
+        font-size: 24px;
     }
 
-    .reward-wheel-label {
-
-        font-size: 7px;
+    .balance-value {
+        font-size: 35px;
     }
 
-    .reward-actions {
-
-        gap: 7px;
+    .mining-progress-ring {
+        width: 194px;
+        height: 194px;
     }
 
-    .reward-action-card {
-
-        min-height: 101px;
-
-        padding: 11px;
+    .circular-mine-btn {
+        width: 148px;
+        height: 148px;
     }
 
+    .mine-icon {
+        font-size: 24px;
+    }
+
+    .quick-actions {
+        gap: 6px;
+
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .quick-action {
+        min-height: 67px;
+    }
+
+    .quick-action span {
+        font-size: 18px;
+    }
+
+    .quick-action small {
+        font-size: 8px;
+    }
 }
 
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+button:focus-visible,
+input:focus-visible {
+    outline:
+        2px solid rgba(247, 147, 26, 0.65);
+
+    outline-offset: 2px;
+}
 
 /* =========================================================
-   REDUCED MOTION — REWARDS
+   REDUCED MOTION
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
 
-    .reward-wheel {
+        transition-duration: 0.01ms !important;
 
-        transition: none;
+        scroll-behavior: auto !important;
     }
-
-    .reward-action-card,
-    .reward-spin-button,
-    .watch-earn-button {
-
-        transition: none;
-    }
-
 }
