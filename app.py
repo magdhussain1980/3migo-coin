@@ -1,4 +1,5 @@
 import os
+import serpapi
 import subprocess
 import sys
 
@@ -9,6 +10,21 @@ from pydantic import BaseModel, Field
 
 import db
 import economic_engine
+
+
+# =========================================================
+# 3MIGO SMART — SERPAPI SEARCH ENGINE
+# =========================================================
+
+SERPAPI_KEY = os.getenv("SERPAPI_KEY", "").strip()
+
+serpapi_client = None
+
+if SERPAPI_KEY:
+    serpapi_client = serpapi.Client(
+        api_key=SERPAPI_KEY,
+        timeout=10,
+    )
 
 
 # =========================================================
@@ -245,6 +261,110 @@ def health():
             else "not_configured"
         ),
     }
+
+
+# =========================================================
+# 3MIGO SMART — AI WEB SEARCH
+# =========================================================
+
+@app.get("/ai/search")
+def ai_search(
+    q: str = "",
+    num: int = 5,
+):
+    query = str(q or "").strip()
+
+    if not query:
+        raise HTTPException(
+            status_code=400,
+            detail="search_query_required",
+        )
+
+    if serpapi_client is None:
+        raise HTTPException(
+            status_code=503,
+            detail="serpapi_not_configured",
+        )
+
+    try:
+
+        limit = max(
+            1,
+            min(int(num), 10),
+        )
+
+        results = serpapi_client.search({
+            "engine": "google",
+            "q": query,
+            "hl": "ar",
+            "gl": "sd",
+            "output": "md",
+        })
+
+        organic_results = results.get(
+            "organic_results",
+            [],
+        )
+
+        items = []
+
+        for item in organic_results[:limit]:
+
+            items.append({
+                "position": item.get(
+                    "position"
+                ),
+                "title": item.get(
+                    "title",
+                    "",
+                ),
+                "link": item.get(
+                    "link",
+                    "",
+                ),
+                "snippet": item.get(
+                    "snippet",
+                    "",
+                ),
+                "source": item.get(
+                    "source",
+                    "",
+                ),
+            })
+
+        return {
+            "status": "ok",
+            "query": query,
+            "count": len(items),
+            "results": items,
+        }
+
+    except serpapi.HTTPError as error:
+
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                f"serpapi_http_error: "
+                f"{error}"
+            ),
+        )
+
+    except serpapi.TimeoutError:
+
+        raise HTTPException(
+            status_code=504,
+            detail="serpapi_timeout",
+        )
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                f"ai_search_error: "
+                f"{error}"
+            ),
+        )
 
 
 # =========================================================
