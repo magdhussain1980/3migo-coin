@@ -12,10 +12,10 @@ import economic_engine
 
 
 # =========================================================
-# 3MIGO COIN API — VERSION 3.2.2
+# 3MIGO COIN API — VERSION 3.2.3
 # =========================================================
 
-APP_VERSION = "3.2.2"
+APP_VERSION = "3.2.3"
 
 
 app = FastAPI(
@@ -23,6 +23,19 @@ app = FastAPI(
     version=APP_VERSION,
     description="3Migo Smart Revenue & Rewards API",
 )
+
+
+# =========================================================
+# TELEGRAM MINI APP ENTRY
+# =========================================================
+
+@app.get("/webapp/in")
+def webapp_in():
+
+    return RedirectResponse(
+        url="/webapp/index.html",
+        status_code=307,
+    )
 
 
 # =========================================================
@@ -829,7 +842,7 @@ def admin_home():
         </p>
 
         <div class="version">
-            Admin Dashboard v3.2.2
+            Admin Dashboard v3.2.3
         </div>
 
     </div>
