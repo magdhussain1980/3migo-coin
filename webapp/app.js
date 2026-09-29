@@ -1,6 +1,6 @@
 /* =========================================================
-   3MIGO COIN — APP.JS V5.6
-   ADSGRAM REWARD INTEGRATION — DEBUG TEST
+   3MIGO COIN — APP.JS V5.7
+   PREMIUM REWARDS HUB
 
    IMPORTANT:
    - Backend/API contracts preserved
@@ -11,11 +11,16 @@
    - Home Mining Button + Mining Page Button use ONE shared state
    - AdsGram Reward integration preserved
    - Ads do NOT directly modify balance
-   - AdsGram DEBUG MODE enabled temporarily for testing
+   - Rewards Hub added
+   - Reward Wheel is frontend experience only
+   - Wheel rewards are NOT added locally to wallet
+   - No fake economic balance
 ========================================================= */
 
 (() => {
+
     "use strict";
+
 
     /* =====================================================
        TELEGRAM WEB APP
@@ -24,19 +29,26 @@
     const tg = window.Telegram?.WebApp || null;
 
     if (tg) {
+
         try {
+
             tg.ready();
             tg.expand();
 
             tg.setHeaderColor?.("#04142a");
             tg.setBackgroundColor?.("#031024");
+
         } catch (error) {
+
             console.log(
                 "Telegram UI settings unavailable:",
                 error
             );
+
         }
+
     }
+
 
     /* =====================================================
        CONFIG
@@ -55,6 +67,7 @@
 
     const MINING_REWARD = 10;
 
+
     /* =====================================================
        ADSGRAM
     ===================================================== */
@@ -64,6 +77,7 @@
     let adsgramController = null;
 
     let adsgramLoading = false;
+
 
     /* =====================================================
        STATE
@@ -86,6 +100,7 @@
 
         sessions: 0,
 
+
         /* ===============================
            ONE SHARED MINING STATE
         =============================== */
@@ -103,11 +118,13 @@
 
         miningRequestPending: false,
 
+
         /* ===============================
            TASKS
         =============================== */
 
         tasks: [],
+
 
         /* ===============================
            REFERRAL
@@ -120,6 +137,7 @@
         referralCount: 0,
 
         referralEarned: 0,
+
 
         /* ===============================
            ECONOMIC
@@ -138,7 +156,9 @@
             contributionScore: 0,
 
             trustScore: 0
+
         },
+
 
         /* ===============================
            EXPERIENCE
@@ -155,9 +175,34 @@
             score: 0,
 
             nextScore: 100
+
         },
 
         growthIndex: 0,
+
+
+        /* ===============================
+           REWARDS HUB
+        =============================== */
+
+        rewards: {
+
+            spinsAvailable: 0,
+
+            earned3m: 0,
+
+            dailyActivity: 0,
+
+            wheelBusy: false,
+
+            lastWheelReward: null,
+
+            pendingRewards: [],
+
+            initialized: false
+
+        },
+
 
         transactions: [],
 
@@ -166,41 +211,108 @@
         aiMessages: [],
 
         loading: false
+
     };
+
+
+    /* =====================================================
+       REWARD WHEEL CONFIGURATION
+
+       IMPORTANT:
+       These are display outcomes only until a backend
+       reward endpoint is implemented.
+
+       No local wallet balance modification occurs.
+    ===================================================== */
+
+    const REWARD_WHEEL_SEGMENTS = [
+
+        {
+            id: "reward-3",
+            label: "+3M",
+            amount: 3
+        },
+
+        {
+            id: "reward-5",
+            label: "+5M",
+            amount: 5
+        },
+
+        {
+            id: "reward-10",
+            label: "+10M",
+            amount: 10
+        },
+
+        {
+            id: "reward-3-b",
+            label: "+3M",
+            amount: 3
+        },
+
+        {
+            id: "reward-5-b",
+            label: "+5M",
+            amount: 5
+        },
+
+        {
+            id: "bonus",
+            label: "BONUS",
+            amount: 0
+        }
+
+    ];
+
 
     /* =====================================================
        HELPERS
     ===================================================== */
 
     function $(selector) {
+
         return document.querySelector(selector);
+
     }
 
+
     function $all(selector) {
+
         return Array.from(
             document.querySelectorAll(selector)
         );
+
     }
+
 
     function setText(selector, value) {
 
         const element = $(selector);
 
         if (element) {
+
             element.textContent =
                 value ?? "";
+
         }
+
     }
+
 
     function setValue(selector, value) {
 
         const element = $(selector);
 
         if (element) {
+
             element.value =
                 value ?? "";
+
         }
+
     }
+
 
     function safeNumber(
         value,
@@ -213,7 +325,9 @@
         return Number.isFinite(number)
             ? number
             : fallback;
+
     }
+
 
     function formatNumber(value) {
 
@@ -225,14 +339,18 @@
                     maximumFractionDigits: 2
                 }
             );
+
     }
+
 
     function formatInteger(value) {
 
         return Math.round(
             safeNumber(value)
         ).toLocaleString("en-US");
+
     }
+
 
     function formatTime(seconds) {
 
@@ -269,7 +387,9 @@
                 .padStart(2, "0")
 
         ].join(":");
+
     }
+
 
     function toast(message) {
 
@@ -281,10 +401,23 @@
             console.log(message);
 
             return;
+
         }
 
-        element.textContent =
-            message;
+        const messageElement =
+            $("#toastMessage");
+
+        if (messageElement) {
+
+            messageElement.textContent =
+                message;
+
+        } else {
+
+            element.textContent =
+                message;
+
+        }
 
         element.hidden = false;
 
@@ -299,7 +432,9 @@
                     true;
 
             }, 2600);
+
     }
+
 
     /* =====================================================
        TELEGRAM USER
@@ -313,7 +448,9 @@
                 tg?.initDataUnsafe?.user;
 
             if (user?.id) {
+
                 return user;
+
             }
 
         } catch (error) {
@@ -322,10 +459,13 @@
                 "Telegram user read error:",
                 error
             );
+
         }
 
         return null;
+
     }
+
 
     function initializeTelegramUser() {
 
@@ -352,8 +492,11 @@
 
             state.username =
                 "3Migo User";
+
         }
+
     }
+
 
     /* =====================================================
        API
@@ -370,8 +513,7 @@
         const requestOptions = {
 
             method:
-                options.method ||
-                "GET",
+                options.method || "GET",
 
             headers: {
 
@@ -379,7 +521,9 @@
                     "application/json",
 
                 ...(options.headers || {})
+
             }
+
         };
 
         if (
@@ -395,6 +539,7 @@
                     : JSON.stringify(
                         options.body
                     );
+
         }
 
         const response =
@@ -420,6 +565,7 @@
             data = {
                 raw: text
             };
+
         }
 
         if (!response.ok) {
@@ -433,10 +579,13 @@
             throw new Error(
                 message
             );
+
         }
 
         return data;
+
     }
+
 
     /* =====================================================
        USER
@@ -463,6 +612,7 @@
                 return await apiRequest(
                     "/register",
                     {
+
                         method: "POST",
 
                         body: {
@@ -472,7 +622,9 @@
 
                             username:
                                 state.username
+
                         }
+
                     }
                 );
 
@@ -484,9 +636,13 @@
                 );
 
                 return null;
+
             }
+
         }
+
     }
+
 
     async function loadUser() {
 
@@ -505,10 +661,13 @@
                 "loadUser:",
                 error
             );
+
         }
 
         updateProfileUI();
+
     }
+
 
     function applyUserData(data) {
 
@@ -555,10 +714,13 @@
             state.username =
                 user.username ||
                 data.username;
+
         }
 
         updateBalanceUI();
+
     }
+
 
     /* =====================================================
        BALANCE UI
@@ -645,7 +807,9 @@
             "#walletMemberNumber",
             cardNumber
         );
+
     }
+
 
     function makeMemberCardNumber(id) {
 
@@ -671,7 +835,9 @@
             last12.slice(8, 12)
 
         ].join(" • ");
+
     }
+
 
     /* =====================================================
        PROFILE
@@ -694,14 +860,18 @@
             "#profileMemberId",
             `Member ID: ${makeMemberId()}`
         );
+
     }
+
 
     function makeMemberId() {
 
         return `3M-${String(
             state.telegramId
         ).padStart(8, "0")}`;
+
     }
+
 
     /* =====================================================
        MINING
@@ -717,6 +887,7 @@
             return state.miningCompleted
                 ? 100
                 : 0;
+
         }
 
         const elapsed =
@@ -724,16 +895,24 @@
             state.miningRemaining;
 
         return Math.max(
+
             0,
+
             Math.min(
+
                 100,
+
                 (
                     elapsed /
                     MINING_CYCLE_SECONDS
                 ) * 100
+
             )
+
         );
+
     }
+
 
     function updateMiningProgressVisual() {
 
@@ -748,6 +927,7 @@
             "#miningProgressRing",
 
             "#miningPageProgressRing"
+
         ];
 
         rings.forEach(
@@ -767,8 +947,10 @@
                     "--progress",
                     `${degrees}deg`
                 );
+
             }
         );
+
 
         const timeline =
             $("#miningProgress");
@@ -777,8 +959,22 @@
 
             timeline.style.width =
                 `${progress}%`;
+
         }
+
+
+        const pageTimeline =
+            $("#miningPageProgress");
+
+        if (pageTimeline) {
+
+            pageTimeline.style.width =
+                `${progress}%`;
+
+        }
+
     }
+
 
     function updateMiningButton(
         buttonSelector,
@@ -846,19 +1042,23 @@
 
             button.disabled =
                 false;
+
         }
 
         if (text) {
 
             text.textContent =
                 label;
+
         }
 
         button.setAttribute(
             "aria-label",
             label
         );
+
     }
+
 
     function updateMiningUI() {
 
@@ -892,6 +1092,7 @@
 
             status =
                 "جاهز للتعدين";
+
         }
 
         setText(
@@ -916,11 +1117,15 @@
 
         setText(
             "#miningPageStatus",
+
             active
                 ? "ACTIVE"
+
                 : completed
                     ? "CLAIM"
+
                     : "READY"
+
         );
 
         updateMiningButton(
@@ -934,7 +1139,9 @@
         );
 
         updateMiningProgressVisual();
+
     }
+
 
     /* =====================================================
        LOAD MINING STATUS
@@ -984,6 +1191,7 @@
 
                 state.miningCompleted =
                     false;
+
             }
 
             if (
@@ -994,6 +1202,7 @@
 
                 state.miningCompleted =
                     true;
+
             }
 
             updateMiningUI();
@@ -1008,8 +1217,11 @@
             );
 
             updateMiningUI();
+
         }
+
     }
+
 
     /* =====================================================
        MINING TIMER
@@ -1028,6 +1240,7 @@
             updateMiningUI();
 
             return;
+
         }
 
         state.miningTimer =
@@ -1040,6 +1253,7 @@
                     state.miningRemaining--;
 
                     updateMiningUI();
+
                 }
 
                 if (
@@ -1067,10 +1281,13 @@
                     toast(
                         "اكتملت دورة التعدين. يمكنك استلام المكافأة."
                     );
+
                 }
 
             }, 1000);
+
     }
+
 
     /* =====================================================
        START MINING
@@ -1081,7 +1298,9 @@
         if (
             state.miningRequestPending
         ) {
+
             return;
+
         }
 
         if (
@@ -1093,6 +1312,7 @@
             );
 
             return;
+
         }
 
         if (
@@ -1102,6 +1322,7 @@
             await claimMining();
 
             return;
+
         }
 
         state.miningRequestPending =
@@ -1168,8 +1389,11 @@
 
             state.miningRequestPending =
                 false;
+
         }
+
     }
+
 
     /* =====================================================
        CLAIM MINING
@@ -1180,7 +1404,9 @@
         if (
             state.miningRequestPending
         ) {
+
             return;
+
         }
 
         if (
@@ -1193,6 +1419,7 @@
             );
 
             return;
+
         }
 
         state.miningRequestPending =
@@ -1215,13 +1442,17 @@
                     state.miningReward
                 );
 
-            state.balance += reward;
+            state.balance +=
+                reward;
 
-            state.total += reward;
+            state.total +=
+                reward;
 
-            state.today += reward;
+            state.today +=
+                reward;
 
-            state.sessions += 1;
+            state.sessions +=
+                1;
 
             state.miningActive =
                 false;
@@ -1237,8 +1468,11 @@
             updateMiningUI();
 
             await Promise.allSettled([
+
                 loadEconomic(),
+
                 loadTransactions()
+
             ]);
 
             await loadMiningStatus();
@@ -1263,12 +1497,14 @@
 
             state.miningRequestPending =
                 false;
+
         }
+
     }
+
 
     /* =====================================================
        MINING BUTTONS
-       BOTH BUTTONS CALL THE SAME FUNCTION
     ===================================================== */
 
     function handleMiningButtonClick() {
@@ -1276,7 +1512,9 @@
         if (
             state.miningRequestPending
         ) {
+
             return;
+
         }
 
         if (
@@ -1288,6 +1526,7 @@
             );
 
             return;
+
         }
 
         if (
@@ -1297,10 +1536,13 @@
             claimMining();
 
             return;
+
         }
 
         startMining();
+
     }
+
 
     function setupMiningButtons() {
 
@@ -1309,6 +1551,7 @@
             "#mineBtn",
 
             "#mineBtnPage"
+
         ];
 
         buttons.forEach(
@@ -1328,11 +1571,15 @@
                         event.stopPropagation();
 
                         handleMiningButtonClick();
+
                     }
                 );
+
             }
         );
+
     }
+
 
     /* =====================================================
        TASKS
@@ -1349,12 +1596,18 @@
 
             state.tasks =
                 Array.isArray(data)
+
                     ? data
+
                     : data?.tasks ||
                       data?.data ||
                       [];
 
+            updateRewardsActivityFromTasks();
+
             renderTasks();
+
+            updateRewardsUI();
 
         } catch (error) {
 
@@ -1366,8 +1619,25 @@
             state.tasks = [];
 
             renderTasksError();
+
         }
+
     }
+
+
+    function updateRewardsActivityFromTasks() {
+
+        const completedCount =
+            state.tasks.filter(
+                task =>
+                    Boolean(task.completed)
+            ).length;
+
+        state.rewards.dailyActivity =
+            completedCount;
+
+    }
+
 
     function renderTasks() {
 
@@ -1386,16 +1656,23 @@
         ) {
 
             container.innerHTML = `
+
                 <div class="empty-state">
+
                     لا توجد مهام متاحة حالياً.
+
                 </div>
+
             `;
 
             return;
+
         }
 
         container.innerHTML =
+
             state.tasks
+
                 .map(task => {
 
                     const id =
@@ -1427,17 +1704,25 @@
                         );
 
                     return `
+
                         <div class="task-card">
+
                             <div class="task-info">
-                                <h3>${title}</h3>
+
+                                <h3>
+                                    ${title}
+                                </h3>
 
                                 <p>
                                     ${description}
                                 </p>
+
                             </div>
 
                             <div class="task-reward">
+
                                 +${formatNumber(reward)} 3M
+
                             </div>
 
                             <button
@@ -1446,17 +1731,25 @@
                                 type="button"
                                 ${completed ? "disabled" : ""}
                             >
+
                                 ${
                                     completed
                                         ? "مكتملة"
                                         : "تنفيذ"
                                 }
+
                             </button>
+
                         </div>
+
                     `;
+
                 })
+
                 .join("");
+
     }
+
 
     function renderTasksError() {
 
@@ -1466,11 +1759,17 @@
         if (!container) return;
 
         container.innerHTML = `
+
             <div class="empty-state">
+
                 تعذر تحميل المهام حالياً.
+
             </div>
+
         `;
+
     }
+
 
     async function completeTask(taskId) {
 
@@ -1505,17 +1804,25 @@
                     reward;
 
                 updateBalanceUI();
+
             }
 
             toast(
+
                 reward > 0
+
                     ? `تمت المهمة +${reward} 3M`
+
                     : "تم تنفيذ المهمة."
+
             );
 
             await Promise.allSettled([
+
                 loadTasks(),
+
                 loadEconomic()
+
             ]);
 
         } catch (error) {
@@ -1529,8 +1836,11 @@
                 error.message ||
                 "تعذر تنفيذ المهمة."
             );
+
         }
+
     }
+
 
     /* =====================================================
        DAILY REWARD
@@ -1569,12 +1879,17 @@
                     reward;
 
                 updateBalanceUI();
+
             }
 
             toast(
+
                 reward
+
                     ? `المكافأة اليومية +${reward} 3M`
+
                     : "تم تحديث المكافأة اليومية."
+
             );
 
         } catch (error) {
@@ -1588,8 +1903,11 @@
                 error.message ||
                 "تعذر الحصول على المكافأة اليومية."
             );
+
         }
+
     }
+
 
     /* =====================================================
        REFERRAL
@@ -1647,15 +1965,35 @@
                 createReferralLink(
                     state.referralCode
                 );
+
         }
 
         updateReferralUI();
+
+        updateRewardsFromReferral();
+
     }
+
+
+    function updateRewardsFromReferral() {
+
+        /*
+         * Referral activity contributes to the Rewards Hub
+         * presentation, but does not create free spins
+         * automatically without backend confirmation.
+         */
+
+        updateRewardsUI();
+
+    }
+
 
     function createReferralLink(code) {
 
         return `https://t.me/${BOT_USERNAME}?start=ref_${encodeURIComponent(code)}`;
+
     }
+
 
     function updateReferralUI() {
 
@@ -1671,6 +2009,7 @@
 
             referralInput.value =
                 state.referralLink;
+
         }
 
         setText(
@@ -1690,7 +2029,9 @@
         generateReferralBarcode(
             state.referralCode
         );
+
     }
+
 
     function generateReferralBarcode(code) {
 
@@ -1720,6 +2061,7 @@
                     seed * 31 +
                     source.charCodeAt(i)
                 ) >>> 0;
+
         }
 
         for (
@@ -1749,8 +2091,11 @@
             container.appendChild(
                 bar
             );
+
         }
+
     }
+
 
     async function copyReferral() {
 
@@ -1785,18 +2130,24 @@
             toast(
                 "تم نسخ رابط الإحالة."
             );
+
         }
+
     }
+
 
     function shareReferral() {
 
         if (
             !state.referralLink
         ) {
+
             return;
+
         }
 
         const shareUrl =
+
             `https://t.me/share/url?url=${encodeURIComponent(
                 state.referralLink
             )}&text=${encodeURIComponent(
@@ -1821,14 +2172,18 @@
                     "Telegram share:",
                     error
                 );
+
             }
+
         }
 
         window.open(
             shareUrl,
             "_blank"
         );
+
     }
+
 
     /* =====================================================
        ECONOMIC SYSTEM
@@ -1902,14 +2257,19 @@
 
             updateEconomicUI();
 
+            updateRewardsUI();
+
         } catch (error) {
 
             console.log(
                 "loadEconomic:",
                 error
             );
+
         }
+
     }
+
 
     function calculateGrowthIndex() {
 
@@ -1939,7 +2299,9 @@
                     trust
                 ) / 3
             );
+
     }
+
 
     function calculateExperience() {
 
@@ -1989,6 +2351,7 @@
                 min: 1500,
                 max: 3000
             }
+
         ];
 
         let current =
@@ -2004,7 +2367,9 @@
 
                 current =
                     level;
+
             }
+
         }
 
         const progress =
@@ -2037,8 +2402,11 @@
 
             nextScore:
                 current.max
+
         };
+
     }
+
 
     function updateEconomicUI() {
 
@@ -2135,6 +2503,7 @@
 
             experienceProgress.style.width =
                 `${state.experience.progress}%`;
+
         }
 
         setText(
@@ -2170,8 +2539,11 @@
 
             profileProgress.style.width =
                 `${state.experience.progress}%`;
+
         }
+
     }
+
 
     /* =====================================================
        AIRDROP
@@ -2195,9 +2567,13 @@
                 );
 
             toast(
+
                 amount > 0
+
                     ? `الإيردروب المتوقع: ${formatNumber(amount)} 3M`
+
                     : "لا توجد كمية إيردروب متاحة للمعاينة حالياً."
+
             );
 
         } catch (error) {
@@ -2211,8 +2587,11 @@
                 error.message ||
                 "تعذر معاينة الإيردروب."
             );
+
         }
+
     }
+
 
     async function spendEconomic() {
 
@@ -2232,8 +2611,11 @@
             );
 
             await Promise.allSettled([
+
                 loadUser(),
+
                 loadEconomic()
+
             ]);
 
         } catch (error) {
@@ -2247,8 +2629,11 @@
                 error.message ||
                 "تعذر تنفيذ العملية."
             );
+
         }
+
     }
+
 
     /* =====================================================
        TRANSACTIONS
@@ -2265,7 +2650,9 @@
 
             state.transactions =
                 Array.isArray(data)
+
                     ? data
+
                     : data?.transactions ||
                       data?.data ||
                       [];
@@ -2278,8 +2665,11 @@
                 "transactions:",
                 error
             );
+
         }
+
     }
+
 
     function renderTransactions() {
 
@@ -2293,17 +2683,25 @@
         ) {
 
             container.innerHTML = `
+
                 <div class="empty-state">
+
                     لا توجد عمليات بعد
+
                 </div>
+
             `;
 
             return;
+
         }
 
         container.innerHTML =
+
             state.transactions
+
                 .slice(0, 30)
+
                 .map(transaction => {
 
                     const title =
@@ -2322,21 +2720,703 @@
                         );
 
                     return `
+
                         <div class="transaction-item">
+
                             <span>
                                 ${title}
                             </span>
 
                             <strong>
+
                                 ${amount >= 0 ? "+" : ""}
+
                                 ${formatNumber(amount)}
                                 3M
+
                             </strong>
+
                         </div>
+
                     `;
+
                 })
+
                 .join("");
+
     }
+
+
+    /* =====================================================
+       REWARDS HUB
+    ===================================================== */
+
+    function calculateInitialSpins() {
+
+        /*
+         * V5.7 intentionally does NOT manufacture
+         * persistent spins from arbitrary frontend data.
+
+         * Spins are granted only from confirmed activity
+         * in this version.
+
+         * Until a backend Rewards endpoint exists,
+         * initial spins remain zero.
+         */
+
+        return 0;
+
+    }
+
+
+    function initializeRewardsHub() {
+
+        if (
+            state.rewards.initialized
+        ) {
+
+            updateRewardsUI();
+
+            return;
+
+        }
+
+        state.rewards.spinsAvailable =
+            calculateInitialSpins();
+
+        state.rewards.earned3m =
+            0;
+
+        state.rewards.dailyActivity =
+            0;
+
+        state.rewards.initialized =
+            true;
+
+        updateRewardsUI();
+
+    }
+
+
+    function updateRewardsUI() {
+
+        const spins =
+            state.rewards.spinsAvailable;
+
+        const earned =
+            state.rewards.earned3m;
+
+        const activity =
+            state.rewards.dailyActivity;
+
+        setText(
+            "#rewardSpinsValue",
+            formatInteger(spins)
+        );
+
+        setText(
+            "#wheelSpins",
+            formatInteger(spins)
+        );
+
+        setText(
+            "#modalRewardSpins",
+            formatInteger(spins)
+        );
+
+        setText(
+            "#rewardEarnedValue",
+            formatNumber(earned)
+        );
+
+        setText(
+            "#modalRewardEarned",
+            formatNumber(earned)
+        );
+
+        setText(
+            "#rewardDailyValue",
+            formatInteger(activity)
+        );
+
+        const spinButton =
+            $("#spinRewardWheelButton");
+
+        if (spinButton) {
+
+            spinButton.disabled =
+                spins <= 0 ||
+                state.rewards.wheelBusy;
+
+            if (
+                state.rewards.wheelBusy
+            ) {
+
+                spinButton.textContent =
+                    "🎡 جاري الدوران...";
+
+            } else if (
+                spins > 0
+            ) {
+
+                spinButton.textContent =
+                    "🎡 استخدم لفة مجانية";
+
+            } else {
+
+                spinButton.textContent =
+                    "🎡 لا توجد لفات متاحة";
+
+            }
+
+        }
+
+    }
+
+
+    function setRewardStatus(message) {
+
+        setText(
+            "#rewardWheelStatus",
+            message
+        );
+
+    }
+
+
+    function spinRewardWheel() {
+
+        if (
+            state.rewards.wheelBusy
+        ) {
+
+            return;
+
+        }
+
+        if (
+            state.rewards.spinsAvailable <= 0
+        ) {
+
+            setRewardStatus(
+                "لا توجد لفة مجانية متاحة حالياً. أكمل نشاطاً مؤهلاً للحصول على Spin."
+            );
+
+            toast(
+                "لا توجد لفات متاحة حالياً."
+            );
+
+            return;
+
+        }
+
+        const wheel =
+            $("#rewardWheel");
+
+        if (!wheel) {
+
+            return;
+
+        }
+
+        const segmentCount =
+            REWARD_WHEEL_SEGMENTS.length;
+
+        const selectedIndex =
+            Math.floor(
+                Math.random() *
+                segmentCount
+            );
+
+        const selectedReward =
+            REWARD_WHEEL_SEGMENTS[
+                selectedIndex
+            ];
+
+        /*
+         * Each segment is 60 degrees.
+         * Pointer is at top.
+         */
+        const segmentAngle =
+            360 / segmentCount;
+
+        const targetAngle =
+            360 -
+            (
+                selectedIndex *
+                segmentAngle
+            ) -
+            (
+                segmentAngle / 2
+            );
+
+        const extraTurns =
+            360 * 5;
+
+        const finalRotation =
+            extraTurns +
+            targetAngle;
+
+        state.rewards.wheelBusy =
+            true;
+
+        state.rewards.spinsAvailable--;
+
+        updateRewardsUI();
+
+        wheel.style.transition =
+            "transform 4.8s cubic-bezier(.12,.72,.15,1)";
+
+        wheel.style.transform =
+            `rotate(${finalRotation}deg)`;
+
+        setRewardStatus(
+            "جاري تحديد نتيجة اللفة..."
+        );
+
+        setTimeout(() => {
+
+            state.rewards.wheelBusy =
+                false;
+
+            /*
+             * Keep the wheel visually aligned for
+             * future spins.
+             */
+            wheel.style.transition =
+                "none";
+
+            wheel.style.transform =
+                `rotate(${targetAngle}deg)`;
+
+            state.rewards.lastWheelReward =
+                selectedReward;
+
+            /*
+             * IMPORTANT:
+             * No local wallet modification.
+             *
+             * The result is recorded as pending until
+             * the backend reward endpoint exists.
+             */
+
+            state.rewards.pendingRewards.push({
+
+                id:
+                    `local-${Date.now()}`,
+
+                label:
+                    selectedReward.label,
+
+                amount:
+                    selectedReward.amount,
+
+                status:
+                    "pending-backend"
+
+            });
+
+            updateRewardsUI();
+
+            const amount =
+                selectedReward.amount;
+
+            if (amount > 0) {
+
+                setRewardStatus(
+                    `🎁 النتيجة: ${selectedReward.label} — بانتظار تأكيد النظام الخلفي.`
+                );
+
+                toast(
+                    `🎁 حصلت على ${selectedReward.label}`
+                );
+
+            } else {
+
+                setRewardStatus(
+                    "✨ BONUS — النتيجة بانتظار تأكيد النظام الخلفي."
+                );
+
+                toast(
+                    "✨ حصلت على BONUS"
+                );
+
+            }
+
+        }, 4900);
+
+    }
+
+
+    /* =====================================================
+       REWARDS — WATCH & EARN
+    ===================================================== */
+
+    async function rewardWatchAd() {
+
+        closeAllModals();
+
+        openModal(
+            "adGalaxyModal"
+        );
+
+        await showRewardAd();
+
+    }
+
+
+    /* =====================================================
+       REWARDS — JOIN & EARN
+    ===================================================== */
+
+    function rewardJoin() {
+
+        setRewardStatus(
+            "📢 أنشطة المجتمع المؤهلة للمكافآت ستظهر هنا بعد ربط نظام التحقق."
+        );
+
+        toast(
+            "سيتم تفعيل أنشطة Join & Earn مع التحقق من العضوية."
+        );
+
+    }
+
+
+    /* =====================================================
+       REWARDS — INVITE & EARN
+    ===================================================== */
+
+    function rewardInvite() {
+
+        if (
+            !state.referralLink
+        ) {
+
+            toast(
+                "رابط الإحالة غير جاهز حالياً."
+            );
+
+            return;
+
+        }
+
+        shareReferral();
+
+        setRewardStatus(
+            "👥 تمت مشاركة رابط الإحالة. مكافآت الإحالة تعتمد على النظام الخلفي."
+        );
+
+    }
+
+
+    /* =====================================================
+       REWARDS — DAILY MISSIONS
+    ===================================================== */
+
+    function rewardDaily() {
+
+        switchView(
+            "tasks"
+        );
+
+        toast(
+            "تم فتح المهام اليومية."
+        );
+
+    }
+
+
+    /* =====================================================
+       REWARDS HUB MODAL
+    ===================================================== */
+
+    function openRewardsHub() {
+
+        initializeRewardsHub();
+
+        openModal(
+            "rewardsHubModal"
+        );
+
+    }
+
+
+    function scrollRewardsWheel() {
+
+        closeAllModals();
+
+        const wheelCard =
+            $("#rewardWheelCard");
+
+        if (wheelCard) {
+
+            wheelCard.scrollIntoView({
+
+                behavior: "smooth",
+
+                block: "center"
+
+            });
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ADSGRAM INITIALIZATION
+       TEMPORARY DEBUG MODE
+    ===================================================== */
+
+    function initializeAdsGram() {
+
+        try {
+
+            if (
+                !window.Adsgram
+            ) {
+
+                console.log(
+                    "AdsGram SDK is not loaded."
+                );
+
+                return false;
+
+            }
+
+            adsgramController =
+                window.Adsgram.init({
+
+                    blockId:
+                        ADSGRAM_BLOCK_ID,
+
+                    /*
+                     * TEMPORARY TEST ONLY
+                     */
+                    debug:
+                        true,
+
+                    debugBannerType:
+                        "RewardedVideo"
+
+                });
+
+            console.log(
+
+                "AdsGram initialized — DEBUG MODE — Block ID:",
+
+                ADSGRAM_BLOCK_ID
+
+            );
+
+            return true;
+
+        } catch (error) {
+
+            console.log(
+                "AdsGram initialization error:",
+                error
+            );
+
+            adsgramController =
+                null;
+
+            return false;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ADSGRAM REWARD AD
+    ===================================================== */
+
+    async function showRewardAd() {
+
+        if (
+            adsgramLoading
+        ) {
+
+            toast(
+                "الإعلان قيد التحميل..."
+            );
+
+            return;
+
+        }
+
+        if (
+            !window.Adsgram
+        ) {
+
+            toast(
+                "خدمة الإعلانات غير متاحة حالياً."
+            );
+
+            return;
+
+        }
+
+        if (
+            !adsgramController
+        ) {
+
+            const initialized =
+                initializeAdsGram();
+
+            if (!initialized) {
+
+                toast(
+                    "تعذر تشغيل خدمة الإعلانات."
+                );
+
+                return;
+
+            }
+
+        }
+
+        const button =
+            $(
+                '[data-action="watch-reward-ad"]'
+            );
+
+        const status =
+            $("#adRewardStatus");
+
+        adsgramLoading =
+            true;
+
+        if (button) {
+
+            button.disabled =
+                true;
+
+            button.classList.add(
+                "loading"
+            );
+
+        }
+
+        if (status) {
+
+            status.textContent =
+                "جارٍ تجهيز الإعلان...";
+
+        }
+
+        try {
+
+            if (status) {
+
+                status.textContent =
+                    "شاهد الإعلان حتى النهاية لتفعيل المشاهدة.";
+
+            }
+
+            const result =
+                await adsgramController.show();
+
+            console.log(
+                "AdsGram reward result:",
+                result
+            );
+
+            /*
+             * DEBUG MODE:
+             *
+             * Never modify wallet locally.
+             */
+
+            if (
+                result &&
+                result.done === false
+            ) {
+
+                if (status) {
+
+                    status.textContent =
+                        "لم تكتمل مشاهدة الإعلان.";
+
+                }
+
+                toast(
+                    "لم تكتمل مشاهدة الإعلان."
+                );
+
+                return;
+
+            }
+
+            if (status) {
+
+                status.textContent =
+                    "تم اختبار عرض الإعلان. المكافأة الاقتصادية تعتمد على تأكيد النظام الخلفي.";
+
+            }
+
+            toast(
+                "تم عرض إعلان الاختبار."
+            );
+
+        } catch (error) {
+
+            console.log(
+                "AdsGram show error:",
+                error
+            );
+
+            if (status) {
+
+                status.textContent =
+                    "تعذر تشغيل الإعلان أو لم تتوفر مادة إعلانية للاختبار.";
+
+            }
+
+            toast(
+                "تعذر تشغيل الإعلان حالياً."
+            );
+
+        } finally {
+
+            adsgramLoading =
+                false;
+
+            if (button) {
+
+                button.disabled =
+                    false;
+
+                button.classList.remove(
+                    "loading"
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       AD GALAXY
+    ===================================================== */
+
+    async function refreshAds() {
+
+        toast(
+            "جارٍ تحديث الأنشطة الإعلانية والمهام..."
+        );
+
+        await loadTasks();
+
+        toast(
+            "تم تحديث الأنشطة."
+        );
+
+    }
+
 
     /* =====================================================
        VIEW NAVIGATION
@@ -2355,6 +3435,7 @@
             "wallet",
 
             "profile"
+
         ];
 
         if (
@@ -2365,6 +3446,7 @@
 
             viewName =
                 "home";
+
         }
 
         state.currentView =
@@ -2384,6 +3466,7 @@
 
                 view.hidden =
                     !active;
+
             });
 
         $all(
@@ -2392,21 +3475,30 @@
             .forEach(button => {
 
                 button.classList.toggle(
+
                     "active",
+
                     button.dataset.viewTarget ===
                     viewName
+
                 );
+
             });
 
         window.scrollTo({
+
             top: 0,
+
             behavior: "smooth"
+
         });
 
         loadViewData(
             viewName
         );
+
     }
+
 
     async function loadViewData(
         viewName
@@ -2419,6 +3511,7 @@
             await loadMiningStatus();
 
             return;
+
         }
 
         if (
@@ -2428,6 +3521,7 @@
             await loadTasks();
 
             return;
+
         }
 
         if (
@@ -2441,9 +3535,11 @@
                 loadEconomic(),
 
                 loadTransactions()
+
             ]);
 
             return;
+
         }
 
         if (
@@ -2455,11 +3551,15 @@
                 loadReferral(),
 
                 loadEconomic()
+
             ]);
 
             return;
+
         }
+
     }
+
 
     /* =====================================================
        MODALS
@@ -2478,7 +3578,9 @@
         document.body.classList.add(
             "modal-open"
         );
+
     }
+
 
     function closeModal(modal) {
 
@@ -2490,7 +3592,9 @@
         document.body.classList.remove(
             "modal-open"
         );
+
     }
+
 
     function closeAllModals() {
 
@@ -2502,13 +3606,16 @@
 
                     modal.hidden =
                         true;
+
                 }
             );
 
         document.body.classList.remove(
             "modal-open"
         );
+
     }
+
 
     /* =====================================================
        AI ASSISTANT
@@ -2519,7 +3626,9 @@
         openModal(
             "aiModal"
         );
+
     }
+
 
     function addAIMessage(
         text,
@@ -2571,7 +3680,9 @@
 
         container.scrollTop =
             container.scrollHeight;
+
     }
+
 
     function aiResponse(question) {
 
@@ -2586,8 +3697,11 @@
         ) {
 
             return `
+
 التعدين يعمل على دورة مدتها 12 ساعة. عند بدء الدورة يعمل المؤقت، وعند اكتمالها تصبح المكافأة قابلة للاستلام وفق حالة الخادم. المكافأة الحالية في النموذج هي 10 3M.
+
             `.trim();
+
         }
 
         if (
@@ -2596,8 +3710,11 @@
         ) {
 
             return `
+
 المحفظة تعرض رصيد 3M الخاص بك، والإجمالي، وأرباح اليوم، وسجل العمليات. الصفحة الاقتصادية منفصلة عن البطاقة حتى يبقى العرض واضحاً.
+
             `.trim();
+
         }
 
         if (
@@ -2606,8 +3723,11 @@
         ) {
 
             return `
+
 لك كود إحالة ورابط خاص بك. يمكنك نسخ الرابط أو مشاركته مباشرة، وتظهر الإحالات والمكافآت المرتبطة بحسابك.
+
             `.trim();
+
         }
 
         if (
@@ -2617,8 +3737,11 @@
         ) {
 
             return `
+
 اقتصاد 3Migo يجمع نشاط المستخدم والمكافآت والمعلومات الاقتصادية في منظومة واحدة. الإيردروب مرتبط بالاقتصاد وليس نظاماً منفصلاً عن المنظومة.
+
             `.trim();
+
         }
 
         if (
@@ -2627,14 +3750,50 @@
         ) {
 
             return `
+
 صفحة المهام تعرض الأنشطة المتاحة والمكافآت المرتبطة بها. بعد تنفيذ المهمة يتم تحديث الرصيد والاقتصاد.
+
             `.trim();
+
+        }
+
+        if (
+            text.includes("reward") ||
+            text.includes("مكاف") ||
+            text.includes("عجلة") ||
+            text.includes("spin")
+        ) {
+
+            return `
+
+Rewards Hub هو مركز الأنشطة والمكافآت. اللفات المجانية مرتبطة بالنشاط المؤهل، وعجلة المكافآت لا تضيف رصيداً محلياً قبل تأكيد النظام الخلفي.
+
+            `.trim();
+
+        }
+
+        if (
+            text.includes("إعلان") ||
+            text.includes("adsgram") ||
+            text.includes("ad")
+        ) {
+
+            return `
+
+AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأساسية في 3Migo لا تعتمد على مشاهدة الإعلان، ولا يتم تعديل الرصيد محلياً بمجرد تشغيل الإعلان.
+
+            `.trim();
+
         }
 
         return `
-أنا مساعد 3Migo. يمكنني شرح التعدين، المحفظة، الإحالات، المهام، والإعلانات والاقتصاد داخل التطبيق.
+
+أنا مساعد 3Migo. يمكنني شرح التعدين، المحفظة، الإحالات، المهام، Rewards Hub، الإعلانات والاقتصاد داخل التطبيق.
+
         `.trim();
+
     }
+
 
     function sendAIMessage() {
 
@@ -2647,7 +3806,9 @@
             input.value.trim();
 
         if (!question) {
+
             return;
+
         }
 
         addAIMessage(
@@ -2661,255 +3822,19 @@
         setTimeout(() => {
 
             addAIMessage(
+
                 aiResponse(
                     question
                 ),
+
                 "assistant"
+
             );
 
         }, 250);
+
     }
 
-    /* =====================================================
-       ADSGRAM INITIALIZATION
-       TEMPORARY DEBUG MODE
-    ===================================================== */
-
-    function initializeAdsGram() {
-
-        try {
-
-            if (
-                !window.Adsgram
-            ) {
-
-                console.log(
-                    "AdsGram SDK is not loaded."
-                );
-
-                return false;
-            }
-
-            adsgramController =
-                window.Adsgram.init({
-                    blockId:
-                        ADSGRAM_BLOCK_ID,
-
-                    /*
-                     * TEMPORARY TEST ONLY
-                     *
-                     * This asks AdsGram for a
-                     * RewardedVideo debug ad.
-                     *
-                     * It does NOT represent
-                     * production inventory.
-                     */
-
-                    debug: true,
-
-                    debugBannerType:
-                        "RewardedVideo"
-                });
-
-            console.log(
-                "AdsGram initialized — DEBUG MODE — Block ID:",
-                ADSGRAM_BLOCK_ID
-            );
-
-            return true;
-
-        } catch (error) {
-
-            console.log(
-                "AdsGram initialization error:",
-                error
-            );
-
-            adsgramController =
-                null;
-
-            return false;
-        }
-    }
-
-    /* =====================================================
-       ADSGRAM REWARD AD
-    ===================================================== */
-
-    async function showRewardAd() {
-
-        if (
-            adsgramLoading
-        ) {
-
-            toast(
-                "الإعلان قيد التحميل..."
-            );
-
-            return;
-        }
-
-        if (
-            !window.Adsgram
-        ) {
-
-            toast(
-                "خدمة الإعلانات غير متاحة حالياً."
-            );
-
-            return;
-        }
-
-        if (
-            !adsgramController
-        ) {
-
-            const initialized =
-                initializeAdsGram();
-
-            if (!initialized) {
-
-                toast(
-                    "تعذر تشغيل خدمة الإعلانات."
-                );
-
-                return;
-            }
-        }
-
-        const button =
-            $(
-                '[data-action="watch-reward-ad"]'
-            );
-
-        const status =
-            $("#adRewardStatus");
-
-        adsgramLoading =
-            true;
-
-        if (button) {
-
-            button.disabled =
-                true;
-
-            button.classList.add(
-                "loading"
-            );
-        }
-
-        if (status) {
-
-            status.textContent =
-                "جارٍ تجهيز الإعلان...";
-        }
-
-        try {
-
-            if (status) {
-
-                status.textContent =
-                    "شاهد الإعلان حتى النهاية لتفعيل المشاهدة.";
-            }
-
-            const result =
-                await adsgramController.show();
-
-            console.log(
-                "AdsGram reward result:",
-                result
-            );
-
-            /*
-             * DEBUG MODE:
-             *
-             * The test/debug ad is only used
-             * to verify SDK integration.
-             *
-             * We DO NOT modify the 3M balance here.
-             *
-             * Production rewards continue to be
-             * handled by the backend Reward URL.
-             */
-
-            if (
-                result &&
-                result.done === false
-            ) {
-
-                if (status) {
-
-                    status.textContent =
-                        "لم تكتمل مشاهدة الإعلان.";
-                }
-
-                toast(
-                    "لم تكتمل مشاهدة الإعلان."
-                );
-
-                return;
-            }
-
-            if (status) {
-
-                status.textContent =
-                    "تم اختبار عرض الإعلان بنجاح.";
-            }
-
-            toast(
-                "تم عرض إعلان الاختبار بنجاح."
-            );
-
-        } catch (error) {
-
-            console.log(
-                "AdsGram show error:",
-                error
-            );
-
-            if (status) {
-
-                status.textContent =
-                    "تعذر تشغيل الإعلان أو لم تتوفر مادة إعلانية للاختبار.";
-            }
-
-            toast(
-                "تعذر تشغيل الإعلان حالياً."
-            );
-
-        } finally {
-
-            adsgramLoading =
-                false;
-
-            if (button) {
-
-                button.disabled =
-                    false;
-
-                button.classList.remove(
-                    "loading"
-                );
-            }
-        }
-    }
-
-    /* =====================================================
-       AD GALAXY
-    ===================================================== */
-
-    async function refreshAds() {
-
-        toast(
-            "جارٍ تحديث الأنشطة الإعلانية والمهام..."
-        );
-
-        await loadTasks();
-
-        toast(
-            "تم تحديث الأنشطة."
-        );
-    }
 
     /* =====================================================
        ACTION HANDLER
@@ -2928,6 +3853,7 @@
 
                 break;
 
+
             case "open-economic":
 
                 openModal(
@@ -2937,6 +3863,7 @@
                 await loadEconomic();
 
                 break;
+
 
             case "open-wallet":
 
@@ -2948,6 +3875,7 @@
 
                 break;
 
+
             case "open-ad-galaxy":
 
                 openModal(
@@ -2956,11 +3884,62 @@
 
                 break;
 
+
+            case "open-rewards-hub":
+
+                openRewardsHub();
+
+                break;
+
+
+            case "spin-reward-wheel":
+
+                spinRewardWheel();
+
+                break;
+
+
+            case "scroll-rewards-wheel":
+
+                scrollRewardsWheel();
+
+                break;
+
+
+            case "reward-watch-ad":
+
+                await rewardWatchAd();
+
+                break;
+
+
+            case "reward-join":
+
+                rewardJoin();
+
+                break;
+
+
+            case "reward-invite":
+
+                rewardInvite();
+
+                break;
+
+
+            case "reward-daily":
+
+                rewardDaily();
+
+                break;
+
+
             case "watch-reward-ad":
 
                 await showRewardAd();
 
                 break;
+
 
             case "copy-referral":
 
@@ -2968,11 +3947,13 @@
 
                 break;
 
+
             case "share-referral":
 
                 shareReferral();
 
                 break;
+
 
             case "preview-airdrop":
 
@@ -2980,11 +3961,13 @@
 
                 break;
 
+
             case "spend-economic":
 
                 await spendEconomic();
 
                 break;
+
 
             case "refresh-ads":
 
@@ -2992,15 +3975,19 @@
 
                 break;
 
+
             case "close-modal":
 
                 closeModal(
+
                     element.closest(
                         ".modal-overlay"
                     )
+
                 );
 
                 break;
+
 
             case "daily-reward":
 
@@ -3008,14 +3995,18 @@
 
                 break;
 
+
             default:
 
                 console.log(
                     "Unknown action:",
                     action
                 );
+
         }
+
     }
+
 
     /* =====================================================
        EVENT SYSTEM
@@ -3024,7 +4015,9 @@
     function setupEvents() {
 
         document.addEventListener(
+
             "click",
+
             async event => {
 
                 /*
@@ -3045,7 +4038,9 @@
                     );
 
                     return;
+
                 }
+
 
                 /*
                  * Actions
@@ -3063,12 +4058,17 @@
                     event.preventDefault();
 
                     await handleAction(
+
                         actionElement.dataset.action,
+
                         actionElement
+
                     );
 
                     return;
+
                 }
+
 
                 /*
                  * Task buttons
@@ -3095,10 +4095,13 @@
                         await completeTask(
                             taskId
                         );
+
                     }
 
                     return;
+
                 }
+
 
                 /*
                  * AI quick questions
@@ -3126,18 +4129,25 @@
                     setTimeout(() => {
 
                         addAIMessage(
+
                             aiResponse(
                                 question
                             ),
+
                             "assistant"
+
                         );
 
                     }, 200);
 
                     return;
+
                 }
+
             }
+
         );
+
 
         /*
          * AI send
@@ -3154,7 +4164,9 @@
                 "click",
                 sendAIMessage
             );
+
         }
+
 
         /*
          * Enter inside AI input
@@ -3168,7 +4180,9 @@
         ) {
 
             aiInput.addEventListener(
+
                 "keydown",
+
                 event => {
 
                     if (
@@ -3179,10 +4193,15 @@
                         event.preventDefault();
 
                         sendAIMessage();
+
                     }
+
                 }
+
             );
+
         }
+
 
         /*
          * Close modal by backdrop
@@ -3194,7 +4213,9 @@
             .forEach(modal => {
 
                 modal.addEventListener(
+
                     "click",
+
                     event => {
 
                         if (
@@ -3205,17 +4226,24 @@
                             closeModal(
                                 modal
                             );
+
                         }
+
                     }
+
                 );
+
             });
+
 
         /*
          * ESC
          */
 
         document.addEventListener(
+
             "keydown",
+
             event => {
 
                 if (
@@ -3224,10 +4252,15 @@
                 ) {
 
                     closeAllModals();
+
                 }
+
             }
+
         );
+
     }
+
 
     /* =====================================================
        HTML ESCAPE
@@ -3238,27 +4271,34 @@
         return String(
             value ?? ""
         )
+
             .replace(
                 /&/g,
                 "&amp;"
             )
+
             .replace(
                 /</g,
                 "&lt;"
             )
+
             .replace(
                 />/g,
                 "&gt;"
             )
+
             .replace(
                 /"/g,
                 "&quot;"
             )
+
             .replace(
                 /'/g,
                 "&#039;"
             );
+
     }
+
 
     /* =====================================================
        INITIALIZATION
@@ -3267,8 +4307,9 @@
     async function initialize() {
 
         console.log(
-            "3Migo Coin — App V5.6 initializing..."
+            "3Migo Coin — App V5.7 initializing..."
         );
+
 
         /*
          * Telegram
@@ -3276,17 +4317,27 @@
 
         initializeTelegramUser();
 
+
+        /*
+         * Rewards Hub
+         */
+
+        initializeRewardsHub();
+
+
         /*
          * AdsGram
          */
 
         initializeAdsGram();
 
+
         /*
          * Register/load user first.
          */
 
         await registerUser();
+
 
         /*
          * Load core data.
@@ -3301,7 +4352,9 @@
             loadReferral(),
 
             loadEconomic()
+
         ]);
+
 
         /*
          * UI
@@ -3317,6 +4370,9 @@
 
         updateMiningUI();
 
+        updateRewardsUI();
+
+
         /*
          * Events
          */
@@ -3324,6 +4380,7 @@
         setupMiningButtons();
 
         setupEvents();
+
 
         /*
          * Home is default.
@@ -3333,10 +4390,13 @@
             "home"
         );
 
+
         console.log(
-            "3Migo Coin — App V5.6 ready."
+            "3Migo Coin — App V5.7 ready."
         );
+
     }
+
 
     /* =====================================================
        START
@@ -3355,7 +4415,9 @@
     } else {
 
         initialize();
+
     }
+
 
     /* =====================================================
        GLOBAL ACCESS
@@ -3387,7 +4449,22 @@
 
         initializeAdsGram,
 
+        openRewardsHub,
+
+        spinRewardWheel,
+
+        rewardWatchAd,
+
+        rewardJoin,
+
+        rewardInvite,
+
+        rewardDaily,
+
+        updateRewardsUI,
+
         toast
+
     };
 
 })();
