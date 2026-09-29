@@ -12,10 +12,10 @@ import economic_engine
 
 
 # =========================================================
-# 3MIGO COIN API — VERSION 3.2.1
+# 3MIGO COIN API — VERSION 3.2.2
 # =========================================================
 
-APP_VERSION = "3.2.1"
+APP_VERSION = "3.2.2"
 
 
 app = FastAPI(
@@ -53,6 +53,39 @@ MINING_CYCLE_HOURS = float(
 MINING_REWARD = float(
     os.getenv("MINING_REWARD", "10")
 )
+
+
+# =========================================================
+# ADSGRAM CONFIGURATION
+# =========================================================
+
+ADSGRAM_REWARD_KEY = os.getenv(
+    "ADSGRAM_REWARD_KEY",
+    "",
+)
+
+
+def require_adsgram_key(key: str):
+    """
+    Protect the AdsGram reward callback.
+
+    The secret key must exist in Render Environment Variables.
+    It must never be placed inside app.js or index.html.
+    """
+
+    if not ADSGRAM_REWARD_KEY:
+
+        raise HTTPException(
+            status_code=503,
+            detail="adsgram_reward_key_not_configured",
+        )
+
+    if key != ADSGRAM_REWARD_KEY:
+
+        raise HTTPException(
+            status_code=401,
+            detail="invalid_adsgram_reward_key",
+        )
 
 
 # =========================================================
@@ -125,12 +158,14 @@ def require_admin(key: str):
     expected = os.getenv("ADMIN_KEY", "")
 
     if not expected:
+
         raise HTTPException(
             status_code=503,
             detail="admin_key_not_configured",
         )
 
     if key != expected:
+
         raise HTTPException(
             status_code=401,
             detail="invalid_admin_key",
@@ -180,6 +215,7 @@ def home():
         "revenue_engine": "3.0",
         "economic_engine": "2.0",
         "admin_dashboard": "3.2",
+        "adsgram_reward": "enabled",
     }
 
 
@@ -190,7 +226,121 @@ def health():
         "status": "ok",
         "service": "3Migo Coin API",
         "version": APP_VERSION,
+        "adsgram_reward": (
+            "configured"
+            if ADSGRAM_REWARD_KEY
+            else "not_configured"
+        ),
     }
+
+
+# =========================================================
+# ADSGRAM REWARD CALLBACK
+# =========================================================
+
+@app.get("/adsgram/reward")
+def adsgram_reward(
+    userid: int | None = None,
+    key: str = "",
+    request_id: str = "",
+    event: str = "REWARD",
+):
+    """
+    AdsGram server-to-server reward callback.
+
+    Expected URL:
+
+    /adsgram/reward?userid=[userId]&key=SECRET
+
+    AdsGram replaces [userId] with the Telegram user ID.
+
+    The reward is processed by db.grant_adsgram_reward().
+    """
+
+    require_adsgram_key(key)
+
+    if userid is None or userid <= 0:
+
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_userid",
+        )
+
+    normalized_event = str(
+        event or "REWARD"
+    ).strip().upper()
+
+    if normalized_event != "REWARD":
+
+        return {
+            "status": "ignored",
+            "event": normalized_event,
+            "telegram_id": userid,
+        }
+
+    try:
+
+        result = db.grant_adsgram_reward(
+            telegram_id=userid,
+            request_id=request_id,
+            event_type=normalized_event,
+            reference=(
+                f"adsgram:{request_id}"
+                if request_id
+                else "adsgram:reward"
+            ),
+        )
+
+        return result
+
+    except ValueError as error:
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"adsgram_reward_error: {error}",
+        )
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"adsgram_reward_error: {error}",
+        )
+
+
+# =========================================================
+# ADSGRAM REWARD STATUS
+# =========================================================
+
+@app.get(
+    "/adsgram/reward/status/{telegram_id}"
+)
+def adsgram_reward_status(
+    telegram_id: int,
+):
+
+    if telegram_id <= 0:
+
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_telegram_id",
+        )
+
+    try:
+
+        return db.adsgram_reward_stats(
+            telegram_id
+        )
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "adsgram_reward_status_error: "
+                f"{error}"
+            ),
+        )
 
 
 # =========================================================
@@ -679,7 +829,7 @@ def admin_home():
         </p>
 
         <div class="version">
-            Admin Dashboard v3.2.1
+            Admin Dashboard v3.2.2
         </div>
 
     </div>
@@ -996,7 +1146,6 @@ def referral(telegram_id: int):
                 "telegram_id": telegram_id,
             }
 
-        # Safely convert SQLite Row to dictionary
         try:
 
             user_dict = dict(user_data)
@@ -1004,10 +1153,6 @@ def referral(telegram_id: int):
         except Exception:
 
             user_dict = {}
-
-        # -------------------------------------------------
-        # Try the existing database referral statistics
-        # -------------------------------------------------
 
         try:
 
@@ -1032,7 +1177,10 @@ def referral(telegram_id: int):
                     )
 
                     referral_count = (
-                        stats_dict.get("referral_count", 0)
+                        stats_dict.get(
+                            "referral_count",
+                            0,
+                        )
                         or 0
                     )
 
@@ -1065,10 +1213,6 @@ def referral(telegram_id: int):
         except Exception:
 
             pass
-
-        # -------------------------------------------------
-        # Safe fallback
-        # -------------------------------------------------
 
         referral_code = (
             user_dict.get("referral_code")
@@ -1383,6 +1527,14 @@ def admin_dashboard(
         "economic_engine": {},
 
         "stats": {},
+
+        "adsgram": {
+            "reward": (
+                "configured"
+                if ADSGRAM_REWARD_KEY
+                else "not_configured"
+            ),
+        },
     }
 
     try:
@@ -1501,4 +1653,10 @@ def admin_status(
         "mining_cycle_hours": MINING_CYCLE_HOURS,
 
         "mining_reward": MINING_REWARD,
+
+        "adsgram_reward": (
+            "configured"
+            if ADSGRAM_REWARD_KEY
+            else "not_configured"
+        ),
     }
