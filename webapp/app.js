@@ -1,6 +1,6 @@
 /* =========================================================
-   3MIGO COIN — APP.JS V5.8
-   PREMIUM REWARDS HUB + SAFE REWARD EXPERIENCE
+   3MIGO COIN — APP.JS V5.9
+   PREMIUM REWARDS HUB + LIVE AI WEB SEARCH
 
    IMPORTANT:
    - Backend/API contracts preserved
@@ -16,6 +16,8 @@
    - Wheel rewards are NOT added locally to wallet
    - No fake economic balance
    - One session demo spin is allowed for UX testing
+   - AI now uses the real backend /ai/search endpoint
+   - Search results are displayed as source cards
 ========================================================= */
 
 (() => {
@@ -51,10 +53,20 @@
     const FALLBACK_TELEGRAM_ID = 1;
 
     const MINING_CYCLE_HOURS = 12;
+
     const MINING_CYCLE_SECONDS =
         MINING_CYCLE_HOURS * 60 * 60;
 
     const MINING_REWARD = 10;
+
+    /* =====================================================
+       AI SEARCH
+    ===================================================== */
+
+    const AI_SEARCH_ENDPOINT = "/ai/search";
+    const AI_SEARCH_LIMIT = 5;
+
+    let aiSearchPending = false;
 
     /* =====================================================
        ADSGRAM
@@ -89,6 +101,7 @@
 
         miningActive: false,
         miningRemaining: 0,
+
         miningReward:
             MINING_REWARD,
 
@@ -169,6 +182,7 @@
              * UX-only session spin.
              * It does NOT create wallet balance.
              */
+
             sessionDemoSpinUsed: false
 
         },
@@ -180,6 +194,7 @@
         aiMessages: [],
 
         loading: false
+
     };
 
     /* =====================================================
@@ -236,33 +251,55 @@
     ===================================================== */
 
     function $(selector) {
-        return document.querySelector(selector);
+
+        return document.querySelector(
+            selector
+        );
+
     }
 
     function $all(selector) {
+
         return Array.from(
-            document.querySelectorAll(selector)
+            document.querySelectorAll(
+                selector
+            )
         );
+
     }
 
-    function setText(selector, value) {
+    function setText(
+        selector,
+        value
+    ) {
 
-        const element = $(selector);
+        const element =
+            $(selector);
 
         if (element) {
+
             element.textContent =
                 value ?? "";
+
         }
+
     }
 
-    function setValue(selector, value) {
+    function setValue(
+        selector,
+        value
+    ) {
 
-        const element = $(selector);
+        const element =
+            $(selector);
 
         if (element) {
+
             element.value =
                 value ?? "";
+
         }
+
     }
 
     function safeNumber(
@@ -276,6 +313,7 @@
         return Number.isFinite(number)
             ? number
             : fallback;
+
     }
 
     function formatNumber(value) {
@@ -288,23 +326,28 @@
                     maximumFractionDigits: 2
                 }
             );
+
     }
 
     function formatInteger(value) {
 
         return Math.round(
             safeNumber(value)
-        ).toLocaleString("en-US");
+        ).toLocaleString(
+            "en-US"
+        );
+
     }
 
     function formatTime(seconds) {
 
-        seconds = Math.max(
-            0,
-            Math.floor(
-                safeNumber(seconds)
-            )
-        );
+        seconds =
+            Math.max(
+                0,
+                Math.floor(
+                    safeNumber(seconds)
+                )
+            );
 
         const hours =
             Math.floor(
@@ -331,6 +374,7 @@
                 .padStart(2, "0")
 
         ].join(":");
+
     }
 
     function toast(message) {
@@ -339,7 +383,9 @@
             $("#toast");
 
         if (!element) {
+
             console.log(message);
+
             return;
         }
 
@@ -355,9 +401,11 @@
 
             element.textContent =
                 message;
+
         }
 
-        element.hidden = false;
+        element.hidden =
+            false;
 
         clearTimeout(
             toast._timer
@@ -370,6 +418,7 @@
                     true;
 
             }, 2600);
+
     }
 
     /* =====================================================
@@ -384,7 +433,9 @@
                 tg?.initDataUnsafe?.user;
 
             if (user?.id) {
+
                 return user;
+
             }
 
         } catch (error) {
@@ -393,9 +444,11 @@
                 "Telegram user read error:",
                 error
             );
+
         }
 
         return null;
+
     }
 
     function initializeTelegramUser() {
@@ -423,7 +476,9 @@
 
             state.username =
                 "3Migo User";
+
         }
+
     }
 
     /* =====================================================
@@ -449,7 +504,9 @@
                     "application/json",
 
                 ...(options.headers || {})
+
             }
+
         };
 
         if (
@@ -465,6 +522,7 @@
                     : JSON.stringify(
                         options.body
                     );
+
         }
 
         const response =
@@ -488,8 +546,12 @@
         } catch {
 
             data = {
-                raw: text
+
+                raw:
+                    text
+
             };
+
         }
 
         if (!response.ok) {
@@ -503,9 +565,11 @@
             throw new Error(
                 message
             );
+
         }
 
         return data;
+
     }
 
     /* =====================================================
@@ -543,6 +607,7 @@
 
                             username:
                                 state.username
+
                         }
 
                     }
@@ -556,8 +621,11 @@
                 );
 
                 return null;
+
             }
+
         }
+
     }
 
     async function loadUser() {
@@ -569,7 +637,9 @@
                     `/user/${state.telegramId}`
                 );
 
-            applyUserData(data);
+            applyUserData(
+                data
+            );
 
         } catch (error) {
 
@@ -577,9 +647,11 @@
                 "loadUser:",
                 error
             );
+
         }
 
         updateProfileUI();
+
     }
 
     function applyUserData(data) {
@@ -627,9 +699,11 @@
             state.username =
                 user.username ||
                 data.username;
+
         }
 
         updateBalanceUI();
+
     }
 
     /* =====================================================
@@ -717,6 +791,7 @@
             "#walletMemberNumber",
             cardNumber
         );
+
     }
 
     function makeMemberCardNumber(id) {
@@ -743,6 +818,7 @@
             last12.slice(8, 12)
 
         ].join(" • ");
+
     }
 
     /* =====================================================
@@ -766,6 +842,7 @@
             "#profileMemberId",
             `Member ID: ${makeMemberId()}`
         );
+
     }
 
     function makeMemberId() {
@@ -773,6 +850,7 @@
         return `3M-${String(
             state.telegramId
         ).padStart(8, "0")}`;
+
     }
 
     /* =====================================================
@@ -789,6 +867,7 @@
             return state.miningCompleted
                 ? 100
                 : 0;
+
         }
 
         const elapsed =
@@ -805,6 +884,7 @@
                 ) * 100
             )
         );
+
     }
 
     function updateMiningProgressVisual() {
@@ -840,6 +920,7 @@
                     "--progress",
                     `${degrees}deg`
                 );
+
             }
         );
 
@@ -850,6 +931,7 @@
 
             timeline.style.width =
                 `${progress}%`;
+
         }
 
         const pageTimeline =
@@ -859,7 +941,9 @@
 
             pageTimeline.style.width =
                 `${progress}%`;
+
         }
+
     }
 
     function updateMiningButton(
@@ -928,18 +1012,21 @@
 
             button.disabled =
                 false;
+
         }
 
         if (text) {
 
             text.textContent =
                 label;
+
         }
 
         button.setAttribute(
             "aria-label",
             label
         );
+
     }
 
     function updateMiningUI() {
@@ -974,6 +1061,7 @@
 
             status =
                 "جاهز للتعدين";
+
         }
 
         setText(
@@ -1016,6 +1104,7 @@
         );
 
         updateMiningProgressVisual();
+
     }
 
     /* =====================================================
@@ -1066,6 +1155,7 @@
 
                 state.miningCompleted =
                     false;
+
             }
 
             if (
@@ -1076,6 +1166,7 @@
 
                 state.miningCompleted =
                     true;
+
             }
 
             updateMiningUI();
@@ -1090,7 +1181,9 @@
             );
 
             updateMiningUI();
+
         }
+
     }
 
     /* =====================================================
@@ -1110,6 +1203,7 @@
             updateMiningUI();
 
             return;
+
         }
 
         state.miningTimer =
@@ -1122,6 +1216,7 @@
                     state.miningRemaining--;
 
                     updateMiningUI();
+
                 }
 
                 if (
@@ -1149,9 +1244,11 @@
                     toast(
                         "اكتملت دورة التعدين. يمكنك استلام المكافأة."
                     );
+
                 }
 
             }, 1000);
+
     }
 
     /* =====================================================
@@ -1163,7 +1260,9 @@
         if (
             state.miningRequestPending
         ) {
+
             return;
+
         }
 
         if (
@@ -1175,6 +1274,7 @@
             );
 
             return;
+
         }
 
         if (
@@ -1184,6 +1284,7 @@
             await claimMining();
 
             return;
+
         }
 
         state.miningRequestPending =
@@ -1250,7 +1351,9 @@
 
             state.miningRequestPending =
                 false;
+
         }
+
     }
 
     /* =====================================================
@@ -1262,7 +1365,9 @@
         if (
             state.miningRequestPending
         ) {
+
             return;
+
         }
 
         if (
@@ -1275,6 +1380,7 @@
             );
 
             return;
+
         }
 
         state.miningRequestPending =
@@ -1352,7 +1458,9 @@
 
             state.miningRequestPending =
                 false;
+
         }
+
     }
 
     /* =====================================================
@@ -1364,7 +1472,9 @@
         if (
             state.miningRequestPending
         ) {
+
             return;
+
         }
 
         if (
@@ -1376,6 +1486,7 @@
             );
 
             return;
+
         }
 
         if (
@@ -1385,9 +1496,11 @@
             claimMining();
 
             return;
+
         }
 
         startMining();
+
     }
 
     function setupMiningButtons() {
@@ -1417,10 +1530,13 @@
                         event.stopPropagation();
 
                         handleMiningButtonClick();
+
                     }
                 );
+
             }
         );
+
     }
 
     /* =====================================================
@@ -1461,7 +1577,9 @@
             state.tasks = [];
 
             renderTasksError();
+
         }
+
     }
 
     function updateRewardsActivityFromTasks() {
@@ -1476,6 +1594,7 @@
 
         state.rewards.dailyActivity =
             completedCount;
+
     }
 
     function renderTasks() {
@@ -1505,6 +1624,7 @@
             `;
 
             return;
+
         }
 
         container.innerHTML =
@@ -1582,6 +1702,7 @@
 
                 })
                 .join("");
+
     }
 
     function renderTasksError() {
@@ -1600,9 +1721,12 @@
             </div>
 
         `;
+
     }
 
-    async function completeTask(taskId) {
+    async function completeTask(
+        taskId
+    ) {
 
         try {
 
@@ -1635,6 +1759,7 @@
                     reward;
 
                 updateBalanceUI();
+
             }
 
             toast(
@@ -1644,6 +1769,7 @@
                     ? `تمت المهمة +${reward} 3M`
 
                     : "تم تنفيذ المهمة."
+
             );
 
             await Promise.allSettled([
@@ -1665,7 +1791,9 @@
                 error.message ||
                 "تعذر تنفيذ المهمة."
             );
+
         }
+
     }
 
     /* =====================================================
@@ -1705,6 +1833,7 @@
                     reward;
 
                 updateBalanceUI();
+
             }
 
             toast(
@@ -1714,6 +1843,7 @@
                     ? `المكافأة اليومية +${reward} 3M`
 
                     : "تم تحديث المكافأة اليومية."
+
             );
 
         } catch (error) {
@@ -1727,7 +1857,9 @@
                 error.message ||
                 "تعذر الحصول على المكافأة اليومية."
             );
+
         }
+
     }
 
     /* =====================================================
@@ -1786,11 +1918,13 @@
                 createReferralLink(
                     state.referralCode
                 );
+
         }
 
         updateReferralUI();
 
         updateRewardsFromReferral();
+
     }
 
     function updateRewardsFromReferral() {
@@ -1803,11 +1937,17 @@
          */
 
         updateRewardsUI();
+
     }
 
-    function createReferralLink(code) {
+    function createReferralLink(
+        code
+    ) {
 
-        return `https://t.me/${BOT_USERNAME}?start=ref_${encodeURIComponent(code)}`;
+        return `https://t.me/${BOT_USERNAME}?start=ref_${encodeURIComponent(
+            code
+        )}`;
+
     }
 
     function updateReferralUI() {
@@ -1824,6 +1964,7 @@
 
             referralInput.value =
                 state.referralLink;
+
         }
 
         setText(
@@ -1843,9 +1984,12 @@
         generateReferralBarcode(
             state.referralCode
         );
+
     }
 
-    function generateReferralBarcode(code) {
+    function generateReferralBarcode(
+        code
+    ) {
 
         const container =
             $("#referralBarcode");
@@ -1873,6 +2017,7 @@
                     seed * 31 +
                     source.charCodeAt(i)
                 ) >>> 0;
+
         }
 
         for (
@@ -1902,7 +2047,9 @@
             container.appendChild(
                 bar
             );
+
         }
+
     }
 
     async function copyReferral() {
@@ -1938,7 +2085,9 @@
             toast(
                 "تم نسخ رابط الإحالة."
             );
+
         }
+
     }
 
     function shareReferral() {
@@ -1946,7 +2095,9 @@
         if (
             !state.referralLink
         ) {
+
             return;
+
         }
 
         const shareUrl =
@@ -1974,13 +2125,16 @@
                     "Telegram share:",
                     error
                 );
+
             }
+
         }
 
         window.open(
             shareUrl,
             "_blank"
         );
+
     }
 
     /* =====================================================
@@ -2063,7 +2217,9 @@
                 "loadEconomic:",
                 error
             );
+
         }
+
     }
 
     function calculateGrowthIndex() {
@@ -2094,6 +2250,7 @@
                     trust
                 ) / 3
             );
+
     }
 
     function calculateExperience() {
@@ -2160,7 +2317,9 @@
 
                 current =
                     level;
+
             }
+
         }
 
         const progress =
@@ -2193,7 +2352,9 @@
 
             nextScore:
                 current.max
+
         };
+
     }
 
     function updateEconomicUI() {
@@ -2248,11 +2409,6 @@
             )
         );
 
-        /*
-         * Optional element.
-         * Safe even if index.html does not contain it.
-         */
-
         setText(
             "#economicTrust",
             formatNumber(
@@ -2296,6 +2452,7 @@
 
             experienceProgress.style.width =
                 `${state.experience.progress}%`;
+
         }
 
         setText(
@@ -2331,7 +2488,9 @@
 
             profileProgress.style.width =
                 `${state.experience.progress}%`;
+
         }
+
     }
 
     /* =====================================================
@@ -2362,6 +2521,7 @@
                     ? `الإيردروب المتوقع: ${formatNumber(amount)} 3M`
 
                     : "لا توجد كمية إيردروب متاحة للمعاينة حالياً."
+
             );
 
         } catch (error) {
@@ -2375,7 +2535,9 @@
                 error.message ||
                 "تعذر معاينة الإيردروب."
             );
+
         }
+
     }
 
     async function spendEconomic() {
@@ -2414,7 +2576,9 @@
                 error.message ||
                 "تعذر تنفيذ العملية."
             );
+
         }
+
     }
 
     /* =====================================================
@@ -2447,7 +2611,9 @@
                 "transactions:",
                 error
             );
+
         }
+
     }
 
     function renderTransactions() {
@@ -2472,6 +2638,7 @@
             `;
 
             return;
+
         }
 
         container.innerHTML =
@@ -2518,6 +2685,7 @@
 
                 })
                 .join("");
+
     }
 
     /* =====================================================
@@ -2527,7 +2695,7 @@
     function calculateInitialSpins() {
 
         /*
-         * V5.8:
+         * V5.9:
          *
          * One FREE UX demo spin per browser session.
          *
@@ -2536,10 +2704,6 @@
          * - modify backend
          * - create 3M
          * - create economic value
-         *
-         * It simply allows the user to experience
-         * the Rewards Hub while the real backend
-         * reward engine is being prepared.
          */
 
         if (
@@ -2547,9 +2711,11 @@
         ) {
 
             return 0;
+
         }
 
         return 1;
+
     }
 
     function initializeRewardsHub() {
@@ -2561,6 +2727,7 @@
             updateRewardsUI();
 
             return;
+
         }
 
         state.rewards.spinsAvailable =
@@ -2584,7 +2751,9 @@
             setRewardStatus(
                 "🎁 لديك لفة مجانية تجريبية."
             );
+
         }
+
     }
 
     function updateRewardsUI() {
@@ -2655,16 +2824,22 @@
 
                 spinButton.textContent =
                     "🎡 لا توجد لفات متاحة";
+
             }
+
         }
+
     }
 
-    function setRewardStatus(message) {
+    function setRewardStatus(
+        message
+    ) {
 
         setText(
             "#rewardWheelStatus",
             message
         );
+
     }
 
     function spinRewardWheel() {
@@ -2672,7 +2847,9 @@
         if (
             state.rewards.wheelBusy
         ) {
+
             return;
+
         }
 
         if (
@@ -2688,13 +2865,16 @@
             );
 
             return;
+
         }
 
         const wheel =
             $("#rewardWheel");
 
         if (!wheel) {
+
             return;
+
         }
 
         const segmentCount =
@@ -2736,10 +2916,6 @@
 
         state.rewards.spinsAvailable--;
 
-        /*
-         * The one UX demo spin is now consumed.
-         */
-
         state.rewards.sessionDemoSpinUsed =
             true;
 
@@ -2768,15 +2944,6 @@
 
             state.rewards.lastWheelReward =
                 selectedReward;
-
-            /*
-             * IMPORTANT:
-             *
-             * No local wallet modification.
-             *
-             * The result is only pending until
-             * a real backend reward endpoint exists.
-             */
 
             state.rewards.pendingRewards.push({
 
@@ -2823,9 +2990,11 @@
                 toast(
                     "✨ حصلت على BONUS"
                 );
+
             }
 
         }, 4900);
+
     }
 
     /* =====================================================
@@ -2841,6 +3010,7 @@
         );
 
         await showRewardAd();
+
     }
 
     /* =====================================================
@@ -2856,6 +3026,7 @@
         toast(
             "سيتم تفعيل أنشطة Join & Earn مع التحقق من العضوية."
         );
+
     }
 
     /* =====================================================
@@ -2873,6 +3044,7 @@
             );
 
             return;
+
         }
 
         shareReferral();
@@ -2880,6 +3052,7 @@
         setRewardStatus(
             "👥 تمت مشاركة رابط الإحالة. مكافآت الإحالة تعتمد على النظام الخلفي."
         );
+
     }
 
     /* =====================================================
@@ -2895,6 +3068,7 @@
         toast(
             "تم فتح المهام اليومية."
         );
+
     }
 
     /* =====================================================
@@ -2908,6 +3082,7 @@
         openModal(
             "rewardsHubModal"
         );
+
     }
 
     function scrollRewardsWheel() {
@@ -2926,8 +3101,11 @@
 
                 block:
                     "center"
+
             });
+
         }
+
     }
 
     /* =====================================================
@@ -2949,6 +3127,7 @@
                 );
 
                 return false;
+
             }
 
             adsgramController =
@@ -2956,11 +3135,6 @@
 
                     blockId:
                         ADSGRAM_BLOCK_ID,
-
-                    /*
-                     * Keep DEBUG while AdsGram
-                     * moderation / availability is unresolved.
-                     */
 
                     debug:
                         true,
@@ -2988,7 +3162,9 @@
                 null;
 
             return false;
+
         }
+
     }
 
     /* =====================================================
@@ -3006,6 +3182,7 @@
             );
 
             return;
+
         }
 
         if (
@@ -3017,6 +3194,7 @@
             );
 
             return;
+
         }
 
         if (
@@ -3033,7 +3211,9 @@
                 );
 
                 return;
+
             }
+
         }
 
         const button =
@@ -3055,12 +3235,14 @@
             button.classList.add(
                 "loading"
             );
+
         }
 
         if (status) {
 
             status.textContent =
                 "جارٍ تجهيز الإعلان...";
+
         }
 
         try {
@@ -3069,6 +3251,7 @@
 
                 status.textContent =
                     "شاهد الإعلان حتى النهاية لتفعيل المشاهدة.";
+
             }
 
             const result =
@@ -3079,12 +3262,6 @@
                 result
             );
 
-            /*
-             * IMPORTANT:
-             *
-             * Never modify wallet locally.
-             */
-
             if (
                 result &&
                 result.done === false
@@ -3094,6 +3271,7 @@
 
                     status.textContent =
                         "لم تكتمل مشاهدة الإعلان.";
+
                 }
 
                 toast(
@@ -3101,12 +3279,14 @@
                 );
 
                 return;
+
             }
 
             if (status) {
 
                 status.textContent =
                     "تمت مشاهدة الإعلان. انتظار تأكيد النظام الخلفي.";
+
             }
 
             setRewardStatus(
@@ -3128,6 +3308,7 @@
 
                 status.textContent =
                     "تعذر تشغيل الإعلان أو لم تتوفر مادة إعلانية حالياً.";
+
             }
 
             toast(
@@ -3147,8 +3328,11 @@
                 button.classList.remove(
                     "loading"
                 );
+
             }
+
         }
+
     }
 
     /* =====================================================
@@ -3166,13 +3350,16 @@
         toast(
             "تم تحديث الأنشطة."
         );
+
     }
 
     /* =====================================================
        VIEW NAVIGATION
     ===================================================== */
 
-    function switchView(viewName) {
+    function switchView(
+        viewName
+    ) {
 
         const validViews = [
 
@@ -3192,6 +3379,7 @@
 
             viewName =
                 "home";
+
         }
 
         state.currentView =
@@ -3211,6 +3399,7 @@
 
                 view.hidden =
                     !active;
+
             });
 
         $all(
@@ -3224,7 +3413,9 @@
 
                     button.dataset.viewTarget ===
                     viewName
+
                 );
+
             });
 
         window.scrollTo({
@@ -3233,11 +3424,13 @@
 
             behavior:
                 "smooth"
+
         });
 
         loadViewData(
             viewName
         );
+
     }
 
     async function loadViewData(
@@ -3251,6 +3444,7 @@
             await loadMiningStatus();
 
             return;
+
         }
 
         if (
@@ -3260,6 +3454,7 @@
             await loadTasks();
 
             return;
+
         }
 
         if (
@@ -3277,6 +3472,7 @@
             ]);
 
             return;
+
         }
 
         if (
@@ -3292,7 +3488,9 @@
             ]);
 
             return;
+
         }
+
     }
 
     /* =====================================================
@@ -3302,7 +3500,9 @@
     function openModal(id) {
 
         const modal =
-            document.getElementById(id);
+            document.getElementById(
+                id
+            );
 
         if (!modal) return;
 
@@ -3312,6 +3512,7 @@
         document.body.classList.add(
             "modal-open"
         );
+
     }
 
     function closeModal(modal) {
@@ -3324,6 +3525,7 @@
         document.body.classList.remove(
             "modal-open"
         );
+
     }
 
     function closeAllModals() {
@@ -3336,16 +3538,19 @@
 
                     modal.hidden =
                         true;
+
                 }
             );
 
         document.body.classList.remove(
             "modal-open"
         );
+
     }
 
     /* =====================================================
        AI ASSISTANT
+       V5.9 — LIVE SERPAPI SEARCH
     ===================================================== */
 
     function openAI() {
@@ -3353,6 +3558,34 @@
         openModal(
             "aiModal"
         );
+
+        /*
+         * Keep the existing AI conversation.
+         * We do not clear messages when opening
+         * the modal.
+         */
+
+        const input =
+            $("#aiInput");
+
+        if (input) {
+
+            setTimeout(() => {
+
+                try {
+
+                    input.focus();
+
+                } catch {
+
+                    /* no-op */
+
+                }
+
+            }, 150);
+
+        }
+
     }
 
     function addAIMessage(
@@ -3405,9 +3638,520 @@
 
         container.scrollTop =
             container.scrollHeight;
+
+        return message;
+
     }
 
-    function aiResponse(question) {
+    /* =====================================================
+       AI SEARCH STATUS
+    ===================================================== */
+
+    function addAISearchStatus(
+        text
+    ) {
+
+        const container =
+            $("#aiMessages");
+
+        if (!container) return null;
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "ai-message assistant ai-search-status";
+
+        const title =
+            document.createElement(
+                "strong"
+            );
+
+        title.textContent =
+            "3Migo AI";
+
+        const paragraph =
+            document.createElement(
+                "p"
+            );
+
+        paragraph.textContent =
+            text;
+
+        message.appendChild(
+            title
+        );
+
+        message.appendChild(
+            paragraph
+        );
+
+        container.appendChild(
+            message
+        );
+
+        container.scrollTop =
+            container.scrollHeight;
+
+        return message;
+
+    }
+
+    /* =====================================================
+       AI SOURCE URL SAFETY
+    ===================================================== */
+
+    function isSafeHttpUrl(
+        value
+    ) {
+
+        try {
+
+            const url =
+                new URL(
+                    String(value || "")
+                );
+
+            return (
+                url.protocol === "https:" ||
+                url.protocol === "http:"
+            );
+
+        } catch {
+
+            return false;
+
+        }
+
+    }
+
+    /* =====================================================
+       AI SEARCH RESULTS RENDERER
+    ===================================================== */
+
+    function renderAISearchResults(
+        query,
+        results
+    ) {
+
+        const container =
+            $("#aiMessages");
+
+        if (!container) return;
+
+        const safeResults =
+            Array.isArray(results)
+                ? results.slice(
+                    0,
+                    AI_SEARCH_LIMIT
+                )
+                : [];
+
+        if (
+            !safeResults.length
+        ) {
+
+            addAIMessage(
+                `لم أجد نتائج ويب مناسبة لسؤالك: ${query}`,
+                "assistant"
+            );
+
+            return;
+
+        }
+
+        const wrapper =
+            document.createElement(
+                "div"
+            );
+
+        wrapper.className =
+            "ai-message assistant ai-search-results";
+
+        const title =
+            document.createElement(
+                "strong"
+            );
+
+        title.textContent =
+            "3Migo AI — نتائج البحث";
+
+        wrapper.appendChild(
+            title
+        );
+
+        const intro =
+            document.createElement(
+                "p"
+            );
+
+        intro.textContent =
+            `بحثت في الويب عن: ${query}`;
+
+        wrapper.appendChild(
+            intro
+        );
+
+        safeResults.forEach(
+            (item, index) => {
+
+                const titleText =
+                    String(
+                        item?.title ||
+                        `نتيجة ${index + 1}`
+                    );
+
+                const link =
+                    String(
+                        item?.link ||
+                        ""
+                    );
+
+                const snippet =
+                    String(
+                        item?.snippet ||
+                        ""
+                    );
+
+                const source =
+                    String(
+                        item?.source ||
+                        ""
+                    );
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+                card.className =
+                    "ai-source-card";
+
+                const number =
+                    document.createElement(
+                        "span"
+                    );
+
+                number.className =
+                    "ai-source-number";
+
+                number.textContent =
+                    String(
+                        item?.position ||
+                        index + 1
+                    );
+
+                card.appendChild(
+                    number
+                );
+
+                const content =
+                    document.createElement(
+                        "div"
+                    );
+
+                content.className =
+                    "ai-source-content";
+
+                const heading =
+                    document.createElement(
+                        "div"
+                    );
+
+                heading.className =
+                    "ai-source-title";
+
+                if (
+                    isSafeHttpUrl(
+                        link
+                    )
+                ) {
+
+                    const anchor =
+                        document.createElement(
+                            "a"
+                        );
+
+                    anchor.href =
+                        link;
+
+                    anchor.target =
+                        "_blank";
+
+                    anchor.rel =
+                        "noopener noreferrer";
+
+                    anchor.textContent =
+                        titleText;
+
+                    heading.appendChild(
+                        anchor
+                    );
+
+                } else {
+
+                    heading.textContent =
+                        titleText;
+
+                }
+
+                content.appendChild(
+                    heading
+                );
+
+                if (
+                    snippet
+                ) {
+
+                    const snippetElement =
+                        document.createElement(
+                            "p"
+                        );
+
+                    snippetElement.className =
+                        "ai-source-snippet";
+
+                    snippetElement.textContent =
+                        snippet;
+
+                    content.appendChild(
+                        snippetElement
+                    );
+
+                }
+
+                if (
+                    source
+                ) {
+
+                    const sourceElement =
+                        document.createElement(
+                            "small"
+                        );
+
+                    sourceElement.className =
+                        "ai-source-domain";
+
+                    sourceElement.textContent =
+                        source;
+
+                    content.appendChild(
+                        sourceElement
+                    );
+
+                }
+
+                card.appendChild(
+                    content
+                );
+
+                wrapper.appendChild(
+                    card
+                );
+
+            }
+        );
+
+        container.appendChild(
+            wrapper
+        );
+
+        container.scrollTop =
+            container.scrollHeight;
+
+    }
+
+    /* =====================================================
+       AI SEARCH
+    ===================================================== */
+
+    async function searchAIWeb(
+        question
+    ) {
+
+        const query =
+            String(
+                question || ""
+            ).trim();
+
+        if (!query) {
+
+            return;
+
+        }
+
+        if (
+            aiSearchPending
+        ) {
+
+            toast(
+                "البحث السابق ما زال جارياً..."
+            );
+
+            return;
+
+        }
+
+        aiSearchPending =
+            true;
+
+        const statusMessage =
+            addAISearchStatus(
+                "🔎 جاري البحث في الويب..."
+            );
+
+        try {
+
+            const queryString =
+                new URLSearchParams({
+
+                    q:
+                        query,
+
+                    num:
+                        String(
+                            AI_SEARCH_LIMIT
+                        )
+
+                }).toString();
+
+            const data =
+                await apiRequest(
+                    `${AI_SEARCH_ENDPOINT}?${queryString}`
+                );
+
+            const results =
+                Array.isArray(
+                    data?.results
+                )
+                    ? data.results
+                    : [];
+
+            if (
+                statusMessage
+            ) {
+
+                statusMessage.remove();
+
+            }
+
+            if (
+                data?.status !== "ok"
+            ) {
+
+                throw new Error(
+                    "ai_search_invalid_response"
+                );
+
+            }
+
+            renderAISearchResults(
+                query,
+                results
+            );
+
+            /*
+             * Save a compact conversation record.
+             * This is frontend state only.
+             */
+
+            state.aiMessages.push({
+
+                role:
+                    "user",
+
+                content:
+                    query,
+
+                timestamp:
+                    new Date().toISOString()
+
+            });
+
+            state.aiMessages.push({
+
+                role:
+                    "search",
+
+                content:
+                    `تم العثور على ${results.length} نتائج`,
+
+                timestamp:
+                    new Date().toISOString()
+
+            });
+
+        } catch (error) {
+
+            console.log(
+                "AI web search:",
+                error
+            );
+
+            if (
+                statusMessage
+            ) {
+
+                statusMessage.remove();
+
+            }
+
+            let message =
+                "تعذر الوصول إلى البحث المباشر حالياً.";
+
+            if (
+                error.message ===
+                "serpapi_not_configured"
+            ) {
+
+                message =
+                    "خدمة البحث الذكي غير مهيأة على الخادم.";
+
+            } else if (
+                error.message?.includes(
+                    "serpapi_timeout"
+                )
+            ) {
+
+                message =
+                    "استغرق البحث وقتاً أطول من المتوقع. حاول مرة أخرى.";
+
+            } else if (
+                error.message?.includes(
+                    "HTTP 503"
+                )
+            ) {
+
+                message =
+                    "محرك البحث غير متاح مؤقتاً.";
+
+            }
+
+            addAIMessage(
+                message,
+                "assistant"
+            );
+
+        } finally {
+
+            aiSearchPending =
+                false;
+
+        }
+
+    }
+
+    /* =====================================================
+       LOCAL AI EXPLANATION
+       Used only as fallback for 3Migo-specific questions
+       or when web search is unavailable.
+    ===================================================== */
+
+    function aiResponse(
+        question
+    ) {
 
         const text =
             String(
@@ -3420,6 +4164,7 @@
         ) {
 
             return `التعدين يعمل على دورة مدتها 12 ساعة. عند بدء الدورة يعمل المؤقت، وعند اكتمالها تصبح المكافأة قابلة للاستلام وفق حالة الخادم. المكافأة الحالية في النموذج هي 10 3M.`;
+
         }
 
         if (
@@ -3428,6 +4173,7 @@
         ) {
 
             return `المحفظة تعرض رصيد 3M الخاص بك، والإجمالي، وأرباح اليوم، وسجل العمليات. الصفحة الاقتصادية منفصلة عن البطاقة حتى يبقى العرض واضحاً.`;
+
         }
 
         if (
@@ -3436,6 +4182,7 @@
         ) {
 
             return `لك كود إحالة ورابط خاص بك. يمكنك نسخ الرابط أو مشاركته مباشرة، وتظهر الإحالات والمكافآت المرتبطة بحسابك.`;
+
         }
 
         if (
@@ -3445,6 +4192,7 @@
         ) {
 
             return `اقتصاد 3Migo يجمع نشاط المستخدم والمكافآت والمعلومات الاقتصادية في منظومة واحدة. الإيردروب مرتبط بالاقتصاد وليس نظاماً منفصلاً عن المنظومة.`;
+
         }
 
         if (
@@ -3453,6 +4201,7 @@
         ) {
 
             return `صفحة المهام تعرض الأنشطة المتاحة والمكافآت المرتبطة بها. بعد تنفيذ المهمة يتم تحديث الرصيد والاقتصاد.`;
+
         }
 
         if (
@@ -3463,6 +4212,7 @@
         ) {
 
             return `Rewards Hub هو مركز الأنشطة والمكافآت. توجد لفة تجريبية مجانية لتجربة الواجهة، بينما المكافآت الاقتصادية الحقيقية لا تضاف إلى المحفظة قبل تأكيد النظام الخلفي.`;
+
         }
 
         if (
@@ -3472,12 +4222,127 @@
         ) {
 
             return `AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأساسية في 3Migo لا تعتمد على مشاهدة الإعلان، ولا يتم تعديل الرصيد محلياً بمجرد تشغيل الإعلان.`;
+
         }
 
-        return `أنا مساعد 3Migo. يمكنني شرح التعدين، المحفظة، الإحالات، المهام، Rewards Hub، الإعلانات والاقتصاد داخل التطبيق.`;
+        return null;
+
     }
 
-    function sendAIMessage() {
+    /* =====================================================
+       AI QUERY ROUTER
+       V5.9
+
+       1. 3Migo-specific questions use local knowledge.
+       2. General questions use live web search.
+       3. This avoids spending a SerpApi search on every
+          internal application question.
+    ===================================================== */
+
+    function isThreeMigoQuestion(
+        question
+    ) {
+
+        const text =
+            String(
+                question || ""
+            ).toLowerCase();
+
+        const keywords = [
+
+            "3migo",
+            "3ميجو",
+            "3 ميجو",
+            "التعدين",
+            "mine",
+            "محفظ",
+            "رصيد",
+            "إحال",
+            "ref",
+            "اقتصاد",
+            "إيردروب",
+            "airdrop",
+            "مهم",
+            "task",
+            "reward",
+            "مكاف",
+            "عجلة",
+            "spin",
+            "إعلان",
+            "adsgram",
+            "ad",
+            "رصيدي",
+            "التطبيق"
+
+        ];
+
+        return keywords.some(
+            keyword =>
+                text.includes(
+                    keyword
+                )
+        );
+
+    }
+
+    async function processAIQuestion(
+        question
+    ) {
+
+        const query =
+            String(
+                question || ""
+            ).trim();
+
+        if (!query) {
+
+            return;
+
+        }
+
+        /*
+         * 3Migo internal questions:
+         * answer from the existing app logic.
+         */
+
+        if (
+            isThreeMigoQuestion(
+                query
+            )
+        ) {
+
+            const localAnswer =
+                aiResponse(
+                    query
+                );
+
+            if (
+                localAnswer
+            ) {
+
+                addAIMessage(
+                    localAnswer,
+                    "assistant"
+                );
+
+                return;
+
+            }
+
+        }
+
+        /*
+         * General knowledge / current web:
+         * use real SerpApi search.
+         */
+
+        await searchAIWeb(
+            query
+        );
+
+    }
+
+    async function sendAIMessage() {
 
         const input =
             $("#aiInput");
@@ -3488,7 +4353,9 @@
             input.value.trim();
 
         if (!question) {
+
             return;
+
         }
 
         addAIMessage(
@@ -3499,19 +4366,10 @@
         input.value =
             "";
 
-        setTimeout(() => {
+        await processAIQuestion(
+            question
+        );
 
-            addAIMessage(
-
-                aiResponse(
-                    question
-                ),
-
-                "assistant"
-
-            );
-
-        }, 250);
     }
 
     /* =====================================================
@@ -3659,7 +4517,9 @@
                     "Unknown action:",
                     action
                 );
+
         }
+
     }
 
     /* =====================================================
@@ -3690,6 +4550,7 @@
                     );
 
                     return;
+
                 }
 
                 /*
@@ -3716,6 +4577,7 @@
                     );
 
                     return;
+
                 }
 
                 /*
@@ -3743,9 +4605,11 @@
                         await completeTask(
                             taskId
                         );
+
                     }
 
                     return;
+
                 }
 
                 /*
@@ -3771,22 +4635,14 @@
                         "user"
                     );
 
-                    setTimeout(() => {
-
-                        addAIMessage(
-
-                            aiResponse(
-                                question
-                            ),
-
-                            "assistant"
-
-                        );
-
-                    }, 200);
+                    await processAIQuestion(
+                        question
+                    );
 
                     return;
+
                 }
+
             }
         );
 
@@ -3805,6 +4661,7 @@
                 "click",
                 sendAIMessage
             );
+
         }
 
         /*
@@ -3832,9 +4689,13 @@
                         event.preventDefault();
 
                         sendAIMessage();
+
                     }
+
                 }
+
             );
+
         }
 
         /*
@@ -3860,9 +4721,13 @@
                             closeModal(
                                 modal
                             );
+
                         }
+
                     }
+
                 );
+
             });
 
         /*
@@ -3879,9 +4744,12 @@
                 ) {
 
                     closeAllModals();
+
                 }
+
             }
         );
+
     }
 
     /* =====================================================
@@ -3918,6 +4786,7 @@
                 /'/g,
                 "&#039;"
             );
+
     }
 
     /* =====================================================
@@ -3927,7 +4796,7 @@
     async function initialize() {
 
         console.log(
-            "3Migo Coin — App V5.8 initializing..."
+            "3Migo Coin — App V5.9 initializing..."
         );
 
         /*
@@ -4005,8 +4874,9 @@
         );
 
         console.log(
-            "3Migo Coin — App V5.8 ready."
+            "3Migo Coin — App V5.9 ready."
         );
+
     }
 
     /* =====================================================
@@ -4026,6 +4896,7 @@
     } else {
 
         initialize();
+
     }
 
     /* =====================================================
@@ -4053,6 +4924,10 @@
         switchView,
 
         openAI,
+
+        searchAIWeb,
+
+        processAIQuestion,
 
         showRewardAd,
 
