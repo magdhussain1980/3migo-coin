@@ -28,10 +28,10 @@ if SERPAPI_KEY:
 
 
 # =========================================================
-# 3MIGO COIN API — VERSION 3.2.3
+# 3MIGO COIN API — VERSION 3.2.4
 # =========================================================
 
-APP_VERSION = "3.2.3"
+APP_VERSION = "3.2.4"
 
 
 app = FastAPI(
@@ -184,7 +184,11 @@ class SpendIn(BaseModel):
 # =========================================================
 
 def require_admin(key: str):
-    expected = os.getenv("ADMIN_KEY", "")
+
+    expected = os.getenv(
+        "ADMIN_KEY",
+        "",
+    )
 
     if not expected:
 
@@ -245,6 +249,11 @@ def home():
         "economic_engine": "2.0",
         "admin_dashboard": "3.2",
         "adsgram_reward": "enabled",
+        "serpapi": (
+            "configured"
+            if serpapi_client is not None
+            else "not_configured"
+        ),
     }
 
 
@@ -260,6 +269,11 @@ def health():
             if ADSGRAM_REWARD_KEY
             else "not_configured"
         ),
+        "serpapi": (
+            "configured"
+            if serpapi_client is not None
+            else "not_configured"
+        ),
     }
 
 
@@ -272,15 +286,20 @@ def ai_search(
     q: str = "",
     num: int = 5,
 ):
-    query = str(q or "").strip()
+
+    query = str(
+        q or ""
+    ).strip()
 
     if not query:
+
         raise HTTPException(
             status_code=400,
             detail="search_query_required",
         )
 
     if serpapi_client is None:
+
         raise HTTPException(
             status_code=503,
             detail="serpapi_not_configured",
@@ -293,12 +312,22 @@ def ai_search(
             min(int(num), 10),
         )
 
+        # =================================================
+        # IMPORTANT:
+        # Do NOT use output="md" here.
+        #
+        # SerpApi returns a String when output="md"
+        # is requested.
+        #
+        # We need structured JSON here because the
+        # frontend will use organic_results.
+        # =================================================
+
         results = serpapi_client.search({
             "engine": "google",
             "q": query,
             "hl": "ar",
             "gl": "sd",
-            "output": "md",
         })
 
         organic_results = results.get(
@@ -378,17 +407,6 @@ def adsgram_reward(
     request_id: str = "",
     event: str = "REWARD",
 ):
-    """
-    AdsGram server-to-server reward callback.
-
-    Expected URL:
-
-    /adsgram/reward?userid=[userId]&key=SECRET
-
-    AdsGram replaces [userId] with the Telegram user ID.
-
-    The reward is processed by db.grant_adsgram_reward().
-    """
 
     require_adsgram_key(key)
 
@@ -734,7 +752,9 @@ def economic_mining_test(
     telegram_id: int,
 ):
 
-    user_data = db.get_user(telegram_id)
+    user_data = db.get_user(
+        telegram_id
+    )
 
     if not user_data:
 
@@ -807,7 +827,10 @@ def run_economic_tests(
 
         raise HTTPException(
             status_code=500,
-            detail=f"economic_tests_error: {error}",
+            detail=(
+                f"economic_tests_error: "
+                f"{error}"
+            ),
         )
 
 
@@ -850,88 +873,57 @@ def admin_home():
     <style>
 
         body {
-
             margin: 0;
-
             background: #07111f;
-
             color: #ffffff;
-
             font-family: Arial, sans-serif;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             min-height: 100vh;
-
             text-align: center;
         }
 
         .box {
-
             width: 90%;
-
             max-width: 520px;
-
             background: #0d1b2e;
-
             border: 1px solid #1f3b5d;
-
             border-radius: 20px;
-
             padding: 30px;
-
             box-sizing: border-box;
         }
 
         .logo {
-
             font-size: 32px;
-
             font-weight: bold;
-
             margin-bottom: 10px;
         }
 
         .logo span {
-
             color: #f5c542;
         }
 
         h1 {
-
             margin: 10px 0;
         }
 
         p {
-
             color: #aebed0;
-
             line-height: 1.7;
         }
 
         .status {
-
             display: inline-block;
-
             padding: 8px 16px;
-
             border-radius: 20px;
-
             background: #123c2c;
-
             color: #58d68d;
-
             margin: 15px 0;
         }
 
         .version {
-
             color: #7f9bb8;
-
             font-size: 13px;
         }
 
@@ -962,7 +954,7 @@ def admin_home():
         </p>
 
         <div class="version">
-            Admin Dashboard v3.2.3
+            Admin Dashboard v3.2.4
         </div>
 
     </div>
@@ -992,7 +984,9 @@ def register(data: Register):
 @app.get("/user/{telegram_id}")
 def user(telegram_id: int):
 
-    u = db.get_user(telegram_id)
+    u = db.get_user(
+        telegram_id
+    )
 
     return u or {
         "error": "user_not_found",
@@ -1006,7 +1000,9 @@ def user(telegram_id: int):
 @app.post("/daily/{telegram_id}")
 def daily(telegram_id: int):
 
-    u, status = db.claim_daily(telegram_id)
+    u, status = db.claim_daily(
+        telegram_id
+    )
 
     if status == "user_not_found":
 
@@ -1027,7 +1023,9 @@ def daily(telegram_id: int):
 @app.post("/user/{telegram_id}/daily")
 def daily_legacy(telegram_id: int):
 
-    return daily(telegram_id)
+    return daily(
+        telegram_id
+    )
 
 
 # =========================================================
@@ -1035,9 +1033,13 @@ def daily_legacy(telegram_id: int):
 # =========================================================
 
 @app.get("/mining/{telegram_id}/status")
-def mining_status(telegram_id: int):
+def mining_status(
+    telegram_id: int
+):
 
-    user_data = db.get_user(telegram_id)
+    user_data = db.get_user(
+        telegram_id
+    )
 
     if not user_data:
 
@@ -1045,13 +1047,19 @@ def mining_status(telegram_id: int):
             "error": "user_not_found",
         }
 
-    return db.mining_status(telegram_id)
+    return db.mining_status(
+        telegram_id
+    )
 
 
 @app.post("/mining/{telegram_id}/start")
-def start_mining(telegram_id: int):
+def start_mining(
+    telegram_id: int
+):
 
-    user_data = db.get_user(telegram_id)
+    user_data = db.get_user(
+        telegram_id
+    )
 
     if not user_data:
 
@@ -1059,13 +1067,19 @@ def start_mining(telegram_id: int):
             "error": "user_not_found",
         }
 
-    return db.start_mining(telegram_id)
+    return db.start_mining(
+        telegram_id
+    )
 
 
 @app.post("/mining/{telegram_id}/claim")
-def claim_mining(telegram_id: int):
+def claim_mining(
+    telegram_id: int
+):
 
-    user_data = db.get_user(telegram_id)
+    user_data = db.get_user(
+        telegram_id
+    )
 
     if not user_data:
 
@@ -1073,13 +1087,19 @@ def claim_mining(telegram_id: int):
             "error": "user_not_found",
         }
 
-    return db.claim_mining(telegram_id)
+    return db.claim_mining(
+        telegram_id
+    )
 
 
 @app.post("/user/{telegram_id}/mine")
-def mine_legacy(telegram_id: int):
+def mine_legacy(
+    telegram_id: int
+):
 
-    user_data = db.get_user(telegram_id)
+    user_data = db.get_user(
+        telegram_id
+    )
 
     if not user_data:
 
@@ -1087,7 +1107,9 @@ def mine_legacy(telegram_id: int):
             "error": "user_not_found",
         }
 
-    return db.start_mining(telegram_id)
+    return db.start_mining(
+        telegram_id
+    )
 
 
 # =========================================================
@@ -1095,9 +1117,13 @@ def mine_legacy(telegram_id: int):
 # =========================================================
 
 @app.get("/transactions/{telegram_id}")
-def user_transactions(telegram_id: int):
+def user_transactions(
+    telegram_id: int
+):
 
-    return db.transactions(telegram_id)
+    return db.transactions(
+        telegram_id
+    )
 
 
 # =========================================================
@@ -1148,11 +1174,15 @@ def tasks():
 
 
 @app.get("/tasks/{telegram_id}")
-def user_tasks(telegram_id: int):
+def user_tasks(
+    telegram_id: int
+):
 
     try:
 
-        return db.user_tasks(telegram_id)
+        return db.user_tasks(
+            telegram_id
+        )
 
     except Exception:
 
@@ -1181,7 +1211,9 @@ def user_tasks(telegram_id: int):
                 WHERE t.active=1
                 ORDER BY t.id
                 """,
-                (telegram_id,),
+                (
+                    telegram_id,
+                ),
             ).fetchall()
 
             return [
@@ -1202,7 +1234,9 @@ def complete_task(
     task_id: int,
 ):
 
-    user_data = db.get_user(telegram_id)
+    user_data = db.get_user(
+        telegram_id
+    )
 
     if not user_data:
 
@@ -1221,7 +1255,9 @@ def complete_task(
             WHERE id=?
             AND active=1
             """,
-            (task_id,),
+            (
+                task_id,
+            ),
         ).fetchone()
 
     finally:
@@ -1265,11 +1301,15 @@ def complete_task(
 # =========================================================
 
 @app.get("/referral/{telegram_id}")
-def referral(telegram_id: int):
+def referral(
+    telegram_id: int
+):
 
     try:
 
-        user_data = db.get_user(telegram_id)
+        user_data = db.get_user(
+            telegram_id
+        )
 
         if not user_data:
 
@@ -1281,7 +1321,9 @@ def referral(telegram_id: int):
 
         try:
 
-            user_dict = dict(user_data)
+            user_dict = dict(
+                user_data
+            )
 
         except Exception:
 
@@ -1289,23 +1331,34 @@ def referral(telegram_id: int):
 
         try:
 
-            stats = db.referral_stats(telegram_id)
+            stats = db.referral_stats(
+                telegram_id
+            )
 
             if stats:
 
                 try:
 
-                    stats_dict = dict(stats)
+                    stats_dict = dict(
+                        stats
+                    )
 
                 except Exception:
 
                     stats_dict = {}
 
-                if isinstance(stats_dict, dict):
+                if isinstance(
+                    stats_dict,
+                    dict,
+                ):
 
                     referral_code = (
-                        stats_dict.get("referral_code")
-                        or user_dict.get("referral_code")
+                        stats_dict.get(
+                            "referral_code"
+                        )
+                        or user_dict.get(
+                            "referral_code"
+                        )
                         or f"3M{telegram_id}"
                     )
 
@@ -1333,7 +1386,9 @@ def referral(telegram_id: int):
                             "https://t.me/"
                             "threemigosmart_bot"
                             "?start=ref_"
-                            + str(referral_code)
+                            + str(
+                                referral_code
+                            )
                         ),
                         "referral_count": int(
                             referral_count
@@ -1348,7 +1403,9 @@ def referral(telegram_id: int):
             pass
 
         referral_code = (
-            user_dict.get("referral_code")
+            user_dict.get(
+                "referral_code"
+            )
             or f"3M{telegram_id}"
         )
 
@@ -1360,7 +1417,9 @@ def referral(telegram_id: int):
                 "https://t.me/"
                 "threemigosmart_bot"
                 "?start=ref_"
-                + str(referral_code)
+                + str(
+                    referral_code
+                )
             ),
             "referral_count": 0,
             "referral_rewards": 0.0,
@@ -1370,7 +1429,10 @@ def referral(telegram_id: int):
 
         raise HTTPException(
             status_code=500,
-            detail=f"referral_error: {error}",
+            detail=(
+                f"referral_error: "
+                f"{error}"
+            ),
         )
 
 
@@ -1389,7 +1451,9 @@ def referral_register(
 
     try:
 
-        user_data = db.get_user(telegram_id)
+        user_data = db.get_user(
+            telegram_id
+        )
 
         if not user_data:
 
@@ -1405,13 +1469,18 @@ def referral_register(
 
         try:
 
-            if isinstance(result, tuple):
+            if isinstance(
+                result,
+                tuple,
+            ):
 
                 result = result[0]
 
             if result is not None:
 
-                result = dict(result)
+                result = dict(
+                    result
+                )
 
         except Exception:
 
@@ -1428,7 +1497,10 @@ def referral_register(
 
         raise HTTPException(
             status_code=500,
-            detail=f"referral_processing_error: {error}",
+            detail=(
+                "referral_processing_error: "
+                f"{error}"
+            ),
         )
 
 
@@ -1442,7 +1514,9 @@ def create_revenue(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     allowed_statuses = {
         "pending",
@@ -1467,7 +1541,9 @@ def create_revenue(
         status=data.status,
     )
 
-    allocation = db.allocate_revenue(revenue_id)
+    allocation = db.allocate_revenue(
+        revenue_id
+    )
 
     return {
         "status": "success",
@@ -1481,7 +1557,9 @@ def admin_revenue(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return db.all_revenue()
 
@@ -1491,7 +1569,9 @@ def admin_revenue_summary(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return db.revenue_summary()
 
@@ -1501,10 +1581,13 @@ def admin_revenue_today(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return {
-        "revenue_today_usd": db.revenue_today(),
+        "revenue_today_usd":
+            db.revenue_today(),
     }
 
 
@@ -1513,10 +1596,13 @@ def admin_revenue_month(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return {
-        "revenue_month_usd": db.revenue_month(),
+        "revenue_month_usd":
+            db.revenue_month(),
     }
 
 
@@ -1528,7 +1614,9 @@ def confirm_admin_revenue(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     revenue, status = db.confirm_revenue(
         revenue_id
@@ -1548,7 +1636,9 @@ def cancel_admin_revenue(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     revenue, status = db.cancel_revenue(
         revenue_id
@@ -1569,7 +1659,9 @@ def admin_stats(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return db.stats()
 
@@ -1583,7 +1675,9 @@ def treasury(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     connection = db.get_conn()
 
@@ -1638,7 +1732,9 @@ def admin_dashboard(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     result = {
 
@@ -1649,8 +1745,11 @@ def admin_dashboard(
         "status": "online",
 
         "mining": {
-            "cycle_hours": MINING_CYCLE_HOURS,
-            "reward": MINING_REWARD,
+            "cycle_hours":
+                MINING_CYCLE_HOURS,
+
+            "reward":
+                MINING_REWARD,
         },
 
         "revenue_engine": {},
@@ -1665,6 +1764,14 @@ def admin_dashboard(
             "reward": (
                 "configured"
                 if ADSGRAM_REWARD_KEY
+                else "not_configured"
+            ),
+        },
+
+        "serpapi": {
+            "search": (
+                "configured"
+                if serpapi_client is not None
                 else "not_configured"
             ),
         },
@@ -1763,7 +1870,9 @@ def admin_status(
     x_admin_key: str = Header(default=""),
 ):
 
-    require_admin(x_admin_key)
+    require_admin(
+        x_admin_key
+    )
 
     return {
 
@@ -1783,13 +1892,21 @@ def admin_status(
 
         "mining_allocation": 12000000000,
 
-        "mining_cycle_hours": MINING_CYCLE_HOURS,
+        "mining_cycle_hours":
+            MINING_CYCLE_HOURS,
 
-        "mining_reward": MINING_REWARD,
+        "mining_reward":
+            MINING_REWARD,
 
         "adsgram_reward": (
             "configured"
             if ADSGRAM_REWARD_KEY
+            else "not_configured"
+        ),
+
+        "serpapi_search": (
+            "configured"
+            if serpapi_client is not None
             else "not_configured"
         ),
     }
