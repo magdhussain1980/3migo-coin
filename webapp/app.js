@@ -1,6 +1,6 @@
 /* =========================================================
-   3MIGO COIN — APP.JS V5.7
-   PREMIUM REWARDS HUB
+   3MIGO COIN — APP.JS V5.8
+   PREMIUM REWARDS HUB + SAFE REWARD EXPERIENCE
 
    IMPORTANT:
    - Backend/API contracts preserved
@@ -11,16 +11,15 @@
    - Home Mining Button + Mining Page Button use ONE shared state
    - AdsGram Reward integration preserved
    - Ads do NOT directly modify balance
-   - Rewards Hub added
+   - Rewards Hub preserved and improved
    - Reward Wheel is frontend experience only
    - Wheel rewards are NOT added locally to wallet
    - No fake economic balance
+   - One session demo spin is allowed for UX testing
 ========================================================= */
 
 (() => {
-
     "use strict";
-
 
     /* =====================================================
        TELEGRAM WEB APP
@@ -29,44 +28,33 @@
     const tg = window.Telegram?.WebApp || null;
 
     if (tg) {
-
         try {
-
             tg.ready();
             tg.expand();
 
             tg.setHeaderColor?.("#04142a");
             tg.setBackgroundColor?.("#031024");
-
         } catch (error) {
-
             console.log(
                 "Telegram UI settings unavailable:",
                 error
             );
-
         }
-
     }
-
 
     /* =====================================================
        CONFIG
     ===================================================== */
 
     const API_BASE = window.location.origin;
-
     const BOT_USERNAME = "threemigosmart_bot";
-
     const FALLBACK_TELEGRAM_ID = 1;
 
     const MINING_CYCLE_HOURS = 12;
-
     const MINING_CYCLE_SECONDS =
         MINING_CYCLE_HOURS * 60 * 60;
 
     const MINING_REWARD = 10;
-
 
     /* =====================================================
        ADSGRAM
@@ -75,9 +63,7 @@
     const ADSGRAM_BLOCK_ID = "50727";
 
     let adsgramController = null;
-
     let adsgramLoading = false;
-
 
     /* =====================================================
        STATE
@@ -93,22 +79,16 @@
         username: "",
 
         balance: 0,
-
         total: 0,
-
         today: 0,
-
         sessions: 0,
-
 
         /* ===============================
            ONE SHARED MINING STATE
         =============================== */
 
         miningActive: false,
-
         miningRemaining: 0,
-
         miningReward:
             MINING_REWARD,
 
@@ -118,26 +98,20 @@
 
         miningRequestPending: false,
 
-
         /* ===============================
            TASKS
         =============================== */
 
         tasks: [],
 
-
         /* ===============================
            REFERRAL
         =============================== */
 
         referralCode: "",
-
         referralLink: "",
-
         referralCount: 0,
-
         referralEarned: 0,
-
 
         /* ===============================
            ECONOMIC
@@ -146,19 +120,14 @@
         economic: {
 
             totalMined: 0,
-
             locked3m: 0,
-
             unlocked3m: 0,
-
             airdrop3m: 0,
 
             contributionScore: 0,
-
             trustScore: 0
 
         },
-
 
         /* ===============================
            EXPERIENCE
@@ -167,19 +136,14 @@
         experience: {
 
             level: 1,
-
             name: "Starter",
-
             progress: 0,
-
             score: 0,
-
             nextScore: 100
 
         },
 
         growthIndex: 0,
-
 
         /* ===============================
            REWARDS HUB
@@ -199,10 +163,15 @@
 
             pendingRewards: [],
 
-            initialized: false
+            initialized: false,
+
+            /*
+             * UX-only session spin.
+             * It does NOT create wallet balance.
+             */
+            sessionDemoSpinUsed: false
 
         },
-
 
         transactions: [],
 
@@ -211,18 +180,15 @@
         aiMessages: [],
 
         loading: false
-
     };
-
 
     /* =====================================================
        REWARD WHEEL CONFIGURATION
 
        IMPORTANT:
-       These are display outcomes only until a backend
-       reward endpoint is implemented.
+       These are display outcomes only.
 
-       No local wallet balance modification occurs.
+       No wallet balance is modified locally.
     ===================================================== */
 
     const REWARD_WHEEL_SEGMENTS = [
@@ -265,54 +231,39 @@
 
     ];
 
-
     /* =====================================================
        HELPERS
     ===================================================== */
 
     function $(selector) {
-
         return document.querySelector(selector);
-
     }
 
-
     function $all(selector) {
-
         return Array.from(
             document.querySelectorAll(selector)
         );
-
     }
-
 
     function setText(selector, value) {
 
         const element = $(selector);
 
         if (element) {
-
             element.textContent =
                 value ?? "";
-
         }
-
     }
-
 
     function setValue(selector, value) {
 
         const element = $(selector);
 
         if (element) {
-
             element.value =
                 value ?? "";
-
         }
-
     }
-
 
     function safeNumber(
         value,
@@ -325,9 +276,7 @@
         return Number.isFinite(number)
             ? number
             : fallback;
-
     }
-
 
     function formatNumber(value) {
 
@@ -339,28 +288,23 @@
                     maximumFractionDigits: 2
                 }
             );
-
     }
-
 
     function formatInteger(value) {
 
         return Math.round(
             safeNumber(value)
         ).toLocaleString("en-US");
-
     }
-
 
     function formatTime(seconds) {
 
-        seconds =
-            Math.max(
-                0,
-                Math.floor(
-                    safeNumber(seconds)
-                )
-            );
+        seconds = Math.max(
+            0,
+            Math.floor(
+                safeNumber(seconds)
+            )
+        );
 
         const hours =
             Math.floor(
@@ -387,9 +331,7 @@
                 .padStart(2, "0")
 
         ].join(":");
-
     }
-
 
     function toast(message) {
 
@@ -397,11 +339,8 @@
             $("#toast");
 
         if (!element) {
-
             console.log(message);
-
             return;
-
         }
 
         const messageElement =
@@ -416,7 +355,6 @@
 
             element.textContent =
                 message;
-
         }
 
         element.hidden = false;
@@ -432,9 +370,7 @@
                     true;
 
             }, 2600);
-
     }
-
 
     /* =====================================================
        TELEGRAM USER
@@ -448,9 +384,7 @@
                 tg?.initDataUnsafe?.user;
 
             if (user?.id) {
-
                 return user;
-
             }
 
         } catch (error) {
@@ -459,13 +393,10 @@
                 "Telegram user read error:",
                 error
             );
-
         }
 
         return null;
-
     }
-
 
     function initializeTelegramUser() {
 
@@ -492,11 +423,8 @@
 
             state.username =
                 "3Migo User";
-
         }
-
     }
-
 
     /* =====================================================
        API
@@ -521,9 +449,7 @@
                     "application/json",
 
                 ...(options.headers || {})
-
             }
-
         };
 
         if (
@@ -539,7 +465,6 @@
                     : JSON.stringify(
                         options.body
                     );
-
         }
 
         const response =
@@ -565,7 +490,6 @@
             data = {
                 raw: text
             };
-
         }
 
         if (!response.ok) {
@@ -579,13 +503,10 @@
             throw new Error(
                 message
             );
-
         }
 
         return data;
-
     }
-
 
     /* =====================================================
        USER
@@ -622,7 +543,6 @@
 
                             username:
                                 state.username
-
                         }
 
                     }
@@ -636,13 +556,9 @@
                 );
 
                 return null;
-
             }
-
         }
-
     }
-
 
     async function loadUser() {
 
@@ -661,13 +577,10 @@
                 "loadUser:",
                 error
             );
-
         }
 
         updateProfileUI();
-
     }
-
 
     function applyUserData(data) {
 
@@ -714,13 +627,10 @@
             state.username =
                 user.username ||
                 data.username;
-
         }
 
         updateBalanceUI();
-
     }
-
 
     /* =====================================================
        BALANCE UI
@@ -807,9 +717,7 @@
             "#walletMemberNumber",
             cardNumber
         );
-
     }
-
 
     function makeMemberCardNumber(id) {
 
@@ -835,9 +743,7 @@
             last12.slice(8, 12)
 
         ].join(" • ");
-
     }
-
 
     /* =====================================================
        PROFILE
@@ -860,18 +766,14 @@
             "#profileMemberId",
             `Member ID: ${makeMemberId()}`
         );
-
     }
-
 
     function makeMemberId() {
 
         return `3M-${String(
             state.telegramId
         ).padStart(8, "0")}`;
-
     }
-
 
     /* =====================================================
        MINING
@@ -887,7 +789,6 @@
             return state.miningCompleted
                 ? 100
                 : 0;
-
         }
 
         const elapsed =
@@ -895,24 +796,16 @@
             state.miningRemaining;
 
         return Math.max(
-
             0,
-
             Math.min(
-
                 100,
-
                 (
                     elapsed /
                     MINING_CYCLE_SECONDS
                 ) * 100
-
             )
-
         );
-
     }
-
 
     function updateMiningProgressVisual() {
 
@@ -947,10 +840,8 @@
                     "--progress",
                     `${degrees}deg`
                 );
-
             }
         );
-
 
         const timeline =
             $("#miningProgress");
@@ -959,9 +850,7 @@
 
             timeline.style.width =
                 `${progress}%`;
-
         }
-
 
         const pageTimeline =
             $("#miningPageProgress");
@@ -970,11 +859,8 @@
 
             pageTimeline.style.width =
                 `${progress}%`;
-
         }
-
     }
-
 
     function updateMiningButton(
         buttonSelector,
@@ -1042,23 +928,19 @@
 
             button.disabled =
                 false;
-
         }
 
         if (text) {
 
             text.textContent =
                 label;
-
         }
 
         button.setAttribute(
             "aria-label",
             label
         );
-
     }
-
 
     function updateMiningUI() {
 
@@ -1092,7 +974,6 @@
 
             status =
                 "جاهز للتعدين";
-
         }
 
         setText(
@@ -1117,15 +998,11 @@
 
         setText(
             "#miningPageStatus",
-
             active
                 ? "ACTIVE"
-
                 : completed
                     ? "CLAIM"
-
                     : "READY"
-
         );
 
         updateMiningButton(
@@ -1139,9 +1016,7 @@
         );
 
         updateMiningProgressVisual();
-
     }
-
 
     /* =====================================================
        LOAD MINING STATUS
@@ -1191,7 +1066,6 @@
 
                 state.miningCompleted =
                     false;
-
             }
 
             if (
@@ -1202,7 +1076,6 @@
 
                 state.miningCompleted =
                     true;
-
             }
 
             updateMiningUI();
@@ -1217,11 +1090,8 @@
             );
 
             updateMiningUI();
-
         }
-
     }
-
 
     /* =====================================================
        MINING TIMER
@@ -1240,7 +1110,6 @@
             updateMiningUI();
 
             return;
-
         }
 
         state.miningTimer =
@@ -1253,7 +1122,6 @@
                     state.miningRemaining--;
 
                     updateMiningUI();
-
                 }
 
                 if (
@@ -1281,13 +1149,10 @@
                     toast(
                         "اكتملت دورة التعدين. يمكنك استلام المكافأة."
                     );
-
                 }
 
             }, 1000);
-
     }
-
 
     /* =====================================================
        START MINING
@@ -1298,9 +1163,7 @@
         if (
             state.miningRequestPending
         ) {
-
             return;
-
         }
 
         if (
@@ -1312,7 +1175,6 @@
             );
 
             return;
-
         }
 
         if (
@@ -1322,7 +1184,6 @@
             await claimMining();
 
             return;
-
         }
 
         state.miningRequestPending =
@@ -1389,11 +1250,8 @@
 
             state.miningRequestPending =
                 false;
-
         }
-
     }
-
 
     /* =====================================================
        CLAIM MINING
@@ -1404,9 +1262,7 @@
         if (
             state.miningRequestPending
         ) {
-
             return;
-
         }
 
         if (
@@ -1419,7 +1275,6 @@
             );
 
             return;
-
         }
 
         state.miningRequestPending =
@@ -1497,11 +1352,8 @@
 
             state.miningRequestPending =
                 false;
-
         }
-
     }
-
 
     /* =====================================================
        MINING BUTTONS
@@ -1512,9 +1364,7 @@
         if (
             state.miningRequestPending
         ) {
-
             return;
-
         }
 
         if (
@@ -1526,7 +1376,6 @@
             );
 
             return;
-
         }
 
         if (
@@ -1536,13 +1385,10 @@
             claimMining();
 
             return;
-
         }
 
         startMining();
-
     }
-
 
     function setupMiningButtons() {
 
@@ -1571,15 +1417,11 @@
                         event.stopPropagation();
 
                         handleMiningButtonClick();
-
                     }
                 );
-
             }
         );
-
     }
-
 
     /* =====================================================
        TASKS
@@ -1619,25 +1461,22 @@
             state.tasks = [];
 
             renderTasksError();
-
         }
-
     }
-
 
     function updateRewardsActivityFromTasks() {
 
         const completedCount =
             state.tasks.filter(
                 task =>
-                    Boolean(task.completed)
+                    Boolean(
+                        task.completed
+                    )
             ).length;
 
         state.rewards.dailyActivity =
             completedCount;
-
     }
-
 
     function renderTasks() {
 
@@ -1666,13 +1505,10 @@
             `;
 
             return;
-
         }
 
         container.innerHTML =
-
             state.tasks
-
                 .map(task => {
 
                     const id =
@@ -1745,11 +1581,8 @@
                     `;
 
                 })
-
                 .join("");
-
     }
-
 
     function renderTasksError() {
 
@@ -1767,9 +1600,7 @@
             </div>
 
         `;
-
     }
-
 
     async function completeTask(taskId) {
 
@@ -1804,7 +1635,6 @@
                     reward;
 
                 updateBalanceUI();
-
             }
 
             toast(
@@ -1814,7 +1644,6 @@
                     ? `تمت المهمة +${reward} 3M`
 
                     : "تم تنفيذ المهمة."
-
             );
 
             await Promise.allSettled([
@@ -1836,11 +1665,8 @@
                 error.message ||
                 "تعذر تنفيذ المهمة."
             );
-
         }
-
     }
-
 
     /* =====================================================
        DAILY REWARD
@@ -1879,7 +1705,6 @@
                     reward;
 
                 updateBalanceUI();
-
             }
 
             toast(
@@ -1889,7 +1714,6 @@
                     ? `المكافأة اليومية +${reward} 3M`
 
                     : "تم تحديث المكافأة اليومية."
-
             );
 
         } catch (error) {
@@ -1903,11 +1727,8 @@
                 error.message ||
                 "تعذر الحصول على المكافأة اليومية."
             );
-
         }
-
     }
-
 
     /* =====================================================
        REFERRAL
@@ -1965,35 +1786,29 @@
                 createReferralLink(
                     state.referralCode
                 );
-
         }
 
         updateReferralUI();
 
         updateRewardsFromReferral();
-
     }
-
 
     function updateRewardsFromReferral() {
 
         /*
-         * Referral activity contributes to the Rewards Hub
-         * presentation, but does not create free spins
-         * automatically without backend confirmation.
+         * Referral activity contributes to the
+         * Rewards Hub presentation.
+         *
+         * No automatic spin is created here.
          */
 
         updateRewardsUI();
-
     }
-
 
     function createReferralLink(code) {
 
         return `https://t.me/${BOT_USERNAME}?start=ref_${encodeURIComponent(code)}`;
-
     }
-
 
     function updateReferralUI() {
 
@@ -2009,7 +1824,6 @@
 
             referralInput.value =
                 state.referralLink;
-
         }
 
         setText(
@@ -2029,9 +1843,7 @@
         generateReferralBarcode(
             state.referralCode
         );
-
     }
-
 
     function generateReferralBarcode(code) {
 
@@ -2061,7 +1873,6 @@
                     seed * 31 +
                     source.charCodeAt(i)
                 ) >>> 0;
-
         }
 
         for (
@@ -2091,11 +1902,8 @@
             container.appendChild(
                 bar
             );
-
         }
-
     }
-
 
     async function copyReferral() {
 
@@ -2130,24 +1938,18 @@
             toast(
                 "تم نسخ رابط الإحالة."
             );
-
         }
-
     }
-
 
     function shareReferral() {
 
         if (
             !state.referralLink
         ) {
-
             return;
-
         }
 
         const shareUrl =
-
             `https://t.me/share/url?url=${encodeURIComponent(
                 state.referralLink
             )}&text=${encodeURIComponent(
@@ -2172,18 +1974,14 @@
                     "Telegram share:",
                     error
                 );
-
             }
-
         }
 
         window.open(
             shareUrl,
             "_blank"
         );
-
     }
-
 
     /* =====================================================
        ECONOMIC SYSTEM
@@ -2265,11 +2063,8 @@
                 "loadEconomic:",
                 error
             );
-
         }
-
     }
-
 
     function calculateGrowthIndex() {
 
@@ -2299,9 +2094,7 @@
                     trust
                 ) / 3
             );
-
     }
-
 
     function calculateExperience() {
 
@@ -2367,9 +2160,7 @@
 
                 current =
                     level;
-
             }
-
         }
 
         const progress =
@@ -2402,11 +2193,8 @@
 
             nextScore:
                 current.max
-
         };
-
     }
-
 
     function updateEconomicUI() {
 
@@ -2460,6 +2248,11 @@
             )
         );
 
+        /*
+         * Optional element.
+         * Safe even if index.html does not contain it.
+         */
+
         setText(
             "#economicTrust",
             formatNumber(
@@ -2503,7 +2296,6 @@
 
             experienceProgress.style.width =
                 `${state.experience.progress}%`;
-
         }
 
         setText(
@@ -2539,11 +2331,8 @@
 
             profileProgress.style.width =
                 `${state.experience.progress}%`;
-
         }
-
     }
-
 
     /* =====================================================
        AIRDROP
@@ -2573,7 +2362,6 @@
                     ? `الإيردروب المتوقع: ${formatNumber(amount)} 3M`
 
                     : "لا توجد كمية إيردروب متاحة للمعاينة حالياً."
-
             );
 
         } catch (error) {
@@ -2587,11 +2375,8 @@
                 error.message ||
                 "تعذر معاينة الإيردروب."
             );
-
         }
-
     }
-
 
     async function spendEconomic() {
 
@@ -2629,11 +2414,8 @@
                 error.message ||
                 "تعذر تنفيذ العملية."
             );
-
         }
-
     }
-
 
     /* =====================================================
        TRANSACTIONS
@@ -2665,11 +2447,8 @@
                 "transactions:",
                 error
             );
-
         }
-
     }
-
 
     function renderTransactions() {
 
@@ -2693,15 +2472,11 @@
             `;
 
             return;
-
         }
 
         container.innerHTML =
-
             state.transactions
-
                 .slice(0, 30)
-
                 .map(transaction => {
 
                     const title =
@@ -2732,6 +2507,7 @@
                                 ${amount >= 0 ? "+" : ""}
 
                                 ${formatNumber(amount)}
+
                                 3M
 
                             </strong>
@@ -2741,11 +2517,8 @@
                     `;
 
                 })
-
                 .join("");
-
     }
-
 
     /* =====================================================
        REWARDS HUB
@@ -2754,20 +2527,30 @@
     function calculateInitialSpins() {
 
         /*
-         * V5.7 intentionally does NOT manufacture
-         * persistent spins from arbitrary frontend data.
-
-         * Spins are granted only from confirmed activity
-         * in this version.
-
-         * Until a backend Rewards endpoint exists,
-         * initial spins remain zero.
+         * V5.8:
+         *
+         * One FREE UX demo spin per browser session.
+         *
+         * This does NOT:
+         * - modify wallet
+         * - modify backend
+         * - create 3M
+         * - create economic value
+         *
+         * It simply allows the user to experience
+         * the Rewards Hub while the real backend
+         * reward engine is being prepared.
          */
 
-        return 0;
+        if (
+            state.rewards.sessionDemoSpinUsed
+        ) {
 
+            return 0;
+        }
+
+        return 1;
     }
-
 
     function initializeRewardsHub() {
 
@@ -2778,7 +2561,6 @@
             updateRewardsUI();
 
             return;
-
         }
 
         state.rewards.spinsAvailable =
@@ -2795,8 +2577,15 @@
 
         updateRewardsUI();
 
-    }
+        if (
+            state.rewards.spinsAvailable > 0
+        ) {
 
+            setRewardStatus(
+                "🎁 لديك لفة مجانية تجريبية."
+            );
+        }
+    }
 
     function updateRewardsUI() {
 
@@ -2866,13 +2655,9 @@
 
                 spinButton.textContent =
                     "🎡 لا توجد لفات متاحة";
-
             }
-
         }
-
     }
-
 
     function setRewardStatus(message) {
 
@@ -2880,18 +2665,14 @@
             "#rewardWheelStatus",
             message
         );
-
     }
-
 
     function spinRewardWheel() {
 
         if (
             state.rewards.wheelBusy
         ) {
-
             return;
-
         }
 
         if (
@@ -2907,16 +2688,13 @@
             );
 
             return;
-
         }
 
         const wheel =
             $("#rewardWheel");
 
         if (!wheel) {
-
             return;
-
         }
 
         const segmentCount =
@@ -2933,10 +2711,6 @@
                 selectedIndex
             ];
 
-        /*
-         * Each segment is 60 degrees.
-         * Pointer is at top.
-         */
         const segmentAngle =
             360 / segmentCount;
 
@@ -2962,6 +2736,13 @@
 
         state.rewards.spinsAvailable--;
 
+        /*
+         * The one UX demo spin is now consumed.
+         */
+
+        state.rewards.sessionDemoSpinUsed =
+            true;
+
         updateRewardsUI();
 
         wheel.style.transition =
@@ -2979,10 +2760,6 @@
             state.rewards.wheelBusy =
                 false;
 
-            /*
-             * Keep the wheel visually aligned for
-             * future spins.
-             */
             wheel.style.transition =
                 "none";
 
@@ -2994,10 +2771,11 @@
 
             /*
              * IMPORTANT:
+             *
              * No local wallet modification.
              *
-             * The result is recorded as pending until
-             * the backend reward endpoint exists.
+             * The result is only pending until
+             * a real backend reward endpoint exists.
              */
 
             state.rewards.pendingRewards.push({
@@ -3012,7 +2790,10 @@
                     selectedReward.amount,
 
                 status:
-                    "pending-backend"
+                    "pending-backend",
+
+                createdAt:
+                    new Date().toISOString()
 
             });
 
@@ -3021,7 +2802,9 @@
             const amount =
                 selectedReward.amount;
 
-            if (amount > 0) {
+            if (
+                amount > 0
+            ) {
 
                 setRewardStatus(
                     `🎁 النتيجة: ${selectedReward.label} — بانتظار تأكيد النظام الخلفي.`
@@ -3040,13 +2823,10 @@
                 toast(
                     "✨ حصلت على BONUS"
                 );
-
             }
 
         }, 4900);
-
     }
-
 
     /* =====================================================
        REWARDS — WATCH & EARN
@@ -3061,9 +2841,7 @@
         );
 
         await showRewardAd();
-
     }
-
 
     /* =====================================================
        REWARDS — JOIN & EARN
@@ -3078,9 +2856,7 @@
         toast(
             "سيتم تفعيل أنشطة Join & Earn مع التحقق من العضوية."
         );
-
     }
-
 
     /* =====================================================
        REWARDS — INVITE & EARN
@@ -3097,7 +2873,6 @@
             );
 
             return;
-
         }
 
         shareReferral();
@@ -3105,9 +2880,7 @@
         setRewardStatus(
             "👥 تمت مشاركة رابط الإحالة. مكافآت الإحالة تعتمد على النظام الخلفي."
         );
-
     }
-
 
     /* =====================================================
        REWARDS — DAILY MISSIONS
@@ -3122,9 +2895,7 @@
         toast(
             "تم فتح المهام اليومية."
         );
-
     }
-
 
     /* =====================================================
        REWARDS HUB MODAL
@@ -3137,9 +2908,7 @@
         openModal(
             "rewardsHubModal"
         );
-
     }
-
 
     function scrollRewardsWheel() {
 
@@ -3152,20 +2921,19 @@
 
             wheelCard.scrollIntoView({
 
-                behavior: "smooth",
+                behavior:
+                    "smooth",
 
-                block: "center"
-
+                block:
+                    "center"
             });
-
         }
-
     }
-
 
     /* =====================================================
        ADSGRAM INITIALIZATION
-       TEMPORARY DEBUG MODE
+
+       DEBUG MODE REMAINS FOR TESTING ONLY.
     ===================================================== */
 
     function initializeAdsGram() {
@@ -3181,7 +2949,6 @@
                 );
 
                 return false;
-
             }
 
             adsgramController =
@@ -3191,8 +2958,10 @@
                         ADSGRAM_BLOCK_ID,
 
                     /*
-                     * TEMPORARY TEST ONLY
+                     * Keep DEBUG while AdsGram
+                     * moderation / availability is unresolved.
                      */
+
                     debug:
                         true,
 
@@ -3202,11 +2971,8 @@
                 });
 
             console.log(
-
                 "AdsGram initialized — DEBUG MODE — Block ID:",
-
                 ADSGRAM_BLOCK_ID
-
             );
 
             return true;
@@ -3222,11 +2988,8 @@
                 null;
 
             return false;
-
         }
-
     }
-
 
     /* =====================================================
        ADSGRAM REWARD AD
@@ -3243,7 +3006,6 @@
             );
 
             return;
-
         }
 
         if (
@@ -3255,7 +3017,6 @@
             );
 
             return;
-
         }
 
         if (
@@ -3272,9 +3033,7 @@
                 );
 
                 return;
-
             }
-
         }
 
         const button =
@@ -3296,14 +3055,12 @@
             button.classList.add(
                 "loading"
             );
-
         }
 
         if (status) {
 
             status.textContent =
                 "جارٍ تجهيز الإعلان...";
-
         }
 
         try {
@@ -3312,7 +3069,6 @@
 
                 status.textContent =
                     "شاهد الإعلان حتى النهاية لتفعيل المشاهدة.";
-
             }
 
             const result =
@@ -3324,7 +3080,7 @@
             );
 
             /*
-             * DEBUG MODE:
+             * IMPORTANT:
              *
              * Never modify wallet locally.
              */
@@ -3338,7 +3094,6 @@
 
                     status.textContent =
                         "لم تكتمل مشاهدة الإعلان.";
-
                 }
 
                 toast(
@@ -3346,18 +3101,20 @@
                 );
 
                 return;
-
             }
 
             if (status) {
 
                 status.textContent =
-                    "تم اختبار عرض الإعلان. المكافأة الاقتصادية تعتمد على تأكيد النظام الخلفي.";
-
+                    "تمت مشاهدة الإعلان. انتظار تأكيد النظام الخلفي.";
             }
 
+            setRewardStatus(
+                "📺 تمت مشاهدة الإعلان. المكافأة لا تدخل المحفظة إلا بعد تأكيد النظام."
+            );
+
             toast(
-                "تم عرض إعلان الاختبار."
+                "تمت مشاهدة الإعلان."
             );
 
         } catch (error) {
@@ -3370,8 +3127,7 @@
             if (status) {
 
                 status.textContent =
-                    "تعذر تشغيل الإعلان أو لم تتوفر مادة إعلانية للاختبار.";
-
+                    "تعذر تشغيل الإعلان أو لم تتوفر مادة إعلانية حالياً.";
             }
 
             toast(
@@ -3391,13 +3147,9 @@
                 button.classList.remove(
                     "loading"
                 );
-
             }
-
         }
-
     }
-
 
     /* =====================================================
        AD GALAXY
@@ -3414,9 +3166,7 @@
         toast(
             "تم تحديث الأنشطة."
         );
-
     }
-
 
     /* =====================================================
        VIEW NAVIGATION
@@ -3427,13 +3177,9 @@
         const validViews = [
 
             "home",
-
             "mine",
-
             "tasks",
-
             "wallet",
-
             "profile"
 
         ];
@@ -3446,7 +3192,6 @@
 
             viewName =
                 "home";
-
         }
 
         state.currentView =
@@ -3466,7 +3211,6 @@
 
                 view.hidden =
                     !active;
-
             });
 
         $all(
@@ -3480,25 +3224,21 @@
 
                     button.dataset.viewTarget ===
                     viewName
-
                 );
-
             });
 
         window.scrollTo({
 
             top: 0,
 
-            behavior: "smooth"
-
+            behavior:
+                "smooth"
         });
 
         loadViewData(
             viewName
         );
-
     }
-
 
     async function loadViewData(
         viewName
@@ -3511,7 +3251,6 @@
             await loadMiningStatus();
 
             return;
-
         }
 
         if (
@@ -3521,7 +3260,6 @@
             await loadTasks();
 
             return;
-
         }
 
         if (
@@ -3539,7 +3277,6 @@
             ]);
 
             return;
-
         }
 
         if (
@@ -3555,11 +3292,8 @@
             ]);
 
             return;
-
         }
-
     }
-
 
     /* =====================================================
        MODALS
@@ -3578,9 +3312,7 @@
         document.body.classList.add(
             "modal-open"
         );
-
     }
-
 
     function closeModal(modal) {
 
@@ -3592,9 +3324,7 @@
         document.body.classList.remove(
             "modal-open"
         );
-
     }
-
 
     function closeAllModals() {
 
@@ -3606,16 +3336,13 @@
 
                     modal.hidden =
                         true;
-
                 }
             );
 
         document.body.classList.remove(
             "modal-open"
         );
-
     }
-
 
     /* =====================================================
        AI ASSISTANT
@@ -3626,9 +3353,7 @@
         openModal(
             "aiModal"
         );
-
     }
-
 
     function addAIMessage(
         text,
@@ -3680,9 +3405,7 @@
 
         container.scrollTop =
             container.scrollHeight;
-
     }
-
 
     function aiResponse(question) {
 
@@ -3696,12 +3419,7 @@
             text.includes("mine")
         ) {
 
-            return `
-
-التعدين يعمل على دورة مدتها 12 ساعة. عند بدء الدورة يعمل المؤقت، وعند اكتمالها تصبح المكافأة قابلة للاستلام وفق حالة الخادم. المكافأة الحالية في النموذج هي 10 3M.
-
-            `.trim();
-
+            return `التعدين يعمل على دورة مدتها 12 ساعة. عند بدء الدورة يعمل المؤقت، وعند اكتمالها تصبح المكافأة قابلة للاستلام وفق حالة الخادم. المكافأة الحالية في النموذج هي 10 3M.`;
         }
 
         if (
@@ -3709,12 +3427,7 @@
             text.includes("رصيد")
         ) {
 
-            return `
-
-المحفظة تعرض رصيد 3M الخاص بك، والإجمالي، وأرباح اليوم، وسجل العمليات. الصفحة الاقتصادية منفصلة عن البطاقة حتى يبقى العرض واضحاً.
-
-            `.trim();
-
+            return `المحفظة تعرض رصيد 3M الخاص بك، والإجمالي، وأرباح اليوم، وسجل العمليات. الصفحة الاقتصادية منفصلة عن البطاقة حتى يبقى العرض واضحاً.`;
         }
 
         if (
@@ -3722,12 +3435,7 @@
             text.includes("ref")
         ) {
 
-            return `
-
-لك كود إحالة ورابط خاص بك. يمكنك نسخ الرابط أو مشاركته مباشرة، وتظهر الإحالات والمكافآت المرتبطة بحسابك.
-
-            `.trim();
-
+            return `لك كود إحالة ورابط خاص بك. يمكنك نسخ الرابط أو مشاركته مباشرة، وتظهر الإحالات والمكافآت المرتبطة بحسابك.`;
         }
 
         if (
@@ -3736,12 +3444,7 @@
             text.includes("airdrop")
         ) {
 
-            return `
-
-اقتصاد 3Migo يجمع نشاط المستخدم والمكافآت والمعلومات الاقتصادية في منظومة واحدة. الإيردروب مرتبط بالاقتصاد وليس نظاماً منفصلاً عن المنظومة.
-
-            `.trim();
-
+            return `اقتصاد 3Migo يجمع نشاط المستخدم والمكافآت والمعلومات الاقتصادية في منظومة واحدة. الإيردروب مرتبط بالاقتصاد وليس نظاماً منفصلاً عن المنظومة.`;
         }
 
         if (
@@ -3749,12 +3452,7 @@
             text.includes("task")
         ) {
 
-            return `
-
-صفحة المهام تعرض الأنشطة المتاحة والمكافآت المرتبطة بها. بعد تنفيذ المهمة يتم تحديث الرصيد والاقتصاد.
-
-            `.trim();
-
+            return `صفحة المهام تعرض الأنشطة المتاحة والمكافآت المرتبطة بها. بعد تنفيذ المهمة يتم تحديث الرصيد والاقتصاد.`;
         }
 
         if (
@@ -3764,12 +3462,7 @@
             text.includes("spin")
         ) {
 
-            return `
-
-Rewards Hub هو مركز الأنشطة والمكافآت. اللفات المجانية مرتبطة بالنشاط المؤهل، وعجلة المكافآت لا تضيف رصيداً محلياً قبل تأكيد النظام الخلفي.
-
-            `.trim();
-
+            return `Rewards Hub هو مركز الأنشطة والمكافآت. توجد لفة تجريبية مجانية لتجربة الواجهة، بينما المكافآت الاقتصادية الحقيقية لا تضاف إلى المحفظة قبل تأكيد النظام الخلفي.`;
         }
 
         if (
@@ -3778,22 +3471,11 @@ Rewards Hub هو مركز الأنشطة والمكافآت. اللفات الم
             text.includes("ad")
         ) {
 
-            return `
-
-AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأساسية في 3Migo لا تعتمد على مشاهدة الإعلان، ولا يتم تعديل الرصيد محلياً بمجرد تشغيل الإعلان.
-
-            `.trim();
-
+            return `AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأساسية في 3Migo لا تعتمد على مشاهدة الإعلان، ولا يتم تعديل الرصيد محلياً بمجرد تشغيل الإعلان.`;
         }
 
-        return `
-
-أنا مساعد 3Migo. يمكنني شرح التعدين، المحفظة، الإحالات، المهام، Rewards Hub، الإعلانات والاقتصاد داخل التطبيق.
-
-        `.trim();
-
+        return `أنا مساعد 3Migo. يمكنني شرح التعدين، المحفظة، الإحالات، المهام، Rewards Hub، الإعلانات والاقتصاد داخل التطبيق.`;
     }
-
 
     function sendAIMessage() {
 
@@ -3806,9 +3488,7 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
             input.value.trim();
 
         if (!question) {
-
             return;
-
         }
 
         addAIMessage(
@@ -3832,9 +3512,7 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
             );
 
         }, 250);
-
     }
-
 
     /* =====================================================
        ACTION HANDLER
@@ -3853,7 +3531,6 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             case "open-economic":
 
                 openModal(
@@ -3863,7 +3540,6 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                 await loadEconomic();
 
                 break;
-
 
             case "open-wallet":
 
@@ -3875,7 +3551,6 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             case "open-ad-galaxy":
 
                 openModal(
@@ -3884,13 +3559,11 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             case "open-rewards-hub":
 
                 openRewardsHub();
 
                 break;
-
 
             case "spin-reward-wheel":
 
@@ -3898,13 +3571,11 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             case "scroll-rewards-wheel":
 
                 scrollRewardsWheel();
 
                 break;
-
 
             case "reward-watch-ad":
 
@@ -3912,13 +3583,11 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             case "reward-join":
 
                 rewardJoin();
 
                 break;
-
 
             case "reward-invite":
 
@@ -3926,13 +3595,11 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             case "reward-daily":
 
                 rewardDaily();
 
                 break;
-
 
             case "watch-reward-ad":
 
@@ -3940,13 +3607,11 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             case "copy-referral":
 
                 await copyReferral();
 
                 break;
-
 
             case "share-referral":
 
@@ -3954,13 +3619,11 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             case "preview-airdrop":
 
                 await previewAirdrop();
 
                 break;
-
 
             case "spend-economic":
 
@@ -3968,26 +3631,21 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             case "refresh-ads":
 
                 await refreshAds();
 
                 break;
 
-
             case "close-modal":
 
                 closeModal(
-
                     element.closest(
                         ".modal-overlay"
                     )
-
                 );
 
                 break;
-
 
             case "daily-reward":
 
@@ -3995,18 +3653,14 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
                 break;
 
-
             default:
 
                 console.log(
                     "Unknown action:",
                     action
                 );
-
         }
-
     }
-
 
     /* =====================================================
        EVENT SYSTEM
@@ -4015,9 +3669,7 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
     function setupEvents() {
 
         document.addEventListener(
-
             "click",
-
             async event => {
 
                 /*
@@ -4038,9 +3690,7 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                     );
 
                     return;
-
                 }
-
 
                 /*
                  * Actions
@@ -4066,9 +3716,7 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                     );
 
                     return;
-
                 }
-
 
                 /*
                  * Task buttons
@@ -4095,13 +3743,10 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                         await completeTask(
                             taskId
                         );
-
                     }
 
                     return;
-
                 }
-
 
                 /*
                  * AI quick questions
@@ -4141,13 +3786,9 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                     }, 200);
 
                     return;
-
                 }
-
             }
-
         );
-
 
         /*
          * AI send
@@ -4164,9 +3805,7 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                 "click",
                 sendAIMessage
             );
-
         }
-
 
         /*
          * Enter inside AI input
@@ -4193,15 +3832,10 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                         event.preventDefault();
 
                         sendAIMessage();
-
                     }
-
                 }
-
             );
-
         }
-
 
         /*
          * Close modal by backdrop
@@ -4226,24 +3860,17 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                             closeModal(
                                 modal
                             );
-
                         }
-
                     }
-
                 );
-
             });
-
 
         /*
          * ESC
          */
 
         document.addEventListener(
-
             "keydown",
-
             event => {
 
                 if (
@@ -4252,15 +3879,10 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                 ) {
 
                     closeAllModals();
-
                 }
-
             }
-
         );
-
     }
-
 
     /* =====================================================
        HTML ESCAPE
@@ -4296,9 +3918,7 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
                 /'/g,
                 "&#039;"
             );
-
     }
-
 
     /* =====================================================
        INITIALIZATION
@@ -4307,9 +3927,8 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
     async function initialize() {
 
         console.log(
-            "3Migo Coin — App V5.7 initializing..."
+            "3Migo Coin — App V5.8 initializing..."
         );
-
 
         /*
          * Telegram
@@ -4317,13 +3936,11 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
         initializeTelegramUser();
 
-
         /*
          * Rewards Hub
          */
 
         initializeRewardsHub();
-
 
         /*
          * AdsGram
@@ -4331,13 +3948,11 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
         initializeAdsGram();
 
-
         /*
          * Register/load user first.
          */
 
         await registerUser();
-
 
         /*
          * Load core data.
@@ -4351,10 +3966,11 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
             loadReferral(),
 
-            loadEconomic()
+            loadEconomic(),
+
+            loadTasks()
 
         ]);
-
 
         /*
          * UI
@@ -4372,7 +3988,6 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
 
         updateRewardsUI();
 
-
         /*
          * Events
          */
@@ -4380,7 +3995,6 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
         setupMiningButtons();
 
         setupEvents();
-
 
         /*
          * Home is default.
@@ -4390,13 +4004,10 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
             "home"
         );
 
-
         console.log(
-            "3Migo Coin — App V5.7 ready."
+            "3Migo Coin — App V5.8 ready."
         );
-
     }
-
 
     /* =====================================================
        START
@@ -4415,9 +4026,7 @@ AdsGram يعمل كإعلان مكافأة اختياري. الوظائف الأ
     } else {
 
         initialize();
-
     }
-
 
     /* =====================================================
        GLOBAL ACCESS
