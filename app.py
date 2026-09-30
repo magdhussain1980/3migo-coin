@@ -28,10 +28,10 @@ if SERPAPI_KEY:
 
 
 # =========================================================
-# 3MIGO COIN API — VERSION 3.2.4
+# 3MIGO COIN API — VERSION 3.2.5
 # =========================================================
 
-APP_VERSION = "3.2.4"
+APP_VERSION = "3.2.5"
 
 
 app = FastAPI(
@@ -91,15 +91,19 @@ MINING_REWARD = float(
 ADSGRAM_REWARD_KEY = os.getenv(
     "ADSGRAM_REWARD_KEY",
     "",
-)
+).strip()
 
 
 def require_adsgram_key(key: str):
     """
     Protect the AdsGram reward callback.
 
-    The secret key must exist in Render Environment Variables.
-    It must never be placed inside app.js or index.html.
+    The key is a static secret placed in the
+    AdsGram Reward URL.
+
+    It must exist only in the Render Environment
+    Variables and must never be placed inside
+    app.js or index.html.
     """
 
     if not ADSGRAM_REWARD_KEY:
@@ -109,7 +113,7 @@ def require_adsgram_key(key: str):
             detail="adsgram_reward_key_not_configured",
         )
 
-    if key != ADSGRAM_REWARD_KEY:
+    if str(key or "").strip() != ADSGRAM_REWARD_KEY:
 
         raise HTTPException(
             status_code=401,
@@ -264,11 +268,13 @@ def health():
         "status": "ok",
         "service": "3Migo Coin API",
         "version": APP_VERSION,
+
         "adsgram_reward": (
             "configured"
             if ADSGRAM_REWARD_KEY
             else "not_configured"
         ),
+
         "serpapi": (
             "configured"
             if serpapi_client is not None
@@ -312,16 +318,9 @@ def ai_search(
             min(int(num), 10),
         )
 
-        # =================================================
         # IMPORTANT:
-        # Do NOT use output="md" here.
-        #
-        # SerpApi returns a String when output="md"
-        # is requested.
-        #
-        # We need structured JSON here because the
-        # frontend will use organic_results.
-        # =================================================
+        # Do NOT use output="md".
+        # We need structured JSON.
 
         results = serpapi_client.search({
             "engine": "google",
@@ -343,18 +342,22 @@ def ai_search(
                 "position": item.get(
                     "position"
                 ),
+
                 "title": item.get(
                     "title",
                     "",
                 ),
+
                 "link": item.get(
                     "link",
                     "",
                 ),
+
                 "snippet": item.get(
                     "snippet",
                     "",
                 ),
+
                 "source": item.get(
                     "source",
                     "",
@@ -408,7 +411,15 @@ def adsgram_reward(
     event: str = "REWARD",
 ):
 
+    # -----------------------------------------------------
+    # STEP 1 — Verify static Reward URL secret
+    # -----------------------------------------------------
+
     require_adsgram_key(key)
+
+    # -----------------------------------------------------
+    # STEP 2 — Validate Telegram user ID
+    # -----------------------------------------------------
 
     if userid is None or userid <= 0:
 
@@ -417,9 +428,16 @@ def adsgram_reward(
             detail="invalid_userid",
         )
 
+    # -----------------------------------------------------
+    # STEP 3 — Normalize event
+    # -----------------------------------------------------
+
     normalized_event = str(
         event or "REWARD"
     ).strip().upper()
+
+    # AdsGram currently documents REWARD.
+    # Other events are ignored safely.
 
     if normalized_event != "REWARD":
 
@@ -429,17 +447,40 @@ def adsgram_reward(
             "telegram_id": userid,
         }
 
+    # -----------------------------------------------------
+    # STEP 4 — Normalize optional request ID
+    # -----------------------------------------------------
+
+    normalized_request_id = str(
+        request_id or ""
+    ).strip()
+
+    # -----------------------------------------------------
+    # STEP 5 — Build server-side reference
+    # -----------------------------------------------------
+
+    if normalized_request_id:
+
+        reference = (
+            "adsgram:"
+            + normalized_request_id
+        )
+
+    else:
+
+        reference = "adsgram:reward"
+
+    # -----------------------------------------------------
+    # STEP 6 — Grant reward atomically in DB
+    # -----------------------------------------------------
+
     try:
 
         result = db.grant_adsgram_reward(
             telegram_id=userid,
-            request_id=request_id,
+            request_id=normalized_request_id,
             event_type=normalized_event,
-            reference=(
-                f"adsgram:{request_id}"
-                if request_id
-                else "adsgram:reward"
-            ),
+            reference=reference,
         )
 
         return result
@@ -448,14 +489,20 @@ def adsgram_reward(
 
         raise HTTPException(
             status_code=400,
-            detail=f"adsgram_reward_error: {error}",
+            detail=(
+                "adsgram_reward_error: "
+                f"{error}"
+            ),
         )
 
     except Exception as error:
 
         raise HTTPException(
             status_code=500,
-            detail=f"adsgram_reward_error: {error}",
+            detail=(
+                "adsgram_reward_error: "
+                f"{error}"
+            ),
         )
 
 
@@ -479,9 +526,14 @@ def adsgram_reward_status(
 
     try:
 
-        return db.adsgram_reward_stats(
+        result = db.adsgram_reward_stats(
             telegram_id
         )
+
+        return {
+            "status": "ok",
+            **result,
+        }
 
     except Exception as error:
 
@@ -537,7 +589,9 @@ def economic_user_profile(
 # ECONOMIC CONTRIBUTION
 # =========================================================
 
-@app.post("/economic/contribution/{telegram_id}")
+@app.post(
+    "/economic/contribution/{telegram_id}"
+)
 def economic_contribution(
     telegram_id: int,
     data: ContributionIn,
@@ -580,7 +634,9 @@ def economic_contribution(
 # ECONOMIC TRUST SCORE
 # =========================================================
 
-@app.post("/economic/trust/{telegram_id}")
+@app.post(
+    "/economic/trust/{telegram_id}"
+)
 def economic_trust(
     telegram_id: int,
     data: TrustIn,
@@ -623,7 +679,9 @@ def economic_trust(
 # ECONOMIC UNLOCK
 # =========================================================
 
-@app.post("/economic/unlock/{telegram_id}")
+@app.post(
+    "/economic/unlock/{telegram_id}"
+)
 def economic_unlock(
     telegram_id: int,
     data: UnlockIn,
@@ -667,7 +725,9 @@ def economic_unlock(
 # ECONOMIC AIRDROP PREVIEW
 # =========================================================
 
-@app.get("/economic/airdrop/{telegram_id}")
+@app.get(
+    "/economic/airdrop/{telegram_id}"
+)
 def economic_airdrop_preview(
     telegram_id: int,
 ):
@@ -704,7 +764,9 @@ def economic_airdrop_preview(
 # ECONOMIC SPEND
 # =========================================================
 
-@app.post("/economic/spend/{telegram_id}")
+@app.post(
+    "/economic/spend/{telegram_id}"
+)
 def economic_spend(
     telegram_id: int,
     data: SpendIn,
@@ -747,7 +809,9 @@ def economic_spend(
 # ECONOMIC MINING TEST
 # =========================================================
 
-@app.post("/economic/mining/{telegram_id}")
+@app.post(
+    "/economic/mining/{telegram_id}"
+)
 def economic_mining_test(
     telegram_id: int,
 ):
@@ -781,7 +845,9 @@ def economic_mining_test(
 # AUTOMATED ECONOMIC ENGINE TEST
 # =========================================================
 
-@app.post("/admin/tests/economic")
+@app.post(
+    "/admin/tests/economic"
+)
 def run_economic_tests(
     x_admin_key: str = Header(default="")
 ):
@@ -954,7 +1020,7 @@ def admin_home():
         </p>
 
         <div class="version">
-            Admin Dashboard v3.2.4
+            Admin Dashboard v3.2.5
         </div>
 
     </div>
@@ -1020,8 +1086,12 @@ def daily(telegram_id: int):
     return u
 
 
-@app.post("/user/{telegram_id}/daily")
-def daily_legacy(telegram_id: int):
+@app.post(
+    "/user/{telegram_id}/daily"
+)
+def daily_legacy(
+    telegram_id: int
+):
 
     return daily(
         telegram_id
@@ -1032,7 +1102,9 @@ def daily_legacy(telegram_id: int):
 # MINING
 # =========================================================
 
-@app.get("/mining/{telegram_id}/status")
+@app.get(
+    "/mining/{telegram_id}/status"
+)
 def mining_status(
     telegram_id: int
 ):
@@ -1052,7 +1124,9 @@ def mining_status(
     )
 
 
-@app.post("/mining/{telegram_id}/start")
+@app.post(
+    "/mining/{telegram_id}/start"
+)
 def start_mining(
     telegram_id: int
 ):
@@ -1072,7 +1146,9 @@ def start_mining(
     )
 
 
-@app.post("/mining/{telegram_id}/claim")
+@app.post(
+    "/mining/{telegram_id}/claim"
+)
 def claim_mining(
     telegram_id: int
 ):
@@ -1092,7 +1168,9 @@ def claim_mining(
     )
 
 
-@app.post("/user/{telegram_id}/mine")
+@app.post(
+    "/user/{telegram_id}/mine"
+)
 def mine_legacy(
     telegram_id: int
 ):
@@ -1116,7 +1194,9 @@ def mine_legacy(
 # TRANSACTIONS
 # =========================================================
 
-@app.get("/transactions/{telegram_id}")
+@app.get(
+    "/transactions/{telegram_id}"
+)
 def user_transactions(
     telegram_id: int
 ):
@@ -1173,7 +1253,9 @@ def tasks():
             connection.close()
 
 
-@app.get("/tasks/{telegram_id}")
+@app.get(
+    "/tasks/{telegram_id}"
+)
 def user_tasks(
     telegram_id: int
 ):
@@ -1199,16 +1281,21 @@ def user_tasks(
                     t.reward_3m,
                     t.task_type,
                     t.task_url,
+
                     CASE
                         WHEN ut.id IS NULL
                         THEN 0
                         ELSE 1
                     END AS completed
+
                 FROM tasks t
+
                 LEFT JOIN user_tasks ut
                     ON ut.task_id=t.id
                     AND ut.telegram_id=?
+
                 WHERE t.active=1
+
                 ORDER BY t.id
                 """,
                 (
@@ -1300,7 +1387,9 @@ def complete_task(
 # REFERRAL
 # =========================================================
 
-@app.get("/referral/{telegram_id}")
+@app.get(
+    "/referral/{telegram_id}"
+)
 def referral(
     telegram_id: int
 ):
@@ -1436,7 +1525,9 @@ def referral(
         )
 
 
-@app.post("/referral/{telegram_id}")
+@app.post(
+    "/referral/{telegram_id}"
+)
 def referral_register(
     telegram_id: int,
     data: ReferralIn,
@@ -1508,7 +1599,9 @@ def referral_register(
 # REVENUE ENGINE 3.0
 # =========================================================
 
-@app.post("/admin/revenue")
+@app.post(
+    "/admin/revenue"
+)
 def create_revenue(
     data: RevenueIn,
     x_admin_key: str = Header(default=""),
@@ -1552,7 +1645,9 @@ def create_revenue(
     }
 
 
-@app.get("/admin/revenue")
+@app.get(
+    "/admin/revenue"
+)
 def admin_revenue(
     x_admin_key: str = Header(default=""),
 ):
@@ -1564,7 +1659,9 @@ def admin_revenue(
     return db.all_revenue()
 
 
-@app.get("/admin/revenue/summary")
+@app.get(
+    "/admin/revenue/summary"
+)
 def admin_revenue_summary(
     x_admin_key: str = Header(default=""),
 ):
@@ -1576,7 +1673,9 @@ def admin_revenue_summary(
     return db.revenue_summary()
 
 
-@app.get("/admin/revenue/today")
+@app.get(
+    "/admin/revenue/today"
+)
 def admin_revenue_today(
     x_admin_key: str = Header(default=""),
 ):
@@ -1591,7 +1690,9 @@ def admin_revenue_today(
     }
 
 
-@app.get("/admin/revenue/month")
+@app.get(
+    "/admin/revenue/month"
+)
 def admin_revenue_month(
     x_admin_key: str = Header(default=""),
 ):
@@ -1654,7 +1755,9 @@ def cancel_admin_revenue(
 # ADMIN STATISTICS
 # =========================================================
 
-@app.get("/admin/stats")
+@app.get(
+    "/admin/stats"
+)
 def admin_stats(
     x_admin_key: str = Header(default=""),
 ):
@@ -1670,7 +1773,9 @@ def admin_stats(
 # ADMIN TREASURY
 # =========================================================
 
-@app.get("/admin/treasury")
+@app.get(
+    "/admin/treasury"
+)
 def treasury(
     x_admin_key: str = Header(default=""),
 ):
@@ -1727,7 +1832,9 @@ def treasury(
 # ADMIN DASHBOARD DATA
 # =========================================================
 
-@app.get("/admin/dashboard")
+@app.get(
+    "/admin/dashboard"
+)
 def admin_dashboard(
     x_admin_key: str = Header(default=""),
 ):
@@ -1738,13 +1845,17 @@ def admin_dashboard(
 
     result = {
 
-        "project": "3Migo Coin",
+        "project":
+            "3Migo Coin",
 
-        "version": APP_VERSION,
+        "version":
+            APP_VERSION,
 
-        "status": "online",
+        "status":
+            "online",
 
         "mining": {
+
             "cycle_hours":
                 MINING_CYCLE_HOURS,
 
@@ -1752,28 +1863,42 @@ def admin_dashboard(
                 MINING_REWARD,
         },
 
-        "revenue_engine": {},
+        "revenue_engine":
+            {},
 
-        "treasury": [],
+        "treasury":
+            [],
 
-        "economic_engine": {},
+        "economic_engine":
+            {},
 
-        "stats": {},
+        "stats":
+            {},
 
         "adsgram": {
-            "reward": (
-                "configured"
-                if ADSGRAM_REWARD_KEY
-                else "not_configured"
-            ),
+
+            "reward":
+                (
+                    "configured"
+                    if ADSGRAM_REWARD_KEY
+                    else "not_configured"
+                ),
+
+            "reward_endpoint":
+                "/adsgram/reward",
+
+            "reward_status_endpoint":
+                "/adsgram/reward/status/{telegram_id}",
         },
 
         "serpapi": {
-            "search": (
-                "configured"
-                if serpapi_client is not None
-                else "not_configured"
-            ),
+
+            "search":
+                (
+                    "configured"
+                    if serpapi_client is not None
+                    else "not_configured"
+                ),
         },
     }
 
@@ -1865,7 +1990,9 @@ def admin_dashboard(
 # ADMIN SYSTEM STATUS
 # =========================================================
 
-@app.get("/admin/status")
+@app.get(
+    "/admin/status"
+)
 def admin_status(
     x_admin_key: str = Header(default=""),
 ):
@@ -1876,21 +2003,29 @@ def admin_status(
 
     return {
 
-        "status": "online",
+        "status":
+            "online",
 
-        "project": "3Migo Coin",
+        "project":
+            "3Migo Coin",
 
-        "api_version": APP_VERSION,
+        "api_version":
+            APP_VERSION,
 
-        "revenue_engine": "3.0",
+        "revenue_engine":
+            "3.0",
 
-        "economic_engine": "2.0",
+        "economic_engine":
+            "2.0",
 
-        "admin_dashboard": "3.2",
+        "admin_dashboard":
+            "3.2",
 
-        "max_supply": 30000000000,
+        "max_supply":
+            30000000000,
 
-        "mining_allocation": 12000000000,
+        "mining_allocation":
+            12000000000,
 
         "mining_cycle_hours":
             MINING_CYCLE_HOURS,
@@ -1898,15 +2033,23 @@ def admin_status(
         "mining_reward":
             MINING_REWARD,
 
-        "adsgram_reward": (
-            "configured"
-            if ADSGRAM_REWARD_KEY
-            else "not_configured"
-        ),
+        "adsgram_reward":
+            (
+                "configured"
+                if ADSGRAM_REWARD_KEY
+                else "not_configured"
+            ),
 
-        "serpapi_search": (
-            "configured"
-            if serpapi_client is not None
-            else "not_configured"
-        ),
+        "adsgram_reward_endpoint":
+            "/adsgram/reward",
+
+        "adsgram_reward_status":
+            "/adsgram/reward/status/{telegram_id}",
+
+        "serpapi_search":
+            (
+                "configured"
+                if serpapi_client is not None
+                else "not_configured"
+            ),
     }
