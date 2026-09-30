@@ -1,81 +1,147 @@
 /* =========================================================
-   3MIGO COIN — APP.JS V5.9
+   3MIGO COIN — APP.JS V6.0
    PREMIUM REWARDS HUB + LIVE AI WEB SEARCH
 
    IMPORTANT:
+
    - Backend/API contracts preserved
    - Mining economy preserved
    - Referral economy preserved
    - Airdrop/economic endpoints preserved
    - No database changes
    - Home Mining Button + Mining Page Button use ONE shared state
-   - AdsGram Reward integration preserved
+   - AdsGram Reward integration preserved and improved
    - Ads do NOT directly modify balance
    - Rewards Hub preserved and improved
    - Reward Wheel is frontend experience only
    - Wheel rewards are NOT added locally to wallet
    - No fake economic balance
    - One session demo spin is allowed for UX testing
-   - AI now uses the real backend /ai/search endpoint
+   - AI uses the real backend /ai/search endpoint
    - Search results are displayed as source cards
+
+   V6.0 ADSGRAM FLOW:
+
+   User watches full ad
+        ↓
+   AdsGram show() resolves
+        ↓
+   result.done === true
+        ↓
+   AdsGram calls backend Reward URL
+        ↓
+   Backend validates reward
+        ↓
+   Frontend polls reward status
+        ↓
+   reward_count increases
+        ↓
+   Reload authoritative user/economic/transactions data
+
+   IMPORTANT:
+   The frontend NEVER adds AdsGram rewards directly
+   to the wallet.
 ========================================================= */
 
+
 (() => {
+
     "use strict";
+
 
     /* =====================================================
        TELEGRAM WEB APP
     ===================================================== */
 
-    const tg = window.Telegram?.WebApp || null;
+    const tg =
+        window.Telegram?.WebApp || null;
 
     if (tg) {
+
         try {
+
             tg.ready();
+
             tg.expand();
 
-            tg.setHeaderColor?.("#04142a");
-            tg.setBackgroundColor?.("#031024");
+            tg.setHeaderColor?.(
+                "#04142a"
+            );
+
+            tg.setBackgroundColor?.(
+                "#031024"
+            );
+
         } catch (error) {
+
             console.log(
                 "Telegram UI settings unavailable:",
                 error
             );
+
         }
+
     }
+
 
     /* =====================================================
        CONFIG
     ===================================================== */
 
-    const API_BASE = window.location.origin;
-    const BOT_USERNAME = "threemigosmart_bot";
-    const FALLBACK_TELEGRAM_ID = 1;
+    const API_BASE =
+        window.location.origin;
 
-    const MINING_CYCLE_HOURS = 12;
+    const BOT_USERNAME =
+        "threemigosmart_bot";
+
+    const FALLBACK_TELEGRAM_ID =
+        1;
+
+    const MINING_CYCLE_HOURS =
+        12;
 
     const MINING_CYCLE_SECONDS =
         MINING_CYCLE_HOURS * 60 * 60;
 
-    const MINING_REWARD = 10;
+    const MINING_REWARD =
+        10;
+
 
     /* =====================================================
        AI SEARCH
     ===================================================== */
 
-    const AI_SEARCH_ENDPOINT = "/ai/search";
-    const AI_SEARCH_LIMIT = 5;
+    const AI_SEARCH_ENDPOINT =
+        "/ai/search";
 
-    let aiSearchPending = false;
+    const AI_SEARCH_LIMIT =
+        5;
+
+    let aiSearchPending =
+        false;
+
 
     /* =====================================================
-       ADSGRAM
+       ADSGRAM V6.0
     ===================================================== */
 
-    const ADSGRAM_BLOCK_ID = "50727";
+    const ADSGRAM_BLOCK_ID =
+        "50727";
 
-    let adsgramController = null;
-    let adsgramLoading = false;
+    let adsgramController =
+        null;
+
+    let adsgramLoading =
+        false;
+
+    /*
+     * Prevents more than one reward-confirmation
+     * polling operation from running simultaneously.
+     */
+
+    let adsgramRewardPolling =
+        false;
+
 
     /* =====================================================
        STATE
@@ -88,43 +154,69 @@
         telegramId:
             FALLBACK_TELEGRAM_ID,
 
-        username: "",
+        username:
+            "",
 
-        balance: 0,
-        total: 0,
-        today: 0,
-        sessions: 0,
+        balance:
+            0,
+
+        total:
+            0,
+
+        today:
+            0,
+
+        sessions:
+            0,
+
 
         /* ===============================
            ONE SHARED MINING STATE
         =============================== */
 
-        miningActive: false,
-        miningRemaining: 0,
+        miningActive:
+            false,
+
+        miningRemaining:
+            0,
 
         miningReward:
             MINING_REWARD,
 
-        miningCompleted: false,
+        miningCompleted:
+            false,
 
-        miningTimer: null,
+        miningTimer:
+            null,
 
-        miningRequestPending: false,
+        miningRequestPending:
+            false,
+
 
         /* ===============================
            TASKS
         =============================== */
 
-        tasks: [],
+        tasks:
+            [],
+
 
         /* ===============================
            REFERRAL
         =============================== */
 
-        referralCode: "",
-        referralLink: "",
-        referralCount: 0,
-        referralEarned: 0,
+        referralCode:
+            "",
+
+        referralLink:
+            "",
+
+        referralCount:
+            0,
+
+        referralEarned:
+            0,
+
 
         /* ===============================
            ECONOMIC
@@ -132,15 +224,26 @@
 
         economic: {
 
-            totalMined: 0,
-            locked3m: 0,
-            unlocked3m: 0,
-            airdrop3m: 0,
+            totalMined:
+                0,
 
-            contributionScore: 0,
-            trustScore: 0
+            locked3m:
+                0,
+
+            unlocked3m:
+                0,
+
+            airdrop3m:
+                0,
+
+            contributionScore:
+                0,
+
+            trustScore:
+                0
 
         },
+
 
         /* ===============================
            EXPERIENCE
@@ -148,15 +251,26 @@
 
         experience: {
 
-            level: 1,
-            name: "Starter",
-            progress: 0,
-            score: 0,
-            nextScore: 100
+            level:
+                1,
+
+            name:
+                "Starter",
+
+            progress:
+                0,
+
+            score:
+                0,
+
+            nextScore:
+                100
 
         },
 
-        growthIndex: 0,
+        growthIndex:
+            0,
+
 
         /* ===============================
            REWARDS HUB
@@ -164,87 +278,132 @@
 
         rewards: {
 
-            spinsAvailable: 0,
+            spinsAvailable:
+                0,
 
-            earned3m: 0,
+            earned3m:
+                0,
 
-            dailyActivity: 0,
+            dailyActivity:
+                0,
 
-            wheelBusy: false,
+            wheelBusy:
+                false,
 
-            lastWheelReward: null,
+            lastWheelReward:
+                null,
 
-            pendingRewards: [],
+            pendingRewards:
+                [],
 
-            initialized: false,
+            initialized:
+                false,
 
             /*
              * UX-only session spin.
              * It does NOT create wallet balance.
              */
 
-            sessionDemoSpinUsed: false
+            sessionDemoSpinUsed:
+                false
 
         },
 
-        transactions: [],
 
-        currentView: "home",
+        transactions:
+            [],
 
-        aiMessages: [],
+        currentView:
+            "home",
 
-        loading: false
+        aiMessages:
+            [],
+
+        loading:
+            false
 
     };
+
 
     /* =====================================================
        REWARD WHEEL CONFIGURATION
 
        IMPORTANT:
-       These are display outcomes only.
 
+       These are display outcomes only.
        No wallet balance is modified locally.
     ===================================================== */
 
     const REWARD_WHEEL_SEGMENTS = [
 
         {
-            id: "reward-3",
-            label: "+3M",
-            amount: 3
+            id:
+                "reward-3",
+
+            label:
+                "+3M",
+
+            amount:
+                3
         },
 
         {
-            id: "reward-5",
-            label: "+5M",
-            amount: 5
+            id:
+                "reward-5",
+
+            label:
+                "+5M",
+
+            amount:
+                5
         },
 
         {
-            id: "reward-10",
-            label: "+10M",
-            amount: 10
+            id:
+                "reward-10",
+
+            label:
+                "+10M",
+
+            amount:
+                10
         },
 
         {
-            id: "reward-3-b",
-            label: "+3M",
-            amount: 3
+            id:
+                "reward-3-b",
+
+            label:
+                "+3M",
+
+            amount:
+                3
         },
 
         {
-            id: "reward-5-b",
-            label: "+5M",
-            amount: 5
+            id:
+                "reward-5-b",
+
+            label:
+                "+5M",
+
+            amount:
+                5
         },
 
         {
-            id: "bonus",
-            label: "BONUS",
-            amount: 0
+            id:
+                "bonus",
+
+            label:
+                "BONUS",
+
+            amount:
+                0
         }
 
     ];
+
 
     /* =====================================================
        HELPERS
@@ -258,6 +417,7 @@
 
     }
 
+
     function $all(selector) {
 
         return Array.from(
@@ -267,6 +427,7 @@
         );
 
     }
+
 
     function setText(
         selector,
@@ -285,6 +446,7 @@
 
     }
 
+
     function setValue(
         selector,
         value
@@ -302,6 +464,7 @@
 
     }
 
+
     function safeNumber(
         value,
         fallback = 0
@@ -316,18 +479,23 @@
 
     }
 
+
     function formatNumber(value) {
 
         return safeNumber(value)
             .toLocaleString(
                 "en-US",
                 {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+                    minimumFractionDigits:
+                        2,
+
+                    maximumFractionDigits:
+                        2
                 }
             );
 
     }
+
 
     function formatInteger(value) {
 
@@ -338,6 +506,7 @@
         );
 
     }
+
 
     function formatTime(seconds) {
 
@@ -376,6 +545,7 @@
         ].join(":");
 
     }
+
 
     function toast(message) {
 
@@ -421,6 +591,7 @@
 
     }
 
+
     /* =====================================================
        TELEGRAM USER
     ===================================================== */
@@ -451,6 +622,7 @@
 
     }
 
+
     function initializeTelegramUser() {
 
         const user =
@@ -480,6 +652,7 @@
         }
 
     }
+
 
     /* =====================================================
        API
@@ -572,6 +745,7 @@
 
     }
 
+
     /* =====================================================
        USER
     ===================================================== */
@@ -586,7 +760,8 @@
             return await apiRequest(
                 `/user/${id}`,
                 {
-                    method: "GET"
+                    method:
+                        "GET"
                 }
             );
 
@@ -598,7 +773,8 @@
                     "/register",
                     {
 
-                        method: "POST",
+                        method:
+                            "POST",
 
                         body: {
 
@@ -628,6 +804,7 @@
 
     }
 
+
     async function loadUser() {
 
         try {
@@ -653,6 +830,7 @@
         updateProfileUI();
 
     }
+
 
     function applyUserData(data) {
 
@@ -705,6 +883,7 @@
         updateBalanceUI();
 
     }
+
 
     /* =====================================================
        BALANCE UI
@@ -794,6 +973,7 @@
 
     }
 
+
     function makeMemberCardNumber(id) {
 
         const value =
@@ -811,15 +991,25 @@
 
             "3M",
 
-            last12.slice(0, 4),
+            last12.slice(
+                0,
+                4
+            ),
 
-            last12.slice(4, 8),
+            last12.slice(
+                4,
+                8
+            ),
 
-            last12.slice(8, 12)
+            last12.slice(
+                8,
+                12
+            )
 
         ].join(" • ");
 
     }
+
 
     /* =====================================================
        PROFILE
@@ -845,6 +1035,7 @@
 
     }
 
+
     function makeMemberId() {
 
         return `3M-${String(
@@ -852,6 +1043,7 @@
         ).padStart(8, "0")}`;
 
     }
+
 
     /* =====================================================
        MINING
@@ -886,6 +1078,7 @@
         );
 
     }
+
 
     function updateMiningProgressVisual() {
 
@@ -945,6 +1138,7 @@
         }
 
     }
+
 
     function updateMiningButton(
         buttonSelector,
@@ -1029,6 +1223,7 @@
 
     }
 
+
     function updateMiningUI() {
 
         const active =
@@ -1106,6 +1301,7 @@
         updateMiningProgressVisual();
 
     }
+
 
     /* =====================================================
        LOAD MINING STATUS
@@ -1186,6 +1382,7 @@
 
     }
 
+
     /* =====================================================
        MINING TIMER
     ===================================================== */
@@ -1251,6 +1448,7 @@
 
     }
 
+
     /* =====================================================
        START MINING
     ===================================================== */
@@ -1296,7 +1494,8 @@
                 await apiRequest(
                     `/mining/${state.telegramId}/start`,
                     {
-                        method: "POST"
+                        method:
+                            "POST"
                     }
                 );
 
@@ -1356,6 +1555,7 @@
 
     }
 
+
     /* =====================================================
        CLAIM MINING
     ===================================================== */
@@ -1392,7 +1592,8 @@
                 await apiRequest(
                     `/mining/${state.telegramId}/claim`,
                     {
-                        method: "POST"
+                        method:
+                            "POST"
                     }
                 );
 
@@ -1463,6 +1664,7 @@
 
     }
 
+
     /* =====================================================
        MINING BUTTONS
     ===================================================== */
@@ -1503,6 +1705,7 @@
 
     }
 
+
     function setupMiningButtons() {
 
         const buttons = [
@@ -1539,6 +1742,7 @@
 
     }
 
+
     /* =====================================================
        TASKS
     ===================================================== */
@@ -1574,13 +1778,15 @@
                 error
             );
 
-            state.tasks = [];
+            state.tasks =
+                [];
 
             renderTasksError();
 
         }
 
     }
+
 
     function updateRewardsActivityFromTasks() {
 
@@ -1596,6 +1802,7 @@
             completedCount;
 
     }
+
 
     function renderTasks() {
 
@@ -1628,7 +1835,9 @@
         }
 
         container.innerHTML =
+
             state.tasks
+
                 .map(task => {
 
                     const id =
@@ -1701,9 +1910,11 @@
                     `;
 
                 })
+
                 .join("");
 
     }
+
 
     function renderTasksError() {
 
@@ -1724,6 +1935,7 @@
 
     }
 
+
     async function completeTask(
         taskId
     ) {
@@ -1734,7 +1946,8 @@
                 await apiRequest(
                     `/tasks/${state.telegramId}/complete/${taskId}`,
                     {
-                        method: "POST"
+                        method:
+                            "POST"
                     }
                 );
 
@@ -1796,6 +2009,7 @@
 
     }
 
+
     /* =====================================================
        DAILY REWARD
     ===================================================== */
@@ -1808,7 +2022,8 @@
                 await apiRequest(
                     `/daily/${state.telegramId}`,
                     {
-                        method: "POST"
+                        method:
+                            "POST"
                     }
                 );
 
@@ -1861,6 +2076,7 @@
         }
 
     }
+
 
     /* =====================================================
        REFERRAL
@@ -1927,6 +2143,7 @@
 
     }
 
+
     function updateRewardsFromReferral() {
 
         /*
@@ -1940,6 +2157,7 @@
 
     }
 
+
     function createReferralLink(
         code
     ) {
@@ -1949,6 +2167,7 @@
         )}`;
 
     }
+
 
     function updateReferralUI() {
 
@@ -1987,6 +2206,7 @@
 
     }
 
+
     function generateReferralBarcode(
         code
     ) {
@@ -1996,7 +2216,8 @@
 
         if (!container) return;
 
-        container.innerHTML = "";
+        container.innerHTML =
+            "";
 
         const source =
             String(
@@ -2004,7 +2225,8 @@
                 "3MIGO"
             );
 
-        let seed = 0;
+        let seed =
+            0;
 
         for (
             let i = 0;
@@ -2052,6 +2274,7 @@
 
     }
 
+
     async function copyReferral() {
 
         const link =
@@ -2089,6 +2312,7 @@
         }
 
     }
+
 
     function shareReferral() {
 
@@ -2136,6 +2360,7 @@
         );
 
     }
+
 
     /* =====================================================
        ECONOMIC SYSTEM
@@ -2222,6 +2447,7 @@
 
     }
 
+
     function calculateGrowthIndex() {
 
         const activity =
@@ -2253,6 +2479,7 @@
 
     }
 
+
     function calculateExperience() {
 
         const score =
@@ -2268,38 +2495,73 @@
         const levels = [
 
             {
-                level: 1,
-                name: "Starter",
-                min: 0,
-                max: 100
+                level:
+                    1,
+
+                name:
+                    "Starter",
+
+                min:
+                    0,
+
+                max:
+                    100
             },
 
             {
-                level: 2,
-                name: "Explorer",
-                min: 100,
-                max: 300
+                level:
+                    2,
+
+                name:
+                    "Explorer",
+
+                min:
+                    100,
+
+                max:
+                    300
             },
 
             {
-                level: 3,
-                name: "Builder",
-                min: 300,
-                max: 700
+                level:
+                    3,
+
+                name:
+                    "Builder",
+
+                min:
+                    300,
+
+                max:
+                    700
             },
 
             {
-                level: 4,
-                name: "Contributor",
-                min: 700,
-                max: 1500
+                level:
+                    4,
+
+                name:
+                    "Contributor",
+
+                min:
+                    700,
+
+                max:
+                    1500
             },
 
             {
-                level: 5,
-                name: "Migo Master",
-                min: 1500,
-                max: 3000
+                level:
+                    5,
+
+                name:
+                    "Migo Master",
+
+                min:
+                    1500,
+
+                max:
+                    3000
             }
 
         ];
@@ -2328,7 +2590,10 @@
                 Math.min(
                     100,
                     (
-                        (score - current.min) /
+                        (
+                            score -
+                            current.min
+                        ) /
                         Math.max(
                             1,
                             current.max -
@@ -2356,6 +2621,7 @@
         };
 
     }
+
 
     function updateEconomicUI() {
 
@@ -2493,6 +2759,7 @@
 
     }
 
+
     /* =====================================================
        AIRDROP
     ===================================================== */
@@ -2540,6 +2807,7 @@
 
     }
 
+
     async function spendEconomic() {
 
         try {
@@ -2548,7 +2816,8 @@
                 await apiRequest(
                     `/economic/spend/${state.telegramId}`,
                     {
-                        method: "POST"
+                        method:
+                            "POST"
                     }
                 );
 
@@ -2580,6 +2849,7 @@
         }
 
     }
+
 
     /* =====================================================
        TRANSACTIONS
@@ -2616,6 +2886,7 @@
 
     }
 
+
     function renderTransactions() {
 
         const container =
@@ -2642,8 +2913,14 @@
         }
 
         container.innerHTML =
+
             state.transactions
-                .slice(0, 30)
+
+                .slice(
+                    0,
+                    30
+                )
+
                 .map(transaction => {
 
                     const title =
@@ -2684,9 +2961,11 @@
                     `;
 
                 })
+
                 .join("");
 
     }
+
 
     /* =====================================================
        REWARDS HUB
@@ -2695,7 +2974,7 @@
     function calculateInitialSpins() {
 
         /*
-         * V5.9:
+         * V5.9 / V6.0:
          *
          * One FREE UX demo spin per browser session.
          *
@@ -2717,6 +2996,7 @@
         return 1;
 
     }
+
 
     function initializeRewardsHub() {
 
@@ -2755,6 +3035,7 @@
         }
 
     }
+
 
     function updateRewardsUI() {
 
@@ -2831,6 +3112,7 @@
 
     }
 
+
     function setRewardStatus(
         message
     ) {
@@ -2841,6 +3123,7 @@
         );
 
     }
+
 
     function spinRewardWheel() {
 
@@ -2997,6 +3280,7 @@
 
     }
 
+
     /* =====================================================
        REWARDS — WATCH & EARN
     ===================================================== */
@@ -3013,6 +3297,7 @@
 
     }
 
+
     /* =====================================================
        REWARDS — JOIN & EARN
     ===================================================== */
@@ -3028,6 +3313,7 @@
         );
 
     }
+
 
     /* =====================================================
        REWARDS — INVITE & EARN
@@ -3055,6 +3341,7 @@
 
     }
 
+
     /* =====================================================
        REWARDS — DAILY MISSIONS
     ===================================================== */
@@ -3071,6 +3358,7 @@
 
     }
 
+
     /* =====================================================
        REWARDS HUB MODAL
     ===================================================== */
@@ -3084,6 +3372,7 @@
         );
 
     }
+
 
     function scrollRewardsWheel() {
 
@@ -3108,10 +3397,16 @@
 
     }
 
+
     /* =====================================================
        ADSGRAM INITIALIZATION
+       V6.0
 
        DEBUG MODE REMAINS FOR TESTING ONLY.
+
+       IMPORTANT:
+       Debug mode does not create a real server reward
+       callback. It is only for SDK/UI testing.
     ===================================================== */
 
     function initializeAdsGram() {
@@ -3145,7 +3440,7 @@
                 });
 
             console.log(
-                "AdsGram initialized — DEBUG MODE — Block ID:",
+                "AdsGram initialized — V6.0 DEBUG MODE — Block ID:",
                 ADSGRAM_BLOCK_ID
             );
 
@@ -3167,8 +3462,285 @@
 
     }
 
+
     /* =====================================================
-       ADSGRAM REWARD AD
+       ADSGRAM — TELEGRAM USER ID
+    ===================================================== */
+
+    function getAdsGramTelegramId() {
+
+        try {
+
+            const telegramUser =
+                window.Telegram
+                    ?.WebApp
+                    ?.initDataUnsafe
+                    ?.user;
+
+            if (
+                telegramUser &&
+                telegramUser.id
+            ) {
+
+                return Number(
+                    telegramUser.id
+                );
+
+            }
+
+        } catch (error) {
+
+            console.log(
+                "AdsGram Telegram ID error:",
+                error
+            );
+
+        }
+
+        /*
+         * Do NOT use FALLBACK_TELEGRAM_ID
+         * for real reward confirmation.
+         *
+         * A real AdsGram reward must belong
+         * to the actual Telegram account.
+         */
+
+        return 0;
+
+    }
+
+
+    /* =====================================================
+       ADSGRAM — SERVER REWARD STATUS
+    ===================================================== */
+
+    async function checkAdsGramRewardStatus() {
+
+        const telegramId =
+            getAdsGramTelegramId();
+
+        if (
+            !telegramId ||
+            telegramId <= 0
+        ) {
+
+            console.log(
+                "AdsGram: invalid Telegram ID."
+            );
+
+            return null;
+
+        }
+
+        try {
+
+            const data =
+                await apiRequest(
+                    `/adsgram/reward/status/${telegramId}`,
+                    {
+                        method:
+                            "GET",
+
+                        headers: {
+
+                            "Accept":
+                                "application/json"
+
+                        }
+                    }
+                );
+
+            console.log(
+                "AdsGram reward status:",
+                data
+            );
+
+            return data;
+
+        } catch (error) {
+
+            console.log(
+                "AdsGram reward status error:",
+                error
+            );
+
+            return null;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ADSGRAM — WAIT FOR SERVER CONFIRMATION
+    ===================================================== */
+
+    async function waitForAdsGramRewardConfirmation(
+        previousRewardCount
+    ) {
+
+        if (
+            adsgramRewardPolling
+        ) {
+
+            return false;
+
+        }
+
+        adsgramRewardPolling =
+            true;
+
+        const status =
+            $("#adRewardStatus");
+
+        /*
+         * 12 attempts × 2.5 seconds
+         * = approximately 30 seconds.
+         */
+
+        const maxAttempts =
+            12;
+
+        const intervalMs =
+            2500;
+
+        try {
+
+            for (
+                let attempt = 1;
+                attempt <= maxAttempts;
+                attempt++
+            ) {
+
+                if (status) {
+
+                    status.textContent =
+                        `تمت المشاهدة. جارٍ تأكيد المكافأة (${attempt}/${maxAttempts})...`;
+
+                }
+
+                const rewardData =
+                    await checkAdsGramRewardStatus();
+
+                if (rewardData) {
+
+                    const rewardCount =
+                        Number(
+                            rewardData.reward_count || 0
+                        );
+
+                    /*
+                     * The authoritative confirmation
+                     * is an increase in reward_count.
+                     *
+                     * We deliberately do NOT add
+                     * rewardData.reward_3m locally.
+                     */
+
+                    if (
+                        previousRewardCount !== null &&
+                        rewardCount >
+                        previousRewardCount
+                    ) {
+
+                        console.log(
+                            "AdsGram reward CONFIRMED:",
+                            rewardData
+                        );
+
+                        if (status) {
+
+                            status.textContent =
+                                "تم تأكيد المكافأة من النظام الخلفي.";
+
+                        }
+
+                        setRewardStatus(
+                            "📺 تمت مشاهدة الإعلان وتأكيد المكافأة من الخادم."
+                        );
+
+                        toast(
+                            "تم تأكيد مكافأة الإعلان."
+                        );
+
+                        /*
+                         * Reload authoritative data.
+                         *
+                         * IMPORTANT:
+                         * No local balance calculation here.
+                         */
+
+                        await Promise.allSettled([
+
+                            loadUser(),
+
+                            loadEconomic(),
+
+                            loadTransactions()
+
+                        ]);
+
+                        updateBalanceUI();
+
+                        updateEconomicUI();
+
+                        return true;
+
+                    }
+
+                }
+
+                if (
+                    attempt <
+                    maxAttempts
+                ) {
+
+                    await new Promise(
+                        resolve =>
+                            setTimeout(
+                                resolve,
+                                intervalMs
+                            )
+                    );
+
+                }
+
+            }
+
+            /*
+             * The ad was completed but the server
+             * has not confirmed it yet.
+             */
+
+            if (status) {
+
+                status.textContent =
+                    "تمت مشاهدة الإعلان، لكن تأكيد المكافأة لم يصل بعد.";
+
+            }
+
+            setRewardStatus(
+                "📺 تمت مشاهدة الإعلان. المكافأة تنتظر تأكيد النظام الخلفي."
+            );
+
+            toast(
+                "تمت المشاهدة، وجارٍ انتظار تأكيد الخادم."
+            );
+
+            return false;
+
+        } finally {
+
+            adsgramRewardPolling =
+                false;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ADSGRAM REWARD AD — V6.0
     ===================================================== */
 
     async function showRewardAd() {
@@ -3178,7 +3750,19 @@
         ) {
 
             toast(
-                "الإعلان قيد التحميل..."
+                "الإعلان قيد التشغيل..."
+            );
+
+            return;
+
+        }
+
+        if (
+            adsgramRewardPolling
+        ) {
+
+            toast(
+                "جارٍ تأكيد المكافأة السابقة..."
             );
 
             return;
@@ -3216,6 +3800,35 @@
 
         }
 
+
+        /*
+         * IMPORTANT:
+         *
+         * Read reward_count BEFORE showing the ad.
+         *
+         * This creates the baseline that allows
+         * us to detect the new server-side reward.
+         */
+
+        const before =
+            await checkAdsGramRewardStatus();
+
+        const previousRewardCount =
+            before
+                ? Number(
+                    before.reward_count || 0
+                )
+                : null;
+
+
+        /*
+         * If we cannot read the server baseline,
+         * do not claim that a reward was confirmed.
+         *
+         * We can still show the ad, but after completion
+         * the frontend will not fabricate a reward.
+         */
+
         const button =
             $(
                 '[data-action="watch-reward-ad"]'
@@ -3224,8 +3837,10 @@
         const status =
             $("#adRewardStatus");
 
+
         adsgramLoading =
             true;
+
 
         if (button) {
 
@@ -3238,6 +3853,7 @@
 
         }
 
+
         if (status) {
 
             status.textContent =
@@ -3245,26 +3861,37 @@
 
         }
 
+
         try {
 
             if (status) {
 
                 status.textContent =
-                    "شاهد الإعلان حتى النهاية لتفعيل المشاهدة.";
+                    "شاهد الإعلان حتى النهاية لتفعيل المكافأة.";
 
             }
 
+
             const result =
                 await adsgramController.show();
+
 
             console.log(
                 "AdsGram reward result:",
                 result
             );
 
+
+            /*
+             * Rewarded ads:
+             *
+             * The reward is considered completed
+             * only when done === true.
+             */
+
             if (
-                result &&
-                result.done === false
+                !result ||
+                result.done !== true
             ) {
 
                 if (status) {
@@ -3274,28 +3901,56 @@
 
                 }
 
+                setRewardStatus(
+                    "📺 لم تكتمل مشاهدة الإعلان."
+                );
+
                 toast(
-                    "لم تكتمل مشاهدة الإعلان."
+                    "يجب مشاهدة الإعلان حتى النهاية."
                 );
 
                 return;
 
             }
 
+
+            /*
+             * DO NOT:
+             *
+             * state.balance += reward
+             *
+             * state.total += reward
+             *
+             * state.today += reward
+             *
+             * The backend is the authority.
+             */
+
+
             if (status) {
 
                 status.textContent =
-                    "تمت مشاهدة الإعلان. انتظار تأكيد النظام الخلفي.";
+                    "تمت مشاهدة الإعلان. جارٍ انتظار تأكيد النظام الخلفي...";
 
             }
 
             setRewardStatus(
-                "📺 تمت مشاهدة الإعلان. المكافأة لا تدخل المحفظة إلا بعد تأكيد النظام."
+                "📺 تمت مشاهدة الإعلان. جارٍ تأكيد المكافأة من النظام."
             );
 
             toast(
-                "تمت مشاهدة الإعلان."
+                "تمت مشاهدة الإعلان. جارٍ تأكيد المكافأة."
             );
+
+
+            /*
+             * Poll the backend.
+             */
+
+            await waitForAdsGramRewardConfirmation(
+                previousRewardCount
+            );
+
 
         } catch (error) {
 
@@ -3307,12 +3962,16 @@
             if (status) {
 
                 status.textContent =
-                    "تعذر تشغيل الإعلان أو لم تتوفر مادة إعلانية حالياً.";
+                    "تعذر تشغيل الإعلان أو لا توجد مادة إعلانية متاحة حالياً.";
 
             }
 
+            setRewardStatus(
+                "📺 لا توجد مادة إعلانية متاحة حالياً أو تعذر تشغيل الإعلان."
+            );
+
             toast(
-                "تعذر تشغيل الإعلان حالياً."
+                "لا يوجد إعلان متاح حالياً."
             );
 
         } finally {
@@ -3335,6 +3994,7 @@
 
     }
 
+
     /* =====================================================
        AD GALAXY
     ===================================================== */
@@ -3353,6 +4013,7 @@
 
     }
 
+
     /* =====================================================
        VIEW NAVIGATION
     ===================================================== */
@@ -3364,9 +4025,13 @@
         const validViews = [
 
             "home",
+
             "mine",
+
             "tasks",
+
             "wallet",
+
             "profile"
 
         ];
@@ -3408,19 +4073,17 @@
             .forEach(button => {
 
                 button.classList.toggle(
-
                     "active",
-
                     button.dataset.viewTarget ===
                     viewName
-
                 );
 
             });
 
         window.scrollTo({
 
-            top: 0,
+            top:
+                0,
 
             behavior:
                 "smooth"
@@ -3432,6 +4095,7 @@
         );
 
     }
+
 
     async function loadViewData(
         viewName
@@ -3493,6 +4157,7 @@
 
     }
 
+
     /* =====================================================
        MODALS
     ===================================================== */
@@ -3515,6 +4180,7 @@
 
     }
 
+
     function closeModal(modal) {
 
         if (!modal) return;
@@ -3527,6 +4193,7 @@
         );
 
     }
+
 
     function closeAllModals() {
 
@@ -3548,9 +4215,10 @@
 
     }
 
+
     /* =====================================================
        AI ASSISTANT
-       V5.9 — LIVE SERPAPI SEARCH
+       V6.0 — LIVE SERPAPI SEARCH
     ===================================================== */
 
     function openAI() {
@@ -3587,6 +4255,7 @@
         }
 
     }
+
 
     function addAIMessage(
         text,
@@ -3642,6 +4311,7 @@
         return message;
 
     }
+
 
     /* =====================================================
        AI SEARCH STATUS
@@ -3699,6 +4369,7 @@
 
     }
 
+
     /* =====================================================
        AI SOURCE URL SAFETY
     ===================================================== */
@@ -3715,8 +4386,11 @@
                 );
 
             return (
+
                 url.protocol === "https:" ||
+
                 url.protocol === "http:"
+
             );
 
         } catch {
@@ -3726,6 +4400,7 @@
         }
 
     }
+
 
     /* =====================================================
        AI SEARCH RESULTS RENDERER
@@ -3743,10 +4418,12 @@
 
         const safeResults =
             Array.isArray(results)
+
                 ? results.slice(
                     0,
                     AI_SEARCH_LIMIT
                 )
+
                 : [];
 
         if (
@@ -3963,6 +4640,7 @@
 
     }
 
+
     /* =====================================================
        AI SEARCH
     ===================================================== */
@@ -4026,7 +4704,9 @@
                 Array.isArray(
                     data?.results
                 )
+
                     ? data.results
+
                     : [];
 
             if (
@@ -4143,6 +4823,7 @@
 
     }
 
+
     /* =====================================================
        LOCAL AI EXPLANATION
        Used only as fallback for 3Migo-specific questions
@@ -4229,9 +4910,10 @@
 
     }
 
+
     /* =====================================================
        AI QUERY ROUTER
-       V5.9
+       V6.0
 
        1. 3Migo-specific questions use local knowledge.
        2. General questions use live web search.
@@ -4251,27 +4933,49 @@
         const keywords = [
 
             "3migo",
+
             "3ميجو",
+
             "3 ميجو",
+
             "التعدين",
+
             "mine",
+
             "محفظ",
+
             "رصيد",
+
             "إحال",
+
             "ref",
+
             "اقتصاد",
+
             "إيردروب",
+
             "airdrop",
+
             "مهم",
+
             "task",
+
             "reward",
+
             "مكاف",
+
             "عجلة",
+
             "spin",
+
             "إعلان",
+
             "adsgram",
+
             "ad",
+
             "رصيدي",
+
             "التطبيق"
 
         ];
@@ -4284,6 +4988,7 @@
         );
 
     }
+
 
     async function processAIQuestion(
         question
@@ -4342,6 +5047,7 @@
 
     }
 
+
     async function sendAIMessage() {
 
         const input =
@@ -4372,6 +5078,7 @@
 
     }
 
+
     /* =====================================================
        ACTION HANDLER
     ===================================================== */
@@ -4389,6 +5096,7 @@
 
                 break;
 
+
             case "open-economic":
 
                 openModal(
@@ -4398,6 +5106,7 @@
                 await loadEconomic();
 
                 break;
+
 
             case "open-wallet":
 
@@ -4409,6 +5118,7 @@
 
                 break;
 
+
             case "open-ad-galaxy":
 
                 openModal(
@@ -4417,11 +5127,13 @@
 
                 break;
 
+
             case "open-rewards-hub":
 
                 openRewardsHub();
 
                 break;
+
 
             case "spin-reward-wheel":
 
@@ -4429,11 +5141,13 @@
 
                 break;
 
+
             case "scroll-rewards-wheel":
 
                 scrollRewardsWheel();
 
                 break;
+
 
             case "reward-watch-ad":
 
@@ -4441,11 +5155,13 @@
 
                 break;
 
+
             case "reward-join":
 
                 rewardJoin();
 
                 break;
+
 
             case "reward-invite":
 
@@ -4453,11 +5169,13 @@
 
                 break;
 
+
             case "reward-daily":
 
                 rewardDaily();
 
                 break;
+
 
             case "watch-reward-ad":
 
@@ -4465,11 +5183,13 @@
 
                 break;
 
+
             case "copy-referral":
 
                 await copyReferral();
 
                 break;
+
 
             case "share-referral":
 
@@ -4477,11 +5197,13 @@
 
                 break;
 
+
             case "preview-airdrop":
 
                 await previewAirdrop();
 
                 break;
+
 
             case "spend-economic":
 
@@ -4489,11 +5211,13 @@
 
                 break;
 
+
             case "refresh-ads":
 
                 await refreshAds();
 
                 break;
+
 
             case "close-modal":
 
@@ -4505,11 +5229,13 @@
 
                 break;
 
+
             case "daily-reward":
 
                 await claimDailyReward();
 
                 break;
+
 
             default:
 
@@ -4521,6 +5247,7 @@
         }
 
     }
+
 
     /* =====================================================
        EVENT SYSTEM
@@ -4553,6 +5280,7 @@
 
                 }
 
+
                 /*
                  * Actions
                  */
@@ -4569,16 +5297,14 @@
                     event.preventDefault();
 
                     await handleAction(
-
                         actionElement.dataset.action,
-
                         actionElement
-
                     );
 
                     return;
 
                 }
+
 
                 /*
                  * Task buttons
@@ -4611,6 +5337,7 @@
                     return;
 
                 }
+
 
                 /*
                  * AI quick questions
@@ -4646,6 +5373,7 @@
             }
         );
 
+
         /*
          * AI send
          */
@@ -4664,6 +5392,7 @@
 
         }
 
+
         /*
          * Enter inside AI input
          */
@@ -4676,9 +5405,7 @@
         ) {
 
             aiInput.addEventListener(
-
                 "keydown",
-
                 event => {
 
                     if (
@@ -4693,10 +5420,10 @@
                     }
 
                 }
-
             );
 
         }
+
 
         /*
          * Close modal by backdrop
@@ -4708,9 +5435,7 @@
             .forEach(modal => {
 
                 modal.addEventListener(
-
                     "click",
-
                     event => {
 
                         if (
@@ -4725,10 +5450,10 @@
                         }
 
                     }
-
                 );
 
             });
+
 
         /*
          * ESC
@@ -4751,6 +5476,7 @@
         );
 
     }
+
 
     /* =====================================================
        HTML ESCAPE
@@ -4789,6 +5515,7 @@
 
     }
 
+
     /* =====================================================
        INITIALIZATION
     ===================================================== */
@@ -4796,8 +5523,9 @@
     async function initialize() {
 
         console.log(
-            "3Migo Coin — App V5.9 initializing..."
+            "3Migo Coin — App V6.0 initializing..."
         );
+
 
         /*
          * Telegram
@@ -4805,11 +5533,13 @@
 
         initializeTelegramUser();
 
+
         /*
          * Rewards Hub
          */
 
         initializeRewardsHub();
+
 
         /*
          * AdsGram
@@ -4817,11 +5547,13 @@
 
         initializeAdsGram();
 
+
         /*
          * Register/load user first.
          */
 
         await registerUser();
+
 
         /*
          * Load core data.
@@ -4841,6 +5573,7 @@
 
         ]);
 
+
         /*
          * UI
          */
@@ -4857,6 +5590,7 @@
 
         updateRewardsUI();
 
+
         /*
          * Events
          */
@@ -4864,6 +5598,7 @@
         setupMiningButtons();
 
         setupEvents();
+
 
         /*
          * Home is default.
@@ -4873,11 +5608,13 @@
             "home"
         );
 
+
         console.log(
-            "3Migo Coin — App V5.9 ready."
+            "3Migo Coin — App V6.0 ready."
         );
 
     }
+
 
     /* =====================================================
        START
@@ -4898,6 +5635,7 @@
         initialize();
 
     }
+
 
     /* =====================================================
        GLOBAL ACCESS
@@ -4933,6 +5671,10 @@
 
         initializeAdsGram,
 
+        checkAdsGramRewardStatus,
+
+        waitForAdsGramRewardConfirmation,
+
         openRewardsHub,
 
         spinRewardWheel,
@@ -4950,5 +5692,6 @@
         toast
 
     };
+
 
 })();
