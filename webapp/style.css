@@ -1,15 +1,29 @@
 /* =========================================================
-   3MIGO COIN — STYLE V5.4
-   Premium Crypto / Digital Finance UI
+   3MIGO COIN — STYLE V6.0
+   PREMIUM REWARDS EXPERIENCE
    Dark Navy + Charcoal + Gold + Orange
    Frontend only — API contracts preserved
+
+   V6.0 CHANGES
+   ---------------------------------------------------------
+   - Real visual Reward Wheel
+   - Six-segment circular wheel
+   - Fixed wheel pointer
+   - Premium Rewards Hub layout
+   - Improved reward cards
+   - Reduced visual duplication
+   - Ads remain optional
+   - Ad Galaxy remains dedicated ad area
+   - Existing IDs/classes preserved
 ========================================================= */
+
 
 /* =========================================================
    ROOT
 ========================================================= */
 
 :root {
+
     --bg: #03070d;
     --bg-soft: #071019;
     --bg-card: #0a111b;
@@ -46,8 +60,11 @@
 
     --mine-progress: 0deg;
 
+    --wheel-size: 278px;
+
     box-sizing: border-box;
 }
+
 
 /* =========================================================
    RESET
@@ -61,29 +78,34 @@ html {
     scroll-behavior: smooth;
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     min-height: 100%;
 }
 
 body {
+
     font-family:
         Arial,
         Tahoma,
         sans-serif;
 
     background:
+
         radial-gradient(
             circle at 50% -10%,
             rgba(247, 147, 26, 0.11),
             transparent 34%
         ),
+
         radial-gradient(
             circle at 100% 35%,
             rgba(91, 220, 255, 0.035),
             transparent 30%
         ),
+
         linear-gradient(
             180deg,
             #03070d 0%,
@@ -92,11 +114,13 @@ body {
         );
 
     color: var(--text);
+
     min-height: 100vh;
 
-    padding-bottom: calc(
-        var(--nav-height) + 24px
-    );
+    padding-bottom:
+        calc(
+            var(--nav-height) + 24px
+        );
 
     overflow-x: hidden;
 }
@@ -119,25 +143,34 @@ input {
     outline: none;
 }
 
+
 /* =========================================================
    APP
 ========================================================= */
 
 #app {
+
     width: 100%;
     max-width: 720px;
+
     margin: 0 auto;
+
     position: relative;
 }
+
 
 /* =========================================================
    VIEW SYSTEM
 ========================================================= */
 
 .app-view {
+
     display: none;
+
     width: 100%;
-    animation: viewIn 0.24s ease;
+
+    animation:
+        viewIn 0.24s ease;
 }
 
 .app-view.active {
@@ -149,12 +182,17 @@ input {
 }
 
 .system-section {
+
     width: calc(100% - 28px);
+
     max-width: 692px;
-    margin: 24px auto;
+
+    margin:
+        24px auto;
 }
 
 @keyframes viewIn {
+
     from {
         opacity: 0;
         transform: translateY(8px);
@@ -166,58 +204,76 @@ input {
     }
 }
 
+
 /* =========================================================
    TOP BAR
 ========================================================= */
 
 .topbar {
+
     position: sticky;
+
     top: 0;
+
     z-index: 50;
 
     height: 66px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
-    padding: 0 18px;
+    padding:
+        0
+        18px;
 
     background:
+
         linear-gradient(
             180deg,
             rgba(3, 7, 13, 0.96),
             rgba(3, 7, 13, 0.82)
         );
 
-    backdrop-filter: blur(18px);
+    backdrop-filter:
+        blur(18px);
 
     border-bottom:
-        1px solid rgba(255, 255, 255, 0.06);
+        1px solid
+        rgba(255, 255, 255, 0.06);
 }
 
 .brand {
+
     display: flex;
+
     align-items: center;
+
     gap: 11px;
 }
 
 .coin-symbol {
+
     width: 38px;
     height: 38px;
 
     border-radius: 50%;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     font-size: 12px;
+
     font-weight: 900;
 
     color: #111;
 
     background:
+
         linear-gradient(
             145deg,
             #ffd47a,
@@ -226,53 +282,69 @@ input {
         );
 
     box-shadow:
-        0 0 22px rgba(247, 147, 26, 0.22);
+        0 0 22px
+        rgba(247, 147, 26, 0.22);
 }
 
 .brand-title {
+
     font-size: 15px;
+
     font-weight: 900;
+
     letter-spacing: 0.2px;
 }
 
 .brand-subtitle {
+
     margin-top: 2px;
 
     color: var(--muted);
 
     font-size: 9px;
+
     letter-spacing: 1.4px;
 }
 
 .topbar-status {
+
     display: flex;
+
     align-items: center;
+
     gap: 7px;
 
     color: #91a0b2;
 
     font-size: 9px;
+
     font-weight: 700;
+
     letter-spacing: 0.8px;
 }
 
 .status-dot {
+
     width: 7px;
     height: 7px;
 
     border-radius: 50%;
 
-    background: var(--green);
+    background:
+        var(--green);
 
     box-shadow:
-        0 0 10px rgba(37, 211, 102, 0.55);
+        0 0 10px
+        rgba(37, 211, 102, 0.55);
 }
+
 
 /* =========================================================
    HERO
 ========================================================= */
 
 .hero {
+
     text-align: center;
 
     padding:
@@ -282,17 +354,21 @@ input {
 }
 
 .hero-logo {
+
     display: flex;
+
     justify-content: center;
 
     margin-bottom: 14px;
 }
 
 .coin-logo {
+
     width: 78px;
     height: 78px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -301,9 +377,11 @@ input {
     color: #101010;
 
     font-size: 21px;
+
     font-weight: 950;
 
     background:
+
         radial-gradient(
             circle at 35% 25%,
             #ffe2a2,
@@ -313,23 +391,33 @@ input {
         );
 
     border:
-        3px solid rgba(255, 204, 112, 0.35);
+        3px solid
+        rgba(255, 204, 112, 0.35);
 
     box-shadow:
-        0 0 0 10px rgba(247, 147, 26, 0.045),
-        0 0 0 20px rgba(247, 147, 26, 0.018),
-        0 18px 55px rgba(247, 147, 26, 0.20);
+
+        0 0 0 10px
+        rgba(247, 147, 26, 0.045),
+
+        0 0 0 20px
+        rgba(247, 147, 26, 0.018),
+
+        0 18px 55px
+        rgba(247, 147, 26, 0.20);
 }
 
 .hero h1 {
+
     margin: 0;
 
     font-size: 28px;
+
     font-weight: 950;
 
     letter-spacing: -0.7px;
 
     background:
+
         linear-gradient(
             90deg,
             #fff,
@@ -337,11 +425,14 @@ input {
         );
 
     -webkit-background-clip: text;
+
     background-clip: text;
+
     color: transparent;
 }
 
 .hero p {
+
     margin:
         8px
         0
@@ -353,6 +444,7 @@ input {
 }
 
 .beta-badge {
+
     display: inline-flex;
 
     padding:
@@ -360,7 +452,8 @@ input {
         10px;
 
     border:
-        1px solid var(--border-gold);
+        1px solid
+        var(--border-gold);
 
     border-radius: 999px;
 
@@ -370,15 +463,19 @@ input {
         rgba(247, 147, 26, 0.055);
 
     font-size: 8px;
+
     font-weight: 800;
+
     letter-spacing: 1.3px;
 }
+
 
 /* =========================================================
    PREMIUM WALLET CARD
 ========================================================= */
 
 .wallet-card-wrap {
+
     padding:
         0
         14px
@@ -386,19 +483,24 @@ input {
 }
 
 .balance-card {
+
     position: relative;
+
     overflow: hidden;
 
     min-height: 238px;
 
     padding: 22px;
 
-    border-radius: var(--radius-xl);
+    border-radius:
+        var(--radius-xl);
 
     border:
-        1px solid rgba(255, 255, 255, 0.11);
+        1px solid
+        rgba(255, 255, 255, 0.11);
 
     background:
+
         linear-gradient(
             135deg,
             #111a25 0%,
@@ -407,11 +509,15 @@ input {
         );
 
     box-shadow:
+
         var(--shadow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.045);
 }
 
 .premium-wallet-card::before {
+
     content: "";
 
     position: absolute;
@@ -425,16 +531,22 @@ input {
     border-radius: 50%;
 
     border:
-        1px solid rgba(247, 147, 26, 0.18);
+        1px solid
+        rgba(247, 147, 26, 0.18);
 
     box-shadow:
-        0 0 0 24px rgba(247, 147, 26, 0.025),
-        0 0 0 48px rgba(247, 147, 26, 0.018);
+
+        0 0 0 24px
+        rgba(247, 147, 26, 0.025),
+
+        0 0 0 48px
+        rgba(247, 147, 26, 0.018);
 
     pointer-events: none;
 }
 
 .premium-wallet-card::after {
+
     content: "";
 
     position: absolute;
@@ -448,12 +560,14 @@ input {
     border-radius: 50%;
 
     border:
-        1px solid rgba(91, 220, 255, 0.08);
+        1px solid
+        rgba(91, 220, 255, 0.08);
 
     pointer-events: none;
 }
 
 .wallet-card-glow {
+
     position: absolute;
 
     width: 220px;
@@ -465,6 +579,7 @@ input {
     border-radius: 50%;
 
     background:
+
         radial-gradient(
             circle,
             rgba(247, 147, 26, 0.18),
@@ -477,30 +592,39 @@ input {
 }
 
 .wallet-card-top {
+
     position: relative;
+
     z-index: 2;
 
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
 
     margin-bottom: 28px;
 }
 
 .balance-label {
+
     display: block;
 
     color: #8997a9;
 
     font-size: 9px;
+
     font-weight: 800;
 
     letter-spacing: 1.1px;
 }
 
 .wallet-card-status {
+
     display: flex;
+
     align-items: center;
+
     gap: 6px;
 
     margin-top: 6px;
@@ -508,10 +632,12 @@ input {
     color: #78879a;
 
     font-size: 8px;
+
     font-weight: 700;
 }
 
 .wallet-chip {
+
     width: 39px;
     height: 30px;
 
@@ -520,6 +646,7 @@ input {
     border-radius: 8px;
 
     background:
+
         linear-gradient(
             135deg,
             #f8d28a,
@@ -527,10 +654,12 @@ input {
         );
 
     box-shadow:
-        inset 0 1px 1px rgba(255, 255, 255, 0.45);
+        inset 0 1px 1px
+        rgba(255, 255, 255, 0.45);
 }
 
 .wallet-chip::before {
+
     content: "";
 
     position: absolute;
@@ -538,12 +667,14 @@ input {
     inset: 7px;
 
     border:
-        1px solid rgba(50, 30, 5, 0.45);
+        1px solid
+        rgba(50, 30, 5, 0.45);
 
     border-radius: 4px;
 }
 
 .wallet-chip span {
+
     position: absolute;
 
     background:
@@ -551,6 +682,7 @@ input {
 }
 
 .wallet-chip span:nth-child(1) {
+
     width: 1px;
     height: 100%;
 
@@ -558,6 +690,7 @@ input {
 }
 
 .wallet-chip span:nth-child(2) {
+
     width: 100%;
     height: 1px;
 
@@ -565,6 +698,7 @@ input {
 }
 
 .wallet-chip span:nth-child(3) {
+
     width: 1px;
     height: 100%;
 
@@ -572,16 +706,21 @@ input {
 }
 
 .balance-value {
+
     position: relative;
+
     z-index: 2;
 
     display: flex;
+
     align-items: baseline;
+
     gap: 7px;
 
     margin-top: 7px;
 
     font-size: 42px;
+
     line-height: 1;
 
     font-weight: 950;
@@ -591,11 +730,14 @@ input {
     color: #fff;
 
     text-shadow:
-        0 5px 25px rgba(0, 0, 0, 0.45);
+        0 5px 25px
+        rgba(0, 0, 0, 0.45);
 }
 
 .balance-token {
+
     position: relative;
+
     z-index: 2;
 
     margin-top: 6px;
@@ -603,13 +745,16 @@ input {
     color: var(--gold-light);
 
     font-size: 12px;
+
     font-weight: 900;
 
     letter-spacing: 2px;
 }
 
 .wallet-card-number {
+
     position: relative;
+
     z-index: 2;
 
     margin-top: 24px;
@@ -626,19 +771,25 @@ input {
 }
 
 .balance-meta {
+
     position: relative;
+
     z-index: 2;
 
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
 
     gap: 8px;
 
     margin-top: 17px;
+
     padding-top: 13px;
 
     border-top:
-        1px solid rgba(255, 255, 255, 0.07);
+        1px solid
+        rgba(255, 255, 255, 0.07);
 }
 
 .balance-meta-item {
@@ -646,6 +797,7 @@ input {
 }
 
 .balance-meta-item span {
+
     display: block;
 
     color: #69788b;
@@ -654,6 +806,7 @@ input {
 }
 
 .balance-meta-item strong {
+
     display: block;
 
     margin-top: 5px;
@@ -663,15 +816,19 @@ input {
     font-size: 10px;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
+
 
 /* =========================================================
    MINING PANEL
 ========================================================= */
 
 .mining-panel {
+
     margin:
         18px
         14px
@@ -683,11 +840,14 @@ input {
         18px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.065);
+        1px solid
+        rgba(255, 255, 255, 0.065);
 
-    border-radius: var(--radius-lg);
+    border-radius:
+        var(--radius-lg);
 
     background:
+
         linear-gradient(
             180deg,
             rgba(12, 21, 31, 0.92),
@@ -695,12 +855,16 @@ input {
         );
 
     box-shadow:
-        0 16px 40px rgba(0, 0, 0, 0.26);
+        0 16px 40px
+        rgba(0, 0, 0, 0.26);
 }
 
 .section-title {
+
     display: flex;
+
     align-items: center;
+
     gap: 8px;
 
     margin-bottom: 14px;
@@ -708,6 +872,7 @@ input {
     color: #e9eef5;
 
     font-size: 14px;
+
     font-weight: 900;
 }
 
@@ -715,13 +880,17 @@ input {
     font-size: 15px;
 }
 
+
 /* =========================================================
    CIRCULAR MINING CONTROL
 ========================================================= */
 
 .mining-orb-wrap {
+
     display: flex;
+
     justify-content: center;
+
     align-items: center;
 
     padding:
@@ -731,7 +900,9 @@ input {
 }
 
 .mining-progress-ring {
-    --progress: var(--mine-progress);
+
+    --progress:
+        var(--mine-progress);
 
     width: 218px;
     height: 218px;
@@ -741,21 +912,30 @@ input {
     border-radius: 50%;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     background:
+
         conic-gradient(
             from -90deg,
             var(--gold) 0deg,
             var(--orange) var(--progress),
-            rgba(255, 255, 255, 0.075) var(--progress),
-            rgba(255, 255, 255, 0.075) 360deg
+            rgba(255, 255, 255, 0.075)
+                var(--progress),
+            rgba(255, 255, 255, 0.075)
+                360deg
         );
 
     box-shadow:
-        0 0 0 1px rgba(247, 147, 26, 0.06),
-        0 0 35px rgba(247, 147, 26, 0.12);
+
+        0 0 0 1px
+        rgba(247, 147, 26, 0.06),
+
+        0 0 35px
+        rgba(247, 147, 26, 0.12);
 
     transition:
         background 0.45s ease,
@@ -763,6 +943,7 @@ input {
 }
 
 .mining-progress-ring::before {
+
     content: "";
 
     position: absolute;
@@ -773,22 +954,27 @@ input {
     border-radius: 50%;
 
     border:
-        1px dashed rgba(255, 204, 112, 0.16);
+        1px dashed
+        rgba(255, 204, 112, 0.16);
 
     pointer-events: none;
 }
 
 .mining-orb {
+
     width: 100%;
     height: 100%;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 50%;
 
     background:
+
         radial-gradient(
             circle at 40% 30%,
             #162434,
@@ -797,11 +983,16 @@ input {
         );
 
     box-shadow:
-        inset 0 0 35px rgba(0, 0, 0, 0.72),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+        inset 0 0 35px
+        rgba(0, 0, 0, 0.72),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.04);
 }
 
 .circular-mine-btn {
+
     position: relative;
 
     width: 166px;
@@ -810,13 +1001,17 @@ input {
     padding: 20px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.25);
+        1px solid
+        rgba(247, 147, 26, 0.25);
 
     border-radius: 50%;
 
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
+
     justify-content: center;
 
     gap: 7px;
@@ -824,6 +1019,7 @@ input {
     color: #121212;
 
     background:
+
         radial-gradient(
             circle at 35% 22%,
             #ffe2a0,
@@ -833,9 +1029,15 @@ input {
         );
 
     box-shadow:
-        0 12px 38px rgba(247, 147, 26, 0.25),
-        inset 0 2px 2px rgba(255, 255, 255, 0.42),
-        inset 0 -10px 20px rgba(113, 49, 0, 0.20);
+
+        0 12px 38px
+        rgba(247, 147, 26, 0.25),
+
+        inset 0 2px 2px
+        rgba(255, 255, 255, 0.42),
+
+        inset 0 -10px 20px
+        rgba(113, 49, 0, 0.20);
 
     transition:
         transform 0.18s ease,
@@ -843,6 +1045,7 @@ input {
 }
 
 .circular-mine-btn::before {
+
     content: "";
 
     position: absolute;
@@ -850,7 +1053,8 @@ input {
     inset: 8px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.28);
+        1px solid
+        rgba(255, 255, 255, 0.28);
 
     border-radius: 50%;
 
@@ -858,35 +1062,43 @@ input {
 }
 
 .circular-mine-btn:active {
-    transform: scale(0.95);
+
+    transform:
+        scale(0.95);
 
     box-shadow:
-        0 7px 22px rgba(247, 147, 26, 0.20),
-        inset 0 3px 8px rgba(100, 40, 0, 0.30);
+
+        0 7px 22px
+        rgba(247, 147, 26, 0.20),
+
+        inset 0 3px 8px
+        rgba(100, 40, 0, 0.30);
 }
 
 .mine-icon {
+
     position: relative;
+
     z-index: 2;
 
     font-size: 29px;
-
-    filter:
-        drop-shadow(
-            0 2px 2px rgba(0, 0, 0, 0.20)
-        );
 }
 
 .mine-btn-text {
+
     position: relative;
+
     z-index: 2;
 
     font-size: 12px;
+
     font-weight: 950;
 }
 
 .mine-reward {
+
     position: relative;
+
     z-index: 2;
 
     padding:
@@ -901,12 +1113,14 @@ input {
         rgba(45, 22, 2, 0.35);
 
     font-size: 9px;
+
     font-weight: 900;
 
     letter-spacing: 0.5px;
 }
 
 .mining-status {
+
     text-align: center;
 
     margin-top: 5px;
@@ -914,14 +1128,17 @@ input {
     color: var(--gold-light);
 
     font-size: 11px;
+
     font-weight: 800;
 }
+
 
 /* =========================================================
    MINING TIMELINE
 ========================================================= */
 
 .mining-timeline {
+
     margin:
         18px
         3px
@@ -929,8 +1146,11 @@ input {
 }
 
 .timeline-label {
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     color: #78879a;
@@ -939,6 +1159,7 @@ input {
 }
 
 .timeline-label strong {
+
     color: var(--gold-light);
 
     font-size: 11px;
@@ -949,6 +1170,7 @@ input {
 }
 
 .timeline-track {
+
     position: relative;
 
     height: 7px;
@@ -964,12 +1186,14 @@ input {
 }
 
 .timeline-progress {
+
     width: 0%;
     height: 100%;
 
     border-radius: inherit;
 
     background:
+
         linear-gradient(
             90deg,
             #b85c00,
@@ -977,14 +1201,17 @@ input {
         );
 
     box-shadow:
-        0 0 14px rgba(247, 147, 26, 0.38);
+        0 0 14px
+        rgba(247, 147, 26, 0.38);
 
     transition:
         width 0.6s linear;
 }
 
 .timeline-footer {
+
     display: flex;
+
     justify-content: space-between;
 
     margin-top: 6px;
@@ -995,6 +1222,7 @@ input {
 }
 
 .mining-rate {
+
     margin-top: 13px;
 
     text-align: center;
@@ -1008,13 +1236,17 @@ input {
     color: var(--gold-light);
 }
 
+
 /* =========================================================
    QUICK ACTIONS
 ========================================================= */
 
 .quick-actions {
+
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+
+    grid-template-columns:
+        repeat(4, 1fr);
 
     gap: 9px;
 
@@ -1025,16 +1257,19 @@ input {
 }
 
 .quick-action {
+
     min-height: 73px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.065);
+        1px solid
+        rgba(255, 255, 255, 0.065);
 
     border-radius: 17px;
 
     color: var(--text);
 
     background:
+
         linear-gradient(
             180deg,
             #0c1621,
@@ -1042,14 +1277,18 @@ input {
         );
 
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
+
     justify-content: center;
 
     gap: 7px;
 
     box-shadow:
-        0 9px 25px rgba(0, 0, 0, 0.18);
+        0 9px 25px
+        rgba(0, 0, 0, 0.18);
 
     transition:
         transform 0.18s ease,
@@ -1057,7 +1296,10 @@ input {
 }
 
 .quick-action:active {
-    transform: translateY(1px) scale(0.98);
+
+    transform:
+        translateY(1px)
+        scale(0.98);
 
     border-color:
         rgba(247, 147, 26, 0.25);
@@ -1068,40 +1310,1456 @@ input {
 }
 
 .quick-action small {
+
     color: #8996a8;
 
     font-size: 9px;
+
     font-weight: 800;
 }
+
 
 /* =========================================================
    SECTIONS
 ========================================================= */
 
 .section {
+
     margin:
         22px
         14px;
 }
 
 .muted {
+
     color: var(--muted);
+
     font-size: 9px;
 }
+
+
+/* =========================================================
+   =========================================================
+   REWARDS HUB — PREMIUM V6.0
+   =========================================================
+========================================================= */
+
+.rewards-hub {
+
+    position: relative;
+
+    overflow: hidden;
+
+    margin:
+        22px
+        14px
+        28px;
+
+    padding:
+        20px
+        14px
+        18px;
+
+    border-radius:
+        27px;
+
+    border:
+        1px solid
+        rgba(247, 147, 26, 0.16);
+
+    background:
+
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(247, 147, 26, 0.11),
+            transparent 38%
+        ),
+
+        radial-gradient(
+            circle at 100% 40%,
+            rgba(91, 220, 255, 0.025),
+            transparent 32%
+        ),
+
+        linear-gradient(
+            180deg,
+            #0c1621,
+            #050b12 72%
+        );
+
+    box-shadow:
+
+        0 20px 60px
+        rgba(0, 0, 0, 0.34),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.045);
+}
+
+.rewards-hub::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 260px;
+    height: 260px;
+
+    top: -170px;
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(247, 147, 26, 0.10);
+
+    box-shadow:
+
+        0 0 0 24px
+        rgba(247, 147, 26, 0.018),
+
+        0 0 0 48px
+        rgba(247, 147, 26, 0.012);
+
+    pointer-events: none;
+}
+
+.rewards-hub-glow {
+
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    top: 130px;
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    border-radius: 50%;
+
+    background:
+
+        radial-gradient(
+            circle,
+            rgba(247, 147, 26, 0.075),
+            transparent 68%
+        );
+
+    filter: blur(10px);
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   REWARDS HEADER
+========================================================= */
+
+.rewards-hub-header {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 17px;
+}
+
+.rewards-hub-title-wrap {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    min-width: 0;
+}
+
+.rewards-hub-icon {
+
+    width: 45px;
+    height: 45px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 15px;
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(255, 204, 112, 0.18),
+            rgba(247, 147, 26, 0.055)
+        );
+
+    border:
+        1px solid
+        rgba(247, 147, 26, 0.22);
+
+    font-size: 22px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(247, 147, 26, 0.09);
+}
+
+.rewards-hub-kicker {
+
+    display: block;
+
+    color: var(--gold-light);
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.7px;
+}
+
+.rewards-hub-header h2 {
+
+    margin:
+        3px
+        0
+        2px;
+
+    color: #fff;
+
+    font-size: 18px;
+
+    font-weight: 950;
+}
+
+.rewards-hub-header p {
+
+    margin: 0;
+
+    color: #718094;
+
+    font-size: 8px;
+}
+
+.rewards-hub-badge {
+
+    flex-shrink: 0;
+
+    padding:
+        6px
+        8px;
+
+    border:
+        1px solid
+        rgba(247, 147, 26, 0.18);
+
+    border-radius: 999px;
+
+    color: var(--gold-light);
+
+    background:
+        rgba(247, 147, 26, 0.055);
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   REWARD SUMMARY
+========================================================= */
+
+.rewards-summary {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 7px;
+
+    margin-bottom: 15px;
+}
+
+.reward-summary-card {
+
+    min-height: 73px;
+
+    padding:
+        11px
+        9px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    border-radius: 15px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.06);
+
+    background:
+
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.018)
+        );
+}
+
+.reward-summary-card span {
+
+    color: #687789;
+
+    font-size: 7px;
+
+    white-space: nowrap;
+}
+
+.reward-summary-card strong {
+
+    margin-top: 5px;
+
+    color: #fff;
+
+    font-size: 18px;
+
+    line-height: 1;
+}
+
+.reward-summary-card small {
+
+    margin-top: 4px;
+
+    color: var(--gold-light);
+
+    font-size: 6px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   REWARD WHEEL CARD
+========================================================= */
+
+.reward-wheel-card {
+
+    position: relative;
+
+    z-index: 2;
+
+    overflow: hidden;
+
+    padding:
+        17px
+        10px
+        16px;
+
+    border-radius: 23px;
+
+    border:
+        1px solid
+        rgba(247, 147, 26, 0.18);
+
+    background:
+
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(247, 147, 26, 0.055),
+            transparent 48%
+        ),
+
+        linear-gradient(
+            180deg,
+            rgba(12, 23, 34, 0.98),
+            rgba(5, 10, 16, 0.98)
+        );
+
+    box-shadow:
+
+        0 15px 45px
+        rgba(0, 0, 0, 0.30),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.045);
+}
+
+
+/* =========================================================
+   WHEEL TOP
+========================================================= */
+
+.reward-wheel-top {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding:
+        0
+        5px;
+}
+
+.reward-wheel-label {
+
+    display: block;
+
+    color: var(--gold-light);
+
+    font-size: 7px;
+
+    font-weight: 950;
+
+    letter-spacing: 1.8px;
+}
+
+.reward-wheel-top h3 {
+
+    margin:
+        4px
+        0
+        4px;
+
+    color: #fff;
+
+    font-size: 18px;
+
+    font-weight: 950;
+}
+
+.reward-wheel-top p {
+
+    max-width: 235px;
+
+    margin: 0;
+
+    color: #687789;
+
+    font-size: 8px;
+
+    line-height: 1.65;
+}
+
+.reward-wheel-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    flex-shrink: 0;
+
+    padding:
+        6px
+        8px;
+
+    border-radius: 999px;
+
+    color: #8c9aab;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.06);
+
+    font-size: 6px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.8px;
+}
+
+
+/* =========================================================
+   REAL REWARD WHEEL
+========================================================= */
+
+.reward-wheel-stage {
+
+    position: relative;
+
+    width: 100%;
+
+    min-height:
+        calc(
+            var(--wheel-size) + 34px
+        );
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin:
+        16px
+        0
+        3px;
+}
+
+
+/*
+   Outer decorative halo
+*/
+
+.reward-wheel-stage::before {
+
+    content: "";
+
+    position: absolute;
+
+    width:
+        calc(
+            var(--wheel-size) + 25px
+        );
+
+    height:
+        calc(
+            var(--wheel-size) + 25px
+        );
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(247, 147, 26, 0.10);
+
+    box-shadow:
+
+        0 0 0 8px
+        rgba(247, 147, 26, 0.018),
+
+        0 0 45px
+        rgba(247, 147, 26, 0.10);
+
+    pointer-events: none;
+}
+
+
+/*
+   Gold outer ring
+*/
+
+.reward-wheel-ring {
+
+    position: relative;
+
+    width: var(--wheel-size);
+    height: var(--wheel-size);
+
+    padding: 8px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+
+        linear-gradient(
+            145deg,
+            #ffe0a0,
+            var(--gold),
+            #a84e00
+        );
+
+    box-shadow:
+
+        0 14px 45px
+        rgba(0, 0, 0, 0.48),
+
+        0 0 38px
+        rgba(247, 147, 26, 0.18),
+
+        inset 0 2px 3px
+        rgba(255, 255, 255, 0.35);
+}
+
+
+/*
+   The actual wheel
+*/
+
+.reward-wheel {
+
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    border-radius: 50%;
+
+    /*
+       Six real visual segments.
+       The individual HTML segments sit above this base.
+    */
+
+    background:
+
+        conic-gradient(
+            from -30deg,
+
+            #f7931a 0deg 60deg,
+
+            #1b2633 60deg 120deg,
+
+            #ffb84d 120deg 180deg,
+
+            #182432 180deg 240deg,
+
+            #ff8a00 240deg 300deg,
+
+            #202d3b 300deg 360deg
+        );
+
+    border:
+        3px solid
+        rgba(255, 255, 255, 0.12);
+
+    box-shadow:
+
+        inset 0 0 0 1px
+        rgba(0, 0, 0, 0.32),
+
+        inset 0 0 25px
+        rgba(0, 0, 0, 0.25);
+
+    /*
+       Important:
+       app.js may rotate this element when spinning.
+    */
+
+    transform-origin: center center;
+
+    transition:
+        transform 0.25s cubic-bezier(
+            0.22,
+            0.61,
+            0.36,
+            1
+        );
+}
+
+
+/*
+   Decorative wheel lines
+*/
+
+.reward-wheel::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 7px;
+
+    z-index: 1;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.18);
+
+    pointer-events: none;
+}
+
+.reward-wheel::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 17px;
+
+    z-index: 1;
+
+    border-radius: 50%;
+
+    border:
+        1px dashed
+        rgba(255, 255, 255, 0.11);
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   WHEEL SEGMENTS
+========================================================= */
+
+.wheel-segment {
+
+    position: absolute;
+
+    z-index: 3;
+
+    left: 50%;
+    top: 50%;
+
+    width: 50%;
+    height: 50%;
+
+    transform-origin:
+        0% 0%;
+
+    pointer-events: none;
+}
+
+
+/*
+   Segment separator lines
+*/
+
+.wheel-segment::after {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 1px;
+    height: 100%;
+
+    background:
+        rgba(255, 255, 255, 0.17);
+
+    transform-origin:
+        0 0;
+
+    box-shadow:
+        0 0 3px
+        rgba(0, 0, 0, 0.25);
+}
+
+
+/*
+   Each segment occupies 60 degrees.
+*/
+
+.segment-1 {
+    transform:
+        rotate(-30deg);
+}
+
+.segment-2 {
+    transform:
+        rotate(30deg);
+}
+
+.segment-3 {
+    transform:
+        rotate(90deg);
+}
+
+.segment-4 {
+    transform:
+        rotate(150deg);
+}
+
+.segment-5 {
+    transform:
+        rotate(210deg);
+}
+
+.segment-6 {
+    transform:
+        rotate(270deg);
+}
+
+
+/*
+   Segment labels
+*/
+
+.wheel-segment span {
+
+    position: absolute;
+
+    left: 50%;
+    top: 14px;
+
+    transform:
+        translateX(-50%)
+        rotate(30deg);
+
+    width: 62px;
+
+    text-align: center;
+
+    color: #fff;
+
+    font-size: 10px;
+
+    font-weight: 950;
+
+    letter-spacing: 0.2px;
+
+    text-shadow:
+        0 2px 5px
+        rgba(0, 0, 0, 0.48);
+}
+
+
+/*
+   Correct label orientation for each sector.
+*/
+
+.segment-1 span {
+    transform:
+        translateX(-50%)
+        rotate(30deg);
+}
+
+.segment-2 span {
+    transform:
+        translateX(-50%)
+        rotate(-30deg);
+}
+
+.segment-3 span {
+    transform:
+        translateX(-50%)
+        rotate(-90deg);
+}
+
+.segment-4 span {
+    transform:
+        translateX(-50%)
+        rotate(-150deg);
+}
+
+.segment-5 span {
+    transform:
+        translateX(-50%)
+        rotate(-210deg);
+}
+
+.segment-6 span {
+    transform:
+        translateX(-50%)
+        rotate(-270deg);
+}
+
+
+/*
+   Different visual emphasis.
+*/
+
+.segment-1 span,
+.segment-3 span,
+.segment-5 span {
+
+    color: #211303;
+
+    text-shadow:
+        0 1px 2px
+        rgba(255, 255, 255, 0.18);
+}
+
+.segment-6 span {
+
+    color: #fff;
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   WHEEL CENTER
+========================================================= */
+
+.wheel-center {
+
+    position: absolute;
+
+    z-index: 10;
+
+    left: 50%;
+    top: 50%;
+
+    width: 76px;
+    height: 76px;
+
+    transform:
+        translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #211303;
+
+    font-size: 19px;
+
+    font-weight: 950;
+
+    background:
+
+        radial-gradient(
+            circle at 35% 25%,
+            #ffe8b5,
+            var(--gold-light) 35%,
+            var(--gold) 72%,
+            #bd6100 100%
+        );
+
+    border:
+        4px solid
+        rgba(255, 255, 255, 0.22);
+
+    box-shadow:
+
+        0 7px 22px
+        rgba(0, 0, 0, 0.42),
+
+        0 0 24px
+        rgba(247, 147, 26, 0.24),
+
+        inset 0 2px 2px
+        rgba(255, 255, 255, 0.45);
+}
+
+.wheel-center::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 7px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(91, 52, 5, 0.35);
+}
+
+.wheel-center span {
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   WHEEL POINTER
+========================================================= */
+
+.reward-wheel-pointer {
+
+    position: relative;
+
+    z-index: 20;
+
+    width: 0;
+    height: 0;
+
+    margin:
+        -15px
+        auto
+        0;
+
+    border-left:
+        11px solid transparent;
+
+    border-right:
+        11px solid transparent;
+
+    border-top:
+        25px solid
+        #fff;
+
+    filter:
+
+        drop-shadow(
+            0 4px 5px
+            rgba(0, 0, 0, 0.50)
+        );
+
+    font-size: 0;
+
+    transform:
+        translateY(-1px);
+}
+
+.reward-wheel-pointer::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: -7px;
+    top: -25px;
+
+    width: 14px;
+    height: 14px;
+
+    border-radius: 50%;
+
+    background:
+        var(--gold-light);
+
+    box-shadow:
+
+        0 0 0 2px
+        rgba(0, 0, 0, 0.35),
+
+        0 0 13px
+        rgba(247, 147, 26, 0.42);
+}
+
+
+/* =========================================================
+   WHEEL INFORMATION
+========================================================= */
+
+.reward-wheel-info {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 11px;
+
+    color: #687789;
+
+    font-size: 8px;
+}
+
+.reward-wheel-info strong {
+
+    min-width: 30px;
+
+    padding:
+        5px
+        8px;
+
+    text-align: center;
+
+    border-radius: 999px;
+
+    color: var(--gold-light);
+
+    background:
+        rgba(247, 147, 26, 0.075);
+
+    border:
+        1px solid
+        rgba(247, 147, 26, 0.16);
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   MAIN WHEEL BUTTON
+========================================================= */
+
+.reward-main-btn {
+
+    width: 100%;
+
+    min-height: 47px;
+
+    margin-top: 12px;
+
+    border:
+        1px solid
+        rgba(255, 204, 112, 0.25);
+
+    border-radius: 13px;
+
+    color: #1b1003;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #ffe0a0,
+            var(--gold),
+            #d56d00
+        );
+
+    font-size: 11px;
+
+    font-weight: 950;
+
+    box-shadow:
+
+        0 11px 28px
+        rgba(247, 147, 26, 0.18),
+
+        inset 0 1px 1px
+        rgba(255, 255, 255, 0.40);
+
+    transition:
+        transform 0.16s ease,
+        box-shadow 0.16s ease;
+}
+
+.reward-main-btn:active {
+
+    transform:
+        translateY(1px)
+        scale(0.99);
+
+    box-shadow:
+        0 6px 18px
+        rgba(247, 147, 26, 0.15);
+}
+
+.reward-main-btn:disabled {
+    filter: grayscale(0.35);
+}
+
+
+/* =========================================================
+   REWARD STATUS
+========================================================= */
+
+.reward-status {
+
+    min-height: 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-top: 9px;
+
+    padding:
+        7px
+        10px;
+
+    text-align: center;
+
+    color: #657487;
+
+    background:
+        rgba(255, 255, 255, 0.018);
+
+    border-radius: 10px;
+
+    font-size: 8px;
+
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   REWARD ACTIONS
+========================================================= */
+
+.reward-actions-grid {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 8px;
+
+    margin-top: 11px;
+}
+
+.reward-action-card {
+
+    position: relative;
+
+    min-height: 142px;
+
+    padding:
+        14px
+        12px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    text-align: right;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.065);
+
+    border-radius: 17px;
+
+    color: var(--text);
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(13, 24, 36, 0.98),
+            rgba(7, 16, 25, 0.98)
+        );
+
+    box-shadow:
+        0 9px 25px
+        rgba(0, 0, 0, 0.16);
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease;
+}
+
+.reward-action-card:hover {
+
+    border-color:
+        rgba(247, 147, 26, 0.18);
+}
+
+.reward-action-card:active {
+
+    transform:
+        scale(0.985);
+
+    border-color:
+        rgba(247, 147, 26, 0.25);
+}
+
+.reward-action-icon {
+
+    width: 35px;
+    height: 35px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background:
+        rgba(247, 147, 26, 0.065);
+
+    border:
+        1px solid
+        rgba(247, 147, 26, 0.12);
+
+    font-size: 17px;
+
+    margin-bottom: 9px;
+}
+
+.reward-action-title {
+
+    color: #fff;
+
+    font-size: 10px;
+
+    font-weight: 950;
+}
+
+.reward-action-description {
+
+    margin-top: 6px;
+
+    color: #687789;
+
+    font-size: 7.5px;
+
+    line-height: 1.65;
+}
+
+.reward-action-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    width: 100%;
+
+    margin-top: auto;
+
+    padding-top: 9px;
+
+    color: var(--gold-light);
+
+    font-size: 8px;
+
+    font-weight: 900;
+}
+
+.reward-action-footer b {
+
+    font-size: 15px;
+
+    line-height: 1;
+}
+
+
+/* =========================================================
+   REWARDS NOTE
+========================================================= */
+
+.rewards-hub-note {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 8px;
+
+    margin-top: 12px;
+
+    padding:
+        10px
+        11px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.018);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.045);
+}
+
+.rewards-hub-note > span {
+
+    flex-shrink: 0;
+
+    color: var(--gold);
+
+    font-size: 9px;
+}
+
+.rewards-hub-note p {
+
+    margin: 0;
+
+    color: #59697b;
+
+    font-size: 7px;
+
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   REWARD WHEEL SPINNING SUPPORT
+========================================================= */
+
+.reward-wheel.is-spinning {
+
+    transition:
+        transform 4.8s
+        cubic-bezier(
+            0.12,
+            0.75,
+            0.17,
+            1
+        );
+}
+
+.reward-wheel.spinning {
+
+    transition:
+        transform 4.8s
+        cubic-bezier(
+            0.12,
+            0.75,
+            0.17,
+            1
+        );
+}
+
 
 /* =========================================================
    EXPERIENCE
 ========================================================= */
 
 .experience-card {
+
     padding: 17px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.07);
+        1px solid
+        rgba(255, 255, 255, 0.07);
 
     border-radius: 18px;
 
     background:
+
         linear-gradient(
             135deg,
             #0d1824,
@@ -1109,31 +2767,39 @@ input {
         );
 
     box-shadow:
-        0 12px 35px rgba(0, 0, 0, 0.22);
+        0 12px 35px
+        rgba(0, 0, 0, 0.22);
 }
 
 .experience-top {
+
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
 
     gap: 20px;
 }
 
 .experience-top > div {
+
     display: flex;
+
     flex-direction: column;
 
     gap: 5px;
 }
 
 .experience-top strong {
+
     color: #fff;
 
     font-size: 16px;
 }
 
 .experience-level {
+
     padding:
         5px
         9px;
@@ -1146,14 +2812,18 @@ input {
         rgba(247, 147, 26, 0.08);
 
     border:
-        1px solid rgba(247, 147, 26, 0.17);
+        1px solid
+        rgba(247, 147, 26, 0.17);
 
     font-size: 9px;
+
     font-weight: 900;
 }
 
 .progress-bar {
+
     width: 100%;
+
     height: 7px;
 
     margin-top: 16px;
@@ -1167,12 +2837,14 @@ input {
 }
 
 .progress-fill {
+
     width: 0%;
     height: 100%;
 
     border-radius: inherit;
 
     background:
+
         linear-gradient(
             90deg,
             #b95c00,
@@ -1180,14 +2852,17 @@ input {
         );
 
     box-shadow:
-        0 0 14px rgba(247, 147, 26, 0.30);
+        0 0 14px
+        rgba(247, 147, 26, 0.30);
 
     transition:
         width 0.5s ease;
 }
 
 .experience-footer {
+
     display: flex;
+
     justify-content: space-between;
 
     margin-top: 9px;
@@ -1197,24 +2872,30 @@ input {
     font-size: 8px;
 }
 
+
 /* =========================================================
    ECONOMY PREVIEW
 ========================================================= */
 
 .economy-preview {
+
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
 
     gap: 9px;
 }
 
 .economy-preview-card {
+
     min-height: 85px;
 
     padding: 13px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.065);
+        1px solid
+        rgba(255, 255, 255, 0.065);
 
     border-radius: 16px;
 
@@ -1222,23 +2903,28 @@ input {
         #09121b;
 
     display: flex;
+
     flex-direction: column;
+
     justify-content: space-between;
 }
 
 .economy-preview-card span {
+
     color: #687789;
 
     font-size: 8px;
 }
 
 .economy-preview-card strong {
+
     color: var(--gold-light);
 
     font-size: 12px;
 }
 
 .economy-preview-footer {
+
     margin-top: 10px;
 
     color: #59697b;
@@ -1248,12 +2934,15 @@ input {
     line-height: 1.7;
 }
 
+
 /* =========================================================
    PAGE HEADER
 ========================================================= */
 
 .page-header {
+
     display: flex;
+
     align-items: center;
 
     gap: 13px;
@@ -1265,11 +2954,14 @@ input {
 }
 
 .page-icon {
+
     width: 46px;
     height: 46px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 15px;
@@ -1277,6 +2969,7 @@ input {
     color: var(--gold-light);
 
     background:
+
         linear-gradient(
             145deg,
             rgba(247, 147, 26, 0.15),
@@ -1284,12 +2977,14 @@ input {
         );
 
     border:
-        1px solid rgba(247, 147, 26, 0.18);
+        1px solid
+        rgba(247, 147, 26, 0.18);
 
     font-size: 21px;
 }
 
 .page-header h2 {
+
     margin: 0;
 
     color: #fff;
@@ -1298,18 +2993,24 @@ input {
 }
 
 .page-header p {
-    margin: 5px 0 0;
+
+    margin:
+        5px
+        0
+        0;
 
     color: var(--muted);
 
     font-size: 9px;
 }
 
+
 /* =========================================================
    MINING PAGE
 ========================================================= */
 
 .mining-page-card {
+
     margin:
         0
         14px;
@@ -1319,16 +3020,19 @@ input {
         16px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.12);
+        1px solid
+        rgba(247, 147, 26, 0.12);
 
     border-radius: 25px;
 
     background:
+
         radial-gradient(
             circle at 50% 20%,
             rgba(247, 147, 26, 0.06),
             transparent 34%
         ),
+
         linear-gradient(
             180deg,
             #0b1520,
@@ -1340,7 +3044,9 @@ input {
 }
 
 .mining-page-orb {
+
     display: flex;
+
     justify-content: center;
 
     margin:
@@ -1350,6 +3056,7 @@ input {
 }
 
 .mining-timer-large {
+
     margin:
         20px
         0;
@@ -1364,10 +3071,12 @@ input {
         rgba(255, 255, 255, 0.035);
 
     border:
-        1px solid rgba(255, 255, 255, 0.06);
+        1px solid
+        rgba(255, 255, 255, 0.06);
 }
 
 .mining-timer-large span {
+
     display: block;
 
     color: #69788b;
@@ -1376,6 +3085,7 @@ input {
 }
 
 .mining-timer-large strong {
+
     display: block;
 
     margin-top: 6px;
@@ -1390,14 +3100,20 @@ input {
 }
 
 .mining-page-stats {
+
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
 
     gap: 8px;
 }
 
 .mining-page-stats > div {
-    padding: 12px 8px;
+
+    padding:
+        12px
+        8px;
 
     text-align: center;
 
@@ -1407,10 +3123,12 @@ input {
         rgba(255, 255, 255, 0.03);
 
     border:
-        1px solid rgba(255, 255, 255, 0.055);
+        1px solid
+        rgba(255, 255, 255, 0.055);
 }
 
 .mining-page-stats span {
+
     display: block;
 
     color: #667587;
@@ -1419,6 +3137,7 @@ input {
 }
 
 .mining-page-stats strong {
+
     display: block;
 
     margin-top: 6px;
@@ -1428,13 +3147,17 @@ input {
     font-size: 10px;
 }
 
+
 /* =========================================================
    TASKS
 ========================================================= */
 
 .tasks-summary {
+
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+
+    grid-template-columns:
+        repeat(2, 1fr);
 
     gap: 10px;
 
@@ -1445,6 +3168,7 @@ input {
 }
 
 .tasks-summary > div {
+
     padding: 15px;
 
     border-radius: 17px;
@@ -1453,10 +3177,12 @@ input {
         #09131e;
 
     border:
-        1px solid rgba(255, 255, 255, 0.06);
+        1px solid
+        rgba(255, 255, 255, 0.06);
 }
 
 .tasks-summary span {
+
     display: block;
 
     color: #687789;
@@ -1465,6 +3191,7 @@ input {
 }
 
 .tasks-summary strong {
+
     display: block;
 
     margin-top: 7px;
@@ -1475,22 +3202,26 @@ input {
 }
 
 .tasks-container {
+
     padding:
         0
         14px;
 }
 
 .task-card {
+
     padding: 16px;
 
     margin-bottom: 10px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.065);
+        1px solid
+        rgba(255, 255, 255, 0.065);
 
     border-radius: 18px;
 
     background:
+
         linear-gradient(
             135deg,
             #0c1621,
@@ -1498,17 +3229,21 @@ input {
         );
 
     box-shadow:
-        0 10px 28px rgba(0, 0, 0, 0.18);
+        0 10px 28px
+        rgba(0, 0, 0, 0.18);
 }
 
 .task-card-title {
+
     color: #fff;
 
     font-size: 12px;
+
     font-weight: 900;
 }
 
 .task-card-description {
+
     margin-top: 7px;
 
     color: #718094;
@@ -1519,33 +3254,41 @@ input {
 }
 
 .task-card-footer {
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     margin-top: 13px;
 }
 
 .task-reward {
+
     color: var(--gold-light);
 
     font-size: 10px;
+
     font-weight: 900;
 }
 
 .task-btn {
+
     padding:
         8px
         12px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.20);
+        1px solid
+        rgba(247, 147, 26, 0.20);
 
     border-radius: 10px;
 
     color: #16100a;
 
     background:
+
         linear-gradient(
             135deg,
             var(--gold-light),
@@ -1553,8 +3296,10 @@ input {
         );
 
     font-size: 9px;
+
     font-weight: 900;
 }
+
 
 /* =========================================================
    WALLET PAGE
@@ -1565,6 +3310,7 @@ input {
 }
 
 .wallet-main {
+
     margin:
         0
         14px
@@ -1574,8 +3320,11 @@ input {
 }
 
 .wallet-metrics {
+
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
 
     gap: 8px;
 
@@ -1586,6 +3335,7 @@ input {
 }
 
 .wallet-metric {
+
     min-height: 76px;
 
     padding: 12px;
@@ -1596,10 +3346,12 @@ input {
         #09121b;
 
     border:
-        1px solid rgba(255, 255, 255, 0.06);
+        1px solid
+        rgba(255, 255, 255, 0.06);
 }
 
 .wallet-metric span {
+
     display: block;
 
     color: #667587;
@@ -1608,6 +3360,7 @@ input {
 }
 
 .wallet-metric strong {
+
     display: block;
 
     margin-top: 8px;
@@ -1620,6 +3373,7 @@ input {
 }
 
 .wallet-economic {
+
     margin:
         0
         14px
@@ -1627,13 +3381,17 @@ input {
 }
 
 .economic-grid {
+
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+
+    grid-template-columns:
+        repeat(2, 1fr);
 
     gap: 9px;
 }
 
 .economic-card {
+
     min-height: 82px;
 
     padding: 14px;
@@ -1641,6 +3399,7 @@ input {
     border-radius: 16px;
 
     background:
+
         linear-gradient(
             135deg,
             #0c1722,
@@ -1648,10 +3407,12 @@ input {
         );
 
     border:
-        1px solid rgba(255, 255, 255, 0.06);
+        1px solid
+        rgba(255, 255, 255, 0.06);
 }
 
 .economic-card span {
+
     display: block;
 
     color: #687789;
@@ -1660,6 +3421,7 @@ input {
 }
 
 .economic-card strong {
+
     display: block;
 
     margin-top: 8px;
@@ -1670,15 +3432,20 @@ input {
 }
 
 .transactions-list {
+
     display: flex;
+
     flex-direction: column;
 
     gap: 8px;
 }
 
 .transaction-item {
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     padding: 13px;
@@ -1689,16 +3456,19 @@ input {
         #09121b;
 
     border:
-        1px solid rgba(255, 255, 255, 0.055);
+        1px solid
+        rgba(255, 255, 255, 0.055);
 }
 
 .transaction-item span {
+
     color: #8290a3;
 
     font-size: 9px;
 }
 
 .transaction-item strong {
+
     color: var(--gold-light);
 
     font-size: 10px;
@@ -1706,7 +3476,10 @@ input {
 
 .empty-state,
 .loading-state {
-    padding: 30px 15px;
+
+    padding:
+        30px
+        15px;
 
     text-align: center;
 
@@ -1715,12 +3488,15 @@ input {
     font-size: 10px;
 }
 
+
 /* =========================================================
    PROFILE
 ========================================================= */
 
 .profile-card {
+
     display: flex;
+
     align-items: center;
 
     gap: 14px;
@@ -1735,6 +3511,7 @@ input {
     border-radius: 20px;
 
     background:
+
         linear-gradient(
             135deg,
             #0d1824,
@@ -1742,15 +3519,19 @@ input {
         );
 
     border:
-        1px solid rgba(255, 255, 255, 0.07);
+        1px solid
+        rgba(255, 255, 255, 0.07);
 }
 
 .profile-avatar {
+
     width: 56px;
     height: 56px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     flex-shrink: 0;
@@ -1760,6 +3541,7 @@ input {
     color: #171008;
 
     background:
+
         linear-gradient(
             145deg,
             #ffe0a0,
@@ -1767,43 +3549,54 @@ input {
         );
 
     font-size: 16px;
+
     font-weight: 950;
 
     box-shadow:
-        0 10px 25px rgba(247, 147, 26, 0.18);
+        0 10px 25px
+        rgba(247, 147, 26, 0.18);
 }
 
 .profile-info {
+
     min-width: 0;
 
     display: flex;
+
     flex-direction: column;
 
     gap: 5px;
 }
 
 .profile-info strong {
+
     color: #fff;
 
     font-size: 13px;
 
     overflow: hidden;
+
     text-overflow: ellipsis;
+
     white-space: nowrap;
 }
 
 .profile-info span {
+
     color: #687789;
 
     font-size: 8px;
 }
+
 
 /* =========================================================
    PREMIUM REFERRAL CARD
 ========================================================= */
 
 .premium-referral-card {
+
     position: relative;
+
     overflow: hidden;
 
     margin:
@@ -1814,16 +3607,19 @@ input {
     padding: 19px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.16);
+        1px solid
+        rgba(247, 147, 26, 0.16);
 
     border-radius: 23px;
 
     background:
+
         radial-gradient(
             circle at 100% 0%,
             rgba(247, 147, 26, 0.09),
             transparent 30%
         ),
+
         linear-gradient(
             145deg,
             #101a25,
@@ -1835,6 +3631,7 @@ input {
 }
 
 .premium-referral-card::before {
+
     content: "";
 
     position: absolute;
@@ -1848,19 +3645,25 @@ input {
     border-radius: 50%;
 
     border:
-        1px solid rgba(247, 147, 26, 0.10);
+        1px solid
+        rgba(247, 147, 26, 0.10);
 }
 
 .referral-header {
+
     position: relative;
+
     z-index: 2;
 
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 }
 
 .referral-header h3 {
+
     margin:
         5px
         0
@@ -1872,11 +3675,14 @@ input {
 }
 
 .referral-icon {
+
     width: 39px;
     height: 39px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 13px;
@@ -1887,13 +3693,16 @@ input {
         rgba(247, 147, 26, 0.09);
 
     border:
-        1px solid rgba(247, 147, 26, 0.17);
+        1px solid
+        rgba(247, 147, 26, 0.17);
 
     font-size: 17px;
 }
 
 .referral-description {
+
     position: relative;
+
     z-index: 2;
 
     margin:
@@ -1909,11 +3718,15 @@ input {
 }
 
 .referral-code-box {
+
     position: relative;
+
     z-index: 2;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     padding:
@@ -1926,16 +3739,19 @@ input {
         rgba(0, 0, 0, 0.24);
 
     border:
-        1px solid rgba(255, 255, 255, 0.065);
+        1px solid
+        rgba(255, 255, 255, 0.065);
 }
 
 .referral-code-box span {
+
     color: #69788b;
 
     font-size: 8px;
 }
 
 .referral-code-box strong {
+
     color: var(--gold-light);
 
     font-size: 13px;
@@ -1947,12 +3763,15 @@ input {
         monospace;
 }
 
+
 /* =========================================================
    VISUAL REFERRAL BARCODE
 ========================================================= */
 
 .referral-barcode-wrap {
+
     position: relative;
+
     z-index: 2;
 
     margin-top: 12px;
@@ -1967,13 +3786,16 @@ input {
     background: #f4f1e8;
 
     border:
-        1px solid rgba(255, 255, 255, 0.12);
+        1px solid
+        rgba(255, 255, 255, 0.12);
 }
 
 .referral-barcode {
+
     height: 45px;
 
     display: flex;
+
     align-items: stretch;
 
     gap: 2px;
@@ -1982,9 +3804,11 @@ input {
 }
 
 .referral-barcode i {
+
     display: block;
 
     width: 2px;
+
     height: 100%;
 
     background: #101010;
@@ -2001,6 +3825,7 @@ input {
 }
 
 .referral-barcode-wrap > span {
+
     display: block;
 
     margin-top: 7px;
@@ -2015,7 +3840,9 @@ input {
 }
 
 .referral-link-box {
+
     position: relative;
+
     z-index: 2;
 
     display: flex;
@@ -2026,7 +3853,9 @@ input {
 }
 
 .referral-link-box input {
+
     min-width: 0;
+
     flex: 1;
 
     height: 39px;
@@ -2036,7 +3865,8 @@ input {
         11px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.07);
+        1px solid
+        rgba(255, 255, 255, 0.07);
 
     border-radius: 10px;
 
@@ -2048,22 +3878,29 @@ input {
     font-size: 8px;
 
     direction: ltr;
+
     text-align: left;
 }
 
 .referral-actions {
+
     position: relative;
+
     z-index: 2;
 
     margin-top: 10px;
 }
 
 .referral-stats {
+
     position: relative;
+
     z-index: 2;
 
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+
+    grid-template-columns:
+        repeat(2, 1fr);
 
     gap: 8px;
 
@@ -2071,6 +3908,7 @@ input {
 }
 
 .referral-stats > div {
+
     padding:
         11px;
 
@@ -2080,10 +3918,12 @@ input {
         rgba(255, 255, 255, 0.025);
 
     border:
-        1px solid rgba(255, 255, 255, 0.05);
+        1px solid
+        rgba(255, 255, 255, 0.05);
 }
 
 .referral-stats span {
+
     display: block;
 
     color: #687789;
@@ -2092,6 +3932,7 @@ input {
 }
 
 .referral-stats strong {
+
     display: block;
 
     margin-top: 5px;
@@ -2101,11 +3942,13 @@ input {
     font-size: 11px;
 }
 
+
 /* =========================================================
    BUTTONS
 ========================================================= */
 
 .primary-btn {
+
     width: 100%;
 
     min-height: 43px;
@@ -2115,13 +3958,15 @@ input {
         14px;
 
     border:
-        1px solid rgba(255, 204, 112, 0.18);
+        1px solid
+        rgba(255, 204, 112, 0.18);
 
     border-radius: 12px;
 
     color: #160e05;
 
     background:
+
         linear-gradient(
             135deg,
             #ffd27a,
@@ -2129,17 +3974,21 @@ input {
         );
 
     font-size: 10px;
+
     font-weight: 950;
 
     box-shadow:
-        0 10px 25px rgba(247, 147, 26, 0.13);
+        0 10px 25px
+        rgba(247, 147, 26, 0.13);
 }
 
 .primary-btn:active {
-    transform: translateY(1px);
+    transform:
+        translateY(1px);
 }
 
 .secondary-btn {
+
     min-height: 39px;
 
     padding:
@@ -2147,7 +3996,8 @@ input {
         13px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.18);
+        1px solid
+        rgba(247, 147, 26, 0.18);
 
     border-radius: 10px;
 
@@ -2157,26 +4007,33 @@ input {
         rgba(247, 147, 26, 0.06);
 
     font-size: 9px;
+
     font-weight: 900;
 
     white-space: nowrap;
 }
+
 
 /* =========================================================
    MASTER SERVICES
 ========================================================= */
 
 .master-services {
+
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+
+    grid-template-columns:
+        repeat(2, 1fr);
 
     gap: 9px;
 }
 
 .master-service-card {
+
     min-height: 80px;
 
     display: flex;
+
     align-items: center;
 
     gap: 11px;
@@ -2186,7 +4043,8 @@ input {
     text-align: right;
 
     border:
-        1px solid rgba(255, 255, 255, 0.065);
+        1px solid
+        rgba(255, 255, 255, 0.065);
 
     border-radius: 16px;
 
@@ -2201,45 +4059,54 @@ input {
 }
 
 .master-service-card div {
+
     display: flex;
+
     flex-direction: column;
 
     gap: 5px;
 }
 
 .master-service-card strong {
+
     color: #eaf0f7;
 
     font-size: 10px;
 }
 
 .master-service-card small {
+
     color: #627185;
 
     font-size: 7px;
 }
+
 
 /* =========================================================
    MODALS
 ========================================================= */
 
 .modal-overlay {
+
     position: fixed;
+
     inset: 0;
 
     z-index: 200;
 
     display: flex;
+
     align-items: flex-end;
+
     justify-content: center;
 
-    padding:
-        15px;
+    padding: 15px;
 
     background:
         rgba(0, 0, 0, 0.72);
 
-    backdrop-filter: blur(9px);
+    backdrop-filter:
+        blur(9px);
 
     animation:
         modalFade 0.2s ease;
@@ -2250,6 +4117,7 @@ input {
 }
 
 @keyframes modalFade {
+
     from {
         opacity: 0;
     }
@@ -2260,7 +4128,9 @@ input {
 }
 
 .modal-card {
+
     width: 100%;
+
     max-width: 690px;
 
     max-height: 88vh;
@@ -2270,7 +4140,8 @@ input {
     padding: 18px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.09);
+        1px solid
+        rgba(255, 255, 255, 0.09);
 
     border-radius:
         24px
@@ -2279,6 +4150,7 @@ input {
         16px;
 
     background:
+
         linear-gradient(
             180deg,
             #0d1824,
@@ -2286,36 +4158,45 @@ input {
         );
 
     box-shadow:
-        0 -15px 70px rgba(0, 0, 0, 0.48);
+        0 -15px 70px
+        rgba(0, 0, 0, 0.48);
 }
 
 .modal-header {
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     margin-bottom: 18px;
 }
 
 .modal-header > div {
+
     display: flex;
+
     align-items: center;
 
     gap: 9px;
 }
 
 .modal-header strong {
+
     color: #fff;
 
     font-size: 14px;
 }
 
 .modal-close {
+
     width: 34px;
     height: 34px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.07);
+        1px solid
+        rgba(255, 255, 255, 0.07);
 
     border-radius: 10px;
 
@@ -2328,6 +4209,7 @@ input {
 }
 
 .modal-description {
+
     color: #718094;
 
     font-size: 10px;
@@ -2340,24 +4222,91 @@ input {
 }
 
 .economic-modal-content {
+
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+
+    grid-template-columns:
+        repeat(2, 1fr);
 
     gap: 9px;
 }
+
+
+/* =========================================================
+   REWARDS MODAL
+========================================================= */
+
+.rewards-modal-card {
+
+    max-height: 84vh;
+}
+
+.rewards-modal-summary {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 9px;
+
+    margin:
+        12px
+        0;
+}
+
+.rewards-modal-summary > div {
+
+    padding: 13px;
+
+    text-align: center;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.06);
+}
+
+.rewards-modal-summary span {
+
+    display: block;
+
+    color: #687789;
+
+    font-size: 8px;
+}
+
+.rewards-modal-summary strong {
+
+    display: block;
+
+    margin-top: 6px;
+
+    color: var(--gold-light);
+
+    font-size: 17px;
+}
+
 
 /* =========================================================
    AI ASSISTANT
 ========================================================= */
 
 .ai-modal-card {
+
     min-height: 70vh;
 
     display: flex;
+
     flex-direction: column;
 }
 
 .ai-messages {
+
     flex: 1;
 
     min-height: 270px;
@@ -2373,6 +4322,7 @@ input {
 }
 
 .ai-message {
+
     max-width: 88%;
 
     margin-bottom: 10px;
@@ -2389,6 +4339,7 @@ input {
 }
 
 .ai-message strong {
+
     display: block;
 
     margin-bottom: 4px;
@@ -2403,6 +4354,7 @@ input {
 }
 
 .ai-message.assistant {
+
     margin-left: auto;
 
     color: #d8e0e9;
@@ -2411,17 +4363,20 @@ input {
         #0b1722;
 
     border:
-        1px solid rgba(255, 255, 255, 0.06);
+        1px solid
+        rgba(255, 255, 255, 0.06);
 
     border-top-right-radius: 5px;
 }
 
 .ai-message.user {
+
     margin-right: auto;
 
     color: #1a1006;
 
     background:
+
         linear-gradient(
             135deg,
             #ffd27a,
@@ -2436,8 +4391,11 @@ input {
 }
 
 .ai-quick-actions {
+
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+
+    grid-template-columns:
+        repeat(4, 1fr);
 
     gap: 6px;
 
@@ -2445,10 +4403,12 @@ input {
 }
 
 .ai-quick-actions button {
+
     min-height: 35px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.13);
+        1px solid
+        rgba(247, 147, 26, 0.13);
 
     border-radius: 9px;
 
@@ -2458,16 +4418,19 @@ input {
         rgba(247, 147, 26, 0.045);
 
     font-size: 8px;
+
     font-weight: 800;
 }
 
 .ai-input-row {
+
     display: flex;
 
     gap: 7px;
 }
 
 .ai-input-row input {
+
     flex: 1;
 
     min-width: 0;
@@ -2479,7 +4442,8 @@ input {
         12px;
 
     border:
-        1px solid rgba(255, 255, 255, 0.08);
+        1px solid
+        rgba(255, 255, 255, 0.08);
 
     border-radius: 11px;
 
@@ -2494,16 +4458,19 @@ input {
 }
 
 .ai-input-row button {
+
     width: 68px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.18);
+        1px solid
+        rgba(247, 147, 26, 0.18);
 
     border-radius: 11px;
 
     color: #160e05;
 
     background:
+
         linear-gradient(
             135deg,
             #ffd27a,
@@ -2511,10 +4478,12 @@ input {
         );
 
     font-size: 9px;
+
     font-weight: 900;
 }
 
 .ai-note {
+
     margin-top: 9px;
 
     color: #536275;
@@ -2524,16 +4493,19 @@ input {
     font-size: 7px;
 }
 
+
 /* =========================================================
    PROMOTION
 ========================================================= */
 
 .promotion-card {
+
     padding: 18px;
 
     border-radius: 18px;
 
     background:
+
         linear-gradient(
             135deg,
             rgba(247, 147, 26, 0.09),
@@ -2541,10 +4513,12 @@ input {
         );
 
     border:
-        1px solid rgba(247, 147, 26, 0.13);
+        1px solid
+        rgba(247, 147, 26, 0.13);
 }
 
 .promotion-card h3 {
+
     margin: 0;
 
     color: #fff;
@@ -2553,6 +4527,7 @@ input {
 }
 
 .promotion-card p {
+
     margin:
         8px
         0
@@ -2565,11 +4540,13 @@ input {
     line-height: 1.7;
 }
 
+
 /* =========================================================
    TOAST
 ========================================================= */
 
 .toast {
+
     position: fixed;
 
     left: 50%;
@@ -2584,14 +4561,18 @@ input {
     transform:
         translateX(-50%);
 
-    max-width: calc(100% - 34px);
+    max-width:
+        calc(
+            100% - 34px
+        );
 
     padding:
         11px
         16px;
 
     border:
-        1px solid rgba(247, 147, 26, 0.20);
+        1px solid
+        rgba(247, 147, 26, 0.20);
 
     border-radius: 999px;
 
@@ -2601,9 +4582,11 @@ input {
         rgba(8, 15, 23, 0.94);
 
     box-shadow:
-        0 15px 40px rgba(0, 0, 0, 0.35);
+        0 15px 40px
+        rgba(0, 0, 0, 0.35);
 
-    backdrop-filter: blur(10px);
+    backdrop-filter:
+        blur(10px);
 
     text-align: center;
 
@@ -2618,29 +4601,41 @@ input {
 }
 
 @keyframes toastIn {
+
     from {
+
         opacity: 0;
 
         transform:
-            translate(-50%, 8px);
+            translate(
+                -50%,
+                8px
+            );
     }
 
     to {
+
         opacity: 1;
 
         transform:
-            translate(-50%, 0);
+            translate(
+                -50%,
+                0
+            );
     }
 }
+
 
 /* =========================================================
    BOTTOM NAVIGATION
 ========================================================= */
 
 .bottom-nav {
+
     position: fixed;
 
     left: 50%;
+
     bottom: 0;
 
     transform:
@@ -2649,33 +4644,43 @@ input {
     z-index: 100;
 
     width: 100%;
+
     max-width: 720px;
 
     height: var(--nav-height);
 
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+
+    grid-template-columns:
+        repeat(5, 1fr);
 
     padding:
         8px
         8px
         calc(
-            8px + env(safe-area-inset-bottom)
+            8px +
+            env(
+                safe-area-inset-bottom
+            )
         );
 
     background:
         rgba(4, 9, 15, 0.94);
 
-    backdrop-filter: blur(18px);
+    backdrop-filter:
+        blur(18px);
 
     border-top:
-        1px solid rgba(255, 255, 255, 0.07);
+        1px solid
+        rgba(255, 255, 255, 0.07);
 
     box-shadow:
-        0 -12px 35px rgba(0, 0, 0, 0.30);
+        0 -12px 35px
+        rgba(0, 0, 0, 0.30);
 }
 
 .nav-item {
+
     border: 0;
 
     color: #637184;
@@ -2683,8 +4688,11 @@ input {
     background: transparent;
 
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
+
     justify-content: center;
 
     gap: 4px;
@@ -2697,16 +4705,21 @@ input {
 }
 
 .nav-item span {
+
     font-size: 19px;
+
     line-height: 1;
 }
 
 .nav-item small {
+
     font-size: 7px;
+
     font-weight: 800;
 }
 
 .nav-item.active {
+
     color: var(--gold-light);
 
     background:
@@ -2714,22 +4727,31 @@ input {
 }
 
 .nav-item.active span {
+
     filter:
         drop-shadow(
-            0 0 8px rgba(247, 147, 26, 0.40)
+            0 0 8px
+            rgba(247, 147, 26, 0.40)
         );
 }
 
+
 /* =========================================================
-   RESPONSIVE
+   RESPONSIVE — TABLET / LARGE PHONE
 ========================================================= */
 
 @media (min-width: 600px) {
+
+    :root {
+        --wheel-size: 310px;
+    }
+
     .hero {
         padding-top: 38px;
     }
 
     .coin-logo {
+
         width: 88px;
         height: 88px;
 
@@ -2737,6 +4759,7 @@ input {
     }
 
     .balance-card {
+
         min-height: 270px;
 
         padding: 27px;
@@ -2751,23 +4774,52 @@ input {
     }
 
     .mining-progress-ring {
+
         width: 238px;
         height: 238px;
     }
 
     .circular-mine-btn {
+
         width: 180px;
         height: 180px;
     }
+
+    .rewards-hub {
+
+        margin-left: 16px;
+        margin-right: 16px;
+
+        padding:
+            22px
+            18px
+            20px;
+    }
+
+    .reward-wheel-card {
+
+        padding:
+            20px
+            14px
+            18px;
+    }
 }
+
 
 /* =========================================================
    SMALL PHONES
 ========================================================= */
 
 @media (max-width: 370px) {
+
+    :root {
+        --wheel-size: 232px;
+    }
+
     .topbar {
-        padding: 0 13px;
+        padding:
+            0
+            13px;
     }
 
     .brand-title {
@@ -2783,11 +4835,13 @@ input {
     }
 
     .mining-progress-ring {
+
         width: 194px;
         height: 194px;
     }
 
     .circular-mine-btn {
+
         width: 148px;
         height: 148px;
     }
@@ -2797,6 +4851,7 @@ input {
     }
 
     .quick-actions {
+
         gap: 6px;
 
         padding-left: 10px;
@@ -2814,7 +4869,120 @@ input {
     .quick-action small {
         font-size: 8px;
     }
+
+    .rewards-hub {
+
+        margin-left: 10px;
+        margin-right: 10px;
+
+        padding:
+            17px
+            9px
+            15px;
+    }
+
+    .rewards-hub-header {
+
+        align-items: flex-start;
+    }
+
+    .rewards-hub-icon {
+
+        width: 40px;
+        height: 40px;
+
+        font-size: 19px;
+    }
+
+    .rewards-hub-header h2 {
+        font-size: 16px;
+    }
+
+    .rewards-hub-badge {
+        display: none;
+    }
+
+    .reward-wheel-top h3 {
+        font-size: 16px;
+    }
+
+    .reward-wheel-top p {
+        font-size: 7px;
+    }
+
+    .reward-wheel-status {
+        display: none;
+    }
+
+    .reward-action-card {
+
+        min-height: 136px;
+
+        padding:
+            12px
+            10px;
+    }
+
+    .reward-action-description {
+        font-size: 7px;
+    }
+
+    .wheel-center {
+
+        width: 65px;
+        height: 65px;
+
+        font-size: 16px;
+    }
+
+    .wheel-segment span {
+
+        width: 52px;
+
+        top: 11px;
+
+        font-size: 8px;
+    }
 }
+
+
+/* =========================================================
+   VERY SMALL DEVICES
+========================================================= */
+
+@media (max-width: 330px) {
+
+    :root {
+        --wheel-size: 215px;
+    }
+
+    .reward-actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reward-action-card {
+        min-height: 108px;
+    }
+
+    .rewards-summary {
+        gap: 5px;
+    }
+
+    .reward-summary-card {
+        padding:
+            9px
+            5px;
+    }
+
+    .reward-summary-card strong {
+        font-size: 15px;
+    }
+
+    .reward-wheel-stage {
+        margin-top: 11px;
+    }
+}
+
 
 /* =========================================================
    ACCESSIBILITY
@@ -2822,25 +4990,35 @@ input {
 
 button:focus-visible,
 input:focus-visible {
+
     outline:
-        2px solid rgba(247, 147, 26, 0.65);
+        2px solid
+        rgba(247, 147, 26, 0.65);
 
     outline-offset: 2px;
 }
+
 
 /* =========================================================
    REDUCED MOTION
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
 
-        transition-duration: 0.01ms !important;
+        animation-duration:
+            0.01ms !important;
 
-        scroll-behavior: auto !important;
+        animation-iteration-count:
+            1 !important;
+
+        transition-duration:
+            0.01ms !important;
+
+        scroll-behavior:
+            auto !important;
     }
 }
